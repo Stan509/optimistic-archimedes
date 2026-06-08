@@ -607,6 +607,58 @@ class Command(BaseCommand):
         )
         mkt_limo.sites.set([nyc, dr])
 
+        self.stdout.write('  Linking vehicle images...')
+
+        # ── Link images to vehicles ──
+        # Map vehicle names to their image files in media/vehicles/
+        import os
+        from django.conf import settings
+
+        vehicle_images = {
+            'Cadillac Escalade': 'vehicles/escalade.jpg',
+            'Chevrolet Suburban': 'vehicles/db5b0cd41b1ec2043d931d2eda123d47.jpg',
+            'GMC Yukon Denali': 'vehicles/2023-gmc-yukon-trims-denali-xl.jpg',
+            'Cadillac XTS': 'vehicles/2016-cadillac-xts-4-door-sedan-fwd-angular-front-exterior-view_100571416_m.jpg',
+            'Chrysler 300': 'vehicles/7a62cc3a555fa543de597c474608489d.jpg',
+            'Mercedes-Benz S-Class': 'vehicles/000000008395616.jpg',
+            'BMW 7 Series': 'vehicles/P90491611_highRes_the-bmw-740i-in-sout.jpg',
+            'Toyota Sienna': 'vehicles/Toyota_Sienna_2025_1.jpg',
+            'Chevrolet Traverse': 'vehicles/13370820.jpg',
+            'Mercedes-Benz Sprinter': 'vehicles/Mercedes-Sprinter-Hire.jpg',
+            'Ford Transit': 'vehicles/eyJidWNrZXQiOiJkYXRhay1jZG4teHkiLCJrZXkiOiJjb25maWd1cmF0b3ItaW1ncy9jYXJzL2ttNzd_V6phpfo.jpg',
+            'Lincoln MKT Stretch Limo': 'vehicles/MKT-1.jpg',
+        }
+
+        for vehicle_name, image_path in vehicle_images.items():
+            try:
+                vehicle = Vehicle.objects.get(name=vehicle_name)
+                full_path = os.path.join(settings.MEDIA_ROOT, image_path)
+                if os.path.exists(full_path):
+                    vehicle.image = image_path
+                    vehicle.save(update_fields=['image'])
+                    self.stdout.write(f'    {vehicle_name} → {image_path}')
+                else:
+                    self.stdout.write(self.style.WARNING(f'    {vehicle_name} — image not found: {image_path}'))
+            except Vehicle.DoesNotExist:
+                pass
+
+        # Link category images
+        category_images = {
+            'sprinter-van': 'vehicles/categories/van.jpg',
+        }
+        for cat_slug, image_path in category_images.items():
+            try:
+                cat = VehicleCategory.objects.get(slug=cat_slug)
+                full_path = os.path.join(settings.MEDIA_ROOT, image_path)
+                if os.path.exists(full_path):
+                    cat.image = image_path
+                    cat.save(update_fields=['image'])
+                    self.stdout.write(f'    Category {cat.name} → {image_path}')
+            except VehicleCategory.DoesNotExist:
+                pass
+
+        self.stdout.write(self.style.SUCCESS('  [OK] Vehicle images linked'))
+
         self.stdout.write(self.style.SUCCESS('  [OK] Vehicle fleet created'))
 
         # =====================================================================

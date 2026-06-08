@@ -2,7 +2,6 @@
 *.pyc
 __pycache__/
 staticfiles/
-media/
 db.sqlite3
 
 # Virtual environments
@@ -31,3 +30,14 @@ reconstructed_payload.txt
 # Docker
 .dockerignore
 postgres_data/
+
+# Debug scripts (keep out of repo)
+check_do.py
+find_lines.py
+get_rendered_html.py
+inspect_seed.py
+read_log_step.py
+search_js.py
+search_tests.py
+search_transcript.py
+test_language.py

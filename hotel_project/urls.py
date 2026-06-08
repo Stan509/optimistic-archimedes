@@ -29,10 +29,16 @@ urlpatterns = [
     path('', include('core.urls_root')),
 ]
 
-# Serve media and static files in development
+# Serve media files in development AND production fallback
+# In production, media is primarily served from DigitalOcean Spaces (S3 CDN),
+# but this fallback ensures locally-seeded images work during initial deployment.
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+else:
+    # In production, serve media from local filesystem as fallback
+    # (primary serving is via Spaces CDN, but seed images may be local initially)
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 # Customize Django admin
 admin.site.site_header = 'Aero Luxe Select — Administration'

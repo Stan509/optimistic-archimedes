@@ -22,6 +22,16 @@ DEBUG = os.environ.get('DJANGO_DEBUG', 'True').lower() in ('true', '1', 'yes')
 
 ALLOWED_HOSTS = os.environ.get('DJANGO_ALLOWED_HOSTS', '*').split(',')
 
+# CSRF trusted origins for production (App Platform / custom domains)
+CSRF_TRUSTED_ORIGINS = [
+    origin.strip()
+    for origin in os.environ.get('CSRF_TRUSTED_ORIGINS', '').split(',')
+    if origin.strip()
+]
+
+# SSL behind load balancer (DigitalOcean App Platform)
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
 
 # Application definition
 
@@ -33,6 +43,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.humanize',
+    # Third-party
+    'storages',
     # Project apps
     'core',
 ]
@@ -124,17 +136,59 @@ STATICFILES_DIRS = [
 ]
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
-STORAGES = {
-    "default": {
-        "BACKEND": "django.core.files.storage.FileSystemStorage",
-    },
-    "staticfiles": {
-        "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage",
-    },
-}
 
-# Media files (uploads)
-MEDIA_URL = '/media/'
+# ==========================================================================
+# MEDIA / FILE STORAGE CONFIGURATION
+# ==========================================================================
+# In production, use DigitalOcean Spaces (S3-compatible) for media files.
+# In development, use local filesystem storage.
+
+DO_SPACES_KEY = os.environ.get('DO_SPACES_KEY')
+DO_SPACES_SECRET = os.environ.get('DO_SPACES_SECRET')
+DO_SPACES_BUCKET = os.environ.get('DO_SPACES_BUCKET', 'aeroluxe-media')
+DO_SPACES_REGION = os.environ.get('DO_SPACES_REGION', 'nyc3')
+DO_SPACES_ENDPOINT = os.environ.get(
+    'DO_SPACES_ENDPOINT',
+    f'https://{DO_SPACES_REGION}.digitaloceanspaces.com'
+)
+
+if DO_SPACES_KEY and DO_SPACES_SECRET:
+    # Production: DigitalOcean Spaces (S3)
+    STORAGES = {
+        "default": {
+            "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
+            "OPTIONS": {
+                "access_key": DO_SPACES_KEY,
+                "secret_key": DO_SPACES_SECRET,
+                "bucket_name": DO_SPACES_BUCKET,
+                "endpoint_url": DO_SPACES_ENDPOINT,
+                "default_acl": "public-read",
+                "location": "media",
+                "file_overwrite": False,
+            },
+        },
+        "staticfiles": {
+            "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage",
+        },
+    }
+    # Construct the CDN URL for media files
+    DO_SPACES_CDN = os.environ.get(
+        'DO_SPACES_CDN',
+        f'https://{DO_SPACES_BUCKET}.{DO_SPACES_REGION}.digitaloceanspaces.com'
+    )
+    MEDIA_URL = f'{DO_SPACES_CDN}/media/'
+else:
+    # Development: Local filesystem
+    STORAGES = {
+        "default": {
+            "BACKEND": "django.core.files.storage.FileSystemStorage",
+        },
+        "staticfiles": {
+            "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage",
+        },
+    }
+    MEDIA_URL = '/media/'
+
 MEDIA_ROOT = BASE_DIR / 'media'
 
 

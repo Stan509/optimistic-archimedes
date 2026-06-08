@@ -21,7 +21,9 @@ host = url.hostname
 port = url.port or 5432
 
 print(f'Waiting for database connection on {host}:{port}...')
-while True:
+retries = 0
+max_retries = 30
+while retries < max_retries:
     try:
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.settimeout(2)
@@ -30,7 +32,11 @@ while True:
         print('Database is ready!')
         break
     except socket.error as e:
-        time.sleep(0.5)
+        retries += 1
+        if retries >= max_retries:
+            print(f'Could not connect to database after {max_retries} attempts. Proceeding anyway...')
+            break
+        time.sleep(1)
 "
 
 echo "Running collectstatic..."
@@ -39,5 +45,14 @@ python manage.py collectstatic --noinput
 echo "Running database migrations..."
 python manage.py migrate --noinput
 
+echo "Seeding initial database data..."
+python manage.py seed_data
+
+# Copy local media to Spaces if configured
+if [ -n "$DO_SPACES_KEY" ] && [ -d "/app/media" ]; then
+    echo "Syncing local media files to DigitalOcean Spaces..."
+    python manage.py sync_media_to_spaces || echo "Media sync skipped (non-fatal)"
+fi
+
 echo "Starting Gunicorn server..."
-exec gunicorn hotel_project.wsgi:application --bind 0.0.0.0:8000 --workers 3
+exec gunicorn hotel_project.wsgi:application --bind 0.0.0.0:8000 --workers 3 --timeout 120
