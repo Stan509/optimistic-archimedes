@@ -1,0 +1,186 @@
+{% extends 'dashboard/base.html' %}
+
+{% block title %}CMS Editor — {{ site.name }} — Aero Luxe Select{% endblock %}
+{% block dashboard_header %}CMS Content Editor{% endblock %}
+
+{% block content %}
+<!-- Top Header Actions Bar -->
+<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-luxury-card border border-luxury-border p-6 rounded-2xl">
+    <div>
+        <h2 class="text-xl font-bold font-serif tracking-wide gold-text-gradient">{{ site.name }} Homepage Editor</h2>
+        <p class="text-xs text-luxury-muted mt-1">Directly manage hero headings, support subtitles, text banners, about grids, and media blocks without coding.</p>
+    </div>
+    
+    <!-- Site toggle buttons -->
+    <div class="flex items-center bg-luxury-black p-1 rounded-xl border border-luxury-border text-xs">
+        <a href="{% url 'dashboard:cms_nyc' %}" class="px-4 py-2 rounded-lg transition-all {% if site.slug == 'nyc' %}gold-gradient text-luxury-black font-semibold{% else %}text-luxury-muted hover:text-white{% endif %}">New York Site</a>
+        <a href="{% url 'dashboard:cms_dr' %}" class="px-4 py-2 rounded-lg transition-all {% if site.slug == 'dr' %}gold-gradient text-luxury-black font-semibold{% else %}text-luxury-muted hover:text-white{% endif %}">Dominican Republic</a>
+    </div>
+</div>
+
+<form method="POST" enctype="multipart/form-data" class="space-y-8">
+    {% csrf_token %}
+
+    <!-- Section 1: Global Site Metadata Headers -->
+    <div class="bg-luxury-card border border-luxury-border rounded-2xl p-6 md:p-8 space-y-6">
+        <div class="flex items-center space-x-2.5 border-b border-luxury-border pb-3">
+            <i class="fa-solid fa-window-restore text-gold-400 text-lg"></i>
+            <h3 class="font-serif font-semibold text-base">Hero Landing Headers</h3>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Hero Title -->
+            <div class="md:col-span-2">
+                <label class="block text-xs uppercase tracking-wider text-luxury-muted font-semibold mb-2">Primary Hero Landing Title</label>
+                <input type="text" name="hero_title" value="{{ site.hero_title }}" placeholder="e.g. Luxury Airport Chauffeurs & Transfers" class="w-full bg-luxury-black border border-luxury-border rounded-xl px-4 py-3 text-sm text-white placeholder-luxury-muted focus:border-gold-500/50 outline-none transition-colors">
+            </div>
+
+            <!-- Hero Subtitle -->
+            <div>
+                <label class="block text-xs uppercase tracking-wider text-luxury-muted font-semibold mb-2">Hero Landing Subtitle</label>
+                <input type="text" name="hero_subtitle" value="{{ site.hero_subtitle }}" placeholder="e.g. Travel in unmatched elegance, safety and luxury style." class="w-full bg-luxury-black border border-luxury-border rounded-xl px-4 py-3 text-sm text-white placeholder-luxury-muted focus:border-gold-500/50 outline-none transition-colors">
+            </div>
+
+            <!-- Tagline -->
+            <div>
+                <label class="block text-xs uppercase tracking-wider text-luxury-muted font-semibold mb-2">Company Brand Tagline</label>
+                <input type="text" name="tagline" value="{{ site.tagline }}" placeholder="e.g. Aero Luxe Select &bull; Executive Transfers" class="w-full bg-luxury-black border border-luxury-border rounded-xl px-4 py-3 text-sm text-white placeholder-luxury-muted focus:border-gold-500/50 outline-none transition-colors">
+            </div>
+        </div>
+    </div>
+
+    <!-- Section 2: Split Language & Category Sections Tabs -->
+    <div class="bg-luxury-card border border-luxury-border rounded-2xl overflow-hidden">
+        
+        <!-- Language Switcher Bar -->
+        <div class="bg-luxury-black/40 border-b border-luxury-border px-6 py-4 flex items-center justify-between flex-wrap gap-4">
+            <div>
+                <h3 class="font-serif font-semibold text-base text-white">Interactive Section Blocks</h3>
+                <span class="text-[11px] text-luxury-muted block">Edit text parameters grouped by language translations.</span>
+            </div>
+            
+            <div class="flex items-center space-x-2 bg-luxury-black p-1 rounded-lg border border-luxury-border">
+                {% for lang_code, categories_dict in languages.items %}
+                <button type="button" onclick="switchLanguageTab('{{ lang_code }}')" id="btn-lang-{{ lang_code }}" class="lang-tab-btn px-4.5 py-1.5 rounded text-xs font-semibold uppercase transition-all">
+                    {% if lang_code == 'en' %}English (EN){% else %}Español (ES){% endif %}
+                </button>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Language Sections -->
+        <div class="p-6 md:p-8 space-y-6">
+            {% for lang_code, categories_dict in languages.items %}
+            <div id="content-lang-{{ lang_code }}" class="lang-tab-content space-y-8 hidden">
+                
+                {% for cat_display, elements in categories_dict.items %}
+                <div class="space-y-4">
+                    <div class="flex items-center space-x-2 border-b border-luxury-border pb-2">
+                        <span class="w-2.5 h-2.5 rounded-full bg-gold-400"></span>
+                        <h4 class="font-serif font-bold text-sm tracking-wide text-white uppercase">{{ cat_display }}</h4>
+                    </div>
+
+                    <div class="grid grid-cols-1 gap-6">
+                        {% for elem in elements %}
+                        <div class="p-5 bg-luxury-black/35 rounded-xl border border-luxury-border space-y-3">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <span class="block text-sm font-semibold text-white">{{ elem.label|default:elem.key }}</span>
+                                    <span class="block font-mono text-[10px] text-luxury-muted mt-0.5">{{ elem.key }}</span>
+                                </div>
+                                <span class="text-[9px] uppercase tracking-wider bg-luxury-card px-2 py-0.5 rounded border border-luxury-border font-bold">
+                                    Type: {% if elem.value|length > 100 %}BlockText{% else %}Text{% endif %}
+                                </span>
+                            </div>
+
+                            <!-- Value Input/Textarea -->
+                            <div>
+                                {% if elem.value|length > 100 or 'description' in elem.key or 'about' in elem.key or 'text' in elem.key %}
+                                <textarea name="elem_{{ elem.id }}" rows="4" class="w-full bg-luxury-black border border-luxury-border rounded-xl p-3.5 text-xs text-white focus:border-gold-500/50 outline-none transition-colors">{{ elem.value }}</textarea>
+                                {% else %}
+                                <input type="text" name="elem_{{ elem.id }}" value="{{ elem.value }}" class="w-full bg-luxury-black border border-luxury-border rounded-xl px-3.5 py-2.5 text-xs text-white focus:border-gold-500/50 outline-none transition-colors">
+                                {% endif %}
+                            </div>
+
+                            <!-- Image slot if element supports image/media -->
+                            <div class="pt-2">
+                                <label class="block text-[10px] uppercase text-luxury-muted font-bold mb-1.5">Section Block Image Attachment (optional)</label>
+                                <div class="flex items-center space-x-4">
+                                    {% if elem.image %}
+                                    <div class="shrink-0 relative group">
+                                        <img src="{{ elem.image.url }}" alt="{{ elem.key }}" class="w-16 h-12 object-cover rounded border border-luxury-border">
+                                        <a href="{{ elem.image.url }}" target="_blank" class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity rounded">
+                                            <i class="fa-solid fa-arrow-up-right-from-square text-[10px] text-white"></i>
+                                        </a>
+                                    </div>
+                                    {% endif %}
+                                    <input type="file" name="file_{{ elem.id }}" accept="image/*" class="text-[10px] text-luxury-muted block w-full
+                                        file:mr-3 file:py-1 file:px-3
+                                        file:rounded file:border-0
+                                        file:text-[10px] file:font-semibold
+                                        file:bg-gold-500/15 file:text-gold-400
+                                        file:cursor-pointer hover:file:bg-gold-500/20">
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endfor %}
+
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Submit buttons row -->
+    <div class="flex items-center justify-end space-x-4 bg-luxury-card border border-luxury-border p-6 rounded-2xl">
+        <span class="text-xs text-luxury-muted italic hidden sm:inline"><i class="fa-solid fa-shield-halved mr-1 text-[10px]"></i>All modifications will update the live site immediately.</span>
+        <div class="flex items-center space-x-3">
+            <button type="submit" class="gold-gradient text-luxury-black text-xs font-semibold px-8 py-3 rounded-xl hover:opacity-95 transition-all shadow-lg shadow-gold-500/15">
+                <i class="fa-solid fa-cloud-arrow-up mr-1.5"></i>Save CMS Content
+            </button>
+        </div>
+    </div>
+
+</form>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function switchLanguageTab(langCode) {
+        // Hide all tab contents
+        const contents = document.querySelectorAll('.lang-tab-content');
+        contents.forEach(el => el.classList.add('hidden'));
+
+        // Reset all buttons style
+        const buttons = document.querySelectorAll('.lang-tab-btn');
+        buttons.forEach(el => {
+            el.classList.remove('gold-gradient', 'text-luxury-black', 'font-semibold');
+            el.classList.add('text-luxury-muted', 'hover:text-white');
+        });
+
+        // Show active content
+        const activeContent = document.getElementById('content-lang-' + langCode);
+        if (activeContent) {
+            activeContent.classList.remove('hidden');
+        }
+
+        // Highlight active button
+        const activeBtn = document.getElementById('btn-lang-' + langCode);
+        if (activeBtn) {
+            activeBtn.classList.remove('text-luxury-muted', 'hover:text-white');
+            activeBtn.classList.add('gold-gradient', 'text-luxury-black', 'font-semibold');
+        }
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        // Select first language key dynamically on start
+        const buttons = document.querySelectorAll('.lang-tab-btn');
+        if (buttons.length > 0) {
+            const firstLangId = buttons[0].id.replace('btn-lang-', '');
+            switchLanguageTab(firstLangId);
+        }
+    });
+</script>
+{% endblock %}

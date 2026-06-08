@@ -1,0 +1,111 @@
+<div class="fixed bottom-6 right-6 z-[9999]">
+    <!-- Trigger Button -->
+    <button id="site-switcher-trigger" class="flex items-center space-x-2 bg-gradient-to-r from-luxe-gold to-luxe-gold-bright text-luxe-black px-4 py-3 rounded-full shadow-2xl hover:scale-105 transition-transform duration-300 font-semibold text-xs tracking-wider uppercase focus:outline-none border border-luxe-gold/30">
+        <i class="fas fa-shuffle text-sm animate-spin-slow"></i>
+        <span>Change Region</span>
+    </button>
+
+    <!-- Switcher Drawer / Popover -->
+    <div id="site-switcher-menu" class="hidden absolute bottom-16 right-0 w-80 rounded-2xl glass-card border border-luxe-gold/20 p-5 shadow-2xl animate-fade-in duration-300">
+        <div class="flex items-center justify-between pb-3 border-b border-luxe-gold/10 mb-4">
+            <span class="text-xs uppercase font-bold tracking-widest text-luxe-gold">Select Luxury Hub</span>
+            <button id="site-switcher-close" class="text-gray-400 hover:text-white transition-colors">
+                <i class="fas fa-xmark text-sm"></i>
+            </button>
+        </div>
+        
+        <div class="space-y-3">
+            {% for site in available_sites %}
+            <a href="{% if site.slug == 'nyc' %}/nyc/{% else %}/dr/{% endif %}" class="flex items-center justify-between p-3 rounded-xl {% if current_site.slug == site.slug %}bg-luxe-gold/10 border border-luxe-gold/50 text-luxe-gold{% else %}bg-luxe-black/40 hover:bg-luxe-grey/60 border border-transparent text-gray-300 hover:text-white{% endif %} transition-all duration-300 group">
+                <div class="flex items-center space-x-3">
+                    <div class="w-8 h-8 rounded-lg bg-luxe-grey flex items-center justify-center border border-luxe-gold/20">
+                        {% if site.slug == 'nyc' %}
+                        <i class="fas fa-city text-sm text-luxe-gold"></i>
+                        {% else %}
+                        <i class="fas fa-umbrella-beach text-sm text-luxe-gold"></i>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <h4 class="text-xs uppercase tracking-wider font-semibold group-hover:text-luxe-gold transition-colors">
+                            {{ site.name }}
+                        </h4>
+                        <p class="text-[10px] text-gray-500 font-light">{{ site.tagline|truncatechars:35 }}</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-2">
+                    {% if current_site.slug == site.slug %}
+                    <span class="w-2 h-2 rounded-full bg-luxe-gold-bright animate-ping"></span>
+                    <i class="fas fa-check text-xs text-luxe-gold"></i>
+                    {% else %}
+                    <i class="fas fa-chevron-right text-[10px] text-gray-600 group-hover:text-luxe-gold transition-colors"></i>
+                    {% endif %}
+                </div>
+            </a>
+            {% empty %}
+            <!-- Fallback Static Items if available_sites is not populated -->
+            <a href="/nyc/" class="flex items-center justify-between p-3 rounded-xl bg-luxe-gold/10 border border-luxe-gold/50 text-luxe-gold transition-all duration-300">
+                <div class="flex items-center space-x-3">
+                    <div class="w-8 h-8 rounded-lg bg-luxe-grey flex items-center justify-center border border-luxe-gold/20">
+                        <i class="fas fa-city text-sm text-luxe-gold"></i>
+                    </div>
+                    <div>
+                        <h4 class="text-xs uppercase tracking-wider font-semibold">New York Metro</h4>
+                        <p class="text-[10px] text-gray-500 font-light">NYC Premium Car & Airport Transfers</p>
+                    </div>
+                </div>
+                <i class="fas fa-check text-xs text-luxe-gold"></i>
+            </a>
+            <a href="/dr/" class="flex items-center justify-between p-3 rounded-xl bg-luxe-black/40 hover:bg-luxe-grey/60 border border-transparent text-gray-300 hover:text-white transition-all duration-300">
+                <div class="flex items-center space-x-3">
+                    <div class="w-8 h-8 rounded-lg bg-luxe-grey flex items-center justify-center border border-luxe-gold/20">
+                        <i class="fas fa-umbrella-beach text-sm text-luxe-gold"></i>
+                    </div>
+                    <div>
+                        <h4 class="text-xs uppercase tracking-wider font-semibold">Dominican Republic</h4>
+                        <p class="text-[10px] text-gray-500 font-light">VIP Transfers & Luxury Chauffeur</p>
+                    </div>
+                </div>
+                <i class="fas fa-chevron-right text-[10px] text-gray-600"></i>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<style>
+    @keyframes spin-slow {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+    .animate-spin-slow {
+        animation: spin-slow 15s linear infinite;
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const trigger = document.getElementById('site-switcher-trigger');
+        const menu = document.getElementById('site-switcher-menu');
+        const close = document.getElementById('site-switcher-close');
+
+        if(trigger && menu) {
+            trigger.addEventListener('click', (e) => {
+                e.stopPropagation();
+                menu.classList.toggle('hidden');
+            });
+
+            if(close) {
+                close.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    menu.classList.add('hidden');
+                });
+            }
+
+            document.addEventListener('click', (e) => {
+                if (!menu.contains(e.target) && e.target !== trigger && !trigger.contains(e.target)) {
+                    menu.classList.add('hidden');
+                }
+            });
+        }
+    });
+</script>

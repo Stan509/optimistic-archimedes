@@ -1,0 +1,103 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Administration{% endblock %} | {{ settings.hotel_name }}</title>
+    
+    <!-- Typography & Material Design Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet" />
+    
+    <!-- Dashboard custom CSS -->
+    <link rel="stylesheet" href="{% static 'booking/css/dashboard.css' %}">
+    
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+
+    <div class="dashboard-container">
+        
+        <!-- Left Sidebar -->
+        <aside>
+            <div class="sidebar-header">
+                <div class="sidebar-logo">
+                    {{ settings.hotel_name|upper }}
+                    <span>Console d'Administration</span>
+                </div>
+            </div>
+            
+            <ul class="sidebar-menu">
+                <li>
+                    <a href="{% url 'booking:dashboard_index' %}" class="sidebar-link {% if active_tab == 'home' %}active{% endif %}">
+                        <span class="material-symbols-outlined">dashboard</span>
+                        Vue d'ensemble
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'booking:dashboard_bookings' %}" class="sidebar-link {% if active_tab == 'bookings' %}active{% endif %}">
+                        <span class="material-symbols-outlined">book_online</span>
+                        Réservations
+                        {% if pending_count and pending_count > 0 %}
+                            <span style="background-color: var(--danger); color:#ffffff; font-size:0.75rem; font-weight:700; padding:0.1rem 0.5rem; border-radius:10px; margin-left:auto;">{{ pending_count }}</span>
+                        {% endif %}
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'booking:dashboard_rooms' %}" class="sidebar-link {% if active_tab == 'rooms' %}active{% endif %}">
+                        <span class="material-symbols-outlined">bed</span>
+                        Chambres
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'booking:dashboard_site_editor' %}" class="sidebar-link {% if active_tab == 'editor' %}active{% endif %}">
+                        <span class="material-symbols-outlined">edit_note</span>
+                        Éditeur de Site
+                    </a>
+                </li>
+                <li style="margin-top: auto;">
+                    <a href="{% url 'booking:index' %}" class="sidebar-link" style="color: rgba(248, 250, 252, 0.5);">
+                        <span class="material-symbols-outlined">visibility</span>
+                        Voir le site public
+                    </a>
+                </li>
+            </ul>
+            
+            <div class="sidebar-footer">
+                <a href="{% url 'admin:logout' %}?next={% url 'booking:index' %}" class="btn-logout">
+                    <span class="material-symbols-outlined">logout</span>
+                    Déconnexion
+                </a>
+            </div>
+        </aside>
+        
+        <!-- Right Main Viewport -->
+        <main class="admin-main">
+            
+            <!-- Global Messages inside dashboard -->
+            {% if messages %}
+                <div style="margin-bottom: 2rem;">
+                    {% for message in messages %}
+                        <div style="padding: 1rem 1.5rem; border-radius: var(--border-radius-sm); margin-bottom: 0.8rem; display: flex; justify-content: space-between; align-items: center; font-size: 0.92rem; font-weight: 500;
+                            {% if message.tags == 'success' %}background-color: var(--success-light); color: #065f46; border: 1px solid #a7f3d0;
+                            {% else %}background-color: var(--danger-light); color: #991b1b; border: 1px solid #fecaca;{% endif %}">
+                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                <span class="material-symbols-outlined" style="font-size: 1.15rem;">
+                                    {% if message.tags == 'success' %}check_circle{% else %}error{% endif %}
+                                </span>
+                                {{ message }}
+                            </div>
+                            <button onclick="this.parentElement.style.display='none'" style="background:none; border:none; color:inherit; font-size:1.1rem; cursor:pointer; font-weight:bold; margin-left: 1rem;">&times;</button>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+            
+            {% block admin_content %}{% endblock %}
+        </main>
+        
+    </div>
+
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>

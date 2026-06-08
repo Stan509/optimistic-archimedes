@@ -1,0 +1,367 @@
+{% extends 'dashboard/base.html' %}
+
+{% block title %}Overview — Aero Luxe Select{% endblock %}
+{% block dashboard_header %}System Overview{% endblock %}
+
+{% block content %}
+<!-- Filtering & Period Selector Row -->
+<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-luxury-card border border-luxury-border p-6 rounded-2xl">
+    <div>
+        <h2 class="text-xl font-bold font-serif tracking-wide gold-text-gradient">Welcome back, Admin</h2>
+        <p class="text-xs text-luxury-muted mt-1">Here is what's happening across your premium transport network today.</p>
+    </div>
+    
+    <form method="GET" action="" class="flex items-center space-x-3">
+        <!-- Maintain site filter if set -->
+        <input type="hidden" name="site" value="{{ site_filter }}">
+        
+        <span class="text-xs font-medium text-luxury-muted">Period:</span>
+        <select name="period" onchange="this.form.submit()" class="bg-luxury-black border border-luxury-border text-white text-xs rounded-lg px-3.5 py-2.5 focus:border-gold-500/50 outline-none transition-colors">
+            <option value="7" {% if period == '7' %}selected{% endif %}>Last 7 Days</option>
+            <option value="30" {% if period == '30' or not period %}selected{% endif %}>Last 30 Days</option>
+            <option value="90" {% if period == '90' %}selected{% endif %}>Last 90 Days</option>
+            <option value="365" {% if period == '365' %}selected{% endif %}>Last Year</option>
+        </select>
+    </form>
+</div>
+
+<!-- KPI Summary Cards Grid -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+    <!-- Card 1: Total Revenue -->
+    <div class="bg-luxury-card border border-luxury-border p-6 rounded-2xl relative overflow-hidden group hover:border-gold-500/30 transition-all duration-300">
+        <div class="absolute right-0 bottom-0 translate-x-3 translate-y-3 opacity-[0.03] text-gold-400 group-hover:scale-110 transition-transform duration-300">
+            <i class="fa-solid fa-dollar-sign text-9xl"></i>
+        </div>
+        <div class="flex justify-between items-start">
+            <div>
+                <span class="block text-xs uppercase tracking-wider text-luxury-muted font-semibold">Total Revenue</span>
+                <span class="block text-3xl font-bold mt-2 font-serif tracking-tight text-white">${{ total_revenue|floatformat:2 }}</span>
+            </div>
+            <div class="w-10 h-10 rounded-xl bg-gold-500/10 border border-gold-500/20 flex items-center justify-center text-gold-400">
+                <i class="fa-solid fa-money-bill-trend-up"></i>
+            </div>
+        </div>
+        <div class="mt-4 flex items-center space-x-2 text-xs">
+            <span class="text-emerald-400 font-semibold bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
+                <i class="fa-solid fa-circle-nodes mr-1"></i>Active
+            </span>
+            <span class="text-luxury-muted">Confirmed/Completed bookings</span>
+        </div>
+    </div>
+
+    <!-- Card 2: Platform Revenue & Fee Breakdown -->
+    <div class="bg-luxury-card border border-luxury-border p-6 rounded-2xl relative overflow-hidden group hover:border-gold-500/30 transition-all duration-300">
+        <div class="absolute right-0 bottom-0 translate-x-3 translate-y-3 opacity-[0.03] text-gold-400 group-hover:scale-110 transition-transform duration-300">
+            <i class="fa-solid fa-percent text-9xl"></i>
+        </div>
+        <div class="flex justify-between items-start">
+            <div>
+                <span class="block text-xs uppercase tracking-wider text-luxury-muted font-semibold">Platform Fee Base</span>
+                <span class="block text-3xl font-bold mt-2 font-serif tracking-tight text-white">${{ platform_revenue|floatformat:2 }}</span>
+            </div>
+            <div class="w-10 h-10 rounded-xl bg-gold-500/10 border border-gold-500/20 flex items-center justify-center text-gold-400">
+                <i class="fa-solid fa-network-wired"></i>
+            </div>
+        </div>
+        <div class="mt-4 flex items-center justify-between text-xs">
+            <span class="text-luxury-muted">Direct: <strong class="text-white">${{ direct_revenue|floatformat:2 }}</strong></span>
+            <span class="text-luxury-muted">Channels: <strong class="text-gold-400">${{ platform_revenue|floatformat:2 }}</strong></span>
+        </div>
+    </div>
+
+    <!-- Card 3: Pending Bookings -->
+    <div class="bg-luxury-card border border-luxury-border p-6 rounded-2xl relative overflow-hidden group hover:border-gold-500/30 transition-all duration-300">
+        <div class="absolute right-0 bottom-0 translate-x-3 translate-y-3 opacity-[0.03] text-gold-400 group-hover:scale-110 transition-transform duration-300">
+            <i class="fa-regular fa-clock text-9xl"></i>
+        </div>
+        <div class="flex justify-between items-start">
+            <div>
+                <span class="block text-xs uppercase tracking-wider text-luxury-muted font-semibold">Pending Requests</span>
+                <span class="block text-3xl font-bold mt-2 font-serif tracking-tight text-gold-400">{{ pending_count }}</span>
+            </div>
+            <div class="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400">
+                <i class="fa-solid fa-hourglass-half"></i>
+            </div>
+        </div>
+        <div class="mt-4 flex items-center space-x-2 text-xs">
+            <span class="text-amber-400 font-semibold bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">Action Required</span>
+            <span class="text-luxury-muted">Awaiting dispatcher approval</span>
+        </div>
+    </div>
+
+    <!-- Card 4: Confirmed & Completed Bookings -->
+    <div class="bg-luxury-card border border-luxury-border p-6 rounded-2xl relative overflow-hidden group hover:border-gold-500/30 transition-all duration-300">
+        <div class="absolute right-0 bottom-0 translate-x-3 translate-y-3 opacity-[0.03] text-gold-400 group-hover:scale-110 transition-transform duration-300">
+            <i class="fa-solid fa-circle-check text-9xl"></i>
+        </div>
+        <div class="flex justify-between items-start">
+            <div>
+                <span class="block text-xs uppercase tracking-wider text-luxury-muted font-semibold">Confirmed Trips</span>
+                <span class="block text-3xl font-bold mt-2 font-serif tracking-tight text-white">{{ confirmed_count }}</span>
+            </div>
+            <div class="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
+                <i class="fa-solid fa-circle-check"></i>
+            </div>
+        </div>
+        <div class="mt-4 flex items-center space-x-2 text-xs">
+            <span class="text-emerald-400 font-semibold bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
+                Total Bookings: {{ total_bookings }}
+            </span>
+            <span class="text-luxury-muted">Scheduled for this period</span>
+        </div>
+    </div>
+</div>
+
+<!-- Grid charts and summaries -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <!-- Chart Canvas Column -->
+    <div class="bg-luxury-card border border-luxury-border p-6 rounded-2xl lg:col-span-2">
+        <div class="flex justify-between items-center mb-6">
+            <div>
+                <h3 class="font-serif font-semibold text-lg tracking-wide">Revenue Trend Analysis</h3>
+                <span class="text-xs text-luxury-muted block">Comparing NYC vs DR monthly performance in USD</span>
+            </div>
+            <div class="flex items-center space-x-3 text-xs">
+                <span class="flex items-center"><span class="w-2.5 h-2.5 rounded-full bg-gold-400 mr-1.5 inline-block"></span>NYC</span>
+                <span class="flex items-center"><span class="w-2.5 h-2.5 rounded-full bg-white mr-1.5 inline-block"></span>Dominican Rep.</span>
+            </div>
+        </div>
+        <div class="relative h-80">
+            <canvas id="revenueTrendChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Right Summary breakdown info -->
+    <div class="bg-luxury-card border border-luxury-border p-6 rounded-2xl flex flex-col justify-between">
+        <div>
+            <h3 class="font-serif font-semibold text-lg tracking-wide mb-2">Fleet Chauffeur Activity</h3>
+            <p class="text-xs text-luxury-muted">Overview of high-end travel hubs operating under your brand.</p>
+            
+            <div class="space-y-4 mt-6">
+                <!-- NYC Hub -->
+                <div class="p-4 rounded-xl bg-luxury-black/40 border border-luxury-border">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="font-semibold text-sm">New York City (JFK/LGA/EWR)</span>
+                        <span class="text-xs text-gold-400 font-bold">NYC Hub</span>
+                    </div>
+                    <div class="w-full bg-luxury-border h-1.5 rounded-full overflow-hidden">
+                        <div class="bg-gold-500 h-full rounded-full" style="width: 65%"></div>
+                    </div>
+                    <span class="block text-[10px] text-luxury-muted mt-1.5 uppercase font-medium">65% of Total Bookings</span>
+                </div>
+
+                <!-- DR Hub -->
+                <div class="p-4 rounded-xl bg-luxury-black/40 border border-luxury-border">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="font-semibold text-sm">Punta Cana / Santo Domingo (PUJ/SDQ)</span>
+                        <span class="text-xs text-gold-400 font-bold">DR Hub</span>
+                    </div>
+                    <div class="w-full bg-luxury-border h-1.5 rounded-full overflow-hidden">
+                        <div class="bg-white h-full rounded-full" style="width: 35%"></div>
+                    </div>
+                    <span class="block text-[10px] text-luxury-muted mt-1.5 uppercase font-medium">35% of Total Bookings</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="pt-6 border-t border-luxury-border text-center">
+            <a href="{% url 'dashboard:bookings' %}" class="inline-block text-xs font-semibold text-gold-400 hover:text-white transition-colors bg-gold-500/10 px-4 py-2.5 rounded-xl border border-gold-500/20 hover:bg-gold-500/20 w-full">
+                <i class="fa-solid fa-list-check mr-2"></i>Go to Dispatch Console
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Bookings Log -->
+<div class="bg-luxury-card border border-luxury-border rounded-2xl overflow-hidden">
+    <div class="p-6 border-b border-luxury-border flex justify-between items-center">
+        <div>
+            <h3 class="font-serif font-semibold text-lg tracking-wide">Recent Booking Inflow</h3>
+            <p class="text-xs text-luxury-muted mt-0.5">Showing last 10 VIP transfers registered in the system.</p>
+        </div>
+        <a href="{% url 'dashboard:bookings' %}" class="text-xs font-semibold text-gold-400 hover:underline">
+            View All Log <i class="fa-solid fa-arrow-right ml-1"></i>
+        </a>
+    </div>
+
+    <!-- Booking Log Table -->
+    <div class="overflow-x-auto">
+        <table class="w-full text-left text-sm whitespace-nowrap">
+            <thead>
+                <tr class="bg-luxury-black/30 text-luxury-muted text-xs uppercase tracking-wider border-b border-luxury-border">
+                    <th class="py-4 px-6">Reference</th>
+                    <th class="py-4 px-6">Customer</th>
+                    <th class="py-4 px-6">Route / Service</th>
+                    <th class="py-4 px-6">Date / Time</th>
+                    <th class="py-4 px-6">Source</th>
+                    <th class="py-4 px-6">Price</th>
+                    <th class="py-4 px-6 text-center">Status</th>
+                    <th class="py-4 px-6 text-right">Action</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-luxury-border">
+                {% for b in recent_bookings %}
+                <tr class="hover:bg-luxury-black/20 transition-colors">
+                    <td class="py-4 px-6">
+                        <span class="block font-mono text-gold-400 font-semibold">{{ b.booking_reference }}</span>
+                        <span class="block text-[10px] text-luxury-muted">{{ b.get_service_type_display }}</span>
+                    </td>
+                    <td class="py-4 px-6">
+                        <span class="block font-semibold text-white">{{ b.customer_name }}</span>
+                        <span class="block text-xs text-luxury-muted">{{ b.customer_email }}</span>
+                    </td>
+                    <td class="py-4 px-6">
+                        <div class="flex items-center space-x-2">
+                            <span class="text-xs font-bold px-2 py-0.5 rounded bg-luxury-black border border-luxury-border">
+                                {{ b.site.name|upper }}
+                            </span>
+                            <span class="text-xs text-white">
+                                {% if b.airport %}
+                                    {{ b.airport.code }} &rarr; {{ b.destination.name|default:b.dropoff_address|truncatechars:20 }}
+                                {% else %}
+                                    Chauffeur Services
+                                {% endif %}
+                            </span>
+                        </div>
+                    </td>
+                    <td class="py-4 px-6">
+                        <span class="block text-xs font-semibold text-white">{{ b.pickup_date }}</span>
+                        <span class="block text-[10px] text-luxury-muted">{{ b.pickup_time }}</span>
+                    </td>
+                    <td class="py-4 px-6">
+                        <span class="text-xs uppercase bg-luxury-black px-2 py-1 rounded border border-luxury-border">
+                            {{ b.booking_source }}
+                        </span>
+                    </td>
+                    <td class="py-4 px-6">
+                        <span class="font-bold text-white">${{ b.total_price|floatformat:2 }}</span>
+                    </td>
+                    <td class="py-4 px-6 text-center">
+                        <span class="inline-block text-[10px] uppercase font-bold tracking-wider px-3 py-1 rounded-full border 
+                            {% if b.status == 'PENDING' %}bg-amber-500/10 border-amber-500/20 text-amber-400
+                            {% elif b.status == 'CONFIRMED' %}bg-emerald-500/10 border-emerald-500/20 text-emerald-400
+                            {% elif b.status == 'IN_PROGRESS' %}bg-sky-500/10 border-sky-500/20 text-sky-400
+                            {% elif b.status == 'COMPLETED' %}bg-luxury-muted/10 border-luxury-muted/20 text-white
+                            {% else %}bg-rose-500/10 border-rose-500/20 text-rose-400{% endif %}">
+                            {{ b.status }}
+                        </span>
+                    </td>
+                    <td class="py-4 px-6 text-right">
+                        <a href="{% url 'dashboard:booking_detail' b.id %}" class="inline-block text-xs font-semibold text-gold-400 hover:text-white transition-colors bg-luxury-card border border-luxury-border px-3.5 py-1.5 rounded-lg hover:border-gold-400/40">
+                            <i class="fa-solid fa-magnifying-glass mr-1.5 text-[10px]"></i>Details
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="8" class="text-center py-10 text-luxury-muted text-sm">
+                        <i class="fa-solid fa-inbox text-3xl text-luxury-border mb-3 block"></i>
+                        No booking records available for this filter.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const ctx = document.getElementById('revenueTrendChart').getContext('2d');
+        
+        // Parse Django Context JSON arrays securely
+        const labels = JSON.parse('{{ chart_labels|safe }}');
+        const dataNYC = JSON.parse('{{ chart_data_nyc|safe }}');
+        const dataDR = JSON.parse('{{ chart_data_dr|safe }}');
+
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [
+                    {
+                        label: 'New York City (NYC)',
+                        data: dataNYC,
+                        borderColor: '#C9A84C',
+                        backgroundColor: 'rgba(201, 168, 76, 0.05)',
+                        borderWidth: 2,
+                        pointBackgroundColor: '#C9A84C',
+                        pointHoverRadius: 6,
+                        tension: 0.35,
+                        fill: true
+                    },
+                    {
+                        label: 'Dominican Republic (DR)',
+                        data: dataDR,
+                        borderColor: '#FFFFFF',
+                        backgroundColor: 'rgba(255, 255, 255, 0.02)',
+                        borderWidth: 2,
+                        pointBackgroundColor: '#FFFFFF',
+                        pointHoverRadius: 6,
+                        tension: 0.35,
+                        fill: true
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        mode: 'index',
+                        intersect: false,
+                        padding: 12,
+                        backgroundColor: '#1C1C1E',
+                        titleColor: '#DFBA5B',
+                        titleFont: {
+                            family: 'Outfit',
+                            weight: 'bold'
+                        },
+                        bodyFont: {
+                            family: 'Outfit'
+                        },
+                        borderColor: 'rgba(201, 168, 76, 0.25)',
+                        borderWidth: 1
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: {
+                            color: '#1C1C1E'
+                        },
+                        ticks: {
+                            color: '#A1A1AA',
+                            font: {
+                                family: 'Outfit',
+                                size: 11
+                            }
+                        }
+                    },
+                    y: {
+                        grid: {
+                            color: '#1C1C1E'
+                        },
+                        ticks: {
+                            color: '#A1A1AA',
+                            font: {
+                                family: 'Outfit',
+                                size: 11
+                            },
+                            callback: function(value) {
+                                return '$' + value.toLocaleString();
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}

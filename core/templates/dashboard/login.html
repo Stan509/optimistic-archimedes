@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aero Luxe Select | Corporate Administration Portal</title>
+    
+    <!-- Outfit Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome Icons CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'brand-bg': '#070709',
+                        'brand-card': '#111115',
+                        'brand-gold': '#C9A84C',
+                        'brand-gold-bright': '#DFBA5B',
+                    },
+                    fontFamily: {
+                        sans: ['Outfit', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        .glass-login-card {
+            background: rgba(17, 17, 21, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(201, 168, 76, 0.15);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+        .gold-glow:focus {
+            outline: none;
+            border-color: #C9A84C;
+            box-shadow: 0 0 15px rgba(201, 168, 76, 0.25);
+        }
+        .gold-gradient-btn {
+            background: linear-gradient(135deg, #C9A84C 0%, #DFBA5B 50%, #C9A84C 100%);
+            transition: all 0.3s ease;
+        }
+        .gold-gradient-btn:hover {
+            box-shadow: 0 0 25px rgba(223, 186, 91, 0.4);
+            transform: translateY(-1px);
+        }
+    </style>
+</head>
+<body class="bg-brand-bg text-gray-100 font-sans h-full flex flex-col justify-between selection:bg-brand-gold selection:text-brand-bg">
+
+    <!-- Ambient background glows -->
+    <div class="fixed inset-0 pointer-events-none overflow-hidden z-0">
+        <div class="absolute -top-[40%] -left-[20%] w-[80vw] h-[80vw] rounded-full bg-brand-gold/5 blur-[120px]"></div>
+        <div class="absolute -bottom-[40%] -right-[20%] w-[80vw] h-[80vw] rounded-full bg-brand-gold/5 blur-[120px]"></div>
+    </div>
+
+    <!-- Main Container -->
+    <main class="flex-grow flex items-center justify-center px-4 sm:px-6 lg:px-8 relative z-10 py-12">
+        <div class="w-full max-w-md">
+            
+            <!-- Branding Header -->
+            <div class="text-center mb-8">
+                <h1 class="text-3xl font-bold tracking-widest text-white uppercase flex items-center justify-center space-x-2">
+                    <span class="bg-gradient-to-r from-brand-gold via-brand-gold-bright to-brand-gold bg-clip-text text-transparent">AERO LUXE SELECT</span>
+                </h1>
+                <p class="mt-3 text-sm text-gray-400 font-medium uppercase tracking-wider">Administrative Control Panel</p>
+            </div>
+
+            <!-- Login Card -->
+            <div class="glass-login-card rounded-2xl p-8 sm:p-10 relative overflow-hidden">
+                
+                <!-- Custom status messages -->
+                {% if messages %}
+                <div class="mb-6 space-y-3">
+                    {% for message in messages %}
+                    <div class="p-4 rounded-lg flex items-start space-x-3 text-sm {% if message.tags == 'success' %}bg-green-500/10 border border-green-500/20 text-green-300{% else %}bg-red-500/10 border border-red-500/20 text-red-300{% endif %}" role="alert">
+                        <i class="fas {% if message.tags == 'success' %}fa-circle-check{% else %}fa-circle-exclamation{% endif %} mt-0.5 text-base flex-shrink-0"></i>
+                        <p class="font-medium leading-relaxed">{{ message }}</p>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <!-- Form -->
+                <form action="{% url 'dashboard:login' %}" method="POST" class="space-y-6">
+                    {% csrf_token %}
+                    
+                    <!-- Username field -->
+                    <div class="space-y-2">
+                        <label for="username" class="block text-xs font-semibold uppercase tracking-wider text-gray-400">Username</label>
+                        <div class="relative rounded-lg shadow-sm">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-500">
+                                <i class="fas fa-user-tie"></i>
+                            </div>
+                            <input type="text" name="username" id="username" required 
+                                class="block w-full pl-10 pr-4 py-3 bg-brand-bg/50 border border-brand-gold/15 rounded-lg text-white placeholder-gray-500 text-sm transition-all duration-300 gold-glow"
+                                placeholder="administrator">
+                        </div>
+                    </div>
+
+                    <!-- Password field -->
+                    <div class="space-y-2">
+                        <div class="flex justify-between items-center">
+                            <label for="password" class="block text-xs font-semibold uppercase tracking-wider text-gray-400">Password</label>
+                        </div>
+                        <div class="relative rounded-lg shadow-sm">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-500">
+                                <i class="fas fa-lock"></i>
+                            </div>
+                            <input type="password" name="password" id="password" required 
+                                class="block w-full pl-10 pr-4 py-3 bg-brand-bg/50 border border-brand-gold/15 rounded-lg text-white placeholder-gray-500 text-sm transition-all duration-300 gold-glow"
+                                placeholder="••••••••••••">
+                        </div>
+                    </div>
+
+                    <!-- Sign In Button -->
+                    <button type="submit" 
+                        class="w-full flex justify-center py-3.5 px-4 border border-transparent rounded-lg text-sm font-bold uppercase tracking-widest text-brand-bg gold-gradient-btn focus:outline-none">
+                        Sign In
+                    </button>
+                </form>
+                
+                <!-- Bottom Decorative subtle golden accents -->
+                <div class="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-brand-gold/30 to-transparent"></div>
+            </div>
+
+            <!-- Footer link back to public sites -->
+            <div class="text-center mt-6 relative z-10 flex justify-center space-x-6 text-xs text-gray-500">
+                <a href="/nyc/" class="hover:text-brand-gold transition-colors duration-300 flex items-center space-x-1">
+                    <i class="fas fa-arrow-left text-[10px]"></i>
+                    <span>NYC Portal</span>
+                </a>
+                <span>&bull;</span>
+                <a href="/dr/" class="hover:text-brand-gold transition-colors duration-300 flex items-center space-x-1">
+                    <span>DR Portal</span>
+                    <i class="fas fa-arrow-right text-[10px]"></i>
+                </a>
+            </div>
+        </div>
+    </main>
+
+    <!-- Page Footer with Credits -->
+    <footer class="py-6 border-t border-brand-gold/5 relative z-10 text-center text-xs text-gray-600 bg-black/20">
+        <div class="max-w-7xl mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-2">
+            <p>&copy; {% now "Y" %} Aero Luxe Select. Secured Management Gateway.</p>
+            <a href="tel:8295098412" class="hover:text-brand-gold transition-colors duration-300">
+                Developed by <span class="text-gray-400 font-semibold">GABOOM</span> | Tel: 829 509 84 12
+            </a>
+        </div>
+    </footer>
+
+</body>
+</html>

@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Aero Luxe Select — Dashboard{% endblock %}</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        gold: {
+                            50: '#FDFBF7',
+                            100: '#FBF7ED',
+                            200: '#F4EBCE',
+                            300: '#EADBB0',
+                            400: '#DFBA5B',
+                            500: '#C9A84C',
+                            600: '#A98D3B',
+                            700: '#8E7532',
+                            800: '#6C5826',
+                            900: '#4B3E1B',
+                        },
+                        luxury: {
+                            black: '#0A0A0A',
+                            dark: '#121212',
+                            card: '#1C1C1E',
+                            border: '#2C2C2E',
+                            muted: '#A1A1AA',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Outfit', 'sans-serif'],
+                        serif: ['Playfair Display', 'serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Custom scrollbar for premium dark theme */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #121212;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #C9A84C;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #DFBA5B;
+        }
+        .gold-gradient {
+            background: linear-gradient(135deg, #C9A84C 0%, #DFBA5B 50%, #C9A84C 100%);
+        }
+        .gold-text-gradient {
+            background: linear-gradient(135deg, #DFBA5B 0%, #C9A84C 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .glassmorphism {
+            background: rgba(28, 28, 30, 0.8);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(201, 168, 76, 0.15);
+        }
+        /* Active indicator line */
+        .sidebar-active {
+            border-left: 3px solid #C9A84C;
+            background: linear-gradient(90deg, rgba(201, 168, 76, 0.1) 0%, rgba(28, 28, 30, 0) 100%);
+            color: #DFBA5B !important;
+        }
+    </style>
+    {% block extra_head %}{% endblock %}
+</head>
+<body class="bg-luxury-black text-white font-sans min-h-screen flex flex-col md:flex-row overflow-x-hidden">
+
+    <!-- Mobile Sidebar Toggle Top Bar -->
+    <header class="md:hidden flex items-center justify-between px-6 py-4 bg-luxury-dark border-b border-luxury-border z-50 sticky top-0">
+        <div class="flex items-center space-x-2">
+            <span class="font-serif font-bold text-lg tracking-widest text-gold-400">AERO LUXE</span>
+            <span class="text-xs uppercase bg-gold-500/10 text-gold-400 px-2 py-0.5 rounded border border-gold-500/20">Select</span>
+        </div>
+        <button id="mobile-menu-btn" class="text-luxury-muted hover:text-gold-400 focus:outline-none transition-colors">
+            <i class="fa-solid fa-bars text-2xl"></i>
+        </button>
+    </header>
+
+    <!-- Sidebar Navigation -->
+    <aside id="sidebar" class="fixed inset-y-0 left-0 transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out z-40 w-72 bg-luxury-dark border-r border-luxury-border flex flex-col justify-between shrink-0 h-full md:sticky md:top-0">
+        <div>
+            <!-- Brand Logo -->
+            <div class="hidden md:flex items-center justify-between px-8 py-6 border-b border-luxury-border">
+                <div>
+                    <span class="font-serif font-semibold text-xl tracking-widest block text-gold-400">AERO LUXE</span>
+                    <span class="text-xs font-light uppercase tracking-wider text-luxury-muted block">Select Dashboard</span>
+                </div>
+                <div class="w-2.5 h-2.5 rounded-full bg-gold-400 animate-pulse"></div>
+            </div>
+
+            <!-- Sidebar Quick Info -->
+            <div class="px-8 py-4 border-b border-luxury-border bg-luxury-black/35 flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-full gold-gradient flex items-center justify-center text-luxury-black font-bold uppercase">
+                    {{ request.user.username|slice:":2" }}
+                </div>
+                <div class="overflow-hidden">
+                    <span class="block text-sm font-semibold truncate">{{ request.user.username }}</span>
+                    <span class="block text-xs text-luxury-muted">Administrator</span>
+                </div>
+            </div>
+
+            <!-- Navigation Links -->
+            <nav class="px-4 py-6 space-y-1.5 overflow-y-auto max-h-[calc(100vh-230px)]">
+                <a href="{% url 'dashboard:index' %}" class="flex items-center space-x-3.5 px-4 py-3 rounded-lg text-luxury-muted hover:text-white hover:bg-luxury-card transition-all {% if active_tab == 'home' %}sidebar-active{% endif %}">
+                    <i class="fa-solid fa-chart-line w-5 text-center text-lg"></i>
+                    <span class="font-medium text-sm">Overview</span>
+                </a>
+                
+                <a href="{% url 'dashboard:bookings' %}" class="flex items-center space-x-3.5 px-4 py-3 rounded-lg text-luxury-muted hover:text-white hover:bg-luxury-card transition-all {% if active_tab == 'bookings' %}sidebar-active{% endif %}">
+                    <i class="fa-solid fa-calendar-check w-5 text-center text-lg"></i>
+                    <span class="font-medium text-sm">Bookings</span>
+                </a>
+
+                <!-- Fleet Dropdown Parent -->
+                <div>
+                    <div class="flex items-center justify-between px-4 py-3 rounded-lg text-luxury-muted hover:text-white hover:bg-luxury-card cursor-pointer transition-all {% if active_tab == 'fleet' %}text-gold-400{% endif %}" onclick="toggleFleetMenu()">
+                        <div class="flex items-center space-x-3.5">
+                            <i class="fa-solid fa-car-side w-5 text-center text-lg"></i>
+                            <span class="font-medium text-sm">Fleet Management</span>
+                        </div>
+                        <i id="fleet-chevron" class="fa-solid fa-chevron-right text-xs transition-transform duration-200 {% if active_tab == 'fleet' %}rotate-90{% endif %}"></i>
+                    </div>
+                    <div id="fleet-submenu" class="pl-12 pr-4 py-1 space-y-1 {% if active_tab != 'fleet' %}hidden{% endif %}">
+                        <a href="{% url 'dashboard:fleet' %}" class="block py-2 text-xs text-luxury-muted hover:text-gold-400 transition-colors">Overview</a>
+                        <a href="{% url 'dashboard:fleet_categories' %}" class="block py-2 text-xs text-luxury-muted hover:text-gold-400 transition-colors">Categories</a>
+                        <a href="{% url 'dashboard:fleet_vehicles' %}" class="block py-2 text-xs text-luxury-muted hover:text-gold-400 transition-colors">Vehicles</a>
+                    </div>
+                </div>
+
+                <a href="{% url 'dashboard:airports' %}" class="flex items-center space-x-3.5 px-4 py-3 rounded-lg text-luxury-muted hover:text-white hover:bg-luxury-card transition-all {% if active_tab == 'airports' %}sidebar-active{% endif %}">
+                    <i class="fa-solid fa-plane-departure w-5 text-center text-lg"></i>
+                    <span class="font-medium text-sm">Airports & Zones</span>
+                </a>
+
+                <a href="{% url 'dashboard:pricing' %}" class="flex items-center space-x-3.5 px-4 py-3 rounded-lg text-luxury-muted hover:text-white hover:bg-luxury-card transition-all {% if active_tab == 'pricing' %}sidebar-active{% endif %}">
+                    <i class="fa-solid fa-dollar-sign w-5 text-center text-lg"></i>
+                    <span class="font-medium text-sm">Pricing Rules</span>
+                </a>
+
+                <!-- CMS Submenu Toggle -->
+                <div>
+                    <div class="flex items-center justify-between px-4 py-3 rounded-lg text-luxury-muted hover:text-white hover:bg-luxury-card cursor-pointer transition-all {% if active_tab == 'cms_nyc' or active_tab == 'cms_dr' %}text-gold-400{% endif %}" onclick="toggleCmsMenu()">
+                        <div class="flex items-center space-x-3.5">
+                            <i class="fa-solid fa-file-pen w-5 text-center text-lg"></i>
+                            <span class="font-medium text-sm">CMS Editors</span>
+                        </div>
+                        <i id="cms-chevron" class="fa-solid fa-chevron-right text-xs transition-transform duration-200 {% if active_tab == 'cms_nyc' or active_tab == 'cms_dr' %}rotate-90{% endif %}"></i>
+                    </div>
+                    <div id="cms-submenu" class="pl-12 pr-4 py-1 space-y-1 {% if active_tab != 'cms_nyc' and active_tab != 'cms_dr' %}hidden{% endif %}">
+                        <a href="{% url 'dashboard:cms_nyc' %}" class="block py-2 text-xs text-luxury-muted hover:text-gold-400 transition-colors {% if active_tab == 'cms_nyc' %}text-gold-400 font-semibold{% endif %}">NYC Content</a>
+                        <a href="{% url 'dashboard:cms_dr' %}" class="block py-2 text-xs text-luxury-muted hover:text-gold-400 transition-colors {% if active_tab == 'cms_dr' %}text-gold-400 font-semibold{% endif %}">Dominican Rep. (ES/EN)</a>
+                    </div>
+                </div>
+
+                <a href="{% url 'dashboard:addons' %}" class="flex items-center space-x-3.5 px-4 py-3 rounded-lg text-luxury-muted hover:text-white hover:bg-luxury-card transition-all {% if active_tab == 'addons' %}sidebar-active{% endif %}">
+                    <i class="fa-solid fa-crown w-5 text-center text-lg"></i>
+                    <span class="font-medium text-sm">VIP Add-Ons</span>
+                </a>
+
+                <a href="{% url 'dashboard:reports' %}" class="flex items-center space-x-3.5 px-4 py-3 rounded-lg text-luxury-muted hover:text-white hover:bg-luxury-card transition-all {% if active_tab == 'reports' %}sidebar-active{% endif %}">
+                    <i class="fa-solid fa-chart-pie w-5 text-center text-lg"></i>
+                    <span class="font-medium text-sm">Profit Reports</span>
+                </a>
+
+                <a href="{% url 'dashboard:settings' %}" class="flex items-center space-x-3.5 px-4 py-3 rounded-lg text-luxury-muted hover:text-white hover:bg-luxury-card transition-all {% if active_tab == 'settings' %}sidebar-active{% endif %}">
+                    <i class="fa-solid fa-gears w-5 text-center text-lg"></i>
+                    <span class="font-medium text-sm">System Settings</span>
+                </a>
+            </nav>
+        </div>
+
+        <!-- Footer Credits inside Sidebar -->
+        <div class="p-6 border-t border-luxury-border bg-luxury-black/40 text-center">
+            <span class="block text-[10px] uppercase tracking-wider text-luxury-muted">DEVELOPED BY</span>
+            <span class="block text-xs font-semibold text-gold-400 tracking-widest mt-1">GABOOM LUXE TECH</span>
+            <a href="/" target="_blank" class="inline-block mt-3 text-xs text-luxury-muted hover:text-white transition-colors bg-luxury-card px-3 py-1.5 rounded-full border border-luxury-border">
+                <i class="fa-solid fa-globe mr-1.5"></i>Visit Live Site
+            </a>
+        </div>
+    </aside>
+
+    <!-- Overlay background when sidebar open on mobile -->
+    <div id="sidebar-overlay" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-30 md:hidden"></div>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 min-w-0 flex flex-col min-h-screen">
+        <!-- Top bar search & Profile navigation -->
+        <div class="bg-luxury-dark border-b border-luxury-border h-16 flex items-center justify-between px-6 md:px-10 shrink-0">
+            <!-- Left Header Section -->
+            <div class="flex items-center space-x-3">
+                <h1 class="font-bold text-lg hidden md:block">
+                    {% block dashboard_header %}System Overview{% endblock %}
+                </h1>
+            </div>
+
+            <!-- Right Header Controls -->
+            <div class="flex items-center space-x-4">
+                <!-- Site selection pills -->
+                <div class="hidden sm:flex items-center bg-luxury-black p-1 rounded-full border border-luxury-border text-xs">
+                    <a href="?site=" class="px-3 py-1.5 rounded-full transition-all {% if not site_filter %}gold-gradient text-luxury-black font-semibold{% else %}text-luxury-muted hover:text-white{% endif %}">All</a>
+                    <a href="?site=nyc" class="px-3 py-1.5 rounded-full transition-all {% if site_filter == 'nyc' %}gold-gradient text-luxury-black font-semibold{% else %}text-luxury-muted hover:text-white{% endif %}">NYC</a>
+                    <a href="?site=dr" class="px-3 py-1.5 rounded-full transition-all {% if site_filter == 'dr' %}gold-gradient text-luxury-black font-semibold{% else %}text-luxury-muted hover:text-white{% endif %}">DR</a>
+                </div>
+
+                <!-- Notifications -->
+                <div class="relative">
+                    <button class="w-10 h-10 rounded-full bg-luxury-card border border-luxury-border flex items-center justify-center text-luxury-muted hover:text-gold-400 transition-colors">
+                        <i class="fa-regular fa-bell"></i>
+                    </button>
+                    <span class="absolute top-0 right-0 w-2.5 h-2.5 bg-gold-400 rounded-full border-2 border-luxury-dark"></span>
+                </div>
+
+                <!-- Live Switcher Widget -->
+                <div class="relative" id="profile-dropdown-container">
+                    <button id="profile-dropdown-btn" class="flex items-center space-x-2 bg-luxury-card border border-luxury-border px-3.5 py-1.5 rounded-full hover:border-gold-500/40 transition-colors">
+                        <div class="w-6 h-6 rounded-full gold-gradient flex items-center justify-center text-luxury-black text-xs font-semibold uppercase">
+                            {{ request.user.username|slice:":2" }}
+                        </div>
+                        <span class="text-xs font-medium max-w-[80px] truncate hidden md:inline">{{ request.user.username }}</span>
+                        <i class="fa-solid fa-chevron-down text-[10px] text-luxury-muted"></i>
+                    </button>
+                    <!-- Dropdown Content -->
+                    <div id="profile-dropdown" class="hidden absolute right-0 mt-2.5 w-52 rounded-xl bg-luxury-card border border-luxury-border py-2 shadow-2xl z-50">
+                        <div class="px-4 py-2 border-b border-luxury-border">
+                            <span class="block text-xs text-luxury-muted">Signed in as</span>
+                            <span class="block text-sm font-semibold truncate">{{ request.user.email|default:request.user.username }}</span>
+                        </div>
+                        <a href="{% url 'dashboard:settings' %}" class="flex items-center space-x-2 px-4 py-2.5 text-sm text-luxury-muted hover:text-white hover:bg-luxury-dark transition-colors">
+                            <i class="fa-solid fa-gears w-4 text-center"></i>
+                            <span>Settings</span>
+                        </a>
+                        <a href="{% url 'dashboard:stripe_settings' %}" class="flex items-center space-x-2 px-4 py-2.5 text-sm text-luxury-muted hover:text-white hover:bg-luxury-dark transition-colors">
+                            <i class="fa-brands fa-stripe w-4 text-center text-lg text-[#635BFF]"></i>
+                            <span>Stripe Configuration</span>
+                        </a>
+                        <div class="border-t border-luxury-border mt-1.5 pt-1.5">
+                            <a href="{% url 'dashboard:logout' %}" class="flex items-center space-x-2 px-4 py-2.5 text-sm text-red-400 hover:bg-red-500/10 transition-colors">
+                                <i class="fa-solid fa-arrow-right-from-bracket w-4 text-center"></i>
+                                <span>Sign Out</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dashboard Pages Wrapper -->
+        <div class="flex-1 p-6 md:p-10 space-y-8 overflow-y-auto">
+            <!-- Django Messages Toast Alerts -->
+            {% if messages %}
+            <div class="space-y-3 max-w-4xl mx-auto">
+                {% for message in messages %}
+                <div class="p-4 rounded-xl flex items-start space-x-3 {% if message.tags == 'success' %}bg-emerald-500/10 border border-emerald-500/30 text-emerald-400{% elif message.tags == 'error' %}bg-rose-500/10 border border-rose-500/30 text-rose-400{% else %}bg-gold-500/10 border border-gold-500/30 text-gold-400{% endif %}">
+                    <div class="mt-0.5">
+                        {% if message.tags == 'success' %}
+                        <i class="fa-solid fa-circle-check"></i>
+                        {% elif message.tags == 'error' %}
+                        <i class="fa-solid fa-triangle-exclamation"></i>
+                        {% else %}
+                        <i class="fa-solid fa-circle-info"></i>
+                        {% endif %}
+                    </div>
+                    <div class="flex-1 text-sm font-medium">
+                        {{ message }}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+
+    <!-- Global JS helpers for responsive navigation -->
+    <script>
+        // Mobile Sidebar Toggle
+        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+        const sidebar = document.getElementById('sidebar');
+        const sidebarOverlay = document.getElementById('sidebar-overlay');
+
+        if(mobileMenuBtn) {
+            mobileMenuBtn.addEventListener('click', () => {
+                sidebar.classList.toggle('-translate-x-full');
+                sidebarOverlay.classList.toggle('hidden');
+            });
+        }
+
+        if(sidebarOverlay) {
+            sidebarOverlay.addEventListener('click', () => {
+                sidebar.classList.add('-translate-x-full');
+                sidebarOverlay.classList.add('hidden');
+            });
+        }
+
+        // Profile Dropdown Toggle
+        const profileDropdownBtn = document.getElementById('profile-dropdown-btn');
+        const profileDropdown = document.getElementById('profile-dropdown');
+
+        if (profileDropdownBtn && profileDropdown) {
+            profileDropdownBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                profileDropdown.classList.toggle('hidden');
+            });
+
+            document.addEventListener('click', (e) => {
+                if (!document.getElementById('profile-dropdown-container').contains(e.target)) {
+                    profileDropdown.classList.add('hidden');
+                }
+            });
+        }
+
+        // Submenus Toggle
+        function toggleFleetMenu() {
+            const submenu = document.getElementById('fleet-submenu');
+            const chevron = document.getElementById('fleet-chevron');
+            if (submenu) {
+                submenu.classList.toggle('hidden');
+                chevron.classList.toggle('rotate-90');
+            }
+        }
+
+        function toggleCmsMenu() {
+            const submenu = document.getElementById('cms-submenu');
+            const chevron = document.getElementById('cms-chevron');
+            if (submenu) {
+                submenu.classList.toggle('hidden');
+                chevron.classList.toggle('rotate-90');
+            }
+        }
+    </script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

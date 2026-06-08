@@ -1,0 +1,136 @@
+{% extends 'booking/dashboard/base.html' %}
+{% load static %}
+
+{% block title %}{% if room %}Modifier {{ room.name }}{% else %}Ajouter une Chambre{% endif %} | {{ settings.hotel_name }}{% endblock %}
+
+{% block admin_content %}
+
+<!-- Header -->
+<div class="admin-header">
+    <div class="admin-welcome">
+        <h2>{% if room %}Modifier la Chambre{% else %}Ajouter une Nouvelle Chambre{% endif %}</h2>
+        <p>Renseignez les détails, caractéristiques, tarifs et équipements de l'hébergement.</p>
+    </div>
+    
+    <div>
+        <a href="{% url 'booking:dashboard_rooms' %}" class="btn-action" style="background-color: transparent; border: 1px solid #cbd5e1; color: var(--admin-text-dark);">
+            <span class="material-symbols-outlined">arrow_back</span>
+            Retour à la Liste
+        </a>
+    </div>
+</div>
+
+<!-- Form Container -->
+<div class="admin-section" style="max-width: 800px; margin: 0 auto;">
+    <form action="" method="POST" enctype="multipart/form-data" style="display: flex; flex-direction: column; gap: 2rem;">
+        {% csrf_token %}
+        
+        <!-- General Room Information Section -->
+        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem;">
+            <!-- Room Name -->
+            <div class="form-group" style="display: flex; flex-direction: column; gap: 0.5rem; text-align: left;">
+                <label for="name" style="font-size: 0.85rem; font-weight: 700; text-transform: uppercase; color: var(--admin-text-muted);">Nom de l'hébergement</label>
+                <input type="text" id="name" name="name" value="{{ room.name|default:'' }}" placeholder="Ex: Suite Royale Océan" style="padding: 0.75rem 1rem; border: 1.5px solid #cbd5e1; border-radius: var(--border-radius-sm); font-size: 0.95rem; outline: none; transition: var(--transition);" required>
+            </div>
+            
+            <!-- Room Number -->
+            <div class="form-group" style="display: flex; flex-direction: column; gap: 0.5rem; text-align: left;">
+                <label for="room_number" style="font-size: 0.85rem; font-weight: 700; text-transform: uppercase; color: var(--admin-text-muted);">N° Chambre</label>
+                <input type="text" id="room_number" name="room_number" value="{{ room.room_number|default:'' }}" placeholder="Ex: 504" style="padding: 0.75rem 1rem; border: 1.5px solid #cbd5e1; border-radius: var(--border-radius-sm); font-size: 0.95rem; outline: none; transition: var(--transition);" required>
+            </div>
+        </div>
+
+        <!-- Description -->
+        <div class="form-group" style="display: flex; flex-direction: column; gap: 0.5rem; text-align: left;">
+            <label for="description" style="font-size: 0.85rem; font-weight: 700; text-transform: uppercase; color: var(--admin-text-muted);">Description Complète</label>
+            <textarea id="description" name="description" rows="5" placeholder="Décrivez le charme de la chambre, l'aménagement, la vue, le lit..." style="padding: 0.75rem 1rem; border: 1.5px solid #cbd5e1; border-radius: var(--border-radius-sm); font-size: 0.95rem; font-family: inherit; outline: none; resize: vertical; transition: var(--transition);" required>{{ room.description|default:'' }}</textarea>
+        </div>
+
+        <!-- Rates & Capacity -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+            <!-- Price per Night -->
+            <div class="form-group" style="display: flex; flex-direction: column; gap: 0.5rem; text-align: left;">
+                <label for="price_per_night" style="font-size: 0.85rem; font-weight: 700; text-transform: uppercase; color: var(--admin-text-muted);">Tarif par nuit (€)</label>
+                <input type="number" step="0.01" id="price_per_night" name="price_per_night" value="{{ room.price_per_night|default:'' }}" placeholder="Ex: 350.00" style="padding: 0.75rem 1rem; border: 1.5px solid #cbd5e1; border-radius: var(--border-radius-sm); font-size: 0.95rem; outline: none; transition: var(--transition);" required>
+            </div>
+            
+            <!-- Capacity -->
+            <div class="form-group" style="display: flex; flex-direction: column; gap: 0.5rem; text-align: left;">
+                <label for="capacity" style="font-size: 0.85rem; font-weight: 700; text-transform: uppercase; color: var(--admin-text-muted);">Capacité maximale (Pers.)</label>
+                <input type="number" id="capacity" name="capacity" value="{{ room.capacity|default:'2' }}" placeholder="Ex: 2" min="1" max="10" style="padding: 0.75rem 1rem; border: 1.5px solid #cbd5e1; border-radius: var(--border-radius-sm); font-size: 0.95rem; outline: none; transition: var(--transition);" required>
+            </div>
+        </div>
+
+        <!-- Image Upload -->
+        <div class="form-group" style="display: flex; flex-direction: column; gap: 0.5rem; text-align: left;">
+            <label for="image" style="font-size: 0.85rem; font-weight: 700; text-transform: uppercase; color: var(--admin-text-muted);">Image de présentation</label>
+            {% if room.image %}
+                <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 0.5rem;">
+                    <img src="{{ room.get_image_url }}" alt="{{ room.name }}" style="width: 120px; height: 80px; border-radius: var(--border-radius-sm); object-fit: cover; border: 1px solid #cbd5e1;">
+                    <span style="font-size: 0.8rem; color: var(--admin-text-muted);">Image actuelle déjà enregistrée. Téléversez un nouveau fichier pour la remplacer.</span>
+                </div>
+            {% endif %}
+            <input type="file" id="image" name="image" accept="image/*" style="padding: 0.5rem 0; font-family: inherit; font-size: 0.9rem;">
+        </div>
+
+        <!-- Checkbox Options / Amenities -->
+        <div style="border-top: 1.5px solid #e2e8f0; padding-top: 1.5rem;">
+            <h4 style="font-size: 0.9rem; font-weight: 700; text-transform: uppercase; color: var(--admin-dark); margin-bottom: 1.2rem; letter-spacing: 0.5px;">Statut &amp; Équipements inclus</h4>
+            
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;">
+                <!-- Available -->
+                <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; font-size: 0.9rem; font-weight: 600; color: var(--admin-text-dark);">
+                    <input type="checkbox" id="is_available" name="is_available" {% if room.is_available|default_if_none:True %}checked{% endif %} style="width: 16px; height: 16px; accent-color: var(--admin-gold);">
+                    Chambre Active (Libre)
+                </label>
+                <!-- Wi-Fi -->
+                <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; font-size: 0.9rem; color: #475569;">
+                    <input type="checkbox" id="has_wifi" name="has_wifi" {% if room.has_wifi|default_if_none:True %}checked{% endif %} style="width: 16px; height: 16px; accent-color: var(--admin-gold);">
+                    Wi-Fi Offert
+                </label>
+                <!-- AC -->
+                <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; font-size: 0.9rem; color: #475569;">
+                    <input type="checkbox" id="has_ac" name="has_ac" {% if room.has_ac|default_if_none:True %}checked{% endif %} style="width: 16px; height: 16px; accent-color: var(--admin-gold);">
+                    Climatisation
+                </label>
+                <!-- TV -->
+                <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; font-size: 0.9rem; color: #475569;">
+                    <input type="checkbox" id="has_tv" name="has_tv" {% if room.has_tv|default_if_none:True %}checked{% endif %} style="width: 16px; height: 16px; accent-color: var(--admin-gold);">
+                    Télévision Écran Plat
+                </label>
+                <!-- Balcony -->
+                <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; font-size: 0.9rem; color: #475569;">
+                    <input type="checkbox" id="has_balcony" name="has_balcony" {% if room.has_balcony %}checked{% endif %} style="width: 16px; height: 16px; accent-color: var(--admin-gold);">
+                    Balcon / Terrasse
+                </label>
+                <!-- Jacuzzi -->
+                <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; font-size: 0.9rem; color: #475569; font-weight: 600;">
+                    <input type="checkbox" id="has_jacuzzi" name="has_jacuzzi" {% if room.has_jacuzzi %}checked{% endif %} style="width: 16px; height: 16px; accent-color: var(--admin-gold);">
+                    Jacuzzi Privatif ⭐
+                </label>
+                <!-- Minibar -->
+                <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; font-size: 0.9rem; color: #475569;">
+                    <input type="checkbox" id="has_minibar" name="has_minibar" {% if room.has_minibar %}checked{% endif %} style="width: 16px; height: 16px; accent-color: var(--admin-gold);">
+                    Minibar Premium
+                </label>
+                <!-- Room Service -->
+                <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; font-size: 0.9rem; color: #475569;">
+                    <input type="checkbox" id="has_room_service" name="has_room_service" {% if room.has_room_service %}checked{% endif %} style="width: 16px; height: 16px; accent-color: var(--admin-gold);">
+                    Service d'Étage 24h
+                </label>
+            </div>
+        </div>
+
+        <!-- Submit Buttons -->
+        <div style="display: flex; justify-content: flex-end; gap: 1rem; border-top: 1.5px solid #e2e8f0; padding-top: 1.5rem;">
+            <a href="{% url 'booking:dashboard_rooms' %}" class="btn-action" style="background-color: transparent; border: 1px solid #cbd5e1; color: var(--admin-text-dark);">Annuler</a>
+            <button type="submit" class="btn-action btn-action-gold">
+                <span class="material-symbols-outlined">save</span>
+                {% if room %}Mettre à jour{% else %}Créer la Chambre{% endif %}
+            </button>
+        </div>
+
+    </form>
+</div>
+
+{% endblock %}

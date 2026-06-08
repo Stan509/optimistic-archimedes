@@ -1,0 +1,172 @@
+{% extends 'booking/dashboard/base.html' %}
+{% load static %}
+
+{% block title %}Éditeur Visuel de Site | {{ settings.hotel_name }}{% endblock %}
+
+{% block admin_content %}
+
+<!-- Header -->
+<div class="admin-header">
+    <div class="admin-welcome">
+        <h2>Éditeur Visuel et Dynamique du Site Internet</h2>
+        <p>Modifiez en direct les textes, coordonnées et visuels du site internet. Vos changements sont immédiats !</p>
+    </div>
+</div>
+
+<!-- Form wrapper for all edits -->
+<form action="" method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+
+    <!-- Editor Tab Buttons -->
+    <div class="editor-tabs">
+        <button type="button" class="tab-btn active" onclick="switchTab(event, 'general')">Paramètres Généraux</button>
+        <button type="button" class="tab-btn" onclick="switchTab(event, 'tab-ACCUEIL')">Page d'Accueil</button>
+        <button type="button" class="tab-btn" onclick="switchTab(event, 'tab-ABOUT')">À Propos</button>
+        <button type="button" class="tab-btn" onclick="switchTab(event, 'tab-SERVICES')">Services &amp; Prestations</button>
+        <button type="button" class="tab-btn" onclick="switchTab(event, 'tab-CONTACT')">Pied de Page</button>
+    </div>
+
+    <!-- Floating Save Button -->
+    <div style="background-color: #ffffff; border-radius: var(--border-radius); border: 1.5px solid var(--admin-gold); padding: 1.2rem 2rem; margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; box-shadow: var(--shadow-soft);">
+        <div style="display: flex; align-items: center; gap: 0.5rem; color: #475569; font-weight: 500;">
+            <span class="material-symbols-outlined" style="color: var(--admin-gold);">info</span>
+            Modifiez vos informations ci-dessous puis cliquez sur "Enregistrer tout"
+        </div>
+        <button type="submit" class="btn-action btn-action-gold">
+            <span class="material-symbols-outlined">save</span>
+            Enregistrer Toutes les Modifications
+        </button>
+    </div>
+
+    <!-- 1. GENERAL TAB CONTENT -->
+    <div id="general" class="tab-content" style="display: block;">
+        <h3 class="about-h3" style="font-size: 1.5rem; margin-bottom: 1.5rem; color: var(--primary);">Identité &amp; Contacts de l'Établissement</h3>
+        
+        <div class="admin-section" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
+            <!-- Hotel Name -->
+            <div class="form-group" style="display: flex; flex-direction: column; gap: 0.5rem; text-align: left;">
+                <label for="hotel_name" style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase; color: var(--admin-text-muted);">Nom commercial de l'Hôtel</label>
+                <input type="text" id="hotel_name" name="hotel_name" value="{{ settings.hotel_name }}" style="padding: 0.75rem 1rem; border: 1.5px solid #cbd5e1; border-radius: var(--border-radius-sm); font-size: 0.95rem; outline: none; transition: var(--transition);" required>
+            </div>
+            
+            <!-- Contact Email -->
+            <div class="form-group" style="display: flex; flex-direction: column; gap: 0.5rem; text-align: left;">
+                <label for="contact_email" style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase; color: var(--admin-text-muted);">Email de contact public</label>
+                <input type="email" id="contact_email" name="contact_email" value="{{ settings.contact_email }}" style="padding: 0.75rem 1rem; border: 1.5px solid #cbd5e1; border-radius: var(--border-radius-sm); font-size: 0.95rem; outline: none; transition: var(--transition);" required>
+            </div>
+            
+            <!-- Contact Phone -->
+            <div class="form-group" style="display: flex; flex-direction: column; gap: 0.5rem; text-align: left;">
+                <label for="contact_phone" style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase; color: var(--admin-text-muted);">Téléphone public</label>
+                <input type="text" id="contact_phone" name="contact_phone" value="{{ settings.contact_phone }}" style="padding: 0.75rem 1rem; border: 1.5px solid #cbd5e1; border-radius: var(--border-radius-sm); font-size: 0.95rem; outline: none; transition: var(--transition);" required>
+            </div>
+            
+            <!-- Address -->
+            <div class="form-group" style="display: flex; flex-direction: column; gap: 0.5rem; text-align: left;">
+                <label for="address" style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase; color: var(--admin-text-muted);">Adresse Physique</label>
+                <input type="text" id="address" name="address" value="{{ settings.address }}" style="padding: 0.75rem 1rem; border: 1.5px solid #cbd5e1; border-radius: var(--border-radius-sm); font-size: 0.95rem; outline: none; transition: var(--transition);" required>
+            </div>
+        </div>
+
+        <h3 class="about-h3" style="font-size: 1.5rem; margin-bottom: 1.5rem; color: var(--primary); margin-top: 2rem;">Réseaux Sociaux</h3>
+        
+        <div class="admin-section" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem;">
+            <!-- Facebook -->
+            <div class="form-group" style="display: flex; flex-direction: column; gap: 0.5rem; text-align: left;">
+                <label for="social_facebook" style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase; color: var(--admin-text-muted);">Lien Facebook</label>
+                <input type="url" id="social_facebook" name="social_facebook" value="{{ settings.social_facebook }}" style="padding: 0.75rem 1rem; border: 1.5px solid #cbd5e1; border-radius: var(--border-radius-sm); font-size: 0.95rem; outline: none; transition: var(--transition);">
+            </div>
+            <!-- Instagram -->
+            <div class="form-group" style="display: flex; flex-direction: column; gap: 0.5rem; text-align: left;">
+                <label for="social_instagram" style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase; color: var(--admin-text-muted);">Lien Instagram</label>
+                <input type="url" id="social_instagram" name="social_instagram" value="{{ settings.social_instagram }}" style="padding: 0.75rem 1rem; border: 1.5px solid #cbd5e1; border-radius: var(--border-radius-sm); font-size: 0.95rem; outline: none; transition: var(--transition);">
+            </div>
+            <!-- Twitter -->
+            <div class="form-group" style="display: flex; flex-direction: column; gap: 0.5rem; text-align: left;">
+                <label for="social_twitter" style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase; color: var(--admin-text-muted);">Lien Twitter</label>
+                <input type="url" id="social_twitter" name="social_twitter" value="{{ settings.social_twitter }}" style="padding: 0.75rem 1rem; border: 1.5px solid #cbd5e1; border-radius: var(--border-radius-sm); font-size: 0.95rem; outline: none; transition: var(--transition);">
+            </div>
+        </div>
+    </div>
+
+    <!-- DYNAMIC ELEMENTS CATEGORIES -->
+    {% for cat_name, elems in categories.items %}
+    <div id="tab-{{ cat_name }}" class="tab-content" style="display: none;">
+        <h3 class="about-h3" style="font-size: 1.5rem; margin-bottom: 1.5rem; color: var(--primary);">Éléments - {{ cat_name }}</h3>
+        
+        {% for elem in elems %}
+        <div class="editor-card">
+            <!-- Field description -->
+            <div class="editor-field-info">
+                <h4>{{ elem.label }}</h4>
+                <p class="key">Base de données : element.key = '{{ elem.key }}'</p>
+                
+                {% if elem.key == 'hero_title' %}
+                    <p class="help">Ce texte s'affiche en grand au centre de l'image d'accueil sur la page d'accueil client. Vous pouvez également téléverser une image ci-contre pour remplacer la photo d'arrière-plan de la Hero section.</p>
+                {% elif elem.key == 'hero_subtitle' %}
+                    <p class="help">Il s'agit de la courte phrase d'introduction qui s'affiche sous le titre principal sur la page d'accueil client.</p>
+                {% elif elem.key == 'about_text' %}
+                    <p class="help">Ce long texte présente l'histoire et le charme de l'hôtel. Il s'affiche dans la section "Notre Héritage" sur la page d'accueil.</p>
+                {% else %}
+                    <p class="help">Contenu texte éditable et configurable pour le site internet.</p>
+                {% endif %}
+                
+                <!-- Display existing image if applicable -->
+                {% if elem.image %}
+                    <div style="margin-top: 1.5rem;">
+                        <span style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: var(--admin-text-muted); display: block; margin-bottom: 0.5rem;">Image configurée :</span>
+                        <img src="{{ elem.get_image_url }}" alt="{{ elem.label }}" style="width: 150px; height: 100px; border-radius: var(--border-radius-sm); object-fit: cover; border: 1px solid #cbd5e1;">
+                    </div>
+                {% endif %}
+            </div>
+            
+            <!-- Inputs -->
+            <div class="editor-input-box">
+                <label style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase; color: var(--admin-text-muted);">Texte éditable</label>
+                <textarea id="elem_{{ elem.key }}" name="elem_{{ elem.key }}" rows="{% if elem.value|length > 100 %}6{% else %}3{% endif %}">{{ elem.value }}</textarea>
+                
+                <!-- Optional Image upload for elements -->
+                {% if elem.key == 'hero_title' or elem.key == 'about_title' %}
+                    <label style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase; color: var(--admin-text-muted); margin-top: 0.5rem;">Modifier le visuel associé</label>
+                    <input type="file" id="file_{{ elem.key }}" name="file_{{ elem.key }}" accept="image/*" style="font-family: inherit; font-size: 0.85rem;">
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endfor %}
+
+    <!-- Secondary Save Button at the bottom -->
+    <div style="display: flex; justify-content: flex-end; margin-top: 2rem; margin-bottom: 4rem;">
+        <button type="submit" class="btn-action btn-action-gold" style="padding: 1rem 2.5rem; font-size: 1rem; border-radius: var(--border-radius-sm);">
+            <span class="material-symbols-outlined">save</span>
+            Enregistrer Toutes les Modifications
+        </button>
+    </div>
+
+</form>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    // Script JS pour basculer facilement d'onglet dans l'éditeur de site
+    function switchTab(evt, tabId) {
+        // Cacher tous les contenus d'onglets
+        const tabContents = document.getElementsByClassName("tab-content");
+        for (let i = 0; i < tabContents.length; i++) {
+            tabContents[i].style.display = "none";
+        }
+        
+        // Retirer la classe active de tous les boutons d'onglets
+        const tabBtns = document.getElementsByClassName("tab-btn");
+        for (let i = 0; i < tabBtns.length; i++) {
+            tabBtns[i].classList.remove("active");
+        }
+        
+        // Afficher l'onglet actif et y ajouter la classe active
+        document.getElementById(tabId).style.display = "block";
+        evt.currentTarget.classList.add("active");
+    }
+</script>
+{% endblock %}

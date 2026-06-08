@@ -1,0 +1,33 @@
+# Django
+*.pyc
+__pycache__/
+staticfiles/
+media/
+db.sqlite3
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+env/
+
+# IDE / Editor config
+.vscode/
+.idea/
+
+# Local/temporary files
+db_output.txt
+arena_rendered.html
+arena_rendered.txt
+cleaned_text.txt
+fetched_arena.html
+fetched_en.html
+fetched_fr.html
+payload_en.txt
+payload_fr.txt
+reconstructed_payload.txt
+.env
+
+# Docker
+.dockerignore
+postgres_data/

@@ -1,0 +1,90 @@
+{% extends 'dashboard/base.html' %}
+
+{% block title %}Airports & Hubs — Aero Luxe Select{% endblock %}
+{% block dashboard_header %}Airports Database{% endblock %}
+
+{% block content %}
+<!-- Filtering & Actions Bar -->
+<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-luxury-card border border-luxury-border p-6 rounded-2xl">
+    <div>
+        <h2 class="text-xl font-bold font-serif tracking-wide gold-text-gradient">Operational Airport Hubs</h2>
+        <p class="text-xs text-luxury-muted mt-1">Configure luxury terminals, transport coordinates, and regional destination mapping across your sites.</p>
+    </div>
+    
+    <div class="flex flex-wrap items-center gap-3">
+        <!-- Site quick filter -->
+        <form method="GET" action="" class="flex items-center space-x-2">
+            <span class="text-xs font-semibold text-luxury-muted">Site:</span>
+            <select name="site" onchange="this.form.submit()" class="bg-luxury-black border border-luxury-border text-white text-xs rounded-lg px-3 py-2 focus:border-gold-500/50 outline-none transition-colors">
+                <option value="">All Operating Sites</option>
+                <option value="nyc" {% if site_filter == 'nyc' %}selected{% endif %}>New York City (NYC)</option>
+                <option value="dr" {% if site_filter == 'dr' %}selected{% endif %}>Dominican Republic (DR)</option>
+            </select>
+        </form>
+        
+        <a href="{% url 'dashboard:add_airport' %}" class="gold-gradient text-luxury-black text-xs font-semibold px-5 py-2.5 rounded-xl hover:opacity-95 transition-all shadow-lg shadow-gold-500/10">
+            <i class="fa-solid fa-plus mr-1.5"></i>Register Airport
+        </a>
+    </div>
+</div>
+
+<!-- Airport log list -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    {% for airport in airports %}
+    <div class="bg-luxury-card border border-luxury-border rounded-2xl p-6 hover:border-gold-500/30 transition-all flex flex-col justify-between space-y-6">
+        <div>
+            <!-- Header layout with code -->
+            <div class="flex justify-between items-start">
+                <div class="flex items-center space-x-3">
+                    <span class="font-mono text-2xl font-bold text-gold-400 border border-gold-500/20 bg-gold-500/5 rounded-xl w-16 h-16 flex items-center justify-center">
+                        {{ airport.code }}
+                    </span>
+                    <div>
+                        <h3 class="font-semibold text-white text-base leading-tight">{{ airport.name }}</h3>
+                        <span class="text-xs text-luxury-muted block mt-0.5">{{ airport.city }}, {{ airport.country }}</span>
+                    </div>
+                </div>
+                
+                <span class="inline-block text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded border 
+                    {% if airport.is_active %}bg-emerald-500/10 border-emerald-500/20 text-emerald-400{% else %}bg-rose-500/10 border-rose-500/20 text-rose-400{% endif %}">
+                    {% if airport.is_active %}Active{% else %}Inactive{% endif %}
+                </span>
+            </div>
+            
+            <p class="text-xs text-luxury-muted mt-4 line-clamp-2">
+                {{ airport.description|default:"No description details configured." }}
+            </p>
+
+            <div class="mt-4 flex items-center space-x-4 text-xs font-mono text-luxury-muted bg-luxury-black/35 p-3 rounded-lg border border-luxury-border">
+                <div>
+                    <span class="block text-[9px] uppercase tracking-wider text-luxury-muted">Site Location</span>
+                    <span class="block text-white font-bold mt-0.5 text-xs uppercase">{{ airport.site.name }}</span>
+                </div>
+                <div class="border-l border-luxury-border h-6"></div>
+                <div>
+                    <span class="block text-[9px] uppercase tracking-wider text-luxury-muted">GPS Coordinates</span>
+                    <span class="block text-white mt-0.5 text-xs">Lat: {{ airport.latitude }} &bull; Lng: {{ airport.longitude }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer actions: Destination edits & details -->
+        <div class="pt-4 border-t border-luxury-border flex items-center justify-between gap-4">
+            <a href="{% url 'dashboard:destinations' airport.id %}" class="text-xs font-semibold text-gold-400 hover:text-white transition-colors bg-gold-500/5 hover:bg-gold-500/10 border border-gold-500/20 hover:border-gold-400/40 rounded-xl px-4 py-2.5">
+                <i class="fa-solid fa-hotel mr-1.5 text-[10px]"></i>Manage Destinations Log
+            </a>
+            
+            <a href="{% url 'dashboard:edit_airport' airport.pk %}" class="text-xs font-semibold text-luxury-muted hover:text-white transition-colors bg-luxury-black border border-luxury-border hover:border-gold-500/35 rounded-xl px-4 py-2.5">
+                <i class="fa-solid fa-pen-to-square mr-1 text-[10px]"></i>Edit Airport
+            </a>
+        </div>
+    </div>
+    {% empty %}
+    <div class="md:col-span-2 text-center py-20 text-luxury-muted bg-luxury-card rounded-2xl border border-luxury-border">
+        <i class="fa-solid fa-plane-slash text-4xl text-luxury-border mb-3 block"></i>
+        <h4 class="text-white font-serif font-bold text-base">No Airports Mapped</h4>
+        <p class="text-xs text-luxury-muted mt-1">There are no operational airports configured in the database yet.</p>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

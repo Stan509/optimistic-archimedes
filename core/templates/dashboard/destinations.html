@@ -1,0 +1,94 @@
+{% extends 'dashboard/base.html' %}
+
+{% block title %}Destinations via {{ airport.code }} — Aero Luxe Select{% endblock %}
+{% block dashboard_header %}Destinations: {{ airport.code }} Terminal{% endblock %}
+
+{% block content %}
+<!-- Top Header Actions Bar -->
+<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-luxury-card border border-luxury-border p-6 rounded-2xl">
+    <div class="flex items-center space-x-3">
+        <a href="{% url 'dashboard:airports' %}" class="w-10 h-10 rounded-xl bg-luxury-black border border-luxury-border flex items-center justify-center text-luxury-muted hover:text-gold-400 transition-colors">
+            <i class="fa-solid fa-arrow-left"></i>
+        </a>
+        <div>
+            <h2 class="text-xl font-bold font-serif tracking-wide gold-text-gradient">Destinations for {{ airport.code }} Hub</h2>
+            <p class="text-xs text-luxury-muted mt-1">Manage target luxury resorts, hotels, private villas, and neighborhoods mapped to <strong>{{ airport.name }}</strong> routes.</p>
+        </div>
+    </div>
+    
+    <a href="{% url 'dashboard:add_destination' airport.id %}" class="gold-gradient text-luxury-black text-xs font-semibold px-5 py-2.5 rounded-xl hover:opacity-95 transition-all shadow-lg shadow-gold-500/10">
+        <i class="fa-solid fa-plus mr-1.5"></i>Add Destination Point
+    </a>
+</div>
+
+<!-- Destinations Grid table -->
+<div class="bg-luxury-card border border-luxury-border rounded-2xl overflow-hidden shadow-xl">
+    <div class="overflow-x-auto">
+        <table class="w-full text-left text-sm whitespace-nowrap">
+            <thead>
+                <tr class="bg-luxury-black/30 text-luxury-muted text-xs uppercase tracking-wider border-b border-luxury-border">
+                    <th class="py-4 px-6">Preview</th>
+                    <th class="py-4 px-6">Destination Name</th>
+                    <th class="py-4 px-6">Category Type</th>
+                    <th class="py-4 px-6">Full Map Address</th>
+                    <th class="py-4 px-6 text-center">Status</th>
+                    <th class="py-4 px-6 text-right">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-luxury-border">
+                {% for d in destinations %}
+                <tr class="hover:bg-luxury-black/20 transition-colors">
+                    <td class="py-4 px-6">
+                        {% if d.image %}
+                        <img src="{{ d.image.url }}" alt="{{ d.name }}" class="w-16 h-10 object-cover rounded-lg border border-luxury-border">
+                        {% else %}
+                        <div class="w-16 h-10 rounded-lg bg-luxury-black border border-luxury-border flex items-center justify-center text-luxury-muted text-[9px] uppercase font-semibold">
+                            No image
+                        </div>
+                        {% endif %}
+                    </td>
+                    <td class="py-4 px-6 font-semibold text-white">
+                        {{ d.name }}
+                    </td>
+                    <td class="py-4 px-6">
+                        <span class="inline-flex items-center space-x-1.5 px-2.5 py-1 rounded bg-luxury-black border border-luxury-border text-xs text-gold-400 font-bold uppercase tracking-wide">
+                            <i class="fa-solid 
+                                {% if d.destination_type == 'HOTEL' %}fa-hotel
+                                {% elif d.destination_type == 'RESORT' %}fa-umbrella-beach
+                                {% elif d.destination_type == 'PRIVATE_VILLA' %}fa-house-chimney-window
+                                {% elif d.destination_type == 'NEIGHBORHOOD' %}fa-tree-city
+                                {% else %}fa-map-pin{% endif %} mr-1 text-[10px]"></i>
+                            {{ d.get_destination_type_display|default:d.destination_type }}
+                        </span>
+                    </td>
+                    <td class="py-4 px-6 text-xs text-luxury-muted font-medium max-w-xs truncate">
+                        {{ d.address|default:"-" }}
+                    </td>
+                    <td class="py-4 px-6 text-center">
+                        <span class="inline-block text-[10px] uppercase font-bold tracking-wider px-2.5 py-1 rounded-full border 
+                            {% if d.is_active %}bg-emerald-500/10 border-emerald-500/20 text-emerald-400{% else %}bg-rose-500/10 border-rose-500/20 text-rose-400{% endif %}">
+                            {% if d.is_active %}Active{% else %}Inactive{% endif %}
+                        </span>
+                    </td>
+                    <td class="py-4 px-6 text-right">
+                        <a href="{% url 'dashboard:edit_destination' d.pk %}" class="inline-block text-xs font-semibold text-gold-400 hover:text-white transition-colors bg-luxury-card border border-luxury-border px-3.5 py-1.5 rounded-lg hover:border-gold-400/40">
+                            <i class="fa-solid fa-pen-to-square mr-1.5"></i>Edit Point
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="text-center py-20 text-luxury-muted text-sm bg-luxury-card">
+                        <div class="max-w-md mx-auto">
+                            <i class="fa-solid fa-map-location-dot text-4xl text-luxury-border mb-3 block"></i>
+                            <h4 class="text-white font-serif font-bold text-base">No Destinations Configured</h4>
+                            <p class="text-xs text-luxury-muted mt-1">There are no specific hotels, neighborhoods or villas registered for the {{ airport.code }} terminal. Click Add Destination above to build the route pricing base.</p>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

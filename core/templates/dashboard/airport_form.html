@@ -1,0 +1,132 @@
+{% extends 'dashboard/base.html' %}
+
+{% block title %}
+    {% if airport %}Edit {{ airport.code }}{% else %}New Airport{% endif %} — Aero Luxe Select
+{% endblock %}
+
+{% block dashboard_header %}
+    {% if airport %}Edit Airport Hub{% else %}Add Airport Hub{% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto space-y-8">
+    
+    <!-- Top Action bar -->
+    <div class="flex items-center space-x-3 bg-luxury-card border border-luxury-border p-6 rounded-2xl">
+        <a href="{% url 'dashboard:airports' %}" class="w-10 h-10 rounded-xl bg-luxury-black border border-luxury-border flex items-center justify-center text-luxury-muted hover:text-gold-400 transition-colors">
+            <i class="fa-solid fa-arrow-left"></i>
+        </a>
+        <div>
+            <h2 class="text-xl font-bold font-serif tracking-wide gold-text-gradient">
+                {% if airport %}Update "{{ airport.code }} — {{ airport.name }}"{% else %}Register New Airport Hub{% endif %}
+            </h2>
+            <p class="text-xs text-luxury-muted mt-1">Configure flight hubs, coordinates, and brand coverage details.</p>
+        </div>
+    </div>
+
+    <!-- Form Panel -->
+    <div class="bg-luxury-card border border-luxury-border rounded-2xl p-8 shadow-xl">
+        <form method="POST" enctype="multipart/form-data" class="space-y-6">
+            {% csrf_token %}
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Code -->
+                <div>
+                    <label class="block text-xs uppercase tracking-wider text-luxury-muted font-semibold mb-2">Airport Code * (e.g. JFK, PUJ, SDQ)</label>
+                    <input type="text" name="code" required maxlength="10" value="{{ airport.code|default:'' }}" placeholder="e.g. JFK" class="w-full bg-luxury-black border border-luxury-border rounded-xl px-4 py-3 text-sm text-white placeholder-luxury-muted focus:border-gold-500/50 outline-none transition-colors uppercase font-mono">
+                </div>
+
+                <!-- Name -->
+                <div>
+                    <label class="block text-xs uppercase tracking-wider text-luxury-muted font-semibold mb-2">Airport Full Name *</label>
+                    <input type="text" name="name" required value="{{ airport.name|default:'' }}" placeholder="e.g. John F. Kennedy International Airport" class="w-full bg-luxury-black border border-luxury-border rounded-xl px-4 py-3 text-sm text-white placeholder-luxury-muted focus:border-gold-500/50 outline-none transition-colors">
+                </div>
+
+                <!-- City -->
+                <div>
+                    <label class="block text-xs uppercase tracking-wider text-luxury-muted font-semibold mb-2">City *</label>
+                    <input type="text" name="city" required value="{{ airport.city|default:'' }}" placeholder="e.g. Queens, Punta Cana" class="w-full bg-luxury-black border border-luxury-border rounded-xl px-4 py-3 text-sm text-white placeholder-luxury-muted focus:border-gold-500/50 outline-none transition-colors">
+                </div>
+
+                <!-- Country -->
+                <div>
+                    <label class="block text-xs uppercase tracking-wider text-luxury-muted font-semibold mb-2">Country *</label>
+                    <input type="text" name="country" required value="{{ airport.country|default:'' }}" placeholder="e.g. United States, Dominican Republic" class="w-full bg-luxury-black border border-luxury-border rounded-xl px-4 py-3 text-sm text-white placeholder-luxury-muted focus:border-gold-500/50 outline-none transition-colors">
+                </div>
+
+                <!-- Latitude -->
+                <div>
+                    <label class="block text-xs uppercase tracking-wider text-luxury-muted font-semibold mb-2">Latitude GPS Coordinate</label>
+                    <input type="number" name="latitude" step="0.000001" value="{{ airport.latitude|default:0.000000 }}" class="w-full bg-luxury-black border border-luxury-border rounded-xl px-4 py-3 text-sm text-white focus:border-gold-500/50 outline-none transition-colors font-mono">
+                </div>
+
+                <!-- Longitude -->
+                <div>
+                    <label class="block text-xs uppercase tracking-wider text-luxury-muted font-semibold mb-2">Longitude GPS Coordinate</label>
+                    <input type="number" name="longitude" step="0.000001" value="{{ airport.longitude|default:0.000000 }}" class="w-full bg-luxury-black border border-luxury-border rounded-xl px-4 py-3 text-sm text-white focus:border-gold-500/50 outline-none transition-colors font-mono">
+                </div>
+
+                <!-- Site association -->
+                <div>
+                    <label class="block text-xs uppercase tracking-wider text-luxury-muted font-semibold mb-2">Associated Operating Site *</label>
+                    <select name="site" required class="w-full bg-luxury-black border border-luxury-border rounded-xl px-4 py-3 text-sm text-white focus:border-gold-500/50 outline-none transition-colors">
+                        <option value="">Select Operational Hub Site</option>
+                        {% for s in sites %}
+                        <option value="{{ s.id }}" {% if airport.site.id == s.id %}selected{% endif %}>{{ s.name }} ({{ s.slug|upper }})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Image File Input -->
+                <div class="md:col-span-2">
+                    <label class="block text-xs uppercase tracking-wider text-luxury-muted font-semibold mb-2">Terminal / Header Image</label>
+                    
+                    <div class="flex items-center space-x-6 bg-luxury-black/30 border border-luxury-border p-4 rounded-xl">
+                        {% if airport.image %}
+                        <div class="shrink-0">
+                            <span class="block text-[10px] uppercase text-luxury-muted mb-1.5 font-semibold">Current Terminal Image:</span>
+                            <img src="{{ airport.image.url }}" alt="{{ airport.name }}" class="w-24 h-16 object-cover rounded-lg border border-luxury-border">
+                        </div>
+                        {% endif %}
+                        <div class="flex-1">
+                            <input type="file" name="image" accept="image/*" class="text-xs text-luxury-muted block w-full
+                                file:mr-4 file:py-2 file:px-4
+                                file:rounded-xl file:border-0
+                                file:text-xs file:font-semibold
+                                file:bg-gold-500/10 file:text-gold-400
+                                file:cursor-pointer hover:file:bg-gold-500/20 file:transition-colors">
+                            <span class="block text-[10px] text-luxury-muted mt-2">Format: JPG, PNG, WEBP. Recommend landscape ratios (16:9).</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Description -->
+                <div class="md:col-span-2">
+                    <label class="block text-xs uppercase tracking-wider text-luxury-muted font-semibold mb-2">Airport Details Description</label>
+                    <textarea name="description" rows="3" placeholder="Write airport specifics (e.g. VIP curbside pickup lanes, exit gates instructions for drivers)..." class="w-full bg-luxury-black border border-luxury-border rounded-xl p-4 text-sm text-white placeholder-luxury-muted focus:border-gold-500/50 outline-none transition-colors resize-none">{{ airport.description|default:'' }}</textarea>
+                </div>
+
+                <!-- Active Status -->
+                <div class="md:col-span-2 py-2">
+                    <label class="inline-flex items-center space-x-3 cursor-pointer">
+                        <input type="checkbox" name="is_active" class="sr-only peer" {% if airport.is_active or not airport %}checked{% endif %}>
+                        <div class="w-11 h-6 bg-luxury-border peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-gold-500 relative"></div>
+                        <span class="text-xs font-semibold uppercase tracking-wider text-white">Active Operational Terminal</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Submit buttons row -->
+            <div class="flex items-center justify-end space-x-4 pt-6 border-t border-luxury-border">
+                <a href="{% url 'dashboard:airports' %}" class="text-xs font-semibold text-luxury-muted hover:text-white transition-colors px-5 py-3 rounded-xl hover:bg-luxury-black/30 border border-transparent">
+                    Cancel
+                </a>
+                <button type="submit" class="gold-gradient text-luxury-black text-xs font-semibold px-8 py-3 rounded-xl hover:opacity-95 transition-all shadow-lg shadow-gold-500/15">
+                    {% if airport %}Save Changes{% else %}Register Terminal{% endif %}
+                </button>
+            </div>
+
+        </form>
+    </div>
+</div>
+{% endblock %}

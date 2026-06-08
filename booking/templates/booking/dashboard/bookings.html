@@ -1,0 +1,119 @@
+{% extends 'booking/dashboard/base.html' %}
+{% load static %}
+
+{% block title %}Gestion des Réservations | {{ settings.hotel_name }}{% endblock %}
+
+{% block admin_content %}
+
+<!-- Header -->
+<div class="admin-header">
+    <div class="admin-welcome">
+        <h2>Gestion des Réservations</h2>
+        <p>Consultez, filtrez et gérez les réservations et statuts des séjours clients.</p>
+    </div>
+</div>
+
+<!-- Filter / Search Section -->
+<div class="admin-section" style="padding: 1.5rem 2rem; margin-bottom: 2rem;">
+    <form action="" method="GET" style="display: flex; gap: 1.5rem; align-items: center; flex-wrap: wrap;">
+        <!-- Search bar -->
+        <div style="flex-grow: 1; display: flex; align-items: center; gap: 0.5rem; background: var(--admin-bg); padding: 0.6rem 1rem; border-radius: var(--border-radius-sm); border: 1.5px solid #e2e8f0; min-width: 250px;">
+            <span class="material-symbols-outlined" style="color: var(--admin-text-muted);">search</span>
+            <input type="text" name="q" value="{{ query }}" placeholder="Rechercher par nom de client, email, chambre..." style="border: none; background: transparent; width: 100%; outline: none; font-family: inherit; font-size: 0.9rem;">
+        </div>
+        
+        <!-- Status filter -->
+        <div style="display: flex; align-items: center; gap: 0.8rem;">
+            <label for="status" style="font-size: 0.85rem; font-weight: 700; text-transform: uppercase; color: var(--admin-text-muted);">Statut :</label>
+            <select id="status" name="status" style="padding: 0.6rem 1.2rem; border-radius: var(--border-radius-sm); border: 1.5px solid #e2e8f0; background: #ffffff; outline: none; font-family: inherit; font-size: 0.9rem; min-width: 150px;" onchange="this.form.submit()">
+                <option value="">Tous les statuts</option>
+                <option value="PENDING" {% if status_filter == 'PENDING' %}selected{% endif %}>En attente</option>
+                <option value="CONFIRMED" {% if status_filter == 'CONFIRMED' %}selected{% endif %}>Confirmée</option>
+                <option value="CANCELLED" {% if status_filter == 'CANCELLED' %}selected{% endif %}>Annulée</option>
+            </select>
+        </div>
+        
+        <button type="submit" class="btn-action">Rechercher</button>
+        {% if query or status_filter %}
+            <a href="{% url 'booking:dashboard_bookings' %}" style="font-size: 0.9rem; color: var(--admin-gold); font-weight: bold; text-decoration: underline;">Réinitialiser</a>
+        {% endif %}
+    </form>
+</div>
+
+<!-- Bookings List Table -->
+<div class="admin-section">
+    <div class="table-responsive">
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th># ID</th>
+                    <th>Client</th>
+                    <th>Hébergement</th>
+                    <th>Séjour (Dates)</th>
+                    <th>Nuits</th>
+                    <th>Prix Total</th>
+                    <th>Statut</th>
+                    <th style="text-align: center;">Actions rapides</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for res in bookings %}
+                <tr>
+                    <td style="font-weight: 700; color: var(--admin-gold);">#00{{ res.id }}</td>
+                    <td>
+                        <div style="font-weight: 700; color: var(--admin-dark);">{{ res.customer_name }}</div>
+                        <div style="font-size: 0.8rem; color: var(--admin-text-muted);">{{ res.customer_email }}</div>
+                        <div style="font-size: 0.8rem; color: var(--admin-text-muted);">{{ res.customer_phone }}</div>
+                    </td>
+                    <td style="font-weight: 600;">{{ res.room.name }}</td>
+                    <td style="font-size: 0.85rem; line-height: 1.4;">
+                        <div>Du <strong>{{ res.check_in|date:"d M Y" }}</strong></div>
+                        <div>Au <strong>{{ res.check_out|date:"d M Y" }}</strong></div>
+                    </td>
+                    <td style="text-align: center; font-weight: 600;">{{ res.number_of_nights }}</td>
+                    <td style="font-weight: 700; color: var(--admin-dark);">{{ res.total_price|floatformat:2 }} €</td>
+                    <td>
+                        <span class="badge {% if res.status == 'CONFIRMED' %}badge-confirmed{% elif res.status == 'PENDING' %}badge-pending{% else %}badge-cancelled{% endif %}">
+                            {{ res.get_status_display }}
+                        </span>
+                    </td>
+                    <td style="text-align: center;">
+                        <div class="actions-cell" style="justify-content: center;">
+                            {% if res.status == 'PENDING' %}
+                                <a href="{% url 'booking:update_booking_status' res.id 'CONFIRMED' %}" class="btn-action-icon btn-confirm" title="Confirmer la réservation">
+                                    <span class="material-symbols-outlined">check_circle</span>
+                                </a>
+                                <a href="{% url 'booking:update_booking_status' res.id 'CANCELLED' %}" class="btn-action-icon btn-cancel" title="Annuler la réservation" onclick="return confirm('Êtes-vous sûr de vouloir annuler cette réservation ?')">
+                                    <span class="material-symbols-outlined">cancel</span>
+                                </a>
+                            {% elif res.status == 'CONFIRMED' %}
+                                <a href="{% url 'booking:update_booking_status' res.id 'CANCELLED' %}" class="btn-action-icon btn-cancel" title="Annuler la réservation" onclick="return confirm('Êtes-vous sûr de vouloir annuler cette réservation ?')">
+                                    <span class="material-symbols-outlined">cancel</span>
+                                </a>
+                            {% elif res.status == 'CANCELLED' %}
+                                <a href="{% url 'booking:update_booking_status' res.id 'CONFIRMED' %}" class="btn-action-icon btn-confirm" title="Rétablir la réservation">
+                                    <span class="material-symbols-outlined">autorenew</span>
+                                </a>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% if res.special_requests %}
+                <tr>
+                    <td colspan="8" style="background-color: #fafbfc; padding: 0.6rem 1.2rem; font-size: 0.82rem; color: #475569; border-bottom: 1.5px solid #f1f5f9;">
+                        <span style="font-weight: bold; color: var(--admin-gold); text-transform: uppercase; font-size: 0.72rem; letter-spacing: 0.5px;">Demandes spéciales :</span> 
+                        <em>"{{ res.special_requests }}"</em>
+                    </td>
+                </tr>
+                {% endif %}
+                {% empty %}
+                <tr>
+                    <td colspan="8" style="text-align: center; color: var(--admin-text-muted); padding: 4rem;">Aucune réservation trouvée correspondant à vos filtres.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% endblock %}

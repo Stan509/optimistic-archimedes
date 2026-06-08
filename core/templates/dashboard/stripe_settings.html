@@ -1,0 +1,133 @@
+{% extends 'dashboard/base.html' %}
+
+{% block title %}Stripe Payment Configuration — Aero Luxe Select{% endblock %}
+{% block dashboard_header %}Stripe Gateway Settings{% endblock %}
+
+{% block content %}
+<!-- Top Header Actions Bar -->
+<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-luxury-card border border-luxury-border p-6 rounded-2xl">
+    <div>
+        <h2 class="text-xl font-bold font-serif tracking-wide gold-text-gradient">Stripe Payment Gateway</h2>
+        <p class="text-xs text-luxury-muted mt-1">Configure Stripe API public/secret credentials and toggle credit card transaction processing per operational site.</p>
+    </div>
+    
+    <!-- Site toggle buttons -->
+    <div class="flex items-center bg-luxury-black p-1 rounded-xl border border-luxury-border text-xs">
+        {% for s in sites %}
+        <a href="?site={{ s.slug }}" class="px-4 py-2 rounded-lg transition-all {% if current_site.slug == s.slug %}gold-gradient text-luxury-black font-semibold{% else %}text-luxury-muted hover:text-white{% endif %}">
+            {{ s.name }} ({{ s.slug|upper }})
+        </a>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Settings Layout Menu and Forms -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    
+    <!-- Left column Navigation items -->
+    <div class="space-y-4">
+        <div class="bg-luxury-card border border-luxury-border p-4 rounded-xl space-y-1">
+            <a href="{% url 'dashboard:settings' %}?site={{ current_site.slug }}" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-luxury-muted hover:text-white hover:bg-luxury-black/35 font-medium text-xs transition-all">
+                <i class="fa-solid fa-gears text-sm"></i>
+                <span>General Company Settings</span>
+            </a>
+            <a href="?site={{ current_site.slug }}" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-gold-400 bg-gold-500/10 font-medium text-xs">
+                <i class="fa-brands fa-stripe text-lg text-[#635BFF]"></i>
+                <span>Stripe Payment Keys</span>
+            </a>
+            <a href="{% url 'dashboard:email_settings' %}?site={{ current_site.slug }}" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-luxury-muted hover:text-white hover:bg-luxury-black/35 font-medium text-xs transition-all">
+                <i class="fa-solid fa-envelope text-sm text-[#C9A84C]"></i>
+                <span>Email Configuration</span>
+            </a>
+        </div>
+
+        <div class="bg-luxury-card border border-luxury-border p-5 rounded-xl text-xs space-y-2.5">
+            <h4 class="font-semibold text-white uppercase tracking-wider mb-2">Stripe Integrity Help</h4>
+            <p class="text-luxury-muted leading-relaxed">Ensure you use standard Stripe credentials corresponding to either **Test Mode** (e.g. `pk_test_...` / `sk_test_...`) or **Live Mode** (e.g. `pk_live_...` / `sk_live_...`).</p>
+            <p class="text-gold-400 font-semibold leading-relaxed">Never share Stripe Secret Keys with anyone outside the primary system administrators team.</p>
+        </div>
+    </div>
+
+    <!-- Right columns Form edit panels -->
+    <div class="lg:col-span-2">
+        <div class="bg-luxury-card border border-luxury-border rounded-2xl p-6 md:p-8 shadow-xl space-y-6">
+            
+            <!-- Warning block -->
+            <div class="p-4 rounded-xl flex items-start space-x-3 bg-red-500/10 border border-red-500/30 text-red-400 text-xs">
+                <div class="mt-0.5">
+                    <i class="fa-solid fa-shield-halved text-sm"></i>
+                </div>
+                <div class="flex-1">
+                    <h4 class="font-bold uppercase tracking-wider mb-0.5">Sensitive Data Protection</h4>
+                    <p>All secret API key variables stored in this portal are automatically encrypted in the SQLite main databases. Always restrict administrative access logs to staff credentials only.</p>
+                </div>
+            </div>
+
+            <form method="POST" class="space-y-6">
+                {% csrf_token %}
+                
+                <h3 class="font-serif font-semibold text-base border-b border-luxury-border pb-3 mb-6">
+                    Stripe Payment Keys — {{ current_site.name }}
+                </h3>
+
+                <div class="space-y-6">
+                    <!-- Stripe Public Key -->
+                    <div>
+                        <label class="block text-xs uppercase tracking-wider text-luxury-muted font-semibold mb-2">Stripe Publishable Key *</label>
+                        <input type="text" name="stripe_public_key" required value="{{ settings.stripe_public_key }}" placeholder="e.g. pk_test_51..." class="w-full bg-luxury-black border border-luxury-border rounded-xl px-4 py-3 text-sm text-white focus:border-gold-500/50 outline-none transition-colors font-mono">
+                    </div>
+
+                    <!-- Stripe Secret Key -->
+                    <div>
+                        <label class="block text-xs uppercase tracking-wider text-luxury-muted font-semibold mb-2">Stripe Secret Key *</label>
+                        <div class="relative" id="stripe-secret-container">
+                            <input type="password" id="stripe_secret_key" name="stripe_secret_key" required value="{{ settings.stripe_secret_key }}" placeholder="e.g. sk_test_51..." class="w-full bg-luxury-black border border-luxury-border rounded-xl pl-4 pr-12 py-3 text-sm text-white focus:border-gold-500/50 outline-none transition-colors font-mono">
+                            <button type="button" onclick="toggleSecretVisibility()" class="absolute right-4 top-1/2 -translate-y-1/2 text-luxury-muted hover:text-white transition-colors text-sm">
+                                <i id="eye-icon" class="fa-solid fa-eye-slash"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Stripe Enabled checkbox toggle -->
+                    <div class="py-2 border-t border-luxury-border pt-6">
+                        <label class="inline-flex items-center space-x-3 cursor-pointer">
+                            <input type="checkbox" name="stripe_enabled" class="sr-only peer" {% if settings.stripe_enabled %}checked{% endif %}>
+                            <div class="w-11 h-6 bg-luxury-border peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-gold-500 relative"></div>
+                            <span class="text-xs font-semibold uppercase tracking-wider text-white">Enable Credit Card checkout via Stripe</span>
+                        </label>
+                        <p class="text-[10px] text-luxury-muted mt-2 ml-14">When disabled, passengers will not be forced to complete payment at checkout and bookings will register as pending payout.</p>
+                    </div>
+                </div>
+
+                <!-- Submit Buttons Row -->
+                <div class="flex items-center justify-end space-x-4 pt-6 border-t border-luxury-border mt-6">
+                    <button type="submit" class="gold-gradient text-luxury-black text-xs font-semibold px-8 py-3 rounded-xl hover:opacity-95 transition-all shadow-lg shadow-gold-500/15">
+                        <i class="fa-solid fa-key mr-1.5"></i>Save Stripe Configuration
+                    </button>
+                </div>
+
+            </form>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function toggleSecretVisibility() {
+        const input = document.getElementById('stripe_secret_key');
+        const eyeIcon = document.getElementById('eye-icon');
+        
+        if (input.type === 'password') {
+            input.type = 'text';
+            eyeIcon.classList.remove('fa-eye-slash');
+            eyeIcon.classList.add('fa-eye');
+        } else {
+            input.type = 'password';
+            eyeIcon.classList.remove('fa-eye');
+            eyeIcon.classList.add('fa-eye-slash');
+        }
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,790 @@
+{% extends "core/base.html" %}
+{% load static %}
+{% load site_tags %}
+
+{% block title %}Book Chauffeur — Step 1: Trip Routing | Aero Luxe Select{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+<style>
+    /* Styling to make the map look extremely premium and integration fit */
+    .leaflet-container {
+        background: #0A0A0A !important;
+        font-family: 'Outfit', sans-serif;
+    }
+    .leaflet-bar {
+        border: 1px solid #222 !important;
+        box-shadow: none !important;
+        border-radius: 8px !important;
+        overflow: hidden;
+    }
+    .leaflet-bar a {
+        background-color: #121212 !important;
+        color: #C9A84C !important;
+        border-bottom: 1px solid #222 !important;
+        transition: all 0.3s ease;
+    }
+    .leaflet-bar a:hover {
+        background-color: #1C1C1E !important;
+        color: #DFBA5B !important;
+    }
+    .leaflet-popup-content-wrapper, .leaflet-popup-tip {
+        background: #121212 !important;
+        color: #FFFFFF !important;
+        border: 1px solid #C9A84C !important;
+        border-radius: 8px !important;
+    }
+    .leaflet-popup-content {
+        font-weight: 500;
+        font-size: 11px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="py-16 bg-luxe-black min-h-[85vh]">
+    <div class="max-w-3xl mx-auto px-4 sm:px-6">
+        
+        <!-- Premium Multi-step Progress Indicator -->
+        <div class="mb-12">
+            <div class="flex justify-between items-center text-xs uppercase tracking-wider text-gray-500 font-semibold mb-3">
+                <span class="text-luxe-gold">1. Trip Routing</span>
+                <span>2. Select Vehicle</span>
+                <span>3. Passenger Details</span>
+                <span>4. Payment & Checkout</span>
+            </div>
+            <!-- Progress Bar -->
+            <div class="w-full h-1 bg-gray-800 rounded-full overflow-hidden">
+                <div class="h-full w-1/4 bg-gradient-to-r from-luxe-gold to-luxe-gold-bright transition-all duration-500"></div>
+            </div>
+        </div>
+
+        <!-- Central Form Card -->
+        <div class="glass-card rounded-3xl p-8 sm:p-10 shadow-2xl relative overflow-hidden">
+            <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-luxe-gold to-luxe-gold-bright"></div>
+            
+            <div class="text-center space-y-2 mb-10">
+                <span class="text-xs uppercase font-bold tracking-widest text-luxe-gold">Begin Reservation</span>
+                <h1 class="text-3xl font-bold font-display text-white">Trip Specifications</h1>
+                <p class="text-xs text-gray-400 font-light max-w-md mx-auto">
+                    Please provide your travel coordinates. We dynamically adjust all schedules based on your landing times.
+                </p>
+            </div>
+
+            <!-- Booking Step 1 Form -->
+            <form action="" method="POST" id="booking-step1-form" class="space-y-6">
+                {% csrf_token %}
+
+                <!-- Service Type selector -->
+                <div>
+                    <label class="block text-xs uppercase tracking-widest font-bold text-gray-400 mb-3">Service Type</label>
+                    <div class="grid grid-cols-1 {% if site_slug == 'dr' %}md:grid-cols-4{% else %}md:grid-cols-3{% endif %} gap-3 bg-luxe-black p-1.5 rounded-2xl border border-gray-800">
+                        <label class="cursor-pointer text-center p-4 rounded-xl text-xs font-semibold uppercase tracking-wider transition-all duration-300 block select-none border border-transparent" id="lbl-transfer">
+                            <input type="radio" name="service_type" value="airport_transfer" checked class="sr-only" id="rad-transfer">
+                            <i class="fas fa-plane-departure text-base text-luxe-gold mb-2 block"></i>
+                            <span class="block">Airport Transfer</span>
+                        </label>
+                        <label class="cursor-pointer text-center p-4 rounded-xl text-xs font-semibold uppercase tracking-wider transition-all duration-300 block select-none border border-transparent" id="lbl-p2p">
+                            <input type="radio" name="service_type" value="point_to_point" class="sr-only" id="rad-p2p">
+                            <i class="fas fa-route text-base text-gray-500 mb-2 block" id="icon-p2p"></i>
+                            <span class="block text-gray-400" id="span-p2p">Point to Point</span>
+                        </label>
+                        <label class="cursor-pointer text-center p-4 rounded-xl text-xs font-semibold uppercase tracking-wider transition-all duration-300 block select-none border border-transparent" id="lbl-hourly">
+                            <input type="radio" name="service_type" value="hourly" class="sr-only" id="rad-hourly">
+                            <i class="fas fa-clock text-base text-gray-500 mb-2 block" id="icon-hourly"></i>
+                            <span class="block text-gray-400" id="span-hourly">Hourly Chauffeur</span>
+                        </label>
+                        {% if site_slug == 'dr' %}
+                        <label class="cursor-pointer text-center p-4 rounded-xl text-xs font-semibold uppercase tracking-wider transition-all duration-300 block select-none border border-transparent" id="lbl-rental">
+                            <input type="radio" name="service_type" value="luxury_rental" class="sr-only" id="rad-rental">
+                            <i class="fas fa-car text-base text-gray-500 mb-2 block" id="icon-rental"></i>
+                            <span class="block text-gray-400" id="span-rental">Luxury Rental</span>
+                        </label>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Interactive Dark Map -->
+                <div class="relative w-full h-[280px] bg-luxe-black border border-gray-800 rounded-2xl overflow-hidden shadow-inner group mb-2">
+                    <div id="booking-map" class="w-full h-full z-0"></div>
+                    <div class="absolute top-4 left-4 z-[1000] bg-luxe-black/90 px-3 py-1.5 rounded-lg border border-gray-800 backdrop-blur-md">
+                        <span class="text-[9px] uppercase font-bold tracking-widest text-luxe-gold flex items-center gap-1.5">
+                            <i class="fa-solid fa-map-location-dot animate-pulse"></i>
+                            <span>Interactive Luxury Routing Map</span>
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Direction State Tracker -->
+                <input type="hidden" name="transfer_direction" id="transfer_direction" value="AIRPORT_TO_DEST">
+
+                <!-- Airport Transfer wrapper (airport_id and destination_id with Toggle switch) -->
+                <div id="div-airport-transfer-wrapper" class="space-y-4">
+                    <div class="flex flex-col md:flex-row items-center gap-4 relative">
+                        <!-- Left Block: Start -->
+                        <div id="transfer-start-wrapper" class="w-full font-light">
+                            <label id="lbl-transfer-start" for="airport_id" class="block text-xs uppercase tracking-widest font-bold text-gray-400 mb-2">Origin Airport</label>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-luxe-gold">
+                                    <i class="fas fa-plane-departure text-sm" id="icon-transfer-start"></i>
+                                </span>
+                                <select name="airport_id" id="airport_id" class="block w-full pl-11 pr-10 py-4 bg-luxe-black/80 rounded-xl border border-gray-800 focus:border-luxe-gold text-sm text-white focus:outline-none focus:ring-1 focus:ring-luxe-gold appearance-none">
+                                    <option value="" disabled selected>Select Airport...</option>
+                                    {% for airport in airports %}
+                                    <option value="{{ airport.id }}">{{ airport.code }} — {{ airport.name }}</option>
+                                    {% empty %}
+                                    <option value="" disabled>No serviced airports in this hub</option>
+                                    {% endfor %}
+                                </select>
+                                <span class="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-500 pointer-events-none">
+                                    <i class="fas fa-chevron-down text-xs"></i>
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Inversion Toggle Button -->
+                        <div class="flex justify-center items-center md:pt-6">
+                            <button type="button" id="btn-switch-direction" class="w-10 h-10 rounded-full bg-luxe-black border border-gray-800 text-luxe-gold hover:border-luxe-gold/50 hover:text-luxe-gold-bright transition-all duration-300 flex items-center justify-center shadow-lg active:scale-95 cursor-pointer" title="Switch Directions">
+                                <i class="fas fa-right-left rotate-90 md:rotate-0 text-sm"></i>
+                            </button>
+                        </div>
+
+                        <!-- Right Block: End -->
+                        <div id="transfer-end-wrapper" class="w-full font-light">
+                            <label id="lbl-transfer-end" for="destination_id" class="block text-xs uppercase tracking-widest font-bold text-gray-400 mb-2">Drop-off Destination</label>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-luxe-gold">
+                                    <i class="fas fa-map-pin text-sm" id="icon-transfer-end"></i>
+                                </span>
+                                <select name="destination_id" id="destination_id" disabled class="block w-full pl-11 pr-10 py-4 bg-luxe-black/40 rounded-xl border border-gray-800 text-sm text-gray-500 focus:outline-none focus:ring-1 focus:ring-luxe-gold appearance-none">
+                                    <option value="" disabled selected>Please select airport first...</option>
+                                </select>
+                                <span class="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-500 pointer-events-none">
+                                    <i class="fas fa-chevron-down text-xs"></i>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Hourly fields (Hidden by Default, minimum 3 hours, maximum 12 hours) -->
+                <div id="div-hourly" class="hidden space-y-4">
+                    <div>
+                        <label for="hours_requested" class="block text-xs uppercase tracking-widest font-bold text-gray-400 mb-2">Hours Requested (3 - 12 Hours)</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-luxe-gold">
+                                <i class="fas fa-stopwatch text-sm"></i>
+                            </span>
+                            <input type="number" name="hours_requested" id="hours_requested" min="3" max="12" value="3" class="block w-full pl-11 pr-4 py-4 bg-luxe-black/80 rounded-xl border border-gray-800 focus:border-luxe-gold text-sm text-white focus:outline-none focus:ring-1 focus:ring-luxe-gold">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Custom Pickup / Drop-off Addresses as interactive cards (shown for hourly/point-to-point) -->
+                <div id="div-custom-addresses" class="hidden grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Starting Location Card -->
+                    <div class="glass-card rounded-2xl p-5 border border-gray-800 hover:border-luxe-gold/50 transition-all duration-500 flex flex-col space-y-4 group">
+                        <div class="flex items-center justify-between">
+                            <label for="pickup_address" class="block text-xs uppercase tracking-widest font-bold text-gray-400">Pickup Location (Depart)</label>
+                            <span class="text-luxe-gold animate-pulse text-xs"><i class="fas fa-circle-dot"></i></span>
+                        </div>
+                        
+                        <!-- Visual Micro Map representation -->
+                        <div id="map-pickup" class="relative w-full h-28 bg-luxe-black border border-gray-900 rounded-xl overflow-hidden cursor-pointer group-hover:border-luxe-gold/30 transition-colors duration-500">
+                            <!-- SVG Grid lines simulating map streets -->
+                            <svg class="absolute inset-0 w-full h-full opacity-20 stroke-gray-700" xmlns="http://www.w3.org/2000/svg">
+                                <defs>
+                                    <pattern id="grid-pickup" width="20" height="20" patternUnits="userSpaceOnUse">
+                                        <path d="M 20 0 L 0 0 0 20" fill="none" stroke-width="0.5"/>
+                                    </pattern>
+                                </defs>
+                                <rect width="100%" height="100%" fill="url(#grid-pickup)" />
+                                <!-- Mock Route lines -->
+                                <path d="M 20 50 Q 150 20 280 80" fill="none" stroke="#C9A84C" stroke-width="2" class="opacity-40" />
+                            </svg>
+                            <!-- Glowing GPS Marker pin -->
+                            <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center">
+                                <div class="w-8 h-8 rounded-full bg-luxe-gold/20 flex items-center justify-center animate-ping absolute"></div>
+                                <div class="w-4 h-4 rounded-full bg-luxe-gold/40 flex items-center justify-center animate-pulse absolute"></div>
+                                <i class="fas fa-location-dot text-luxe-gold text-lg z-10 filter drop-shadow-[0_0_8px_rgba(201,168,76,0.6)]"></i>
+                            </div>
+                            <span class="absolute bottom-2 right-2 text-[8px] uppercase tracking-wider text-gray-500 font-bold bg-luxe-black/80 px-2 py-0.5 rounded border border-gray-900">Click to Select Plaza Hotel</span>
+                        </div>
+
+                        <!-- TextInput field integrated inside the card -->
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-luxe-gold">
+                                <i class="fas fa-search text-xs"></i>
+                            </span>
+                            <input type="text" name="pickup_address" id="pickup_address" placeholder="Enter starting address..." class="block w-full pl-10 pr-4 py-3.5 bg-luxe-black/90 rounded-xl border border-gray-800 focus:border-luxe-gold text-xs text-white focus:outline-none focus:ring-1 focus:ring-luxe-gold font-light transition-all duration-300">
+                        </div>
+                    </div>
+
+                    <!-- Destination Location Card -->
+                    <div id="div-dropoff-location" class="glass-card rounded-2xl p-5 border border-gray-800 hover:border-luxe-gold/50 transition-all duration-500 flex flex-col space-y-4 group">
+                        <div class="flex items-center justify-between">
+                            <label for="dropoff_address" class="block text-xs uppercase tracking-widest font-bold text-gray-400">Destination Location (Arrival)</label>
+                            <span class="text-luxe-gold animate-pulse text-xs"><i class="fas fa-location-dot"></i></span>
+                        </div>
+                        
+                        <!-- Visual Micro Map representation -->
+                        <div id="map-dropoff" class="relative w-full h-28 bg-luxe-black border border-gray-900 rounded-xl overflow-hidden cursor-pointer group-hover:border-luxe-gold/30 transition-colors duration-500">
+                            <!-- SVG Grid lines simulating map streets -->
+                            <svg class="absolute inset-0 w-full h-full opacity-20 stroke-gray-700" xmlns="http://www.w3.org/2000/svg">
+                                <rect width="100%" height="100%" fill="url(#grid-pickup)" />
+                                <!-- Mock Route lines -->
+                                <path d="M 280 80 Q 150 20 20 50" fill="none" stroke="#C9A84C" stroke-width="2" class="opacity-40" />
+                            </svg>
+                            <!-- Glowing GPS Marker pin -->
+                            <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center">
+                                <div class="w-8 h-8 rounded-full bg-luxe-gold/20 flex items-center justify-center animate-ping absolute"></div>
+                                <div class="w-4 h-4 rounded-full bg-luxe-gold/40 flex items-center justify-center animate-pulse absolute"></div>
+                                <i class="fas fa-location-arrow text-luxe-gold text-base z-10 filter drop-shadow-[0_0_8px_rgba(201,168,76,0.6)]"></i>
+                            </div>
+                            <span class="absolute bottom-2 right-2 text-[8px] uppercase tracking-wider text-gray-500 font-bold bg-luxe-black/80 px-2 py-0.5 rounded border border-gray-900">Click to Select JFK Airport</span>
+                        </div>
+
+                        <!-- TextInput field integrated inside the card -->
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-luxe-gold">
+                                <i class="fas fa-search text-xs"></i>
+                            </span>
+                            <input type="text" name="dropoff_address" id="dropoff_address" placeholder="Enter destination address..." class="block w-full pl-10 pr-4 py-3.5 bg-luxe-black/90 rounded-xl border border-gray-800 focus:border-luxe-gold text-xs text-white focus:outline-none focus:ring-1 focus:ring-luxe-gold font-light transition-all duration-300">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Intermediate Stops Section (For Hourly and Point-to-Point) -->
+                <div id="div-stops-section" class="hidden space-y-4 bg-luxe-black/30 p-5 rounded-2xl border border-gray-800">
+                    <div class="flex items-center justify-between">
+                        <label for="number_of_stops" class="block text-xs uppercase tracking-widest font-bold text-gray-400">Intermediate Stops</label>
+                        <div class="flex items-center space-x-2" id="div-stops-count-wrapper">
+                            <span class="text-[10px] text-gray-500 font-semibold uppercase">Quantity:</span>
+                            <input type="number" name="number_of_stops" id="number_of_stops" min="0" value="0" class="w-16 bg-luxe-black border border-gray-800 rounded px-2 py-1 text-xs text-white focus:border-luxe-gold outline-none">
+                            <span class="text-[10px] text-luxe-gold font-bold">($20/stop for Point-to-Point)</span>
+                        </div>
+                    </div>
+                    <div>
+                        <label for="stop_addresses" class="block text-[10px] uppercase text-gray-500 font-bold mb-1">Stop Addresses</label>
+                        <textarea name="stop_addresses" id="stop_addresses" rows="2" placeholder="List address details for each stop..." class="block w-full px-4 py-3 bg-luxe-black rounded-lg border border-gray-800 focus:border-luxe-gold text-xs text-white focus:outline-none focus:ring-1 focus:ring-luxe-gold font-light"></textarea>
+                    </div>
+                </div>
+
+                <!-- Round-trip Section (For Airport Transfer and Point-to-Point) -->
+                <div id="div-round-trip" class="py-2 border-t border-gray-800">
+                    <div class="flex items-center space-x-3">
+                        <input type="checkbox" name="round_trip" id="round_trip" class="w-4 h-4 rounded text-luxe-gold focus:ring-luxe-gold bg-luxe-black border-gray-800">
+                        <label for="round_trip" class="text-xs text-gray-400 font-bold uppercase tracking-wider select-none cursor-pointer">
+                            Request Round-Trip leg (x2 Fare multiplier)
+                        </label>
+                    </div>
+                    
+                    <!-- Return date/time subfields (dynamic show) -->
+                    <div id="div-return-fields" class="hidden grid grid-cols-1 md:grid-cols-2 gap-4 mt-4 pt-4 border-t border-gray-900">
+                        <div>
+                            <label for="return_date" class="block text-xs uppercase tracking-widest font-bold text-gray-400 mb-2">Return Date</label>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-luxe-gold">
+                                    <i class="fas fa-calendar-days text-sm"></i>
+                                </span>
+                                <input type="date" name="return_date" id="return_date" min="{{ today }}" class="block w-full pl-11 pr-4 py-4 bg-luxe-black/80 rounded-xl border border-gray-800 focus:border-luxe-gold text-sm text-white focus:outline-none focus:ring-1 focus:ring-luxe-gold font-light">
+                            </div>
+                        </div>
+                        <div>
+                            <label for="return_time" class="block text-xs uppercase tracking-widest font-bold text-gray-400 mb-2">Return Time</label>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-luxe-gold">
+                                    <i class="fas fa-clock text-sm"></i>
+                                </span>
+                                <input type="time" name="return_time" id="return_time" class="block w-full pl-11 pr-4 py-4 bg-luxe-black/80 rounded-xl border border-gray-800 focus:border-luxe-gold text-sm text-white focus:outline-none focus:ring-1 focus:ring-luxe-gold font-light">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Date, Time and Flight details -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <label for="pickup_date" class="block text-xs uppercase tracking-widest font-bold text-gray-400 mb-2">Pickup Date</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-luxe-gold">
+                                <i class="fas fa-calendar-days text-sm"></i>
+                            </span>
+                            <input type="date" name="pickup_date" id="pickup_date" required min="{{ today }}" value="{{ today }}" class="block w-full pl-11 pr-4 py-4 bg-luxe-black/80 rounded-xl border border-gray-800 focus:border-luxe-gold text-sm text-white focus:outline-none focus:ring-1 focus:ring-luxe-gold">
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label for="pickup_time" class="block text-xs uppercase tracking-widest font-bold text-gray-400 mb-2">Pickup Time</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-luxe-gold">
+                                <i class="fas fa-clock text-sm"></i>
+                            </span>
+                            <input type="time" name="pickup_time" id="pickup_time" required value="12:00" class="block w-full pl-11 pr-4 py-4 bg-luxe-black/80 rounded-xl border border-gray-800 focus:border-luxe-gold text-sm text-white focus:outline-none focus:ring-1 focus:ring-luxe-gold">
+                        </div>
+                    </div>
+
+                    <div id="div-flight">
+                        <label for="flight_number" class="block text-xs uppercase tracking-widest font-bold text-gray-400 mb-2">Flight Number</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-luxe-gold">
+                                <i class="fas fa-plane text-sm"></i>
+                            </span>
+                            <input type="text" name="flight_number" id="flight_number" placeholder="e.g. AA1234" class="block w-full pl-11 pr-4 py-4 bg-luxe-black/80 rounded-xl border border-gray-800 focus:border-luxe-gold text-sm text-white focus:outline-none focus:ring-1 focus:ring-luxe-gold uppercase">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Meeting Point Field (Visible for all service types) -->
+                <div class="py-4 border-t border-gray-800 space-y-2">
+                    <label for="meeting_point" class="block text-xs uppercase tracking-widest font-bold text-gray-400">Meeting Point (Lieu de rencontre)</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-luxe-gold">
+                            <i class="fas fa-handshake-simple text-sm"></i>
+                        </span>
+                        <input type="text" name="meeting_point" id="meeting_point" placeholder="e.g. Terminal B exit gate 4, or hotel lobby entrance" class="block w-full pl-11 pr-4 py-4 bg-luxe-black/80 rounded-xl border border-gray-800 focus:border-luxe-gold text-sm text-white focus:outline-none focus:ring-1 focus:ring-luxe-gold font-light">
+                    </div>
+                    <p class="text-[10px] text-gray-500 font-light">Specify coordinates or instructions on where to meet the private chauffeur upon pickup.</p>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" id="submit-btn" disabled class="w-full gold-btn py-4.5 rounded-xl text-sm uppercase tracking-widest font-semibold mt-6 shadow-xl flex items-center justify-center space-x-3 cursor-not-allowed opacity-60">
+                    <span>Continue to Fleet Selection</span>
+                    <i class="fas fa-arrow-right text-xs"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const radTransfer = document.getElementById('rad-transfer');
+        const radHourly = document.getElementById('rad-hourly');
+        const radP2P = document.getElementById('rad-p2p');
+        {% if site_slug == 'dr' %}
+        const radRental = document.getElementById('rad-rental');
+        const lblRental = document.getElementById('lbl-rental');
+        const iconRental = document.getElementById('icon-rental');
+        const spanRental = document.getElementById('span-rental');
+        {% else %}
+        const radRental = null;
+        const lblRental = null;
+        const iconRental = null;
+        const spanRental = null;
+        {% endif %}
+
+        const lblTransfer = document.getElementById('lbl-transfer');
+        const lblHourly = document.getElementById('lbl-hourly');
+        const lblP2P = document.getElementById('lbl-p2p');
+
+        const iconHourly = document.getElementById('icon-hourly');
+        const iconP2P = document.getElementById('icon-p2p');
+        const spanHourly = document.getElementById('span-hourly');
+        const spanP2P = document.getElementById('span-p2p');
+
+        const divAirportTransferWrapper = document.getElementById('div-airport-transfer-wrapper');
+        const divHourly = document.getElementById('div-hourly');
+        const divFlight = document.getElementById('div-flight');
+        const divCustomAddresses = document.getElementById('div-custom-addresses');
+        const divDropoffLocation = document.getElementById('div-dropoff-location');
+        const divStopsSection = document.getElementById('div-stops-section');
+        const divStopsCountWrapper = document.getElementById('div-stops-count-wrapper');
+        const divRoundTrip = document.getElementById('div-round-trip');
+        const divReturnFields = document.getElementById('div-return-fields');
+
+        const airportSelect = document.getElementById('airport_id');
+        const destinationSelect = document.getElementById('destination_id');
+        const pickupAddress = document.getElementById('pickup_address');
+        const dropoffAddress = document.getElementById('dropoff_address');
+        const roundTripCheckbox = document.getElementById('round_trip');
+        const returnDateInput = document.getElementById('return_date');
+        const returnTimeInput = document.getElementById('return_time');
+        const submitBtn = document.getElementById('submit-btn');
+
+        // Form Validation logic
+        function checkValidation() {
+            let isValid = false;
+
+            if (radTransfer.checked) {
+                if (airportSelect.value && destinationSelect.value) {
+                    isValid = true;
+                }
+            } else if (radHourly.checked) {
+                if (pickupAddress.value.trim() !== '') {
+                    isValid = true;
+                }
+            } else if (radP2P.checked) {
+                if (pickupAddress.value.trim() !== '' && dropoffAddress.value.trim() !== '') {
+                    isValid = true;
+                }
+            } else if (radRental && radRental.checked) {
+                if (pickupAddress.value.trim() !== '' && dropoffAddress.value.trim() !== '') {
+                    isValid = true;
+                }
+            }
+            
+            // Check round-trip coordinates
+            if (isValid && roundTripCheckbox.checked) {
+                if (!returnDateInput.value || !returnTimeInput.value) {
+                    isValid = false;
+                }
+            }
+
+            if (isValid) {
+                submitBtn.disabled = false;
+                submitBtn.classList.remove('opacity-60', 'cursor-not-allowed');
+                submitBtn.classList.add('hover:scale-[1.01]', 'cursor-pointer');
+            } else {
+                submitBtn.disabled = true;
+                submitBtn.classList.add('opacity-60', 'cursor-not-allowed');
+                submitBtn.classList.remove('hover:scale-[1.01]', 'cursor-pointer');
+            }
+        }
+
+        // Service Type Visual Toggles
+        function updateServiceType() {
+            lblTransfer.className = "cursor-pointer text-center p-4 rounded-xl text-xs font-semibold uppercase tracking-wider transition-all duration-300 block select-none border border-transparent hover:bg-luxe-grey";
+            lblHourly.className = "cursor-pointer text-center p-4 rounded-xl text-xs font-semibold uppercase tracking-wider transition-all duration-300 block select-none border border-transparent hover:bg-luxe-grey";
+            lblP2P.className = "cursor-pointer text-center p-4 rounded-xl text-xs font-semibold uppercase tracking-wider transition-all duration-300 block select-none border border-transparent hover:bg-luxe-grey";
+            if (lblRental) {
+                lblRental.className = "cursor-pointer text-center p-4 rounded-xl text-xs font-semibold uppercase tracking-wider transition-all duration-300 block select-none border border-transparent hover:bg-luxe-grey";
+            }
+            
+            iconHourly.className = "fas fa-clock text-base text-gray-500 mb-2 block";
+            iconP2P.className = "fas fa-route text-base text-gray-500 mb-2 block";
+            if (iconRental) {
+                iconRental.className = "fas fa-car text-base text-gray-500 mb-2 block";
+            }
+            spanHourly.className = "block text-gray-400";
+            spanP2P.className = "block text-gray-400";
+            if (spanRental) {
+                spanRental.className = "block text-gray-400";
+            }
+
+            if (radTransfer.checked) {
+                lblTransfer.className = "cursor-pointer text-center p-4 rounded-xl text-xs font-semibold uppercase tracking-wider bg-luxe-gold/10 border border-luxe-gold/50 text-luxe-gold block select-none";
+                
+                divAirportTransferWrapper.classList.remove('hidden');
+                divFlight.classList.remove('hidden');
+                divHourly.classList.add('hidden');
+                divCustomAddresses.classList.add('hidden');
+                divStopsSection.classList.add('hidden');
+                divRoundTrip.classList.remove('hidden');
+                
+                airportSelect.required = true;
+                destinationSelect.required = true;
+                pickupAddress.required = false;
+                dropoffAddress.required = false;
+            } 
+            else if (radP2P.checked) {
+                lblP2P.className = "cursor-pointer text-center p-4 rounded-xl text-xs font-semibold uppercase tracking-wider bg-luxe-gold/10 border border-luxe-gold/50 text-luxe-gold block select-none";
+                iconP2P.className = "fas fa-route text-base text-luxe-gold mb-2 block";
+                spanP2P.className = "block text-white";
+
+                divAirportTransferWrapper.classList.add('hidden');
+                divFlight.classList.add('hidden');
+                divHourly.classList.add('hidden');
+                divCustomAddresses.classList.remove('hidden');
+                divDropoffLocation.classList.remove('hidden');
+                divStopsSection.classList.remove('hidden');
+                divStopsCountWrapper.classList.remove('hidden');
+                divRoundTrip.classList.remove('hidden');
+
+                airportSelect.required = false;
+                destinationSelect.required = false;
+                pickupAddress.required = true;
+                dropoffAddress.required = true;
+            }
+            else if (radHourly.checked) {
+                lblHourly.className = "cursor-pointer text-center p-4 rounded-xl text-xs font-semibold uppercase tracking-wider bg-luxe-gold/10 border border-luxe-gold/50 text-luxe-gold block select-none";
+                iconHourly.className = "fas fa-clock text-base text-luxe-gold mb-2 block";
+                spanHourly.className = "block text-white";
+
+                divAirportTransferWrapper.classList.add('hidden');
+                divFlight.classList.add('hidden');
+                divHourly.classList.remove('hidden');
+                divCustomAddresses.classList.remove('hidden');
+                divDropoffLocation.classList.add('hidden');
+                divStopsSection.classList.remove('hidden');
+                divStopsCountWrapper.classList.add('hidden');
+
+                airportSelect.required = false;
+                destinationSelect.required = false;
+                pickupAddress.required = true;
+                dropoffAddress.required = false;
+            }
+            else if (radRental && radRental.checked) {
+                lblRental.className = "cursor-pointer text-center p-4 rounded-xl text-xs font-semibold uppercase tracking-wider bg-luxe-gold/10 border border-luxe-gold/50 text-luxe-gold block select-none";
+                iconRental.className = "fas fa-car text-base text-luxe-gold mb-2 block";
+                spanRental.className = "block text-white";
+
+                divAirportTransferWrapper.classList.add('hidden');
+                divFlight.classList.add('hidden');
+                divHourly.classList.add('hidden');
+                divCustomAddresses.classList.remove('hidden');
+                divDropoffLocation.classList.remove('hidden');
+                divStopsSection.classList.add('hidden');
+                divRoundTrip.classList.remove('hidden');
+
+                airportSelect.required = false;
+                destinationSelect.required = false;
+                pickupAddress.required = true;
+                dropoffAddress.required = true;
+            }
+            toggleRoundTripFields();
+            checkValidation();
+            
+            // Refresh map layout if needed
+            if (bookingMap) {
+                setTimeout(() => {
+                    bookingMap.invalidateSize();
+                }, 200);
+            }
+        }
+
+        function toggleRoundTripFields() {
+            if (roundTripCheckbox.checked && !divRoundTrip.classList.contains('hidden')) {
+                divReturnFields.classList.remove('hidden');
+                returnDateInput.required = true;
+                returnTimeInput.required = true;
+            } else {
+                divReturnFields.classList.add('hidden');
+                returnDateInput.required = false;
+                returnTimeInput.required = false;
+            }
+            checkValidation();
+        }
+
+        // Attach Event Listeners to Radios
+        radTransfer.addEventListener('change', updateServiceType);
+        radHourly.addEventListener('change', updateServiceType);
+        radP2P.addEventListener('change', updateServiceType);
+        if (radRental) {
+            radRental.addEventListener('change', updateServiceType);
+        }
+        roundTripCheckbox.addEventListener('change', toggleRoundTripFields);
+        returnDateInput.addEventListener('change', checkValidation);
+        returnTimeInput.addEventListener('change', checkValidation);
+
+        // Fetch Destinations dynamically on Airport Selection
+        airportSelect.addEventListener('change', () => {
+            const airportId = airportSelect.value;
+            if (!airportId) return;
+
+            // Reset and show loading state
+            destinationSelect.disabled = true;
+            destinationSelect.innerHTML = '<option value="" disabled selected>Loading premium destinations...</option>';
+            destinationSelect.className = "block w-full pl-11 pr-10 py-4 bg-luxe-black/40 rounded-xl border border-gray-800 text-sm text-gray-500 appearance-none";
+
+            // AJAX Call to destinations API
+            fetch(`/{{ site_slug }}/api/destinations/${airportId}/`)
+                .then(response => response.json())
+                .then(data => {
+                    destinationSelect.innerHTML = '<option value="" disabled selected>Select Destination...</option>';
+                    if (data.destinations && data.destinations.length > 0) {
+                        data.destinations.forEach(dest => {
+                            const opt = document.createElement('option');
+                            opt.value = dest.id;
+                            opt.textContent = `${dest.name} (${dest.destination_type})`;
+                            destinationSelect.appendChild(opt);
+                        });
+                        destinationSelect.disabled = false;
+                        destinationSelect.className = "block w-full pl-11 pr-10 py-4 bg-luxe-black/80 rounded-xl border border-gray-800 text-sm text-white focus:border-luxe-gold focus:outline-none focus:ring-1 focus:ring-luxe-gold appearance-none";
+                    } else {
+                        destinationSelect.innerHTML = '<option value="" disabled>No destinations mapped active</option>';
+                    }
+                    checkValidation();
+                })
+                .catch(error => {
+                    console.error('Error fetching destinations:', error);
+                    destinationSelect.innerHTML = '<option value="" disabled>Error loading destinations</option>';
+                    checkValidation();
+                });
+        });
+
+        // Other change events to trigger validation
+        destinationSelect.addEventListener('change', checkValidation);
+        pickupAddress.addEventListener('input', checkValidation);
+        dropoffAddress.addEventListener('input', checkValidation);
+
+        // Inversion/Switch Direction Logic
+        const btnSwitchDirection = document.getElementById('btn-switch-direction');
+        const transferDirectionInput = document.getElementById('transfer_direction');
+        const lblTransferStart = document.getElementById('lbl-transfer-start');
+        const lblTransferEnd = document.getElementById('lbl-transfer-end');
+        const iconTransferStart = document.getElementById('icon-transfer-start');
+        const iconTransferEnd = document.getElementById('icon-transfer-end');
+
+        if (btnSwitchDirection) {
+            btnSwitchDirection.addEventListener('click', () => {
+                const currentDir = transferDirectionInput.value;
+                const startWrapper = document.getElementById('transfer-start-wrapper');
+                const endWrapper = document.getElementById('transfer-end-wrapper');
+                if (currentDir === 'AIRPORT_TO_DEST') {
+                    transferDirectionInput.value = 'DEST_TO_AIRPORT';
+                    lblTransferStart.textContent = "Destination Airport";
+                    lblTransferEnd.textContent = "Pickup Location (Hotel)";
+                    iconTransferStart.className = "fas fa-plane-arrival text-sm";
+                    iconTransferEnd.className = "fas fa-map-pin text-sm";
+                    startWrapper.style.order = "3";
+                    endWrapper.style.order = "1";
+                } else {
+                    transferDirectionInput.value = 'AIRPORT_TO_DEST';
+                    lblTransferStart.textContent = "Origin Airport";
+                    lblTransferEnd.textContent = "Drop-off Destination";
+                    iconTransferStart.className = "fas fa-plane-departure text-sm";
+                    iconTransferEnd.className = "fas fa-map-pin text-sm";
+                    startWrapper.style.order = "1";
+                    endWrapper.style.order = "3";
+                }
+            });
+        }
+
+        // Initialize Leaflet Dark Map
+        const mapElement = document.getElementById('booking-map');
+        let bookingMap;
+        let pickupMarker;
+        let dropoffMarker;
+
+        if (mapElement) {
+            // Default center: NYC (40.7128, -74.0060)
+            const mapCenter = [40.7128, -74.0060];
+            bookingMap = L.map('booking-map', {
+                zoomControl: true,
+                attributionControl: false
+            }).setView(mapCenter, 11);
+
+            // CURATED PREMIUM DARK TILES
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+                maxZoom: 20
+            }).addTo(bookingMap);
+
+            // Leaflet Custom Icons
+            const goldIcon = L.divIcon({
+                className: 'custom-div-icon',
+                html: `<div class="w-8 h-8 rounded-full bg-luxe-gold/20 flex items-center justify-center relative"><div class="w-4 h-4 rounded-full bg-luxe-gold flex items-center justify-center shadow-lg"><i class="fas fa-location-dot text-black text-[9px]"></i></div></div>`,
+                iconSize: [32, 32],
+                iconAnchor: [16, 16]
+            });
+
+            const silverIcon = L.divIcon({
+                className: 'custom-div-icon',
+                html: `<div class="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center relative"><div class="w-4 h-4 rounded-full bg-white flex items-center justify-center shadow-lg"><i class="fas fa-flag text-black text-[9px]"></i></div></div>`,
+                iconSize: [32, 32],
+                iconAnchor: [16, 16]
+            });
+
+            // Create markers
+            pickupMarker = L.marker([40.764500, -73.974500], {
+                draggable: true,
+                icon: goldIcon
+            }).addTo(bookingMap);
+
+            dropoffMarker = L.marker([40.641311, -73.778139], {
+                draggable: true,
+                icon: silverIcon
+            }).addTo(bookingMap);
+
+            // Helper to reverse-geocode coordinates using open free Nominatim OSM API
+            function reverseGeocode(lat, lng, targetInput) {
+                fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data && data.display_name) {
+                            // Extract a cleaner address (street, city)
+                            const addressParts = data.address;
+                            let cleanAddress = data.display_name;
+                            if (addressParts) {
+                                const road = addressParts.road || addressParts.pedestrian || addressParts.suburb || "";
+                                const houseNumber = addressParts.house_number || "";
+                                const city = addressParts.city || addressParts.town || addressParts.village || "";
+                                if (road) {
+                                    cleanAddress = `${houseNumber} ${road}, ${city}`.trim();
+                                }
+                            }
+                            targetInput.value = cleanAddress;
+                            targetInput.dispatchEvent(new Event('input'));
+                            checkValidation();
+                        }
+                    })
+                    .catch(err => console.error("Error geocoding:", err));
+            }
+
+            // Dragend events
+            pickupMarker.on('dragend', function (e) {
+                const position = pickupMarker.getLatLng();
+                reverseGeocode(position.lat, position.lng, pickupAddress);
+            });
+
+            dropoffMarker.on('dragend', function (e) {
+                const position = dropoffMarker.getLatLng();
+                reverseGeocode(position.lat, position.lng, dropoffAddress);
+            });
+
+            // Map click handler (sets active input)
+            let activeInput = 'pickup';
+            pickupAddress.addEventListener('focus', () => activeInput = 'pickup');
+            dropoffAddress.addEventListener('focus', () => activeInput = 'dropoff');
+
+            bookingMap.on('click', function(e) {
+                if (radTransfer.checked) return; // Disallow raw coordinates on airport transfer (preset lists only)
+                
+                const latlng = e.latlng;
+                if (activeInput === 'pickup') {
+                    pickupMarker.setLatLng(latlng);
+                    reverseGeocode(latlng.lat, latlng.lng, pickupAddress);
+                    activeInput = 'dropoff'; // Switch focus helper
+                } else {
+                    dropoffMarker.setLatLng(latlng);
+                    reverseGeocode(latlng.lat, latlng.lng, dropoffAddress);
+                    activeInput = 'pickup';
+                }
+            });
+
+            // When clicking the visual map cards, flyTo coordinate
+            const mapPickup = document.getElementById('map-pickup');
+            const mapDropoff = document.getElementById('map-dropoff');
+
+            if (mapPickup) {
+                mapPickup.addEventListener('click', () => {
+                    const plazaCoords = [40.764500, -73.974500];
+                    pickupMarker.setLatLng(plazaCoords);
+                    bookingMap.flyTo(plazaCoords, 14);
+                    pickupAddress.value = "The Plaza Hotel, Fifth Avenue, NYC";
+                    pickupAddress.dispatchEvent(new Event('input'));
+                });
+            }
+
+            if (mapDropoff) {
+                mapDropoff.addEventListener('click', () => {
+                    const jfkCoords = [40.641311, -73.778139];
+                    dropoffMarker.setLatLng(jfkCoords);
+                    bookingMap.flyTo(jfkCoords, 14);
+                    dropoffAddress.value = "JFK International Airport, Queens, NY";
+                    dropoffAddress.dispatchEvent(new Event('input'));
+                });
+            }
+        }
+
+        // URL Search Params pre-selection
+        const urlParams = new URLSearchParams(window.location.search);
+        const serviceTypeParam = urlParams.get('service_type');
+        if (serviceTypeParam === 'luxury_rental' && radRental) {
+            radRental.checked = true;
+        } else if (serviceTypeParam === 'point_to_point') {
+            radP2P.checked = true;
+        } else if (serviceTypeParam === 'hourly') {
+            radHourly.checked = true;
+        } else if (serviceTypeParam === 'airport_transfer') {
+            radTransfer.checked = true;
+        }
+
+        // Initial setup
+        updateServiceType();
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,140 @@
+{% extends "core/base.html" %}
+{% load static %}
+{% load site_tags %}
+
+{% block title %}Reservation Confirmed — ALS-{{ booking.booking_reference }} | Aero Luxe Select{% endblock %}
+
+{% block content %}
+<section class="py-20 bg-luxe-black min-h-[90vh] flex items-center">
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 w-full">
+        
+        <!-- Central Congratulations Card -->
+        <div class="glass-card rounded-3xl p-8 sm:p-10 shadow-2xl relative overflow-hidden space-y-8 text-center">
+            <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-luxe-gold to-luxe-gold-bright"></div>
+
+            <!-- Majestic Success Ring -->
+            <div class="w-20 h-20 bg-gradient-to-tr from-luxe-gold/20 to-luxe-gold-bright/20 rounded-full flex items-center justify-center mx-auto border-2 border-luxe-gold animate-pulse">
+                <i class="fas fa-check text-3xl text-luxe-gold"></i>
+            </div>
+
+            <!-- Header Success Info -->
+            <div class="space-y-3">
+                <span class="text-xs uppercase font-bold tracking-widest text-luxe-gold">Reservation Confirmed</span>
+                <h1 class="text-3xl font-bold font-display text-white">Chauffeur Secured</h1>
+                <p class="text-xs text-gray-400 font-light max-w-md mx-auto leading-relaxed">
+                    Thank you for selecting Aero Luxe Select. Your luxury transport logistics have been successfully locked into our dispatch calendar.
+                </p>
+            </div>
+
+            <!-- Booking reference badge -->
+            <div class="inline-block bg-luxe-dark-grey border border-luxe-gold/20 rounded-2xl px-6 py-3">
+                <span class="block text-[9px] uppercase tracking-widest text-gray-500 font-bold mb-1">Booking Reference</span>
+                <span class="text-lg font-extrabold text-luxe-gold tracking-widest font-display">{{ booking.booking_reference }}</span>
+            </div>
+
+            <!-- Detailed Travel Receipt -->
+            <div class="border-t border-gray-800 pt-8 text-left space-y-6">
+                <h3 class="text-xs uppercase tracking-widest font-bold text-white border-b border-gray-850 pb-2 flex items-center space-x-2">
+                    <i class="fas fa-receipt text-luxe-gold"></i>
+                    <span>Itinerary & Receipt Summary</span>
+                </h3>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs text-gray-300">
+                    <!-- Column 1 -->
+                    <div class="space-y-4">
+                        <div>
+                            <span class="block text-[10px] text-gray-500 uppercase tracking-widest font-bold">Passenger Name</span>
+                            <span class="font-bold text-white">{{ booking.customer_name }}</span>
+                        </div>
+                        <div>
+                            <span class="block text-[10px] text-gray-500 uppercase tracking-widest font-bold">Scheduled Pickup</span>
+                            <span class="font-bold text-white">{{ booking.pickup_date }} at {{ booking.pickup_time }}</span>
+                        </div>
+                        <div>
+                            <span class="block text-[10px] text-gray-500 uppercase tracking-widest font-bold">Chauffeur Service</span>
+                            <span class="font-bold text-white uppercase text-[10px] tracking-wider">
+                                {% if booking.service_type == 'airport_transfer' %}
+                                    Airport Transfer
+                                {% elif booking.service_type == 'hourly' %}
+                                    Hourly Service ({{ booking.hours_requested }} Hours)
+                                {% elif booking.service_type == 'point_to_point' %}
+                                    Point-to-Point Transfer
+                                {% else %}
+                                    {{ booking.get_service_type_display }}
+                                {% endif %}
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Column 2 -->
+                    <div class="space-y-4">
+                        {% if booking.airport %}
+                        <div>
+                            <span class="block text-[10px] text-gray-500 uppercase tracking-widest font-bold">Origin Terminal</span>
+                            <span class="font-bold text-white">{{ booking.airport.code }} — {{ booking.airport.name }}</span>
+                        </div>
+                        {% endif %}
+                        {% if booking.destination %}
+                        <div>
+                            <span class="block text-[10px] text-gray-500 uppercase tracking-widest font-bold">Drop-off Destination</span>
+                            <span class="font-bold text-white">{{ booking.destination.name }}</span>
+                        </div>
+                        {% endif %}
+                        {% if booking.flight_number %}
+                        <div>
+                            <span class="block text-[10px] text-gray-500 uppercase tracking-widest font-bold">Flight Code</span>
+                            <span class="font-bold text-white uppercase">{{ booking.flight_number }}</span>
+                        </div>
+                        {% endif %}
+                        <div>
+                            <span class="block text-[10px] text-gray-500 uppercase tracking-widest font-bold">Payment Method</span>
+                            <span class="font-bold text-white uppercase text-[10px] tracking-wider">{{ booking.payment_method }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Add-ons included -->
+                {% if booking.addons.all %}
+                <div class="bg-luxe-black/30 p-4 rounded-xl border border-gray-800 space-y-2">
+                    <span class="text-[9px] uppercase tracking-widest text-gray-500 font-bold block">Included Enhancements</span>
+                    <ul class="space-y-1.5 text-xs text-gray-300">
+                        {% for addon in booking.addons.all %}
+                        <li class="flex items-center space-x-2">
+                            <i class="fas fa-circle-check text-luxe-gold text-[10px]"></i>
+                            <span>{{ addon.name }}</span>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+
+                <!-- Grand Total price -->
+                <div class="border-t border-gray-850 pt-4 flex justify-between items-center bg-luxe-dark-grey p-4 rounded-xl">
+                    <div>
+                        <span class="text-[10px] uppercase text-gray-500 font-bold tracking-widest block">Total Charged</span>
+                        <span class="text-[9px] text-gray-600 block">All-inclusive USD Rates</span>
+                    </div>
+                    <span class="text-xl font-extrabold text-luxe-gold font-display">{{ booking.total_price|currency }}</span>
+                </div>
+            </div>
+
+            <!-- Support and Help coordination actions -->
+            <div class="pt-6 border-t border-gray-800 space-y-4">
+                <p class="text-xs text-gray-400 font-light leading-relaxed">
+                    Have updates or schedule adjustments? Contact our dispatch command desk 24/7 directly via WhatsApp or return home.
+                </p>
+                <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                    <a href="https://wa.me/{{ site_settings.whatsapp_number }}" target="_blank" class="w-full sm:w-auto bg-green-500 hover:bg-green-600 text-white font-semibold text-xs tracking-wider uppercase px-6 py-3.5 rounded-full shadow-lg flex items-center justify-center space-x-2 transition-all">
+                        <i class="fab fa-whatsapp text-sm"></i>
+                        <span>Chat with Dispatch</span>
+                    </a>
+                    <a href="{% site_url 'index' %}" class="w-full sm:w-auto border border-white/20 hover:border-luxe-gold bg-white/5 hover:bg-luxe-gold/10 px-6 py-3.5 rounded-full text-xs uppercase tracking-wider font-semibold transition-all duration-300">
+                        Return to Homepage
+                    </a>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+{% endblock %}

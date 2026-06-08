@@ -1,0 +1,308 @@
+{% extends 'dashboard/base.html' %}
+
+{% block title %}Booking Details — {{ booking.booking_reference }} — Aero Luxe Select{% endblock %}
+{% block dashboard_header %}Reservation Dispatch Sheet{% endblock %}
+
+{% block content %}
+<!-- Header Bar with Quick Navigation and Booking Reference status -->
+<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-luxury-card border border-luxury-border p-6 rounded-2xl">
+    <div class="flex items-center space-x-4">
+        <a href="{% url 'dashboard:bookings' %}" class="w-10 h-10 rounded-xl bg-luxury-black border border-luxury-border flex items-center justify-center text-luxury-muted hover:text-gold-400 hover:border-gold-500/25 transition-colors">
+            <i class="fa-solid fa-arrow-left"></i>
+        </a>
+        <div>
+            <div class="flex items-center space-x-2">
+                <span class="font-mono text-xl font-bold tracking-wider text-gold-400">{{ booking.booking_reference }}</span>
+                <span class="px-2.5 py-0.5 text-[10px] font-bold uppercase rounded bg-luxury-black border border-luxury-border text-white">
+                    {{ booking.site.name|upper }}
+                </span>
+            </div>
+            <p class="text-xs text-luxury-muted mt-1">Booked on {{ booking.created_at }} &bull; Source: <strong class="text-white">{{ booking.booking_source }}</strong></p>
+        </div>
+    </div>
+    
+    <!-- Current status Badge -->
+    <div class="flex items-center space-x-3">
+        <span class="text-xs font-semibold text-luxury-muted">Status:</span>
+        <span class="inline-block text-xs uppercase font-bold tracking-wider px-4 py-2 rounded-full border 
+            {% if booking.status == 'PENDING' %}bg-amber-500/10 border-amber-500/20 text-amber-400
+            {% elif booking.status == 'CONFIRMED' %}bg-emerald-500/10 border-emerald-500/20 text-emerald-400
+            {% elif booking.status == 'IN_PROGRESS' %}bg-sky-500/10 border-sky-500/20 text-sky-400
+            {% elif booking.status == 'COMPLETED' %}bg-zinc-800 border-zinc-700 text-white
+            {% else %}bg-rose-500/10 border-rose-500/20 text-rose-400{% endif %}">
+            {{ booking.get_status_display }}
+        </span>
+    </div>
+</div>
+
+<!-- Main detailed columns -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    
+    <!-- Left Column: Chauffeur trip details, Vehicle choice, Passenger info -->
+    <div class="lg:col-span-2 space-y-8">
+        
+        <!-- Section 1: Customer Information -->
+        <div class="bg-luxury-card border border-luxury-border rounded-2xl p-6 space-y-4">
+            <div class="flex items-center space-x-2.5 border-b border-luxury-border pb-3">
+                <i class="fa-solid fa-user-tie text-gold-400 text-lg"></i>
+                <h3 class="font-serif font-semibold text-base">VIP Guest Profile</h3>
+            </div>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div>
+                    <span class="block text-xs text-luxury-muted uppercase tracking-wider">Full Name</span>
+                    <span class="block font-semibold text-white text-base mt-1">{{ booking.customer_name }}</span>
+                </div>
+                <div>
+                    <span class="block text-xs text-luxury-muted uppercase tracking-wider">Email Address</span>
+                    <a href="mailto:{{ booking.customer_email }}" class="block font-semibold text-gold-400 hover:underline text-base mt-1 truncate">{{ booking.customer_email }}</a>
+                </div>
+                <div>
+                    <span class="block text-xs text-luxury-muted uppercase tracking-wider">Contact Phone</span>
+                    <span class="block font-mono text-white mt-1">{{ booking.customer_phone }}</span>
+                </div>
+                <div>
+                    <span class="block text-xs text-luxury-muted uppercase tracking-wider">WhatsApp Dispatch Contact</span>
+                    {% if booking.customer_whatsapp %}
+                    <a href="https://wa.me/{{ booking.customer_whatsapp|cut:' '|cut:'-' }}" target="_blank" class="block text-emerald-400 font-semibold hover:underline mt-1">
+                        <i class="fa-brands fa-whatsapp mr-1"></i>{{ booking.customer_whatsapp }}
+                    </a>
+                    {% else %}
+                    <span class="block text-xs text-luxury-muted italic mt-1">Not provided</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 2: Trip & Route Details -->
+        <div class="bg-luxury-card border border-luxury-border rounded-2xl p-6 space-y-4">
+            <div class="flex items-center space-x-2.5 border-b border-luxury-border pb-3">
+                <i class="fa-solid fa-map-location-dot text-gold-400 text-lg"></i>
+                <h3 class="font-serif font-semibold text-base">Transfer Route & Schedule</h3>
+            </div>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div>
+                    <span class="block text-xs text-luxury-muted uppercase tracking-wider">Service Type</span>
+                    <span class="inline-block mt-1 bg-gold-500/10 border border-gold-500/20 text-gold-400 px-3 py-1 rounded text-xs font-semibold">
+                        {{ booking.get_service_type_display }}
+                    </span>
+                </div>
+                <div>
+                    <span class="block text-xs text-luxury-muted uppercase tracking-wider">Pickup Date & Time</span>
+                    <span class="block font-semibold text-white mt-1"><i class="fa-regular fa-clock mr-1.5 text-luxury-muted"></i>{{ booking.pickup_date }} at {{ booking.pickup_time }}</span>
+                </div>
+
+                {% if booking.service_type == 'AIRPORT_TRANSFER' %}
+                <div>
+                    <span class="block text-xs text-luxury-muted uppercase tracking-wider">Origin Airport</span>
+                    <span class="block font-semibold text-white mt-1">{{ booking.airport.name }} ({{ booking.airport.code }})</span>
+                </div>
+                <div>
+                    <span class="block text-xs text-luxury-muted uppercase tracking-wider">Destination</span>
+                    <span class="block font-semibold text-white mt-1">{{ booking.destination.name|default:booking.dropoff_address }}</span>
+                </div>
+                <div class="sm:col-span-2">
+                    <span class="block text-xs text-luxury-muted uppercase tracking-wider">Full Route Addresses</span>
+                    <div class="mt-2 space-y-2 text-xs">
+                        <div class="flex items-start space-x-2 bg-luxury-black/40 border border-luxury-border p-3 rounded-lg">
+                            <span class="text-gold-400 font-bold w-12 shrink-0">Pickup:</span>
+                            <span class="text-white">{{ booking.pickup_address|default:booking.airport.name }}</span>
+                        </div>
+                        <div class="flex items-start space-x-2 bg-luxury-black/40 border border-luxury-border p-3 rounded-lg">
+                            <span class="text-gold-400 font-bold w-12 shrink-0">Dropoff:</span>
+                            <span class="text-white">{{ booking.dropoff_address|default:booking.destination.name }}</span>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <span class="block text-xs text-luxury-muted uppercase tracking-wider">Flight Number</span>
+                    {% if booking.flight_number %}
+                    <span class="block font-mono font-bold text-white mt-1"><i class="fa-solid fa-plane mr-1.5 text-luxury-muted"></i>{{ booking.flight_number|upper }}</span>
+                    {% else %}
+                    <span class="block text-xs text-luxury-muted italic mt-1">Not provided</span>
+                    {% endif %}
+                </div>
+                {% endif %}
+
+                {% if booking.service_type == 'HOURLY' %}
+                <div>
+                    <span class="block text-xs text-luxury-muted uppercase tracking-wider">Requested Hours</span>
+                    <span class="block font-semibold text-white mt-1"><i class="fa-regular fa-hourglass-half mr-1.5 text-luxury-muted"></i>{{ booking.hours_requested }} Hours (Min. 3h)</span>
+                </div>
+                <div>
+                    <span class="block text-xs text-luxury-muted uppercase tracking-wider">Hourly Rate</span>
+                    <span class="block font-semibold text-white mt-1">${{ booking.hourly_rate }}/hour</span>
+                </div>
+                <div class="sm:col-span-2">
+                    <span class="block text-xs text-luxury-muted uppercase tracking-wider">Pickup / Service Area Address</span>
+                    <div class="mt-2 bg-luxury-black/40 border border-luxury-border p-3 rounded-lg text-xs text-white">
+                        {{ booking.pickup_address }}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Section 3: Chauffeur vehicle & Premium Add-ons choice -->
+        <div class="bg-luxury-card border border-luxury-border rounded-2xl p-6 space-y-4">
+            <div class="flex items-center space-x-2.5 border-b border-luxury-border pb-3">
+                <i class="fa-solid fa-car-side text-gold-400 text-lg"></i>
+                <h3 class="font-serif font-semibold text-base">Vehicle Class & VIP Add-ons</h3>
+            </div>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div>
+                    <span class="block text-xs text-luxury-muted uppercase tracking-wider">Requested Vehicle Category</span>
+                    <span class="block font-semibold text-white mt-1 text-base">{{ booking.vehicle_category.name }}</span>
+                    <span class="block text-xs text-luxury-muted mt-0.5">Capacity: {{ booking.vehicle_category.passengers_capacity }} Pax / {{ booking.vehicle_category.luggage_capacity }} Bags</span>
+                </div>
+                <div>
+                    <span class="block text-xs text-luxury-muted uppercase tracking-wider">Client Booking Notes</span>
+                    <p class="text-xs text-luxury-muted mt-1 bg-luxury-black/20 p-2.5 rounded border border-luxury-border italic">
+                        "{{ booking.customer_notes|default:'No specific request notes written by customer.' }}"
+                    </p>
+                </div>
+            </div>
+
+            <!-- VIP Add-ons checklist -->
+            <div class="pt-4 border-t border-luxury-border">
+                <span class="block text-xs text-luxury-muted uppercase tracking-wider mb-3">Selected Premium Upsells</span>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {% for addon in booking.addons.all %}
+                    <div class="flex items-center justify-between p-3 rounded-xl bg-luxury-black/40 border border-luxury-border text-xs">
+                        <div class="flex items-center space-x-2">
+                            <i class="{{ addon.icon|default:'fa-solid fa-crown' }} text-gold-400 text-sm"></i>
+                            <span class="font-medium text-white">{{ addon.name }}</span>
+                        </div>
+                        <span class="font-bold text-gold-400">+${{ addon.price }}</span>
+                    </div>
+                    {% empty %}
+                    <div class="sm:col-span-2 text-xs text-luxury-muted bg-luxury-black/10 p-3 rounded border border-luxury-border border-dashed text-center">
+                        No custom VIP services selected.
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Right Column: Financial summary, Dispatch notes edit, Actions console -->
+    <div class="space-y-8">
+        
+        <!-- Financial Summary Card -->
+        <div class="bg-luxury-card border border-luxury-border rounded-2xl p-6 relative overflow-hidden">
+            <div class="absolute right-0 top-0 translate-x-2 -translate-y-2 opacity-5">
+                <i class="fa-solid fa-receipt text-9xl"></i>
+            </div>
+            
+            <h3 class="font-serif font-semibold text-base border-b border-luxury-border pb-3 mb-4">Financial Ledger</h3>
+            
+            <div class="space-y-3.5 text-sm">
+                <!-- Base route fee -->
+                <div class="flex justify-between items-center text-luxury-muted">
+                    <span>Base Chauffeur Rate</span>
+                    <span class="text-white font-medium">${{ booking.base_price|floatformat:2 }}</span>
+                </div>
+                <!-- Add-ons -->
+                <div class="flex justify-between items-center text-luxury-muted">
+                    <span>VIP Add-Ons total</span>
+                    <span class="text-gold-400 font-medium">+${{ booking.addons_total|floatformat:2 }}</span>
+                </div>
+                
+                <!-- External platform markup check -->
+                {% if booking.is_platform_booking %}
+                <div class="p-3 bg-gold-500/5 rounded-xl border border-gold-500/20 text-xs my-2.5">
+                    <div class="flex justify-between items-center text-gold-400 font-semibold mb-1">
+                        <span>Platform Commission</span>
+                        <span>{{ booking.platform_commission_rate|stringformat:".0%" }}</span>
+                    </div>
+                    <p class="text-[10px] text-luxury-muted mb-2">Baked-in platform fee markup applied for {{ booking.booking_source }}.</p>
+                    <div class="flex justify-between items-center text-white">
+                        <span>Commission markup</span>
+                        <span class="font-mono">${{ booking.platform_fee|floatformat:2 }}</span>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Border -->
+                <div class="border-t border-luxury-border pt-4"></div>
+                
+                <!-- Total price -->
+                <div class="flex justify-between items-baseline">
+                    <span class="text-xs uppercase tracking-wider text-luxury-muted font-bold">Total Price (USD)</span>
+                    <span class="text-3xl font-bold font-serif gold-text-gradient">${{ booking.total_price|floatformat:2 }}</span>
+                </div>
+            </div>
+
+            <div class="mt-6 flex items-center justify-between text-xs pt-4 border-t border-luxury-border text-luxury-muted">
+                <span>Payment Status:</span>
+                <span class="font-bold text-white uppercase bg-luxury-black px-2.5 py-1 rounded border border-luxury-border">
+                    {{ booking.payment_method }} &bull; {{ booking.payment_status }}
+                </span>
+            </div>
+        </div>
+
+        <!-- Dispatch Notes Sheet (POST editor) -->
+        <div class="bg-luxury-card border border-luxury-border rounded-2xl p-6">
+            <h3 class="font-serif font-semibold text-base border-b border-luxury-border pb-3 mb-4">Dispatcher Operations</h3>
+            
+            <form method="POST" action="" class="space-y-4">
+                {% csrf_token %}
+                <div>
+                    <label class="block text-xs uppercase tracking-wider text-luxury-muted font-medium mb-1.5">Internal Office Notes</label>
+                    <textarea name="internal_notes" rows="3" placeholder="Write internal notes about client details, flight updates or pricing approvals here..." class="w-full bg-luxury-black border border-luxury-border rounded-xl p-3 text-xs text-white placeholder-luxury-muted focus:border-gold-500/50 outline-none transition-all resize-none">{{ booking.internal_notes }}</textarea>
+                    <p class="text-[10px] text-luxury-muted mt-1 italic">Only visible to office managers and administrators.</p>
+                </div>
+                
+                <div>
+                    <label class="block text-xs uppercase tracking-wider text-luxury-muted font-medium mb-1.5">Driver & Chauffeur Instructions</label>
+                    <textarea name="driver_notes" rows="3" placeholder="Write instructions for the assigned driver, pickup points, signboards..." class="w-full bg-luxury-black border border-luxury-border rounded-xl p-3 text-xs text-white placeholder-luxury-muted focus:border-gold-500/50 outline-none transition-all resize-none">{{ booking.driver_notes }}</textarea>
+                    <p class="text-[10px] text-luxury-muted mt-1 italic">Will be displayed on dispatch print sheets and chauffeur app view.</p>
+                </div>
+
+                <button type="submit" class="w-full text-xs font-semibold text-gold-400 bg-gold-500/10 hover:bg-gold-500/20 border border-gold-500/25 hover:border-gold-400/40 rounded-xl py-2.5 transition-all">
+                    <i class="fa-solid fa-floppy-disk mr-1.5"></i>Update Operational Notes
+                </button>
+            </form>
+        </div>
+
+        <!-- Quick Status Dispatch Controls -->
+        <div class="bg-luxury-card border border-luxury-border rounded-2xl p-6 space-y-4">
+            <h3 class="font-serif font-semibold text-base border-b border-luxury-border pb-3">Operational Dispatch Console</h3>
+            <p class="text-xs text-luxury-muted">Use these controls to signal dispatch steps in real-time. Clients will be notified via email / SMS automatically.</p>
+            
+            <div class="grid grid-cols-2 gap-2">
+                <!-- Confirm -->
+                <a href="{% url 'dashboard:update_booking_status' booking.id 'CONFIRMED' %}" class="flex items-center justify-center py-2 px-3 rounded-lg text-xs font-bold bg-emerald-500/10 border border-emerald-500/25 text-emerald-400 hover:bg-emerald-500/20 transition-all text-center">
+                    <i class="fa-solid fa-circle-check mr-1.5"></i>Confirm Trip
+                </a>
+                
+                <!-- In Progress -->
+                <a href="{% url 'dashboard:update_booking_status' booking.id 'IN_PROGRESS' %}" class="flex items-center justify-center py-2 px-3 rounded-lg text-xs font-bold bg-sky-500/10 border border-sky-500/25 text-sky-400 hover:bg-sky-500/20 transition-all text-center">
+                    <i class="fa-solid fa-road mr-1.5"></i>In Progress
+                </a>
+
+                <!-- Complete -->
+                <a href="{% url 'dashboard:update_booking_status' booking.id 'COMPLETED' %}" class="flex items-center justify-center py-2 px-3 rounded-lg text-xs font-bold bg-zinc-800 border border-zinc-700 text-white hover:bg-zinc-700/80 transition-all text-center">
+                    <i class="fa-solid fa-flag-checkered mr-1.5"></i>Complete
+                </a>
+
+                <!-- Cancel -->
+                <a href="{% url 'dashboard:update_booking_status' booking.id 'CANCELLED' %}" class="flex items-center justify-center py-2 px-3 rounded-lg text-xs font-bold bg-rose-500/10 border border-rose-500/25 text-rose-400 hover:bg-rose-500/20 transition-all text-center">
+                    <i class="fa-solid fa-ban mr-1.5"></i>Cancel Booking
+                </a>
+            </div>
+            
+            <div class="pt-2 border-t border-luxury-border text-center">
+                <a href="javascript:window.print();" class="inline-block text-[11px] font-semibold text-luxury-muted hover:text-white transition-colors bg-luxury-black border border-luxury-border px-3 py-1.5 rounded-lg w-full">
+                    <i class="fa-solid fa-print mr-1.5"></i>Print Chauffeur Dispatch Sheet
+                </a>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+{% endblock %}

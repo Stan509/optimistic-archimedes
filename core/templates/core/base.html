@@ -1,0 +1,466 @@
+{% load static %}
+{% load site_tags %}
+<!DOCTYPE html>
+<html lang="{{ language|default:'en' }}" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{{ current_site.name|default:"Aero Luxe Select" }} | Luxury Transportation & Airport Transfers{% endblock %}</title>
+    
+    <!-- SEO Meta Tags -->
+    {% block seo %}
+    <meta name="description" content="{{ current_site.tagline|default:'Aero Luxe Select offers premium private airport transfers, hourly chauffeur service, and point-to-point transfers.' }}">
+    <meta name="keywords" content="luxury transportation, airport transfer, private chauffeur, VIP car service, point-to-point transfer, NYC premium car, Dominican Republic VIP transfer">
+    {% endblock %}
+
+    <!-- Google Fonts: Outfit & Playfair Display -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome Icons CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Custom Tailwind Configurations -->
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        'theme-bg': 'var(--theme-bg)',
+                        'theme-text': 'var(--theme-text)',
+                        'theme-card': 'var(--theme-card)',
+                        'theme-border': 'var(--theme-border)',
+                        'luxe-black': '#0A0A0A',
+                        'luxe-dark-grey': '#121212',
+                        'luxe-grey': '#1C1C1E',
+                        'luxe-gold': 'var(--theme-primary)',
+                        'luxe-gold-bright': 'var(--theme-primary-hover)',
+                    },
+                    fontFamily: {
+                        sans: ['var(--theme-font-sans)', 'sans-serif'],
+                        display: ['Playfair Display', 'serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Distinct NYC and DR Site Styling & Light/Dark Mode Variables -->
+    {% if site_slug == 'nyc' %}
+        <!-- NYC Metro Corporate Elegance Skin -->
+        <style>
+            :root {
+                --theme-bg-dark: #070708;
+                --theme-bg-light: #F8FAFC;
+                --theme-text-dark: #FFFFFF;
+                --theme-text-light: #0F172A;
+                --theme-card-dark: #111113;
+                --theme-card-light: #FFFFFF;
+                --theme-border-dark: rgba(201, 168, 76, 0.18);
+                --theme-border-light: rgba(15, 23, 42, 0.08);
+                --theme-primary: #C9A84C;
+                --theme-primary-hover: #DFBA5B;
+                --theme-font-sans: 'Outfit', sans-serif;
+            }
+            .site-btn {
+                border-radius: 4px !important;
+            }
+            .site-card {
+                border-radius: 8px !important;
+            }
+        </style>
+    {% else %}
+        <!-- Dominican Republic Exotic Tropical VIP Skin -->
+        <style>
+            :root {
+                --theme-bg-dark: #090F0D;
+                --theme-bg-light: #FAF8F5;
+                --theme-text-dark: #F5F7F6;
+                --theme-text-light: #2C2520;
+                --theme-card-dark: #121A16;
+                --theme-card-light: #FFFFFF;
+                --theme-border-dark: rgba(223, 186, 91, 0.2);
+                --theme-border-light: rgba(44, 37, 32, 0.08);
+                --theme-primary: #DFBA5B;
+                --theme-primary-hover: #C9A84C;
+                --theme-font-sans: 'Playfair Display', serif;
+            }
+            .site-btn {
+                border-radius: 9999px !important;
+            }
+            .site-card {
+                border-radius: 20px !important;
+            }
+        </style>
+    {% endif %}
+
+    <!-- Glassmorphic & Custom Responsive Styles -->
+    <style>
+        .glass-nav {
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            transition: all 0.3s ease;
+        }
+        .dark .glass-nav {
+            background: rgba(10, 10, 10, 0.75);
+            border-bottom: 1px solid var(--theme-border-dark);
+        }
+        .light .glass-nav {
+            background: rgba(255, 255, 255, 0.85);
+            border-bottom: 1px solid var(--theme-border-light);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.02);
+        }
+        .glass-card {
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            transition: all 0.3s ease;
+        }
+        .dark .glass-card {
+            background: rgba(18, 18, 18, 0.6);
+            border: 1px solid var(--theme-border-dark);
+        }
+        .light .glass-card {
+            background: rgba(255, 255, 255, 0.85);
+            border: 1px solid var(--theme-border-light);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.04);
+        }
+        .glass-card-hover:hover {
+            border: 1px solid var(--theme-primary);
+            box-shadow: 0 0 15px rgba(201, 168, 76, 0.15);
+            transform: translateY(-2px);
+        }
+        .gold-gradient-text {
+            background: linear-gradient(135deg, #C9A84C 0%, #DFBA5B 50%, #C9A84C 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .gold-btn {
+            background: linear-gradient(135deg, #C9A84C 0%, #DFBA5B 50%, #C9A84C 100%);
+            color: #0A0A0A !important;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        .gold-btn:hover {
+            box-shadow: 0 0 20px rgba(223, 186, 91, 0.4);
+            transform: translateY(-1px);
+        }
+        .gold-border {
+            border-color: var(--theme-primary);
+        }
+        .gold-border-focus:focus {
+            outline: none;
+            border-color: var(--theme-primary);
+            box-shadow: 0 0 8px rgba(201, 168, 76, 0.25);
+        }
+    </style>
+    
+    <!-- Immediate Theme Initialization Script (Avoids FOUC) -->
+    <script>
+        (function() {
+            document.documentElement.className = 'dark scroll-smooth';
+            
+            function applyThemeVariables(theme) {
+                document.documentElement.style.setProperty('--theme-bg', 'var(--theme-bg-dark)');
+                document.documentElement.style.setProperty('--theme-text', 'var(--theme-text-dark)');
+                document.documentElement.style.setProperty('--theme-card', 'var(--theme-card-dark)');
+                document.documentElement.style.setProperty('--theme-border', 'var(--theme-border-dark)');
+            }
+            applyThemeVariables('dark');
+            window.__applyThemeVariables = applyThemeVariables;
+        })();
+    </script>
+
+    <!-- Favicon & PWA Icons/Manifest -->
+    <link rel="icon" type="image/x-icon" href="{% static 'core/images/favicon.ico' %}">
+    <link rel="manifest" href="{% static 'core/manifest.json' %}">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="{% static 'core/images/icon-192.png' %}">
+    <meta name="theme-color" content="#0A0A0A">
+
+    <!-- Service Worker Registration -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('{% site_url "service_worker" %}')
+                    .then(reg => console.log('Service Worker registered successfully.', reg.scope))
+                    .catch(err => console.error('Service Worker registration failed.', err));
+            });
+        }
+    </script>
+
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="bg-theme-bg text-theme-text font-sans flex flex-col min-h-screen selection:bg-luxe-gold selection:text-luxe-black transition-colors duration-300">
+
+    <!-- Premium Navigation Bar -->
+    <header class="fixed top-0 left-0 right-0 z-50 glass-nav transition-all duration-300" id="main-header">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                <!-- Brand Logo & Name -->
+                <div class="flex-shrink-0 flex items-center">
+                    <a href="{% site_url 'index' %}" class="flex items-center space-x-3 group">
+                        <img src="{% static 'core/images/logo.png' %}" alt="{{ current_site.name }}" class="h-12 w-auto object-contain">
+                    </a>
+                </div>
+
+                <!-- Navigation Links - Desktop -->
+                <nav class="hidden md:flex space-x-8 items-center">
+                    <a href="{% site_url 'index' %}" class="text-sm font-medium tracking-wider uppercase hover:text-luxe-gold transition-colors duration-300 py-2">Home</a>
+                    <a href="{% site_url 'services' %}" class="text-sm font-medium tracking-wider uppercase hover:text-luxe-gold transition-colors duration-300 py-2">Services</a>
+                    <a href="{% site_url 'fleet' %}" class="text-sm font-medium tracking-wider uppercase hover:text-luxe-gold transition-colors duration-300 py-2">Fleet</a>
+                    <a href="{% site_url 'contact' %}" class="text-sm font-medium tracking-wider uppercase hover:text-luxe-gold transition-colors duration-300 py-2">Contact</a>
+                </nav>
+
+                <!-- Header Actions (Lang Selector + Theme + CTA) -->
+                <div class="hidden md:flex items-center space-x-6">
+                    <!-- Light/Dark Mode Switcher -->
+                    <button id="theme-toggle-btn" class="hidden text-gray-400 hover:text-luxe-gold text-lg transition-all duration-300 focus:outline-none p-2" title="Toggle Light/Dark Theme">
+                        <i class="fas fa-moon" id="theme-icon-indicator"></i>
+                    </button>
+
+                    <!-- Multi-language Switcher -->
+                    {% if current_site_slug == 'dr' %}
+                    <div class="relative group">
+                        <button class="flex items-center space-x-2 text-sm font-medium tracking-wider uppercase hover:text-luxe-gold transition-colors duration-300 focus:outline-none py-2">
+                            <i class="fas fa-globe text-luxe-gold"></i>
+                            <span>{{ language|upper }}</span>
+                            <i class="fas fa-chevron-down text-[10px] text-gray-400 group-hover:text-luxe-gold"></i>
+                        </button>
+                        <div class="absolute right-0 mt-1 w-28 rounded-md bg-theme-card border border-luxe-gold/20 shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50 overflow-hidden">
+                            <div class="py-1">
+                                <a href="{% site_url 'set_language' lang='en' %}" class="block px-4 py-2 text-xs uppercase font-medium hover:bg-luxe-gold hover:text-luxe-black transition-colors {% if language == 'en' %}text-luxe-gold{% else %}text-theme-text{% endif %}">
+                                    English
+                                </a>
+                                <a href="{% site_url 'set_language' lang='es' %}" class="block px-4 py-2 text-xs uppercase font-medium hover:bg-luxe-gold hover:text-luxe-black transition-colors {% if language == 'es' %}text-luxe-gold{% else %}text-theme-text{% endif %}">
+                                    Español
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Book Chauffeur Button -->
+                    <a href="{% site_url 'booking_step1' %}" class="gold-btn site-btn px-6 py-2.5 rounded-full text-sm uppercase tracking-wider transition-all duration-300 font-semibold shadow-lg">
+                        Book Chauffeur
+                    </a>
+                </div>
+
+                <!-- Hamburger Button - Mobile -->
+                <div class="flex items-center md:hidden space-x-4">
+                    <!-- Light/Dark Mode Switcher for mobile -->
+                    <button id="theme-toggle-btn-mobile" class="hidden text-gray-400 hover:text-luxe-gold text-lg transition-all duration-300 focus:outline-none p-2">
+                        <i class="fas fa-moon" id="theme-icon-indicator-mobile"></i>
+                    </button>
+
+                    <!-- Lang switch for mobile quick toggle -->
+                    {% if current_site_slug == 'dr' %}
+                    <a href="{% if language == 'en' %}{% site_url 'set_language' lang='es' %}{% else %}{% site_url 'set_language' lang='en' %}{% endif %}" class="text-xs border border-luxe-gold/30 rounded px-2 py-1 text-luxe-gold hover:bg-luxe-gold hover:text-luxe-black transition-all">
+                        {{ language|upper }}
+                    </a>
+                    {% endif %}
+                    
+                    <button type="button" class="text-gray-400 hover:text-luxe-gold focus:outline-none" id="mobile-menu-btn">
+                        <i class="fas fa-bars text-2xl" id="menu-icon"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Responsive Mobile Drawer Navigation Menu -->
+        <div class="md:hidden hidden border-t border-luxe-gold/10 bg-theme-bg" id="mobile-menu">
+            <div class="px-4 pt-2 pb-6 space-y-3">
+                <a href="{% site_url 'index' %}" class="block text-base font-medium tracking-wider uppercase py-2.5 border-b border-theme-border text-theme-text hover:text-luxe-gold">Home</a>
+                <a href="{% site_url 'services' %}" class="block text-base font-medium tracking-wider uppercase py-2.5 border-b border-theme-border text-theme-text hover:text-luxe-gold">Services</a>
+                <a href="{% site_url 'fleet' %}" class="block text-base font-medium tracking-wider uppercase py-2.5 border-b border-theme-border text-theme-text hover:text-luxe-gold">Fleet</a>
+                <a href="{% site_url 'contact' %}" class="block text-base font-medium tracking-wider uppercase py-2.5 border-b border-theme-border text-theme-text hover:text-luxe-gold">Contact</a>
+                
+                <div class="pt-4 flex flex-col space-y-3">
+                    <!-- Quick language links in mobile nav -->
+                    {% if current_site_slug == 'dr' %}
+                    <div class="flex justify-around items-center py-2 bg-theme-card rounded-lg border border-luxe-gold/10">
+                        <a href="{% site_url 'set_language' lang='en' %}" class="text-sm font-semibold uppercase {% if language == 'en' %}text-luxe-gold{% else %}text-gray-400{% endif %}">EN</a>
+                        <span class="text-gray-600">|</span>
+                        <a href="{% site_url 'set_language' lang='es' %}" class="text-sm font-semibold uppercase {% if language == 'es' %}text-luxe-gold{% else %}text-gray-400{% endif %}">ES</a>
+                    </div>
+                    {% endif %}
+                    
+                    <a href="{% site_url 'booking_step1' %}" class="gold-btn site-btn block text-center py-3 rounded-full text-sm uppercase tracking-widest font-semibold">
+                        Book Chauffeur
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="flex-grow pt-20">
+        <!-- Django Messages Container -->
+        {% if messages %}
+        <div class="max-w-7xl mx-auto px-4 mt-6">
+            {% for message in messages %}
+            <div class="glass-card mb-4 border-l-4 {% if message.tags == 'success' %}border-green-500 bg-green-500/10 text-green-200{% elif message.tags == 'warning' %}border-amber-500 bg-amber-500/10 text-amber-200{% elif message.tags == 'error' %}border-red-500 bg-red-500/10 text-red-200{% else %}border-luxe-gold bg-luxe-grey text-luxe-gold{% endif %} p-4 rounded-r-lg flex items-center justify-between" role="alert">
+                <div class="flex items-center space-x-3">
+                    <i class="fas {% if message.tags == 'success' %}fa-circle-check{% elif message.tags == 'warning' %}fa-circle-exclamation{% else %}fa-circle-info{% endif %} text-lg"></i>
+                    <p class="text-sm font-medium">{{ message }}</p>
+                </div>
+                <button class="text-gray-400 hover:text-white focus:outline-none" onclick="this.parentElement.remove()">
+                    <i class="fas fa-xmark"></i>
+                </button>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Floating Site Switcher Component -->
+    {% site_switcher %}
+
+    <!-- Premium Footer with Developer Credit -->
+    <footer class="bg-[#050505] border-t border-luxe-gold/10 text-gray-400 pt-16 pb-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
+                <!-- Brand Profile -->
+                <div class="space-y-4">
+                    <h3 class="text-xl font-semibold tracking-wider font-display text-white gold-gradient-text uppercase">
+                        Aero Luxe Select
+                    </h3>
+                    <p class="text-sm leading-relaxed text-gray-400">
+                        {% site_content 'footer_about' 'Premium airport transfers and private chauffeur services customized for high-profile business clients and elite travelers. Operating in NYC and the Dominican Republic.' %}
+                    </p>
+                    <div class="flex space-x-4 pt-2">
+                        {% if site_settings.social_instagram %}
+                            <a href="{{ site_settings.social_instagram }}" class="text-gray-400 hover:text-luxe-gold text-lg transition-colors"><i class="fab fa-instagram"></i></a>
+                        {% endif %}
+                        {% if site_settings.social_facebook %}
+                            <a href="{{ site_settings.social_facebook }}" class="text-gray-400 hover:text-luxe-gold text-lg transition-colors"><i class="fab fa-facebook-f"></i></a>
+                        {% endif %}
+                        {% if site_settings.social_twitter %}
+                            <a href="{{ site_settings.social_twitter }}" class="text-gray-400 hover:text-luxe-gold text-lg transition-colors"><i class="fab fa-x-twitter"></i></a>
+                        {% endif %}
+                        {% if site_settings.social_tiktok %}
+                            <a href="{{ site_settings.social_tiktok }}" class="text-gray-400 hover:text-luxe-gold text-lg transition-colors"><i class="fab fa-tiktok"></i></a>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Fast Links -->
+                <div>
+                    <h4 class="text-sm font-bold uppercase tracking-widest text-white mb-6">Service Area</h4>
+                    <ul class="space-y-3 text-sm">
+                        <li>
+                            <a href="/nyc/" class="hover:text-luxe-gold transition-colors flex items-center space-x-2">
+                                <i class="fas fa-location-dot text-[10px] text-luxe-gold"></i>
+                                <span>New York Metro (NYC)</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/dr/" class="hover:text-luxe-gold transition-colors flex items-center space-x-2">
+                                <i class="fas fa-location-dot text-[10px] text-luxe-gold"></i>
+                                <span>Dominican Republic (VIP)</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Navigation Quick links -->
+                <div>
+                    <h4 class="text-sm font-bold uppercase tracking-widest text-white mb-6">Services</h4>
+                    <ul class="space-y-3 text-sm">
+                        <li><a href="{% site_url 'airport_transfer' %}" class="hover:text-luxe-gold transition-colors">Airport Transfer</a></li>
+                        <li><a href="{% site_url 'hourly_service' %}" class="hover:text-luxe-gold transition-colors">Hourly Chauffeur</a></li>
+                        {% if site_slug == 'dr' %}
+                        <li><a href="{% site_url 'luxury_rental' %}" class="hover:text-luxe-gold transition-colors">Luxury Car Rental</a></li>
+                        {% endif %}
+                        <li><a href="{% site_url 'fleet' %}" class="hover:text-luxe-gold transition-colors">Fleet Catalogue</a></li>
+                    </ul>
+                </div>
+
+                <!-- Contact & Support -->
+                <div>
+                    <h4 class="text-sm font-bold uppercase tracking-widest text-white mb-6">Support & Contact</h4>
+                    <ul class="space-y-3 text-sm">
+                        {% if site_settings.contact_phone %}
+                        <li class="flex items-center space-x-3">
+                            <i class="fas fa-phone text-luxe-gold"></i>
+                            <span>{{ site_settings.contact_phone }}</span>
+                        </li>
+                        {% endif %}
+                        {% if site_settings.whatsapp_number %}
+                        <li class="flex items-center space-x-3">
+                            <i class="fab fa-whatsapp text-green-500 font-bold"></i>
+                            <a href="https://wa.me/{{ site_settings.whatsapp_number }}" target="_blank" class="hover:text-luxe-gold transition-colors">
+                                Chat via WhatsApp
+                            </a>
+                        </li>
+                        {% endif %}
+                        {% if site_settings.contact_email %}
+                        <li class="flex items-center space-x-3">
+                            <i class="fas fa-envelope text-luxe-gold"></i>
+                            <a href="mailto:{{ site_settings.contact_email }}" class="hover:text-luxe-gold transition-colors">{{ site_settings.contact_email }}</a>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Developer Credit and Bottom line -->
+            <div class="border-t border-gray-800 pt-8 mt-12 flex flex-col md:flex-row items-center justify-between text-xs">
+                <p>&copy; {% now "Y" %} Aero Luxe Select. All rights reserved.</p>
+                <div class="mt-4 md:mt-0 flex items-center space-x-2 text-gray-500">
+                    <span>|</span>
+                    <!-- REQUIRED DEVELOPER CREDIT -->
+                    <a href="tel:8295098412" class="hover:text-luxe-gold transition-colors font-medium">
+                        Developed by <span class="text-white font-semibold">GABOOM</span> | Tel: 829 509 84 12
+                    </a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Header Scrolling Effect, Mobile Menu & Theme Toggler JS -->
+    <script>
+        // Scroll header effect
+        const header = document.getElementById('main-header');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 20) {
+                header.classList.add('shadow-lg', 'bg-theme-card');
+                header.classList.remove('glass-nav');
+            } else {
+                header.classList.remove('shadow-lg', 'bg-theme-card');
+                header.classList.add('glass-nav');
+            }
+        });
+
+        // Mobile menu drawer toggle
+        const menuBtn = document.getElementById('mobile-menu-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const menuIcon = document.getElementById('menu-icon');
+
+        menuBtn.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+            if (mobileMenu.classList.contains('hidden')) {
+                menuIcon.className = 'fas fa-bars text-2xl';
+            } else {
+                menuIcon.className = 'fas fa-xmark text-2xl';
+            }
+        });
+
+        // Dynamic Light/Dark Theme Toggler logic - Disabled for global dark mode
+        localStorage.setItem('theme', 'dark');
+        document.documentElement.classList.remove('light');
+        document.documentElement.classList.add('dark');
+        if (window.__applyThemeVariables) {
+            window.__applyThemeVariables('dark');
+        }
+    </script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

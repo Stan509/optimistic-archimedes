@@ -1,0 +1,72 @@
+{% extends 'booking/base.html' %}
+{% load static %}
+
+{% block title %}Réservation Confirmée | {{ settings.hotel_name }}{% endblock %}
+
+{% block content %}
+
+<div class="section" style="padding: 6rem 2rem; text-align: center; max-width: 700px;">
+    
+    <!-- Success Icon -->
+    <div style="width: 90px; height: 90px; border-radius: 50%; background-color: rgba(16, 185, 129, 0.1); border: 2.5px solid var(--success); color: var(--success); display: inline-flex; align-items: center; justify-content: center; margin-bottom: 2rem; animation: fadeInUp 0.8s ease;">
+        <span class="material-symbols-outlined" style="font-size: 3.5rem;">verified</span>
+    </div>
+
+    <span class="section-tag" style="margin-bottom: 0.5rem;">Félicitations</span>
+    <h2 class="section-title" style="font-size: 2.4rem; margin-bottom: 1.5rem; color: var(--primary);">Votre Séjour est Réservé !</h2>
+    
+    <p style="color: var(--text-muted); font-size: 1.05rem; margin-bottom: 3rem; line-height: 1.6;">
+        Nous avons le plaisir de vous confirmer que votre réservation à <strong>{{ settings.hotel_name }}</strong> a bien été enregistrée. Un email récapitulatif contenant toutes les informations pratiques vous a été envoyé à <strong>{{ reservation.customer_email }}</strong>.
+    </p>
+
+    <!-- Reservation Summary Card -->
+    <div style="background-color: #ffffff; border-radius: var(--border-radius); box-shadow: var(--shadow-premium); border: 1.5px solid var(--accent); padding: 2.5rem; text-align: left; margin-bottom: 3.5rem; display: flex; flex-direction: column; gap: 1.5rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f1f5f9; padding-bottom: 1rem;">
+            <h4 style="font-size: 1.25rem; font-family: var(--font-heading); color: var(--primary);">Réservation #00{{ reservation.id }}</h4>
+            <span style="background-color: rgba(16, 185, 129, 0.12); color: #065f46; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; padding: 0.4rem 1rem; border-radius: 30px; letter-spacing: 0.5px;">{{ reservation.get_status_display }}</span>
+        </div>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+            <div>
+                <span style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px; display: block; margin-bottom: 0.2rem;">Hébergement</span>
+                <span style="font-weight: 700; color: var(--primary); font-size: 1rem;">{{ reservation.room.name }}</span>
+            </div>
+            <div>
+                <span style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px; display: block; margin-bottom: 0.2rem;">Client</span>
+                <span style="font-weight: 700; color: var(--primary); font-size: 1rem;">{{ reservation.customer_name }}</span>
+            </div>
+            <div>
+                <span style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px; display: block; margin-bottom: 0.2rem;">Date d'arrivée</span>
+                <span style="font-weight: 700; color: var(--primary); font-size: 1rem;">{{ reservation.check_in|date:"d F Y" }}</span>
+            </div>
+            <div>
+                <span style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px; display: block; margin-bottom: 0.2rem;">Date de départ</span>
+                <span style="font-weight: 700; color: var(--primary); font-size: 1rem;">{{ reservation.check_out|date:"d F Y" }}</span>
+            </div>
+            <div>
+                <span style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px; display: block; margin-bottom: 0.2rem;">Voyageurs &amp; Durée</span>
+                <span style="font-weight: 700; color: var(--primary); font-size: 1rem;">{{ reservation.guests }} pers. &middot; {{ reservation.number_of_nights }} nuit(s)</span>
+            </div>
+            <div>
+                <span style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px; display: block; margin-bottom: 0.2rem;">Montant payé</span>
+                <span style="font-weight: 700; color: var(--accent); font-size: 1.15rem;">{{ reservation.total_price|floatformat:2 }} €</span>
+            </div>
+        </div>
+        
+        {% if reservation.special_requests %}
+        <div style="border-top: 1px solid #f1f5f9; padding-top: 1rem;">
+            <span style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px; display: block; margin-bottom: 0.3rem;">Demandes Particulières</span>
+            <p style="font-size: 0.92rem; color: #475569; font-style: italic;">" {{ reservation.special_requests }} "</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Back button -->
+    <a href="{% url 'booking:index' %}" class="btn-search" style="display: inline-flex; width: auto; padding: 1rem 2.5rem; border-radius: 30px;">
+        <span class="material-symbols-outlined">home</span>
+        Retourner à l'Accueil
+    </a>
+
+</div>
+
+{% endblock %}

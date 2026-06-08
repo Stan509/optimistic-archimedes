@@ -1,0 +1,366 @@
+{% extends "core/base.html" %}
+{% load static %}
+{% load site_tags %}
+
+{% block title %}Book Chauffeur — Step 4: Secure Checkout | Aero Luxe Select{% endblock %}
+
+{% block content %}
+<section class="py-16 bg-luxe-black min-h-[85vh]">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6">
+        
+        <!-- Premium Multi-step Progress Indicator -->
+        <div class="mb-12">
+            <div class="flex justify-between items-center text-xs uppercase tracking-wider text-gray-500 font-semibold mb-3">
+                <span class="text-gray-400">1. Trip Routing</span>
+                <span class="text-gray-400">2. Select Vehicle</span>
+                <span class="text-gray-400">3. Passenger Details</span>
+                <span class="text-luxe-gold">4. Payment & Checkout</span>
+            </div>
+            <!-- Progress Bar -->
+            <div class="w-full h-1 bg-gray-800 rounded-full overflow-hidden">
+                <div class="h-full w-full bg-gradient-to-r from-luxe-gold to-luxe-gold-bright transition-all duration-500"></div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+            
+            <!-- Left Payment Form Column -->
+            <div class="lg:col-span-7">
+                <div class="glass-card rounded-3xl p-6 sm:p-8 shadow-2xl relative overflow-hidden space-y-8">
+                    <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-luxe-gold to-luxe-gold-bright"></div>
+                    
+                    <div class="space-y-1">
+                        <span class="text-[10px] uppercase font-bold tracking-widest text-luxe-gold">Step 4 of 4</span>
+                        <h1 class="text-2xl font-bold font-display text-white">Secure Checkout</h1>
+                        <div class="w-12 h-0.5 bg-luxe-gold mt-1"></div>
+                    </div>
+
+                    <!-- Payment Toggle Tabs -->
+                    <div>
+                        <label class="block text-xs uppercase tracking-widest font-bold text-gray-400 mb-3">Payment Method</label>
+                        <div class="grid grid-cols-2 gap-2 bg-luxe-black p-1 rounded-xl border border-gray-800">
+                            <button type="button" id="tab-stripe" class="py-3 rounded-lg text-xs font-bold uppercase tracking-wider transition-all duration-300 flex items-center justify-center space-x-2 border border-transparent">
+                                <i class="fas fa-credit-card"></i>
+                                <span>Credit Card</span>
+                            </button>
+                            <button type="button" id="tab-cash" class="py-3 rounded-lg text-xs font-bold uppercase tracking-wider transition-all duration-300 flex items-center justify-center space-x-2 border border-transparent">
+                                <i class="fas fa-wallet"></i>
+                                <span>Cash / Invoice</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Main Booking Payment Form -->
+                    <form action="" method="POST" id="checkout-form" class="space-y-6">
+                        {% csrf_token %}
+                        <!-- Payment method hidden state tracker -->
+                        <input type="hidden" name="payment_method" id="payment-method-input" value="STRIPE">
+
+                        <!-- Stripe Section -->
+                        <div id="stripe-section" class="space-y-4">
+                            <div class="bg-luxe-black/30 p-4 rounded-xl border border-gray-800 space-y-4">
+                                <div class="flex items-center justify-between text-xs text-gray-400">
+                                    <span>Card details powered by</span>
+                                    <span class="font-bold text-white tracking-widest uppercase flex items-center text-[10px]"><i class="fab fa-stripe text-lg mr-1 text-luxe-gold"></i> STRIPE</span>
+                                </div>
+                                
+                                <div class="space-y-3">
+                                    <div>
+                                        <label class="block text-[10px] uppercase text-gray-500 font-bold mb-1">Cardholder Name</label>
+                                        <input type="text" name="cardholder_name" id="cardholder-name" placeholder="Johnathan Doe" class="block w-full px-4 py-3 bg-luxe-black rounded-lg border border-gray-800 focus:border-luxe-gold text-sm text-white focus:outline-none focus:ring-1 focus:ring-luxe-gold">
+                                    </div>
+
+                                    <div>
+                                        <label class="block text-[10px] uppercase text-gray-500 font-bold mb-1">Card Number</label>
+                                        <div class="relative">
+                                            <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500">
+                                                <i class="fas fa-credit-card text-xs"></i>
+                                            </span>
+                                            <input type="text" name="card_number" id="card-number" placeholder="4242 •••• •••• 4242" class="block w-full pl-9 pr-4 py-3 bg-luxe-black rounded-lg border border-gray-800 focus:border-luxe-gold text-sm text-white focus:outline-none focus:ring-1 focus:ring-luxe-gold">
+                                        </div>
+                                    </div>
+
+                                    <div class="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label class="block text-[10px] uppercase text-gray-500 font-bold mb-1">Expiration Date</label>
+                                            <input type="text" name="card_expiry" id="card-expiry" placeholder="MM/YY" class="block w-full px-4 py-3 bg-luxe-black rounded-lg border border-gray-800 focus:border-luxe-gold text-sm text-white focus:outline-none focus:ring-1 focus:ring-luxe-gold">
+                                        </div>
+                                        <div>
+                                            <label class="block text-[10px] uppercase text-gray-500 font-bold mb-1">CVC Code</label>
+                                            <input type="text" name="card_cvc" id="card-cvc" placeholder="123" class="block w-full px-4 py-3 bg-luxe-black rounded-lg border border-gray-800 focus:border-luxe-gold text-sm text-white focus:outline-none focus:ring-1 focus:ring-luxe-gold">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <p class="text-[10px] text-gray-500 leading-relaxed font-light">
+                                Aero Luxe Select never processes or logs full credit card metrics in local files. All calculations occur safely within Stripe tokens.
+                            </p>
+                        </div>
+
+                        <!-- Cash / Corporate Invoice Section -->
+                        <div id="cash-section" class="hidden space-y-4">
+                            <div class="bg-luxe-gold/5 p-5 rounded-xl border border-luxe-gold/20 space-y-3">
+                                <div class="flex items-center space-x-2 text-luxe-gold">
+                                    <i class="fas fa-circle-info text-sm"></i>
+                                    <h4 class="text-xs font-bold uppercase tracking-wider">Chauffeur Collection Policy</h4>
+                                </div>
+                                <p class="text-xs text-gray-300 leading-relaxed font-light">
+                                    Pay directly to your chauffeur upon pickup. Drivers accept cash (USD/local), major corporate debit/credit cards terminal-side, or direct corporate invoice if a valid billing account is registered.
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Terms & Conditions Checkbox -->
+                        <div class="flex items-start space-x-3 bg-luxe-black/30 p-4 rounded-xl border border-gray-800 my-4">
+                            <input type="checkbox" name="terms" id="terms-checkbox" required class="mt-1 h-4 w-4 rounded border-gray-800 bg-luxe-black text-luxe-gold focus:ring-luxe-gold focus:ring-offset-luxe-black cursor-pointer">
+                            <label for="terms-checkbox" class="text-xs text-gray-400 font-light leading-relaxed select-none cursor-pointer">
+                                I agree to the <a href="#" id="open-terms-modal" class="text-luxe-gold underline hover:text-luxe-gold-bright transition-colors" onclick="event.preventDefault(); event.stopPropagation();">Terms of Service</a>, Chauffeur Gratuity Policy, and Cancellation Rules of Aero Luxe Select.
+                            </label>
+                        </div>
+
+                        <!-- Submit CTA -->
+                        <button type="submit" class="w-full gold-btn py-4 rounded-xl text-sm uppercase tracking-widest font-semibold mt-4 shadow-xl flex items-center justify-center space-x-3">
+                            <i class="fas fa-lock text-xs"></i>
+                            <span id="submit-btn-text">Pay Now & Confirm Trip</span>
+                        </button>
+                    </form>
+
+                    <div class="flex justify-start">
+                        <a href="{% site_url 'booking_step3' %}" class="inline-flex items-center space-x-2 text-xs uppercase font-semibold text-gray-400 hover:text-white transition-colors">
+                            <i class="fas fa-chevron-left text-[10px]"></i>
+                            <span>Back to Details</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Invoice Breakdown Column -->
+            <div class="lg:col-span-5">
+                <div class="glass-card rounded-3xl p-6 sm:p-8 shadow-2xl relative overflow-hidden space-y-6">
+                    <div class="absolute top-0 left-0 w-full h-1 bg-luxe-gold"></div>
+                    
+                    <h3 class="text-sm font-bold uppercase tracking-widest text-luxe-gold border-b border-gray-800 pb-3 flex items-center space-x-2">
+                        <i class="fas fa-file-invoice-dollar"></i>
+                        <span>Invoice Breakdown</span>
+                    </h3>
+
+                    <!-- Line items breakdown -->
+                    <div class="space-y-4 text-xs">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h4 class="font-bold text-white uppercase tracking-wider">Base Chauffeur Fare</h4>
+                                <p class="text-[10px] text-gray-500 font-light mt-0.5">Luxury Chauffeur Service Rate</p>
+                            </div>
+                            <span class="font-bold text-white">{{ base_price|currency }}</span>
+                        </div>
+
+                        <!-- Selected VIP Addons -->
+                        {% if selected_addons %}
+                        <div class="space-y-2.5 border-t border-gray-800 pt-3">
+                            <h4 class="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Select Add-Ons</h4>
+                            {% for addon in selected_addons %}
+                            <div class="flex justify-between items-center text-[11px] text-gray-300">
+                                <span class="font-light">{{ addon.name }}</span>
+                                <span class="font-semibold text-luxe-gold">+{{ addon.price|currency }}</span>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+
+                        <!-- Direct booking fee info -->
+                        <div class="flex justify-between items-center border-t border-gray-800 pt-3 text-[11px]">
+                            <div>
+                                <span class="font-bold text-white uppercase tracking-wider">Platform Booking Fees</span>
+                                <p class="text-[9px] text-green-500 font-light mt-0.5">Direct Booking Benefit</p>
+                            </div>
+                            <span class="font-bold text-green-500">$0.00</span>
+                        </div>
+                    </div>
+
+                    <!-- Grand Total block -->
+                    <div class="border-t border-gray-800 pt-4 flex flex-col space-y-2">
+                        <div class="flex justify-between items-center text-xs uppercase text-gray-500 font-bold tracking-widest">
+                            <span>Grand Total</span>
+                            <span class="text-xl text-luxe-gold font-display font-black">{{ total_price|currency }}</span>
+                        </div>
+                        <span class="text-[9px] text-gray-600 block text-right font-light">All-inclusive USD Rates</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<!-- Terms & Conditions Modal -->
+<div id="terms-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-black/80 backdrop-blur-md transition-all duration-300">
+    <div class="relative w-full max-w-2xl bg-luxe-grey border border-luxe-gold/20 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6 max-h-[80vh] flex flex-col">
+        <div class="flex items-center justify-between border-b border-gray-800 pb-4">
+            <h3 class="text-lg font-bold font-display text-white uppercase tracking-wider flex items-center">
+                <i class="fas fa-file-signature text-luxe-gold mr-2.5"></i>
+                Terms & Conditions
+            </h3>
+            <button type="button" id="close-terms-modal-x" class="text-gray-400 hover:text-white transition-colors">
+                <i class="fas fa-xmark text-lg"></i>
+            </button>
+        </div>
+        
+        <div class="flex-grow overflow-y-auto text-sm text-gray-300 leading-relaxed space-y-4 pr-2 scrollbar-thin scrollbar-thumb-luxe-gold">
+            {% if site_settings.terms_and_conditions %}
+                {{ site_settings.terms_and_conditions|linebreaks }}
+            {% else %}
+                <p>By booking with {{ current_site.name|default:"Aero Luxe Select" }}, you agree to our standard terms of service. Cancellations must be made at least 24 hours prior to scheduled pickup for a full refund. Standard chauffeur gratuity rules apply.</p>
+            {% endif %}
+        </div>
+        
+        <div class="flex items-center justify-end border-t border-gray-800 pt-4">
+            <button type="button" id="close-terms-modal-btn" class="gold-btn px-6 py-2.5 rounded-xl text-xs uppercase tracking-wider font-semibold transition-all">
+                Accept & Close
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const tabStripe = document.getElementById('tab-stripe');
+        const tabCash = document.getElementById('tab-cash');
+        const stripeSection = document.getElementById('stripe-section');
+        const cashSection = document.getElementById('cash-section');
+        const methodInput = document.getElementById('payment-method-input');
+        const submitText = document.getElementById('submit-btn-text');
+
+        const form = document.getElementById('checkout-form');
+        const cardholderInput = document.getElementById('cardholder-name');
+        const cardNumberInput = document.getElementById('card-number');
+        const cardExpiryInput = document.getElementById('card-expiry');
+        const cardCvcInput = document.getElementById('card-cvc');
+        const termsCheckbox = document.getElementById('terms-checkbox');
+
+        // Terms Modal Elements
+        const termsModal = document.getElementById('terms-modal');
+        const openTermsModalBtn = document.getElementById('open-terms-modal');
+        const closeTermsModalX = document.getElementById('close-terms-modal-x');
+        const closeTermsModalBtn = document.getElementById('close-terms-modal-btn');
+
+        function togglePaymentMethod(method) {
+            tabStripe.className = "py-3 rounded-lg text-xs font-bold uppercase tracking-wider transition-all duration-300 flex items-center justify-center space-x-2 border border-transparent text-gray-400 hover:text-white";
+            tabCash.className = "py-3 rounded-lg text-xs font-bold uppercase tracking-wider transition-all duration-300 flex items-center justify-center space-x-2 border border-transparent text-gray-400 hover:text-white";
+            
+            if (method === 'STRIPE') {
+                tabStripe.className = "py-3 rounded-lg text-xs font-bold uppercase tracking-wider bg-luxe-gold/10 border border-luxe-gold/50 text-luxe-gold flex items-center justify-center space-x-2";
+                stripeSection.classList.remove('hidden');
+                cashSection.classList.add('hidden');
+                methodInput.value = 'STRIPE';
+                submitText.textContent = "Pay Now & Confirm Trip";
+            } else {
+                tabCash.className = "py-3 rounded-lg text-xs font-bold uppercase tracking-wider bg-luxe-gold/10 border border-luxe-gold/50 text-luxe-gold flex items-center justify-center space-x-2";
+                stripeSection.classList.add('hidden');
+                cashSection.classList.remove('hidden');
+                methodInput.value = 'CASH';
+                submitText.textContent = "Confirm Trip Reservation";
+            }
+        }
+
+        tabStripe.addEventListener('click', () => togglePaymentMethod('STRIPE'));
+        tabCash.addEventListener('click', () => togglePaymentMethod('CASH'));
+
+        // Default setup
+        togglePaymentMethod('STRIPE');
+
+        // Modal event listeners
+        if (openTermsModalBtn && termsModal) {
+            openTermsModalBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                termsModal.classList.remove('hidden');
+            });
+        }
+        if (closeTermsModalX && termsModal) {
+            closeTermsModalX.addEventListener('click', () => {
+                termsModal.classList.add('hidden');
+            });
+        }
+        if (closeTermsModalBtn && termsModal) {
+            closeTermsModalBtn.addEventListener('click', () => {
+                termsModal.classList.add('hidden');
+            });
+        }
+        window.addEventListener('click', (e) => {
+            if (termsModal && e.target === termsModal) {
+                termsModal.classList.add('hidden');
+            }
+        });
+
+        // Client-side Validation logic
+        form.addEventListener('submit', (event) => {
+            const method = methodInput.value;
+            if (method !== 'STRIPE' && method !== 'CASH') {
+                alert('Please select a payment method.');
+                event.preventDefault();
+                return;
+            }
+
+            if (method === 'STRIPE') {
+                const holder = cardholderInput.value.trim();
+                const num = cardNumberInput.value.replace(/\D/g, '');
+                const expiry = cardExpiryInput.value.trim();
+                const cvc = cardCvcInput.value.replace(/\D/g, '');
+
+                if (!holder) {
+                    alert('Please enter the Cardholder Name.');
+                    cardholderInput.focus();
+                    event.preventDefault();
+                    return;
+                }
+
+                if (num.length !== 16) {
+                    alert('Please enter a valid 16-digit Card Number.');
+                    cardNumberInput.focus();
+                    event.preventDefault();
+                    return;
+                }
+
+                const expiryRegex = /^(0[1-9]|1[0-2])\/([0-9]{2})$/;
+                if (!expiryRegex.test(expiry)) {
+                    alert('Please enter a valid expiration date in MM/YY format (e.g. 12/28).');
+                    cardExpiryInput.focus();
+                    event.preventDefault();
+                    return;
+                }
+
+                // Check date parsing
+                const matches = expiry.match(expiryRegex);
+                const expMonth = parseInt(matches[1], 10);
+                const expYear = parseInt('20' + matches[2], 10);
+                
+                const now = new Date();
+                const curMonth = now.getMonth() + 1; // 0-indexed
+                const curYear = now.getFullYear();
+
+                if (expYear < curYear || (expYear === curYear && expMonth < curMonth)) {
+                    alert('The credit card has expired. Please use a valid card.');
+                    cardExpiryInput.focus();
+                    event.preventDefault();
+                    return;
+                }
+
+                if (cvc.length !== 3 && cvc.length !== 4) {
+                    alert('Please enter a valid 3 or 4-digit CVC security code.');
+                    cardCvcInput.focus();
+                    event.preventDefault();
+                    return;
+                }
+            }
+
+            if (!termsCheckbox.checked) {
+                alert('You must accept the Terms and Conditions to complete your booking.');
+                event.preventDefault();
+                return;
+            }
+        });
+    });
+</script>
+{% endblock %}

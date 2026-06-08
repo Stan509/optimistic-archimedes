@@ -1,0 +1,123 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="{{ elements.hero_subtitle.value|default:'Hôtel 5 étoiles d\'exception sur la Côte d\'Azur. Découvrez l\'Horizon Impérial et réservez votre séjour haut de gamme.' }}">
+    
+    <title>{% block title %}{{ settings.hotel_name }}{% endblock %} | Hôtel de Luxe 5 Étoiles</title>
+    
+    <!-- Typography & Material Design Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{% static 'booking/css/style.css' %}">
+    
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+
+    <!-- Header Navigation -->
+    <header>
+        <div class="nav-container">
+            <a href="{% url 'booking:index' %}" class="logo">
+                {{ settings.hotel_name|upper }}
+                <span>Cannes · Riviera</span>
+            </a>
+            
+            <nav>
+                <ul class="nav-menu">
+                    <li><a href="{% url 'booking:index' %}#accueil" class="nav-link">Accueil</a></li>
+                    <li><a href="{% url 'booking:index' %}#chambres" class="nav-link">Chambres</a></li>
+                    <li><a href="{% url 'booking:index' %}#charme" class="nav-link">Prestations</a></li>
+                    <li><a href="{% url 'booking:index' %}#histoire" class="nav-link">À propos</a></li>
+                    {% if user.is_authenticated and user.is_superuser %}
+                        <li><a href="{% url 'booking:dashboard_index' %}" class="nav-link btn-nav" style="background-color: var(--accent); color: var(--primary); font-weight: bold; border-color: var(--accent);">Dashboard Admin</a></li>
+                    {% else %}
+                        <li><a href="{% url 'admin:login' %}?next={% url 'booking:dashboard_index' %}" class="nav-link btn-nav">Connexion Admin</a></li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Alert Messages System -->
+    {% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">
+            {{ message }}
+            <button onclick="this.parentElement.style.display='none'" style="background:none; border:none; color:inherit; font-size:1.1rem; cursor:pointer; font-weight:bold; margin-left: 1rem;">&times;</button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Main Content Area -->
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-grid">
+            <div class="footer-col">
+                <h4>{{ settings.hotel_name }}</h4>
+                <p>{{ elements.footer_about.value|default:'Hôtel 5 étoiles de prestige au cœur de la French Riviera, symbole du savoir-recevoir français et du raffinement absolu.' }}</p>
+                <div class="social-links">
+                    {% if settings.social_facebook %}
+                        <a href="{{ settings.social_facebook }}" class="social-icon" target="_blank">
+                            <span class="material-symbols-outlined">public</span>
+                        </a>
+                    {% endif %}
+                    {% if settings.social_instagram %}
+                        <a href="{{ settings.social_instagram }}" class="social-icon" target="_blank">
+                            <span class="material-symbols-outlined">photo_camera</span>
+                        </a>
+                    {% endif %}
+                    {% if settings.social_twitter %}
+                        <a href="{{ settings.social_twitter }}" class="social-icon" target="_blank">
+                            <span class="material-symbols-outlined">alternate_email</span>
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="footer-col">
+                <h4>Accès Rapide</h4>
+                <ul class="footer-links">
+                    <li><a href="{% url 'booking:index' %}#accueil">Accueil</a></li>
+                    <li><a href="{% url 'booking:index' %}#chambres">Nos Chambres & Suites</a></li>
+                    <li><a href="{% url 'booking:index' %}#charme">Nos Prestations</a></li>
+                    <li><a href="{% url 'booking:index' %}#histoire">Notre Histoire</a></li>
+                    <li><a href="{% url 'admin:login' %}">Espace Administration</a></li>
+                </ul>
+            </div>
+            
+            <div class="footer-col">
+                <h4>Contact</h4>
+                <p style="margin-bottom: 0.8rem; display: flex; align-items: center; gap: 0.5rem; color: rgba(248, 250, 252, 0.75);">
+                    <span class="material-symbols-outlined" style="color: var(--accent);">location_on</span>
+                    {{ settings.address }}
+                </p>
+                <p style="margin-bottom: 0.8rem; display: flex; align-items: center; gap: 0.5rem; color: rgba(248, 250, 252, 0.75);">
+                    <span class="material-symbols-outlined" style="color: var(--accent);">phone</span>
+                    {{ settings.contact_phone }}
+                </p>
+                <p style="margin-bottom: 0.8rem; display: flex; align-items: center; gap: 0.5rem; color: rgba(248, 250, 252, 0.75);">
+                    <span class="material-symbols-outlined" style="color: var(--accent);">mail</span>
+                    {{ settings.contact_email }}
+                </p>
+            </div>
+        </div>
+        
+        <div class="footer-bottom">
+            <p>&copy; {% now "Y" %} {{ settings.hotel_name }}. Tous droits réservés.</p>
+            <p>Design Premium &middot; Excellence Riviera</p>
+        </div>
+    </footer>
+
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>

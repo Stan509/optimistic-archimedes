@@ -1,0 +1,107 @@
+{% extends 'booking/dashboard/base.html' %}
+{% load static %}
+
+{% block title %}Gestion des Chambres | {{ settings.hotel_name }}{% endblock %}
+
+{% block admin_content %}
+
+<!-- Header -->
+<div class="admin-header">
+    <div class="admin-welcome">
+        <h2>Gestion du Catalogue des Chambres</h2>
+        <p>Consultez, ajoutez, modifiez ou supprimez les chambres et suites de votre établissement.</p>
+    </div>
+    
+    <div>
+        <a href="{% url 'booking:add_room' %}" class="btn-action btn-action-gold">
+            <span class="material-symbols-outlined">add_circle</span>
+            Ajouter une Chambre
+        </a>
+    </div>
+</div>
+
+<!-- Rooms List Table -->
+<div class="admin-section">
+    <div class="table-responsive">
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>Image</th>
+                    <th>Chambre / Suite</th>
+                    <th>N° Chambre</th>
+                    <th>Prix / Nuit</th>
+                    <th>Capacité</th>
+                    <th>Équipements</th>
+                    <th>Statut</th>
+                    <th style="text-align: center;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for room in rooms %}
+                <tr>
+                    <td style="width: 100px;">
+                        <div style="width: 80px; height: 60px; border-radius: var(--border-radius-sm); overflow: hidden; border: 1px solid #cbd5e1; background: #e2e8f0;">
+                            <img src="{{ room.get_image_url }}" alt="{{ room.name }}" style="width: 100%; height: 100%; object-fit: cover;">
+                        </div>
+                    </td>
+                    <td>
+                        <div style="font-weight: 700; color: var(--admin-dark); font-size: 1rem;">{{ room.name }}</div>
+                        <div style="font-size: 0.8rem; color: var(--admin-text-muted); max-width: 300px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="{{ room.description }}">{{ room.description }}</div>
+                    </td>
+                    <td style="font-weight: 700; color: var(--admin-gold); font-size: 1rem;">N° {{ room.room_number }}</td>
+                    <td style="font-weight: 700; color: var(--admin-dark); font-size: 1.05rem;">{{ room.price_per_night|floatformat:2 }} €</td>
+                    <td style="font-weight: 600;">
+                        <span style="display: flex; align-items: center; gap: 0.3rem;">
+                            <span class="material-symbols-outlined" style="font-size: 1.15rem; color: var(--admin-gold);">people</span>
+                            {{ room.capacity }} pers.
+                        </span>
+                    </td>
+                    <td>
+                        <!-- List small badge icons for features -->
+                        <div style="display: flex; flex-wrap: wrap; gap: 0.3rem; max-width: 250px;">
+                            {% if room.has_wifi %}
+                                <span style="font-size: 0.72rem; font-weight: 600; padding: 0.2rem 0.5rem; background: #f1f5f9; border-radius: 4px; color: #475569;" title="Wi-Fi Gratuit">Wi-Fi</span>
+                            {% endif %}
+                            {% if room.has_ac %}
+                                <span style="font-size: 0.72rem; font-weight: 600; padding: 0.2rem 0.5rem; background: #f1f5f9; border-radius: 4px; color: #475569;" title="Climatisation">Clim</span>
+                            {% endif %}
+                            {% if room.has_jacuzzi %}
+                                <span style="font-size: 0.72rem; font-weight: 700; padding: 0.2rem 0.5rem; background: var(--warning-light); border-radius: 4px; color: #b45309; border: 1px solid rgba(245,158,11,0.2);" title="Jacuzzi Privé">Jacuzzi</span>
+                            {% endif %}
+                            {% if room.has_balcony %}
+                                <span style="font-size: 0.72rem; font-weight: 600; padding: 0.2rem 0.5rem; background: #f1f5f9; border-radius: 4px; color: #475569;" title="Balcon / Terrasse">Balcon</span>
+                            {% endif %}
+                            {% if room.has_room_service %}
+                                <span style="font-size: 0.72rem; font-weight: 600; padding: 0.2rem 0.5rem; background: #f1f5f9; border-radius: 4px; color: #475569;" title="Service d'étage">Service</span>
+                            {% endif %}
+                        </div>
+                    </td>
+                    <td>
+                        {% if room.is_available %}
+                            <span class="badge badge-confirmed" style="font-size: 0.7rem;">Actif / Libre</span>
+                        {% else %}
+                            <span class="badge badge-cancelled" style="font-size: 0.7rem;">Désactivé</span>
+                        {% endif %}
+                    </td>
+                    <td style="text-align: center;">
+                        <div class="actions-cell" style="justify-content: center;">
+                            <a href="{% url 'booking:edit_room' room.slug %}" class="btn-action-icon" title="Modifier la chambre" style="color: var(--admin-gold); border-color: rgba(212,175,55,0.3);">
+                                <span class="material-symbols-outlined">edit</span>
+                            </a>
+                            <a href="{% url 'booking:delete_room' room.slug %}" class="btn-action-icon btn-cancel" title="Supprimer la chambre" onclick="return confirm('Êtes-vous sûr de vouloir supprimer définitivement cette chambre ? (Attention: les réservations liées seront également supprimées)')">
+                                <span class="material-symbols-outlined">delete</span>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="8" style="text-align: center; color: var(--admin-text-muted); padding: 4rem;">Aucune chambre enregistrée dans la base de données.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% endblock %}

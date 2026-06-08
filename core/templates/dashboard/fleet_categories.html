@@ -1,0 +1,92 @@
+{% extends 'dashboard/base.html' %}
+
+{% block title %}Fleet Categories — Aero Luxe Select{% endblock %}
+{% block dashboard_header %}Vehicle Categories{% endblock %}
+
+{% block content %}
+<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-luxury-card border border-luxury-border p-6 rounded-2xl">
+    <div class="flex items-center space-x-3">
+        <a href="{% url 'dashboard:fleet' %}" class="w-10 h-10 rounded-xl bg-luxury-black border border-luxury-border flex items-center justify-center text-luxury-muted hover:text-gold-400 transition-colors">
+            <i class="fa-solid fa-arrow-left"></i>
+        </a>
+        <div>
+            <h2 class="text-xl font-bold font-serif tracking-wide gold-text-gradient">Manage Vehicle Categories</h2>
+            <p class="text-xs text-luxury-muted mt-1">Configure passenger capacities, luggage limits, and Spline 3D embedded canvas previews for your premium clients.</p>
+        </div>
+    </div>
+    
+    <a href="{% url 'dashboard:add_category' %}" class="gold-gradient text-luxury-black text-xs font-semibold px-5 py-2.5 rounded-xl hover:opacity-95 transition-all shadow-lg shadow-gold-500/10">
+        <i class="fa-solid fa-plus mr-1.5"></i>Create Category Class
+    </a>
+</div>
+
+<div class="bg-luxury-card border border-luxury-border rounded-2xl overflow-hidden shadow-xl">
+    <div class="overflow-x-auto">
+        <table class="w-full text-left text-sm whitespace-nowrap">
+            <thead>
+                <tr class="bg-luxury-black/30 text-luxury-muted text-xs uppercase tracking-wider border-b border-luxury-border">
+                    <th class="py-4 px-6 text-center w-16">Order</th>
+                    <th class="py-4 px-6">Preview Image</th>
+                    <th class="py-4 px-6">Category Name</th>
+                    <th class="py-4 px-6">Slug</th>
+                    <th class="py-4 px-6 text-center">Passenger Capacity</th>
+                    <th class="py-4 px-6 text-center">Luggage Capacity</th>
+                    <th class="py-4 px-6 text-center">Status</th>
+                    <th class="py-4 px-6 text-right">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-luxury-border">
+                {% for cat in categories %}
+                <tr class="hover:bg-luxury-black/20 transition-colors">
+                    <td class="py-4 px-6 text-center font-mono font-bold text-gold-400">
+                        {{ cat.order }}
+                    </td>
+                    <td class="py-4 px-6">
+                        {% if cat.image %}
+                        <img src="{{ cat.image.url }}" alt="{{ cat.name }}" class="w-20 h-12 object-cover rounded-lg border border-luxury-border">
+                        {% else %}
+                        <div class="w-20 h-12 rounded-lg bg-luxury-black border border-luxury-border flex items-center justify-center text-luxury-muted text-[10px] uppercase font-semibold">
+                            No image
+                        </div>
+                        {% endif %}
+                    </td>
+                    <td class="py-4 px-6 font-semibold text-white">
+                        {{ cat.name }}
+                    </td>
+                    <td class="py-4 px-6 font-mono text-xs text-luxury-muted">
+                        {{ cat.slug }}
+                    </td>
+                    <td class="py-4 px-6 text-center text-white">
+                        <i class="fa-solid fa-users mr-1.5 text-luxury-muted"></i>{{ cat.passengers_capacity }} Pax
+                    </td>
+                    <td class="py-4 px-6 text-center text-white">
+                        <i class="fa-solid fa-briefcase mr-1.5 text-luxury-muted"></i>{{ cat.luggage_capacity }} Bags
+                    </td>
+                    <td class="py-4 px-6 text-center">
+                        <span class="inline-block text-[10px] uppercase font-bold tracking-wider px-2.5 py-1 rounded-full border 
+                            {% if cat.is_active %}bg-emerald-500/10 border-emerald-500/20 text-emerald-400{% else %}bg-rose-500/10 border-rose-500/20 text-rose-400{% endif %}">
+                            {% if cat.is_active %}Active{% else %}Inactive{% endif %}
+                        </span>
+                    </td>
+                    <td class="py-4 px-6 text-right">
+                        <a href="{% url 'dashboard:edit_category' cat.slug %}" class="inline-block text-xs font-semibold text-gold-400 hover:text-white transition-colors bg-luxury-card border border-luxury-border px-3.5 py-1.5 rounded-lg hover:border-gold-400/40">
+                            <i class="fa-solid fa-pen-to-square mr-1.5"></i>Edit Category
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="8" class="text-center py-20 text-luxury-muted text-sm bg-luxury-card">
+                        <div class="max-w-md mx-auto">
+                            <i class="fa-solid fa-folder-open text-4xl text-luxury-border mb-3 block"></i>
+                            <h4 class="text-white font-serif font-bold text-base">No Categories Created</h4>
+                            <p class="text-xs text-luxury-muted mt-1">There are no vehicle categories configured in the fleet database yet.</p>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

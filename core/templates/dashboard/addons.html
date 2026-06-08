@@ -1,0 +1,67 @@
+{% extends 'dashboard/base.html' %}
+
+{% block title %}Premium VIP Add-Ons — Aero Luxe Select{% endblock %}
+{% block dashboard_header %}VIP Add-Ons Catalogue{% endblock %}
+
+{% block content %}
+<!-- Top Actions Bar -->
+<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-luxury-card border border-luxury-border p-6 rounded-2xl">
+    <div>
+        <h2 class="text-xl font-bold font-serif tracking-wide gold-text-gradient">VIP Add-Ons & Premium Upsells</h2>
+        <p class="text-xs text-luxury-muted mt-1">Configure Fast-Track VIP airport clearance, private concierge services, tour packages, and add-on rates offered to clients during checkout.</p>
+    </div>
+    
+    <a href="{% url 'dashboard:add_addon' %}" class="gold-gradient text-luxury-black text-xs font-semibold px-5 py-2.5 rounded-xl hover:opacity-95 transition-all shadow-lg shadow-gold-500/10">
+        <i class="fa-solid fa-plus mr-1.5"></i>Create VIP Service
+    </a>
+</div>
+
+<!-- VIP Add-ons list -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    {% for addon in addons %}
+    <div class="bg-luxury-card border border-luxury-border rounded-2xl p-6 flex flex-col justify-between space-y-6 hover:border-gold-500/35 transition-all">
+        <div>
+            <!-- Header with Icon and Name -->
+            <div class="flex justify-between items-start">
+                <div class="flex items-center space-x-3.5">
+                    <span class="w-12 h-12 rounded-xl bg-gold-500/10 border border-gold-500/20 flex items-center justify-center text-gold-400 text-xl">
+                        <i class="{{ addon.icon|default:'fa-solid fa-crown' }}"></i>
+                    </span>
+                    <div>
+                        <h3 class="font-semibold text-white text-base leading-tight">{{ addon.name }}</h3>
+                        <span class="text-[10px] font-mono text-luxury-muted block mt-0.5">slug: {{ addon.slug }}</span>
+                    </div>
+                </div>
+                
+                <span class="inline-block text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded border 
+                    {% if addon.is_active %}bg-emerald-500/10 border-emerald-500/20 text-emerald-400{% else %}bg-rose-500/10 border-rose-500/20 text-rose-400{% endif %}">
+                    {% if addon.is_active %}Active{% else %}Inactive{% endif %}
+                </span>
+            </div>
+            
+            <p class="text-xs text-luxury-muted mt-4 line-clamp-2">
+                {{ addon.description|default:"No description details written for this premium upsell." }}
+            </p>
+        </div>
+
+        <!-- Footer Pricing details and action buttons -->
+        <div class="pt-4 border-t border-luxury-border flex items-center justify-between gap-4">
+            <div>
+                <span class="block text-[9px] uppercase tracking-wider text-luxury-muted">Service Rate</span>
+                <span class="block text-xl font-bold text-white font-mono mt-0.5">${{ addon.price|floatformat:2 }}</span>
+            </div>
+            
+            <a href="{% url 'dashboard:edit_addon' addon.pk %}" class="inline-block text-xs font-semibold text-gold-400 hover:text-white transition-colors bg-luxury-black border border-luxury-border hover:border-gold-400/40 px-4 py-2.5 rounded-xl">
+                <i class="fa-solid fa-pen-to-square mr-1.5 text-[10px]"></i>Configure Service
+            </a>
+        </div>
+    </div>
+    {% empty %}
+    <div class="md:col-span-2 text-center py-20 text-luxury-muted bg-luxury-card border border-luxury-border rounded-2xl">
+        <i class="fa-solid fa-crown text-4xl text-luxury-border mb-3 block animate-pulse"></i>
+        <h4 class="text-white font-serif font-bold text-base">VIP catalog is empty</h4>
+        <p class="text-xs text-luxury-muted mt-1">There are no premium add-ons configured. Click Create VIP Service above to add concierge products.</p>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

@@ -1,0 +1,145 @@
+{% extends 'dashboard/base.html' %}
+
+{% block title %}System Settings — Aero Luxe Select{% endblock %}
+{% block dashboard_header %}Global Settings{% endblock %}
+
+{% block content %}
+<!-- Top Header Actions Bar -->
+<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-luxury-card border border-luxury-border p-6 rounded-2xl">
+    <div>
+        <h2 class="text-xl font-bold font-serif tracking-wide gold-text-gradient">System Configuration</h2>
+        <p class="text-xs text-luxury-muted mt-1">Configure company details, developer credits, support contacts, and analytics tracking IDs per operational site.</p>
+    </div>
+    
+    <!-- Site toggle buttons -->
+    <div class="flex items-center bg-luxury-black p-1 rounded-xl border border-luxury-border text-xs">
+        {% for s in sites %}
+        <a href="?site={{ s.slug }}" class="px-4 py-2 rounded-lg transition-all {% if current_site.slug == s.slug %}gold-gradient text-luxury-black font-semibold{% else %}text-luxury-muted hover:text-white{% endif %}">
+            {{ s.name }} ({{ s.slug|upper }})
+        </a>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Settings Layout Menu and Forms -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    
+    <!-- Left column Navigation items -->
+    <div class="space-y-4">
+        <div class="bg-luxury-card border border-luxury-border p-4 rounded-xl space-y-1">
+            <a href="?site={{ current_site.slug }}" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-gold-400 bg-gold-500/10 font-medium text-xs">
+                <i class="fa-solid fa-gears text-sm"></i>
+                <span>General Company Settings</span>
+            </a>
+            <a href="{% url 'dashboard:stripe_settings' %}?site={{ current_site.slug }}" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-luxury-muted hover:text-white hover:bg-luxury-black/35 font-medium text-xs transition-all">
+                <i class="fa-brands fa-stripe text-lg text-[#635BFF]"></i>
+                <span>Stripe Payment Keys</span>
+            </a>
+            <a href="{% url 'dashboard:email_settings' %}?site={{ current_site.slug }}" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-luxury-muted hover:text-white hover:bg-luxury-black/35 font-medium text-xs transition-all">
+                <i class="fa-solid fa-envelope text-sm text-[#C9A84C]"></i>
+                <span>Email Configuration</span>
+            </a>
+        </div>
+
+        <div class="bg-luxury-card border border-luxury-border p-5 rounded-xl text-xs space-y-2">
+            <h4 class="font-semibold text-white uppercase tracking-wider mb-2">Developer Credits</h4>
+            <div class="flex justify-between items-center text-luxury-muted border-b border-luxury-border/30 pb-2">
+                <span>Developer Firm:</span>
+                <strong class="text-white font-serif">{{ settings.developer_name }}</strong>
+            </div>
+            <div class="flex justify-between items-center text-luxury-muted pt-1">
+                <span>Support phone:</span>
+                <a href="tel:{{ settings.developer_phone }}" class="text-gold-400 font-semibold hover:underline font-mono">{{ settings.developer_phone }}</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right columns Form edit panels -->
+    <div class="lg:col-span-2">
+        <div class="bg-luxury-card border border-luxury-border rounded-2xl p-6 md:p-8 shadow-xl">
+            <form method="POST" class="space-y-6">
+                {% csrf_token %}
+                
+                <h3 class="font-serif font-semibold text-base border-b border-luxury-border pb-3 mb-6">
+                    Company Credentials — {{ current_site.name }}
+                </h3>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    <!-- Company Name -->
+                    <div>
+                        <label class="block text-xs uppercase tracking-wider text-luxury-muted font-semibold mb-2">Company Brand Name *</label>
+                        <input type="text" name="company_name" required value="{{ settings.company_name }}" class="w-full bg-luxury-black border border-luxury-border rounded-xl px-4 py-3 text-sm text-white focus:border-gold-500/50 outline-none transition-colors">
+                    </div>
+
+                    <!-- Contact Email -->
+                    <div>
+                        <label class="block text-xs uppercase tracking-wider text-luxury-muted font-semibold mb-2">Support Email Address *</label>
+                        <input type="email" name="contact_email" required value="{{ settings.contact_email }}" class="w-full bg-luxury-black border border-luxury-border rounded-xl px-4 py-3 text-sm text-white focus:border-gold-500/50 outline-none transition-colors font-mono">
+                    </div>
+
+                    <!-- Service Phone -->
+                    <div>
+                        <label class="block text-xs uppercase tracking-wider text-luxury-muted font-semibold mb-2">Service Contact Phone *</label>
+                        <input type="text" name="contact_phone" required value="{{ settings.contact_phone }}" class="w-full bg-luxury-black border border-luxury-border rounded-xl px-4 py-3 text-sm text-white focus:border-gold-500/50 outline-none transition-colors font-mono">
+                    </div>
+
+                    <!-- WhatsApp Dispatch -->
+                    <div>
+                        <label class="block text-xs uppercase tracking-wider text-luxury-muted font-semibold mb-2">WhatsApp Dispatch Number</label>
+                        <input type="text" name="whatsapp_number" value="{{ settings.whatsapp_number }}" class="w-full bg-luxury-black border border-luxury-border rounded-xl px-4 py-3 text-sm text-white focus:border-gold-500/50 outline-none transition-colors font-mono">
+                        <p class="text-[9px] text-luxury-muted mt-1">International format without + or spaces (e.g. 18295098412).</p>
+                    </div>
+
+                    <h4 class="sm:col-span-2 font-serif font-semibold text-sm border-b border-luxury-border pb-2 pt-4">Social Media & Tracking Links</h4>
+
+                    <!-- Facebook -->
+                    <div>
+                        <label class="block text-xs uppercase tracking-wider text-luxury-muted font-semibold mb-2">Facebook URL</label>
+                        <input type="text" name="social_facebook" value="{{ settings.social_facebook }}" placeholder="https://facebook.com/..." class="w-full bg-luxury-black border border-luxury-border rounded-xl px-4 py-3 text-sm text-white focus:border-gold-500/50 outline-none transition-colors">
+                    </div>
+
+                    <!-- Instagram -->
+                    <div>
+                        <label class="block text-xs uppercase tracking-wider text-luxury-muted font-semibold mb-2">Instagram URL</label>
+                        <input type="text" name="social_instagram" value="{{ settings.social_instagram }}" placeholder="https://instagram.com/..." class="w-full bg-luxury-black border border-luxury-border rounded-xl px-4 py-3 text-sm text-white focus:border-gold-500/50 outline-none transition-colors">
+                    </div>
+
+                    <!-- Twitter -->
+                    <div>
+                        <label class="block text-xs uppercase tracking-wider text-luxury-muted font-semibold mb-2">Twitter (X) URL</label>
+                        <input type="text" name="social_twitter" value="{{ settings.social_twitter }}" placeholder="https://twitter.com/..." class="w-full bg-luxury-black border border-luxury-border rounded-xl px-4 py-3 text-sm text-white focus:border-gold-500/50 outline-none transition-colors">
+                    </div>
+
+                    <!-- TikTok -->
+                    <div>
+                        <label class="block text-xs uppercase tracking-wider text-luxury-muted font-semibold mb-2">TikTok URL</label>
+                        <input type="text" name="social_tiktok" value="{{ settings.social_tiktok }}" placeholder="https://tiktok.com/@..." class="w-full bg-luxury-black border border-luxury-border rounded-xl px-4 py-3 text-sm text-white focus:border-gold-500/50 outline-none transition-colors">
+                    </div>
+
+                    <!-- GA Analytics ID -->
+                    <div class="sm:col-span-2">
+                        <label class="block text-xs uppercase tracking-wider text-luxury-muted font-semibold mb-2">Google Analytics measurement ID (G-XXXXXXXXXX)</label>
+                        <input type="text" name="google_analytics_id" value="{{ settings.google_analytics_id }}" placeholder="G-XXXXXXXXXX" class="w-full bg-luxury-black border border-luxury-border rounded-xl px-4 py-3 text-sm text-white focus:border-gold-500/50 outline-none transition-colors font-mono">
+                    </div>
+
+                    <!-- Terms & Conditions -->
+                    <div class="sm:col-span-2">
+                        <label class="block text-xs uppercase tracking-wider text-luxury-muted font-semibold mb-2">Terms & Conditions</label>
+                        <textarea name="terms_and_conditions" rows="6" placeholder="Enter terms and conditions text..." class="w-full bg-luxury-black border border-luxury-border rounded-xl px-4 py-3 text-sm text-white focus:border-gold-500/50 outline-none transition-colors">{{ settings.terms_and_conditions }}</textarea>
+                        <p class="text-[9px] text-luxury-muted mt-1">This text is displayed in a popup modal at the checkout payment page.</p>
+                    </div>
+                </div>
+
+                <!-- Submit Buttons Row -->
+                <div class="flex items-center justify-end space-x-4 pt-6 border-t border-luxury-border mt-6">
+                    <button type="submit" class="gold-gradient text-luxury-black text-xs font-semibold px-8 py-3 rounded-xl hover:opacity-95 transition-all shadow-lg shadow-gold-500/15">
+                        <i class="fa-solid fa-floppy-disk mr-1.5"></i>Save Settings
+                    </button>
+                </div>
+
+            </form>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

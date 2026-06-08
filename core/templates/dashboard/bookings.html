@@ -1,0 +1,171 @@
+{% extends 'dashboard/base.html' %}
+
+{% block title %}Bookings Log — Aero Luxe Select{% endblock %}
+{% block dashboard_header %}Reservation Log{% endblock %}
+
+{% block content %}
+<!-- Search and Filter Panel -->
+<div class="bg-luxury-card border border-luxury-border p-6 rounded-2xl">
+    <form method="GET" action="" class="space-y-4">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <!-- Search bar -->
+            <div class="relative md:col-span-2">
+                <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-luxury-muted"></i>
+                <input type="text" name="q" value="{{ query }}" placeholder="Search by name, email, phone or ALS-XXXXXXXX..." class="w-full bg-luxury-black border border-luxury-border rounded-xl pl-11 pr-4 py-3 text-sm text-white placeholder-luxury-muted focus:border-gold-500/50 outline-none transition-colors">
+            </div>
+            
+            <!-- Site filter -->
+            <div>
+                <select name="site" class="w-full bg-luxury-black border border-luxury-border rounded-xl px-4 py-3 text-sm text-white focus:border-gold-500/50 outline-none transition-colors">
+                    <option value="">All Operating Sites</option>
+                    <option value="nyc" {% if site_filter == 'nyc' %}selected{% endif %}>New York City (NYC)</option>
+                    <option value="dr" {% if site_filter == 'dr' %}selected{% endif %}>Dominican Republic (DR)</option>
+                </select>
+            </div>
+
+            <!-- Service type filter -->
+            <div>
+                <select name="service" class="w-full bg-luxury-black border border-luxury-border rounded-xl px-4 py-3 text-sm text-white focus:border-gold-500/50 outline-none transition-colors">
+                    <option value="">All Services</option>
+                    <option value="AIRPORT_TRANSFER" {% if service_filter == 'AIRPORT_TRANSFER' %}selected{% endif %}>Airport Transfers</option>
+                    <option value="HOURLY" {% if service_filter == 'HOURLY' %}selected{% endif %}>Hourly Chauffeurs</option>
+                    <option value="RENTAL" {% if service_filter == 'RENTAL' %}selected{% endif %}>Luxury Rentals</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between pt-4 border-t border-luxury-border gap-4">
+            <!-- Status Pill Filter Buttons -->
+            <div class="flex flex-wrap gap-2">
+                <a href="?q={{ query }}&site={{ site_filter }}&service={{ service_filter }}&status=" class="px-3.5 py-1.5 rounded-full text-xs font-semibold border transition-all {% if not status_filter %}gold-gradient text-luxury-black border-transparent{% else %}bg-luxury-black border-luxury-border text-luxury-muted hover:text-white{% endif %}">
+                    All Statuses
+                </a>
+                <a href="?q={{ query }}&site={{ site_filter }}&service={{ service_filter }}&status=PENDING" class="px-3.5 py-1.5 rounded-full text-xs font-semibold border transition-all {% if status_filter == 'PENDING' %}bg-amber-500/20 border-amber-500/40 text-amber-400{% else %}bg-luxury-black border-luxury-border text-luxury-muted hover:text-white{% endif %}">
+                    Pending
+                </a>
+                <a href="?q={{ query }}&site={{ site_filter }}&service={{ service_filter }}&status=CONFIRMED" class="px-3.5 py-1.5 rounded-full text-xs font-semibold border transition-all {% if status_filter == 'CONFIRMED' %}bg-emerald-500/20 border-emerald-500/40 text-emerald-400{% else %}bg-luxury-black border-luxury-border text-luxury-muted hover:text-white{% endif %}">
+                    Confirmed
+                </a>
+                <a href="?q={{ query }}&site={{ site_filter }}&service={{ service_filter }}&status=IN_PROGRESS" class="px-3.5 py-1.5 rounded-full text-xs font-semibold border transition-all {% if status_filter == 'IN_PROGRESS' %}bg-sky-500/20 border-sky-500/40 text-sky-400{% else %}bg-luxury-black border-luxury-border text-luxury-muted hover:text-white{% endif %}">
+                    In Progress
+                </a>
+                <a href="?q={{ query }}&site={{ site_filter }}&service={{ service_filter }}&status=COMPLETED" class="px-3.5 py-1.5 rounded-full text-xs font-semibold border transition-all {% if status_filter == 'COMPLETED' %}bg-zinc-800 border-zinc-700 text-white{% else %}bg-luxury-black border-luxury-border text-luxury-muted hover:text-white{% endif %}">
+                    Completed
+                </a>
+                <a href="?q={{ query }}&site={{ site_filter }}&service={{ service_filter }}&status=CANCELLED" class="px-3.5 py-1.5 rounded-full text-xs font-semibold border transition-all {% if status_filter == 'CANCELLED' %}bg-rose-500/20 border-rose-500/40 text-rose-400{% else %}bg-luxury-black border-luxury-border text-luxury-muted hover:text-white{% endif %}">
+                    Cancelled
+                </a>
+            </div>
+
+            <!-- Submit and Clear Row -->
+            <div class="flex items-center space-x-3">
+                <a href="?" class="text-xs font-semibold text-luxury-muted hover:text-white transition-colors py-2.5 px-4 rounded-xl hover:bg-luxury-black/30 border border-transparent">
+                    Reset
+                </a>
+                <button type="submit" class="gold-gradient text-luxury-black text-xs font-semibold px-5 py-2.5 rounded-xl hover:opacity-95 transition-all shadow-lg shadow-gold-500/10">
+                    <i class="fa-solid fa-filter mr-1.5"></i>Apply Filters
+                </button>
+            </div>
+        </div>
+        
+        <!-- Pass status via form hidden if they used a pill -->
+        {% if status_filter %}
+        <input type="hidden" name="status" value="{{ status_filter }}">
+        {% endif %}
+    </form>
+</div>
+
+<!-- Bookings Log Database -->
+<div class="bg-luxury-card border border-luxury-border rounded-2xl overflow-hidden shadow-xl">
+    <div class="overflow-x-auto">
+        <table class="w-full text-left text-sm whitespace-nowrap">
+            <thead>
+                <tr class="bg-luxury-black/30 text-luxury-muted text-xs uppercase tracking-wider border-b border-luxury-border">
+                    <th class="py-4 px-6">Reference</th>
+                    <th class="py-4 px-6">Customer</th>
+                    <th class="py-4 px-6">Site</th>
+                    <th class="py-4 px-6">Service Type</th>
+                    <th class="py-4 px-6">Scheduled Date</th>
+                    <th class="py-4 px-6">Price</th>
+                    <th class="py-4 px-6">Payment Status</th>
+                    <th class="py-4 px-6 text-center">Booking Status</th>
+                    <th class="py-4 px-6 text-right">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-luxury-border">
+                {% for b in bookings %}
+                <tr class="hover:bg-luxury-black/20 transition-colors">
+                    <td class="py-4 px-6">
+                        <span class="block font-mono text-gold-400 font-bold">{{ b.booking_reference }}</span>
+                        <span class="block text-[10px] text-luxury-muted">Source: {{ b.booking_source }}</span>
+                    </td>
+                    <td class="py-4 px-6">
+                        <div class="flex flex-col">
+                            <span class="font-semibold text-white">{{ b.customer_name }}</span>
+                            <span class="text-xs text-luxury-muted">{{ b.customer_email }}</span>
+                            <span class="text-[10px] text-luxury-muted font-mono">{{ b.customer_phone }}</span>
+                        </div>
+                    </td>
+                    <td class="py-4 px-6">
+                        <span class="px-2.5 py-1 rounded bg-luxury-black border border-luxury-border text-xs font-bold text-white uppercase tracking-wider">
+                            {{ b.site.slug|upper }}
+                        </span>
+                    </td>
+                    <td class="py-4 px-6">
+                        <span class="block text-xs font-semibold text-white">{{ b.get_service_type_display }}</span>
+                        <span class="block text-[10px] text-luxury-muted">
+                            {% if b.vehicle_category %}
+                                {{ b.vehicle_category.name }}
+                            {% else %}
+                                Premium Fleet
+                            {% endif %}
+                        </span>
+                    </td>
+                    <td class="py-4 px-6">
+                        <span class="block text-xs font-semibold text-white">{{ b.pickup_date }}</span>
+                        <span class="block text-[10px] text-luxury-muted"><i class="fa-regular fa-clock mr-1 text-[9px]"></i>{{ b.pickup_time }}</span>
+                    </td>
+                    <td class="py-4 px-6">
+                        <span class="font-bold text-white">${{ b.total_price|floatformat:2 }}</span>
+                    </td>
+                    <td class="py-4 px-6">
+                        <span class="inline-flex items-center space-x-1 px-2.5 py-1 rounded-full text-[10px] font-bold border 
+                            {% if b.payment_status == 'PAID' %}bg-emerald-500/10 border-emerald-500/20 text-emerald-400
+                            {% elif b.payment_status == 'REFUNDED' %}bg-rose-500/10 border-rose-500/20 text-rose-400
+                            {% else %}bg-amber-500/10 border-amber-500/20 text-amber-400{% endif %}">
+                            <span class="w-1.5 h-1.5 rounded-full {% if b.payment_status == 'PAID' %}bg-emerald-400{% elif b.payment_status == 'REFUNDED' %}bg-rose-400{% else %}bg-amber-400{% endif %}"></span>
+                            <span>{{ b.get_payment_status_display }}</span>
+                        </span>
+                    </td>
+                    <td class="py-4 px-6 text-center">
+                        <span class="inline-block text-[10px] uppercase font-bold tracking-wider px-3 py-1 rounded-full border 
+                            {% if b.status == 'PENDING' %}bg-amber-500/10 border-amber-500/20 text-amber-400
+                            {% elif b.status == 'CONFIRMED' %}bg-emerald-500/10 border-emerald-500/20 text-emerald-400
+                            {% elif b.status == 'IN_PROGRESS' %}bg-sky-500/10 border-sky-500/20 text-sky-400
+                            {% elif b.status == 'COMPLETED' %}bg-zinc-800 border-zinc-700 text-white
+                            {% else %}bg-rose-500/10 border-rose-500/20 text-rose-400{% endif %}">
+                            {{ b.status }}
+                        </span>
+                    </td>
+                    <td class="py-4 px-6 text-right space-x-1.5">
+                        <a href="{% url 'dashboard:booking_detail' b.id %}" class="inline-block text-xs font-semibold text-gold-400 hover:text-white transition-colors bg-luxury-card border border-luxury-border px-3.5 py-1.5 rounded-lg hover:border-gold-400/40">
+                            <i class="fa-solid fa-list-check mr-1.5"></i>Manage
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="9" class="text-center py-20 text-luxury-muted text-sm bg-luxury-card">
+                        <div class="max-w-md mx-auto">
+                            <i class="fa-solid fa-calendar-xmark text-4xl text-luxury-border mb-3 block"></i>
+                            <h4 class="text-white font-serif font-bold text-base">No Bookings Found</h4>
+                            <p class="text-xs text-luxury-muted mt-1">There are no bookings matching the selected query or filters in the luxury transportation registry.</p>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

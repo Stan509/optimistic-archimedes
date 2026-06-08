@@ -1,0 +1,201 @@
+{% extends 'booking/dashboard/base.html' %}
+{% load static %}
+
+{% block title %}Tableau de Bord | {{ settings.hotel_name }}{% endblock %}
+
+{% block admin_content %}
+
+<!-- Header -->
+<div class="admin-header">
+    <div class="admin-welcome">
+        <h2>Bonjour, Administrateur</h2>
+        <p>Voici la situation en temps réel de votre établissement aujourd'hui, le {% now "d F Y" %}.</p>
+    </div>
+    
+    <div>
+        <a href="{% url 'booking:dashboard_site_editor' %}" class="btn-action btn-action-gold">
+            <span class="material-symbols-outlined">edit_note</span>
+            Éditeur Rapide du Site
+        </a>
+    </div>
+</div>
+
+<!-- Stats Grid -->
+<div class="stats-grid">
+    
+    <!-- Revenue -->
+    <div class="stat-card">
+        <div class="stat-info">
+            <h5>Ventes Réalisées</h5>
+            <p>{{ total_revenue|floatformat:2 }} €</p>
+        </div>
+        <div class="stat-icon" style="background-color: rgba(212, 175, 55, 0.1); color: var(--admin-gold);">
+            <span class="material-symbols-outlined">payments</span>
+        </div>
+    </div>
+    
+    <!-- Pending Reservations -->
+    <div class="stat-card">
+        <div class="stat-info">
+            <h5>En attente de validation</h5>
+            <p>{{ pending_count }}</p>
+        </div>
+        <div class="stat-icon" style="background-color: var(--warning-light); color: var(--warning);">
+            <span class="material-symbols-outlined">hourglass_empty</span>
+        </div>
+    </div>
+    
+    <!-- Unique Clients -->
+    <div class="stat-card">
+        <div class="stat-info">
+            <h5>Clients Uniques</h5>
+            <p>{{ unique_clients }}</p>
+        </div>
+        <div class="stat-icon" style="background-color: rgba(16, 185, 129, 0.1); color: var(--success);">
+            <span class="material-symbols-outlined">group</span>
+        </div>
+    </div>
+    
+    <!-- Occupancy Rate -->
+    <div class="stat-card">
+        <div class="stat-info">
+            <h5>Taux d'occupation</h5>
+            <p>{{ occupancy_rate }} %</p>
+        </div>
+        <div class="stat-icon" style="background-color: rgba(59, 130, 246, 0.1); color: #3b82f6;">
+            <span class="material-symbols-outlined">bed</span>
+        </div>
+    </div>
+
+</div>
+
+<!-- Graphics & Recent List Split -->
+<div style="display: grid; grid-template-columns: 1.4fr 1fr; gap: 2rem;">
+    
+    <!-- Left Column: Sales Trend Graph -->
+    <div class="admin-section">
+        <div class="section-header">
+            <h3>Évolution Mensuelle des Ventes (€)</h3>
+            <span class="material-symbols-outlined" style="color: var(--admin-text-muted);">show_chart</span>
+        </div>
+        <div style="position: relative; height: 320px; width: 100%;">
+            <canvas id="salesChart" style="max-height: 320px;"></canvas>
+        </div>
+    </div>
+    
+    <!-- Right Column: Recent Bookings -->
+    <div class="admin-section">
+        <div class="section-header">
+            <h3>Réservations Récentes</h3>
+            <a href="{% url 'booking:dashboard_bookings' %}" style="font-size: 0.8rem; font-weight: 700; color: var(--admin-gold); text-decoration: underline;">Voir tout</a>
+        </div>
+        
+        <div class="table-responsive">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th style="padding: 0.75rem 0.5rem;">Client</th>
+                        <th style="padding: 0.75rem 0.5rem;">Arrivée</th>
+                        <th style="padding: 0.75rem 0.5rem;">Statut</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for res in recent_bookings %}
+                    <tr>
+                        <td style="padding: 0.85rem 0.5rem; font-weight: 600;">
+                            {{ res.customer_name }}
+                            <span style="display: block; font-size: 0.72rem; color: var(--admin-text-muted); font-weight: 400;">{{ res.room.name }}</span>
+                        </td>
+                        <td style="padding: 0.85rem 0.5rem; font-size: 0.85rem;">{{ res.check_in|date:"d M Y" }}</td>
+                        <td style="padding: 0.85rem 0.5rem;">
+                            <span class="badge {% if res.status == 'CONFIRMED' %}badge-confirmed{% elif res.status == 'PENDING' %}badge-pending{% else %}badge-cancelled{% endif %}" style="font-size: 0.65rem; padding: 0.2rem 0.5rem;">
+                                {{ res.get_status_display }}
+                            </span>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="3" style="text-align: center; color: var(--admin-text-muted); padding: 3rem;">Aucune réservation récente.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+</div>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<!-- Load Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const labels = {{ sales_labels_json|safe }};
+    const dataPoints = {{ sales_data_json|safe }};
+    
+    const ctx = document.getElementById('salesChart').getContext('2d');
+    
+    // Create a beautiful premium gradient for Chart area
+    const gradient = ctx.createLinearGradient(0, 0, 0, 300);
+    gradient.addColorStop(0, 'rgba(212, 175, 55, 0.4)');
+    gradient.addColorStop(1, 'rgba(212, 175, 55, 0.02)');
+    
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Revenus (€)',
+                data: dataPoints,
+                borderColor: '#d4af37',
+                borderWidth: 3,
+                backgroundColor: gradient,
+                fill: true,
+                tension: 0.35,
+                pointBackgroundColor: '#0f172a',
+                pointBorderColor: '#d4af37',
+                pointBorderWidth: 2,
+                pointRadius: 5,
+                pointHoverRadius: 7
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    grid: {
+                        color: 'rgba(15, 23, 42, 0.05)'
+                    },
+                    ticks: {
+                        font: {
+                            family: "'Plus Jakarta Sans', sans-serif",
+                            size: 11
+                        },
+                        callback: function(value) {
+                            return value + ' €';
+                        }
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    },
+                    ticks: {
+                        font: {
+                            family: "'Plus Jakarta Sans', sans-serif",
+                            size: 11
+                        }
+                    }
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,94 @@
+{% extends 'dashboard/base.html' %}
+
+{% block title %}
+    {% if addon %}Edit {{ addon.name }}{% else %}New VIP Add-On{% endif %} — Aero Luxe Select
+{% endblock %}
+
+{% block dashboard_header %}
+    {% if addon %}Edit VIP Add-On{% else %}Add VIP Add-On{% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto space-y-8">
+    
+    <!-- Top Action bar -->
+    <div class="flex items-center space-x-3 bg-luxury-card border border-luxury-border p-6 rounded-2xl">
+        <a href="{% url 'dashboard:addons' %}" class="w-10 h-10 rounded-xl bg-luxury-black border border-luxury-border flex items-center justify-center text-luxury-muted hover:text-gold-400 transition-colors">
+            <i class="fa-solid fa-arrow-left"></i>
+        </a>
+        <div>
+            <h2 class="text-xl font-bold font-serif tracking-wide gold-text-gradient">
+                {% if addon %}Configure "{{ addon.name }}"{% else %}Create New VIP Service{% endif %}
+            </h2>
+            <p class="text-xs text-luxury-muted mt-1">Configure premium upsell catalog options available during guest checkouts.</p>
+        </div>
+    </div>
+
+    <!-- Form Panel -->
+    <div class="bg-luxury-card border border-luxury-border rounded-2xl p-8 shadow-xl">
+        <form method="POST" class="space-y-6">
+            {% csrf_token %}
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Name -->
+                <div>
+                    <label class="block text-xs uppercase tracking-wider text-luxury-muted font-semibold mb-2">Service Name *</label>
+                    <input type="text" name="name" required value="{{ addon.name|default:'' }}" placeholder="e.g. Airport VIP Fast-Track Gate Service" class="w-full bg-luxury-black border border-luxury-border rounded-xl px-4 py-3 text-sm text-white placeholder-luxury-muted focus:border-gold-500/50 outline-none transition-colors">
+                </div>
+
+                <!-- Slug -->
+                <div>
+                    <label class="block text-xs uppercase tracking-wider text-luxury-muted font-semibold mb-2">Custom URL Slug (optional)</label>
+                    <input type="text" name="slug" value="{{ addon.slug|default:'' }}" placeholder="e.g. fast-track-vip" class="w-full bg-luxury-black border border-luxury-border rounded-xl px-4 py-3 text-sm text-white placeholder-luxury-muted focus:border-gold-500/50 outline-none transition-colors font-mono">
+                    <p class="text-[10px] text-luxury-muted mt-1">Leave blank to automatically generate from name.</p>
+                </div>
+
+                <!-- Price -->
+                <div>
+                    <label class="block text-xs uppercase tracking-wider text-luxury-muted font-semibold mb-2">Service Pricing (USD) *</label>
+                    <div class="relative">
+                        <span class="absolute left-4 top-1/2 -translate-y-1/2 text-luxury-muted text-sm font-semibold">$</span>
+                        <input type="number" name="price" step="0.01" min="0.00" required value="{{ addon.price|default:0.00 }}" class="w-full bg-luxury-black border border-luxury-border rounded-xl pl-8 pr-4 py-3 text-sm text-white focus:border-gold-500/50 outline-none transition-colors font-mono">
+                    </div>
+                </div>
+
+                <!-- Icon Class -->
+                <div>
+                    <label class="block text-xs uppercase tracking-wider text-luxury-muted font-semibold mb-2">FontAwesome CSS Icon Class</label>
+                    <div class="relative">
+                        <span class="absolute left-4 top-1/2 -translate-y-1/2 text-luxury-muted text-sm"><i class="fa-solid fa-icons"></i></span>
+                        <input type="text" name="icon" value="{{ addon.icon|default:'fa-solid fa-crown' }}" placeholder="e.g. fa-solid fa-shield-halved, fa-solid fa-hotel" class="w-full bg-luxury-black border border-luxury-border rounded-xl pl-10 pr-4 py-3 text-sm text-white focus:border-gold-500/50 outline-none transition-colors font-mono">
+                    </div>
+                    <p class="text-[10px] text-luxury-muted mt-1">Pick a FontAwesome code. Common luxury codes: `fa-solid fa-crown` (Crown), `fa-solid fa-shield-halved` (Concierge), `fa-solid fa-bolt` (Fast-track), `fa-solid fa-route` (Multi-stop).</p>
+                </div>
+
+                <!-- Description -->
+                <div class="md:col-span-2">
+                    <label class="block text-xs uppercase tracking-wider text-luxury-muted font-semibold mb-2">VIP Service Description</label>
+                    <textarea name="description" rows="4" placeholder="Detail the luxury service values, what is included (e.g. bypass immigration queues, private luggage handlers), and specific details..." class="w-full bg-luxury-black border border-luxury-border rounded-xl p-4 text-sm text-white placeholder-luxury-muted focus:border-gold-500/50 outline-none transition-colors resize-none">{{ addon.description|default:'' }}</textarea>
+                </div>
+
+                <!-- Active Status -->
+                <div class="md:col-span-2 py-2">
+                    <label class="inline-flex items-center space-x-3 cursor-pointer">
+                        <input type="checkbox" name="is_active" class="sr-only peer" {% if addon.is_active or not addon %}checked{% endif %}>
+                        <div class="w-11 h-6 bg-luxury-border peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-gold-500 relative"></div>
+                        <span class="text-xs font-semibold uppercase tracking-wider text-white">Active in Passenger checkout Catalogue</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Submit buttons row -->
+            <div class="flex items-center justify-end space-x-4 pt-6 border-t border-luxury-border">
+                <a href="{% url 'dashboard:addons' %}" class="text-xs font-semibold text-luxury-muted hover:text-white transition-colors px-5 py-3 rounded-xl hover:bg-luxury-black/30 border border-transparent">
+                    Cancel
+                </a>
+                <button type="submit" class="gold-gradient text-luxury-black text-xs font-semibold px-8 py-3 rounded-xl hover:opacity-95 transition-all shadow-lg shadow-gold-500/15">
+                    {% if addon %}Save Upsell Changes{% else %}Create VIP Service{% endif %}
+                </button>
+            </div>
+
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,205 @@
+{% extends 'dashboard/base.html' %}
+
+{% block title %}Accounting Reports — Aero Luxe Select{% endblock %}
+{% block dashboard_header %}Financial Reports{% endblock %}
+
+{% block content %}
+<!-- Filtering, Year selector and Generate button Row -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    
+    <!-- Left Column: Search & Filters Card -->
+    <div class="lg:col-span-2 bg-luxury-card border border-luxury-border p-6 rounded-2xl flex flex-col justify-between gap-6">
+        <div>
+            <h3 class="font-serif font-semibold text-lg text-gold-400">Financial Ledger Filters</h3>
+            <p class="text-xs text-luxury-muted mt-1">Isolate accounting logs by specific operational sites or target billing years.</p>
+        </div>
+
+        <form method="GET" action="" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <!-- Site filter -->
+            <div>
+                <label class="block text-[10px] uppercase tracking-wider text-luxury-muted font-bold mb-2">Operating Hub Site</label>
+                <select name="site" class="w-full bg-luxury-black border border-luxury-border rounded-xl px-4 py-3 text-sm text-white focus:border-gold-500/50 outline-none transition-colors">
+                    <option value="">All Operating Sites</option>
+                    {% for s in sites %}
+                    <option value="{{ s.slug }}" {% if site_filter == s.slug %}selected{% endif %}>{{ s.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Year Filter -->
+            <div>
+                <label class="block text-[10px] uppercase tracking-wider text-luxury-muted font-bold mb-2">Accounting Year</label>
+                <select name="year" class="w-full bg-luxury-black border border-luxury-border rounded-xl px-4 py-3 text-sm text-white focus:border-gold-500/50 outline-none transition-colors">
+                    {% for y in years %}
+                    <option value="{{ y }}" {% if year == y %}selected{% endif %}>{{ y }} Year</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="sm:col-span-2 flex items-center justify-end space-x-3 pt-2">
+                <a href="?" class="text-xs font-semibold text-luxury-muted hover:text-white transition-colors">Reset</a>
+                <button type="submit" class="gold-gradient text-luxury-black text-xs font-semibold px-6 py-2.5 rounded-xl hover:opacity-95 transition-all shadow-lg shadow-gold-500/10">
+                    <i class="fa-solid fa-filter mr-1.5"></i>Apply Filters
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Right Column: Generate Monthly Calculations Sheet Card -->
+    <div class="bg-luxury-card border border-luxury-border p-6 rounded-2xl space-y-4">
+        <div>
+            <h3 class="font-serif font-semibold text-base text-white">Generate Monthly Report</h3>
+            <p class="text-xs text-luxury-muted mt-1">Run automatic pricing algorithms to close month registers and index gross balances.</p>
+        </div>
+
+        <form method="POST" action="{% url 'dashboard:generate_report' %}" class="space-y-4 pt-1">
+            {% csrf_token %}
+            
+            <div class="grid grid-cols-2 gap-3">
+                <!-- Month -->
+                <div>
+                    <label class="block text-[9px] uppercase tracking-wider text-luxury-muted font-semibold mb-1">Target Month</label>
+                    <select name="month" class="w-full bg-luxury-black border border-luxury-border rounded-lg px-3 py-2 text-xs text-white focus:border-gold-500/50 outline-none">
+                        <option value="1">January</option>
+                        <option value="2">February</option>
+                        <option value="3">March</option>
+                        <option value="4">April</option>
+                        <option value="5">May</option>
+                        <option value="6">June</option>
+                        <option value="7">July</option>
+                        <option value="8">August</option>
+                        <option value="9">September</option>
+                        <option value="10">October</option>
+                        <option value="11">November</option>
+                        <option value="12">December</option>
+                    </select>
+                </div>
+
+                <!-- Year -->
+                <div>
+                    <label class="block text-[9px] uppercase tracking-wider text-luxury-muted font-semibold mb-1">Target Year</label>
+                    <select name="year" class="w-full bg-luxury-black border border-luxury-border rounded-lg px-3 py-2 text-xs text-white focus:border-gold-500/50 outline-none">
+                        {% for y in years %}
+                        <option value="{{ y }}" {% if year == y %}selected{% endif %}>{{ y }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <button type="submit" class="w-full text-xs font-semibold text-gold-400 bg-gold-500/10 hover:bg-gold-500/20 border border-gold-500/25 hover:border-gold-400/40 rounded-xl py-3 transition-all text-center">
+                <i class="fa-solid fa-gears mr-1.5"></i>Run Profit Calculations
+            </button>
+        </form>
+    </div>
+
+</div>
+
+<!-- Financial Totals Block Grid -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
+    <!-- Bookings -->
+    <div class="bg-luxury-card border border-luxury-border p-5 rounded-xl">
+        <span class="block text-[10px] uppercase tracking-wider text-luxury-muted">Aggregated Trips</span>
+        <span class="block text-2xl font-serif font-bold text-white mt-1">{{ totals.total_bookings|default:0 }} Bookings</span>
+    </div>
+    
+    <!-- Gross -->
+    <div class="bg-luxury-card border border-luxury-border p-5 rounded-xl">
+        <span class="block text-[10px] uppercase tracking-wider text-luxury-muted font-semibold">Gross Revenue</span>
+        <span class="block text-2xl font-serif font-bold text-white mt-1">${{ totals.total_revenue|default:0|floatformat:2 }}</span>
+    </div>
+
+    <!-- Platform commission costs -->
+    <div class="bg-luxury-card border border-luxury-border p-5 rounded-xl">
+        <span class="block text-[10px] uppercase tracking-wider text-luxury-muted">Channel Commissions</span>
+        <span class="block text-2xl font-serif font-bold text-gold-400 mt-1">${{ totals.total_fees|default:0|floatformat:2 }}</span>
+    </div>
+
+    <!-- Net Revenue -->
+    <div class="bg-luxury-card border border-luxury-border p-5 rounded-xl">
+        <span class="block text-[10px] uppercase tracking-wider text-luxury-muted">Net Brand Revenue</span>
+        <span class="block text-2xl font-serif font-bold text-white mt-1">${{ totals.total_net|default:0|floatformat:2 }}</span>
+    </div>
+
+    <!-- Profit -->
+    <div class="bg-luxury-card border border-luxury-border p-5 rounded-xl gold-gradient text-luxury-black font-semibold">
+        <span class="block text-[10px] uppercase tracking-wider opacity-75">Retained Net Profit</span>
+        <span class="block text-2xl font-serif font-bold mt-1">${{ totals.total_profit|default:0|floatformat:2 }}</span>
+    </div>
+</div>
+
+<!-- profit table logs -->
+<div class="bg-luxury-card border border-luxury-border rounded-2xl overflow-hidden shadow-xl">
+    <div class="p-6 border-b border-luxury-border">
+        <h3 class="font-serif font-semibold text-base text-white">Monthly Profit sheets registry</h3>
+        <p class="text-xs text-luxury-muted mt-0.5">Showing closed monthly balance sheets matching filters.</p>
+    </div>
+
+    <div class="overflow-x-auto">
+        <table class="w-full text-left text-sm whitespace-nowrap">
+            <thead>
+                <tr class="bg-luxury-black/30 text-luxury-muted text-xs uppercase tracking-wider border-b border-luxury-border">
+                    <th class="py-4 px-6">Month / Year</th>
+                    <th class="py-4 px-6">Operational Site</th>
+                    <th class="py-4 px-6 text-center">Bookings closed</th>
+                    <th class="py-4 px-6">Gross Chauffeur Revenue</th>
+                    <th class="py-4 px-6">Platform Surcharges (Viator/Expedia)</th>
+                    <th class="py-4 px-6">Local Expenses</th>
+                    <th class="py-4 px-6 font-bold text-gold-400">Net Profit Value</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-luxury-border">
+                {% for r in reports %}
+                <tr class="hover:bg-luxury-black/20 transition-colors">
+                    <td class="py-4 px-6 font-semibold text-white">
+                        <span class="text-sm">
+                            {% if r.month == 1 %}January
+                            {% elif r.month == 2 %}February
+                            {% elif r.month == 3 %}March
+                            {% elif r.month == 4 %}April
+                            {% elif r.month == 5 %}May
+                            {% elif r.month == 6 %}June
+                            {% elif r.month == 7 %}July
+                            {% elif r.month == 8 %}August
+                            {% elif r.month == 9 %}September
+                            {% elif r.month == 10 %}October
+                            {% elif r.month == 11 %}November
+                            {% elif r.month == 12 %}December
+                            {% endif %}
+                        </span>
+                        <span class="block font-mono text-[10px] text-luxury-muted mt-0.5">{{ r.year }} Fiscal Year</span>
+                    </td>
+                    <td class="py-4 px-6 font-bold uppercase text-white">
+                        {{ r.site.name }}
+                    </td>
+                    <td class="py-4 px-6 text-center text-white">
+                        {{ r.total_bookings }}
+                    </td>
+                    <td class="py-4 px-6 font-mono font-semibold text-white">
+                        ${{ r.total_revenue|floatformat:2 }}
+                    </td>
+                    <td class="py-4 px-6 font-mono text-xs text-luxury-muted">
+                        ${{ r.platform_fees|floatformat:2 }}
+                    </td>
+                    <td class="py-4 px-6 font-mono text-xs text-rose-400">
+                        -${{ r.expenses|floatformat:2 }}
+                    </td>
+                    <td class="py-4 px-6 font-mono font-bold text-gold-400 text-base">
+                        ${{ r.profit|floatformat:2 }}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" class="text-center py-20 text-luxury-muted text-sm bg-luxury-card">
+                        <div class="max-w-md mx-auto">
+                            <i class="fa-solid fa-chart-line text-4xl text-luxury-border mb-3 block"></i>
+                            <h4 class="text-white font-serif font-bold text-base">No Accounting Sheets Indexed</h4>
+                            <p class="text-xs text-luxury-muted mt-1">There are no generated monthly report calculations registered for {{ year }}. Use the right form to generate profit records.</p>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

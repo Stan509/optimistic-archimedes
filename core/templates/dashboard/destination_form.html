@@ -1,0 +1,109 @@
+{% extends 'dashboard/base.html' %}
+
+{% block title %}
+    {% if destination %}Edit {{ destination.name }}{% else %}New Destination{% endif %} — Aero Luxe Select
+{% endblock %}
+
+{% block dashboard_header %}
+    {% if destination %}Edit Destination Point{% else %}Add Destination Point{% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto space-y-8">
+    
+    <!-- Top Action bar -->
+    <div class="flex items-center space-x-3 bg-luxury-card border border-luxury-border p-6 rounded-2xl">
+        <a href="{% url 'dashboard:destinations' airport.id %}" class="w-10 h-10 rounded-xl bg-luxury-black border border-luxury-border flex items-center justify-center text-luxury-muted hover:text-gold-400 transition-colors">
+            <i class="fa-solid fa-arrow-left"></i>
+        </a>
+        <div>
+            <h2 class="text-xl font-bold font-serif tracking-wide gold-text-gradient">
+                {% if destination %}Update "{{ destination.name }}"{% else %}Add Route Point for {{ airport.code }}{% endif %}
+            </h2>
+            <p class="text-xs text-luxury-muted mt-1">Configure hotels, private keys, resort complexes, and zone locations connected to the <strong>{{ airport.name }} ({{ airport.code }})</strong> hub.</p>
+        </div>
+    </div>
+
+    <!-- Form Panel -->
+    <div class="bg-luxury-card border border-luxury-border rounded-2xl p-8 shadow-xl">
+        <form method="POST" enctype="multipart/form-data" class="space-y-6">
+            {% csrf_token %}
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Name -->
+                <div>
+                    <label class="block text-xs uppercase tracking-wider text-luxury-muted font-semibold mb-2">Destination Point Name *</label>
+                    <input type="text" name="name" required value="{{ destination.name|default:'' }}" placeholder="e.g. Majestic Colonial Resort, Upper East Side" class="w-full bg-luxury-black border border-luxury-border rounded-xl px-4 py-3 text-sm text-white placeholder-luxury-muted focus:border-gold-500/50 outline-none transition-colors">
+                </div>
+
+                <!-- Type Selection -->
+                <div>
+                    <label class="block text-xs uppercase tracking-wider text-luxury-muted font-semibold mb-2">Destination Type *</label>
+                    <select name="destination_type" required class="w-full bg-luxury-black border border-luxury-border rounded-xl px-4 py-3 text-sm text-white focus:border-gold-500/50 outline-none transition-colors">
+                        <option value="HOTEL" {% if destination.destination_type == 'HOTEL' %}selected{% endif %}>Hotel</option>
+                        <option value="RESORT" {% if destination.destination_type == 'RESORT' or not destination %}selected{% endif %}>Resort Complex</option>
+                        <option value="PRIVATE_VILLA" {% if destination.destination_type == 'PRIVATE_VILLA' %}selected{% endif %}>Private Villa</option>
+                        <option value="NEIGHBORHOOD" {% if destination.destination_type == 'NEIGHBORHOOD' %}selected{% endif %}>Neighborhood / Borough</option>
+                        <option value="OTHER" {% if destination.destination_type == 'OTHER' %}selected{% endif %}>Other Location Point</option>
+                    </select>
+                </div>
+
+                <!-- Full Address -->
+                <div class="md:col-span-2">
+                    <label class="block text-xs uppercase tracking-wider text-luxury-muted font-semibold mb-2">Geographic Address / Location Map Reference *</label>
+                    <input type="text" name="address" required value="{{ destination.address|default:'' }}" placeholder="e.g. Carretera Arena Gorda, Punta Cana 23000, Dominican Republic" class="w-full bg-luxury-black border border-luxury-border rounded-xl px-4 py-3 text-sm text-white placeholder-luxury-muted focus:border-gold-500/50 outline-none transition-colors">
+                </div>
+
+                <!-- Description -->
+                <div class="md:col-span-2">
+                    <label class="block text-xs uppercase tracking-wider text-luxury-muted font-semibold mb-2">Route Details & Driver Notes Description</label>
+                    <textarea name="description" rows="3" placeholder="Write description (e.g. lobby entry gates, typical time from airport, check-in rules)..." class="w-full bg-luxury-black border border-luxury-border rounded-xl p-4 text-sm text-white placeholder-luxury-muted focus:border-gold-500/50 outline-none transition-colors resize-none">{{ destination.description|default:'' }}</textarea>
+                </div>
+
+                <!-- Image File Input -->
+                <div class="md:col-span-2">
+                    <label class="block text-xs uppercase tracking-wider text-luxury-muted font-semibold mb-2">Location Image / Banner</label>
+                    
+                    <div class="flex items-center space-x-6 bg-luxury-black/30 border border-luxury-border p-4 rounded-xl">
+                        {% if destination.image %}
+                        <div class="shrink-0">
+                            <span class="block text-[10px] uppercase text-luxury-muted mb-1.5 font-semibold">Current Image:</span>
+                            <img src="{{ destination.image.url }}" alt="{{ destination.name }}" class="w-24 h-16 object-cover rounded-lg border border-luxury-border">
+                        </div>
+                        {% endif %}
+                        <div class="flex-1">
+                            <input type="file" name="image" accept="image/*" class="text-xs text-luxury-muted block w-full
+                                file:mr-4 file:py-2 file:px-4
+                                file:rounded-xl file:border-0
+                                file:text-xs file:font-semibold
+                                file:bg-gold-500/10 file:text-gold-400
+                                file:cursor-pointer hover:file:bg-gold-500/20 file:transition-colors">
+                            <span class="block text-[10px] text-luxury-muted mt-2">Format: JPG, PNG, WEBP. Recommend landscape ratios (16:9).</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Active Status -->
+                <div class="md:col-span-2 py-2">
+                    <label class="inline-flex items-center space-x-3 cursor-pointer">
+                        <input type="checkbox" name="is_active" class="sr-only peer" {% if destination.is_active or not destination %}checked{% endif %}>
+                        <div class="w-11 h-6 bg-luxury-border peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-gold-500 relative"></div>
+                        <span class="text-xs font-semibold uppercase tracking-wider text-white">Active Operational Destination</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Submit buttons row -->
+            <div class="flex items-center justify-end space-x-4 pt-6 border-t border-luxury-border">
+                <a href="{% url 'dashboard:destinations' airport.id %}" class="text-xs font-semibold text-luxury-muted hover:text-white transition-colors px-5 py-3 rounded-xl hover:bg-luxury-black/30 border border-transparent">
+                    Cancel
+                </a>
+                <button type="submit" class="gold-gradient text-luxury-black text-xs font-semibold px-8 py-3 rounded-xl hover:opacity-95 transition-all shadow-lg shadow-gold-500/15">
+                    {% if destination %}Save Changes{% else %}Create Location Point{% endif %}
+                </button>
+            </div>
+
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,215 @@
+{% extends 'booking/base.html' %}
+{% load static %}
+
+{% block title %}{{ settings.hotel_name }} | Palais de Prestige{% endblock %}
+
+{% block content %}
+
+<!-- Hero Section -->
+<section id="accueil" class="hero" style="background-image: url('{{ elements.hero_title.get_image_url|default:"https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=1920&q=80" }}');">
+    <div class="hero-content">
+        <span class="section-tag" style="color: var(--accent); margin-bottom: 1.5rem; letter-spacing: 5px;">Bienvenue à Cannes</span>
+        <h1 class="hero-title">{{ elements.hero_title.value|default:"Une Évasion Lumineuse Face à la Méditerranée" }}</h1>
+        <p class="hero-subtitle">{{ elements.hero_subtitle.value|default:"Découvrez le charme intemporel de la Côte d'Azur au sein de notre hôtel 5 étoiles d'exception." }}</p>
+        <a href="#chambres" class="btn-search" style="display: inline-flex; width: auto; padding: 1rem 2.5rem; border-radius: 30px;">
+            {{ elements.hero_button_text.value|default:"Réserver votre séjour" }}
+            <span class="material-symbols-outlined">arrow_forward</span>
+        </a>
+    </div>
+</section>
+
+<!-- Floating Search Bar -->
+<div class="search-wrapper">
+    <div class="search-card">
+        <form action="{% url 'booking:index' %}#chambres" method="GET" class="search-form">
+            <div class="form-group">
+                <label for="check_in">Date d'arrivée</label>
+                <input type="date" id="check_in" name="check_in" min="{{ today }}" value="{{ check_in|default:'' }}" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="check_out">Date de départ</label>
+                <input type="date" id="check_out" name="check_out" min="{{ tomorrow }}" value="{{ check_out|default:'' }}" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="guests">Voyageurs</label>
+                <select id="guests" name="guests">
+                    <option value="1" {% if guests == '1' %}selected{% endif %}>1 Adulte</option>
+                    <option value="2" {% if guests == '2' or not guests %}selected{% endif %}>2 Adultes</option>
+                    <option value="3" {% if guests == '3' %}selected{% endif %}>3 Adultes / Famille</option>
+                    <option value="4" {% if guests == '4' %}selected{% endif %}>4 Voyageurs</option>
+                </select>
+            </div>
+            
+            <button type="submit" class="btn-search">
+                <span class="material-symbols-outlined">search</span>
+                Rechercher
+            </button>
+        </form>
+    </div>
+</div>
+
+<!-- Rooms Catalog Section -->
+<section id="chambres" class="section">
+    <div class="section-header">
+        <span class="section-tag">Havres de Paix</span>
+        <h2 class="section-title">Nos Chambres &amp; Suites d'Exception</h2>
+    </div>
+    
+    {% if check_in and check_out %}
+        <div style="background-color: rgba(212, 175, 55, 0.08); border: 1px solid rgba(212, 175, 55, 0.3); padding: 1.2rem; border-radius: var(--border-radius-sm); margin-bottom: 3rem; text-align: center; font-weight: 500;">
+            <p>Affichage des chambres disponibles du <strong>{{ check_in }}</strong> au <strong>{{ check_out }}</strong> pour <strong>{{ guests }}</strong> voyageur(s).</p>
+            <a href="{% url 'booking:index' %}#chambres" style="color: var(--accent); font-size: 0.9rem; text-decoration: underline; margin-top: 0.5rem; display: block;">Effacer les filtres de recherche</a>
+        </div>
+    {% endif %}
+
+    <div class="rooms-grid">
+        {% for room in rooms %}
+        <div class="room-card">
+            <div class="room-img-wrapper">
+                <img src="{{ room.get_image_url }}" alt="{{ room.name }}">
+                <div class="room-price-badge">
+                    <span>{{ room.price_per_night|floatformat:0 }} €</span> / nuit
+                </div>
+            </div>
+            
+            <div class="room-content">
+                <h3 class="room-title">{{ room.name }}</h3>
+                <div class="room-capacity">
+                    <span class="material-symbols-outlined" style="font-size: 1.1rem; color: var(--accent);">people</span>
+                    Jusqu'à {{ room.capacity }} personnes &middot; N°{{ room.room_number }}
+                </div>
+                
+                <p class="room-desc">{{ room.description }}</p>
+                
+                <!-- Amenities tags -->
+                <div class="room-amenities">
+                    {% if room.has_wifi %}
+                        <span class="amenity-tag">
+                            <span class="material-symbols-outlined" style="font-size: 1rem;">wifi</span> Wi-Fi
+                        </span>
+                    {% endif %}
+                    {% if room.has_ac %}
+                        <span class="amenity-tag">
+                            <span class="material-symbols-outlined" style="font-size: 1rem;">ac_unit</span> Clim
+                        </span>
+                    {% endif %}
+                    {% if room.has_jacuzzi %}
+                        <span class="amenity-tag" style="border: 1px solid rgba(212,175,55,0.4); background-color: rgba(212,175,55,0.05);">
+                            <span class="material-symbols-outlined" style="font-size: 1rem; color: var(--accent);">hot_tub</span> Jacuzzi
+                        </span>
+                    {% endif %}
+                    {% if room.has_balcony %}
+                        <span class="amenity-tag">
+                            <span class="material-symbols-outlined" style="font-size: 1rem;">balcony</span> Balcon
+                        </span>
+                    {% endif %}
+                    {% if room.has_room_service %}
+                        <span class="amenity-tag">
+                            <span class="material-symbols-outlined" style="font-size: 1rem;">room_service</span> Service 24h
+                        </span>
+                    {% endif %}
+                </div>
+                
+                <!-- Action button -->
+                {% if check_in and check_out %}
+                    <a href="{% url 'booking:checkout' room.slug %}?check_in={{ check_in }}&check_out={{ check_out }}&guests={{ guests }}" class="btn-card" style="background-color: var(--accent); border-color: var(--accent); color: var(--primary);">
+                        Réserver Immédiatement
+                    </a>
+                {% else %}
+                    <a href="{% url 'booking:room_detail' room.slug %}" class="btn-card">
+                        Découvrir &amp; Réserver
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+        {% empty %}
+        <div style="grid-column: 1 / -1; text-align: center; padding: 4rem; background: var(--light-card); border-radius: var(--border-radius); box-shadow: var(--shadow-soft);">
+            <span class="material-symbols-outlined" style="font-size: 4rem; color: var(--text-muted); margin-bottom: 1.5rem;">sentiment_dissatisfied</span>
+            <h3>Aucune chambre disponible</h3>
+            <p style="color: var(--text-muted); margin-top: 0.5rem;">Désolé, aucune de nos chambres ne correspond à vos critères de recherche pour ces dates. Veuillez essayer d'autres dates ou réduire le nombre de voyageurs.</p>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+
+<!-- Services & Charme Section -->
+<section id="charme" class="section" style="background-color: #ffffff; max-width: 100vw; width: 100vw; margin-left: calc(-50vw + 50%);">
+    <div style="max-width: 1200px; margin: 0 auto; padding: 0 2rem;">
+        <div class="section-header">
+            <span class="section-tag">Art de Vivre</span>
+            <h2 class="section-title">Les Services &amp; Prestations de l'Impérial</h2>
+        </div>
+        
+        <div class="services-grid">
+            <div class="service-item">
+                <span class="material-symbols-outlined service-icon">spa</span>
+                <h4 class="service-h4">{{ elements.service_1_title.value|default:"Le Spa Royal Impérial" }}</h4>
+                <p class="service-desc">{{ elements.service_1_desc.value|default:"Un sanctuaire de 800 m² dédié à la détente absolue, proposant des soins signature, un hammam traditionnel, un sauna et une piscine sensorielle chauffée." }}</p>
+            </div>
+            
+            <div class="service-item">
+                <span class="material-symbols-outlined service-icon">restaurant</span>
+                <h4 class="service-h4">{{ elements.service_2_title.value|default:"Table de l'Impérial (1* Michelin)" }}</h4>
+                <p class="service-desc">{{ elements.service_2_desc.value|default:"Le chef étoilé vous propose une cuisine gastronomique inspirée des saveurs de la mer et du terroir provençal, sublimée par une carte de vins rares." }}</p>
+            </div>
+            
+            <div class="service-item">
+                <span class="material-symbols-outlined service-icon">sailing</span>
+                <h4 class="service-h4">{{ elements.service_3_title.value|default:"Plage Privée & Club de Voile" }}</h4>
+                <p class="service-desc">{{ elements.service_3_desc.value|default:"Détendez-vous sur nos transats haut de gamme ou embarquez pour une croisière privée en yacht au coucher du soleil depuis notre ponton exclusif." }}</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- About Us Section -->
+<section id="histoire" class="section">
+    <div class="about-wrapper">
+        <div class="about-content">
+            <span class="section-tag" style="text-align: left; display: block; margin-left: 0;">Notre Héritage</span>
+            <h3 class="about-h3">{{ elements.about_title.value|default:"Le Raffinement Absolu Depuis 1926" }}</h3>
+            <p class="about-p">{{ elements.about_text.value|default:"Niché au cœur de la prestigieuse Croisette à Cannes, l'Horizon Impérial incarne l'alliance parfaite de l'élégance historique et du confort contemporain. Depuis un siècle, nous accueillons des voyageurs du monde entier en leur offrant un service sur-mesure exceptionnel, une table gastronomique étoilée et une vue imprenable sur la baie azuréenne." }}</p>
+            
+            <div style="display: flex; gap: 3rem; margin-top: 2rem;">
+                <div>
+                    <h5 style="font-size: 2.2rem; color: var(--accent); font-family: var(--font-heading); font-weight: 700;">5 &starf;</h5>
+                    <p style="font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600; letter-spacing: 1px;">Hôtel de prestige</p>
+                </div>
+                <div>
+                    <h5 style="font-size: 2.2rem; color: var(--accent); font-family: var(--font-heading); font-weight: 700;">1926</h5>
+                    <p style="font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600; letter-spacing: 1px;">Année de fondation</p>
+                </div>
+                <div>
+                    <h5 style="font-size: 2.2rem; color: var(--accent); font-family: var(--font-heading); font-weight: 700;">24h</h5>
+                    <p style="font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600; letter-spacing: 1px;">Conciergerie Clefs d'Or</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="about-img-box">
+            <img src="{{ elements.about_title.get_image_url|default:"https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?auto=format&fit=crop&w=800&q=80" }}" alt="L'Horizon Impérial" class="about-img-main">
+        </div>
+    </div>
+</section>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    // S'assurer que la date de départ est toujours postérieure à l'arrivée
+    const checkInInput = document.getElementById('check_in');
+    const checkOutInput = document.getElementById('check_out');
+    
+    checkInInput.addEventListener('change', function() {
+        const checkInDate = new Date(this.value);
+        checkInDate.setDate(checkInDate.getDate() + 1);
+        const minCheckOut = checkInDate.toISOString().split('T')[0];
+        checkOutInput.min = minCheckOut;
+        if(checkOutInput.value && checkOutInput.value < minCheckOut) {
+            checkOutInput.value = minCheckOut;
+        }
+    });
+</script>
+{% endblock %}
