@@ -1,5 +1,5 @@
 """
-Aero Luxe Select — Public Site Views
+AeroLux Select — Public Site Views
 
 Handles all client-facing pages for both NYC and DR sites.
 The current site is determined by the SiteMiddleware.

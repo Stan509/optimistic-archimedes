@@ -43,7 +43,7 @@ class MultiSiteMiddlewareTestCase(TestCase):
         """Retrieving settings for a site creates or returns the singleton settings."""
         settings_nyc = SiteSettings.get_settings(self.nyc)
         self.assertEqual(settings_nyc.site, self.nyc)
-        self.assertEqual(settings_nyc.company_name, 'Aero Luxe Select')
+        self.assertEqual(settings_nyc.company_name, 'AeroLux Select')
         
         settings_nyc_2 = SiteSettings.get_settings(self.nyc)
         self.assertEqual(settings_nyc.id, settings_nyc_2.id)

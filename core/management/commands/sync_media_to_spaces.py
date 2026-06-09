@@ -1,5 +1,5 @@
 """
-Aero Luxe Select — Sync Local Media to DigitalOcean Spaces
+AeroLux Select — Sync Local Media to DigitalOcean Spaces
 
 Django management command that uploads all files from the local media/
 directory to DigitalOcean Spaces (S3-compatible storage).

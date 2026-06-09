@@ -3,7 +3,7 @@
 {% load site_tags %}
 
 {% block title %}
-    {% if current_site.hero_title %}{{ current_site.hero_title }}{% else %}Aero Luxe Select | Premium Chauffeur & Transfers{% endif %}
+    {% if current_site.hero_title %}{{ current_site.hero_title }}{% else %}AeroLux Select | Premium Chauffeur & Transfers{% endif %}
 {% endblock %}
 
 {% block extra_css %}
@@ -49,23 +49,23 @@
 
 {% block content %}
 <!-- Immersive Hero Section -->
-<section id="hero-section" class="relative min-h-[90vh] flex items-center justify-center overflow-hidden py-16 lg:py-24">
+<section id="hero-section" class="relative min-h-[60vh] md:min-h-[90vh] flex items-center justify-center overflow-hidden py-12 md:py-16 lg:py-24">
     <!-- Video / Static Image Background -->
     <div class="absolute inset-0 z-0 overflow-hidden hero-perspective">
         <div class="absolute inset-0 bg-black/60 z-10"></div>
         {% if current_site.slug == 'nyc' %}
             <!-- Parallax Hero Image for NYC -->
-            <img src="{% static 'core/images/nyc-hero.jpg' %}?v=3" alt="NYC Premium Car Service" id="hero-parallax-img" class="w-full h-[130%] object-cover object-center absolute -top-[15%] left-0 will-change-transform">
+            <img src="{% static 'core/images/nyc-hero.jpg' %}?v=3" alt="NYC Premium Car Service" id="hero-parallax-img" class="w-full h-full md:h-[130%] object-cover md:object-cover object-center absolute top-0 md:-top-[15%] left-0 will-change-transform">
         {% elif current_site.slug == 'dr' %}
             <!-- Parallax Hero Image for DR -->
-            <img src="{% static 'core/images/dr-hero.jpg' %}?v=3" alt="Dominican Republic VIP Transfers" id="hero-parallax-img" class="w-full h-[130%] object-cover object-center absolute -top-[15%] left-0 will-change-transform">
+            <img src="{% static 'core/images/dr-hero.jpg' %}?v=3" alt="Dominican Republic VIP Transfers" id="hero-parallax-img" class="w-full h-full md:h-[130%] object-cover md:object-cover object-center absolute top-0 md:-top-[15%] left-0 will-change-transform">
         {% elif current_site.hero_video_url %}
             <video autoplay loop muted playsinline class="w-full h-full object-cover">
                 <source src="{{ current_site.hero_video_url }}" type="video/mp4">
             </video>
         {% else %}
             <!-- Luxury Black Vehicle Background -->
-            <img src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&q=80&w=1920" alt="Aero Luxe Select" class="w-full h-full object-cover object-center">
+            <img src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&q=80&w=1920" alt="AeroLux Select" class="w-full h-full object-cover object-center">
         {% endif %}
     </div>
 
@@ -79,7 +79,7 @@
             </div>
             
             <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight font-display text-white leading-tight">
-                {% site_content 'hero_title' current_site.hero_title|default:"Aero Luxe Select" %}
+                {% site_content 'hero_title' current_site.hero_title|default:"AeroLux Select" %}
             </h1>
             
             <p class="text-lg text-gray-300 max-w-xl mx-auto lg:mx-0 leading-relaxed font-light">
@@ -112,7 +112,7 @@
                     <!-- Service Type selector -->
                     <div>
                         <label class="block text-xs uppercase tracking-widest font-bold text-gray-400 mb-3">Service Type</label>
-                    <div class="grid grid-cols-1 {% if site_slug == 'dr' %}md:grid-cols-4{% else %}md:grid-cols-3{% endif %} gap-3 bg-luxe-black p-1.5 rounded-2xl border border-gray-800">
+                    <div class="grid grid-cols-2 {% if site_slug == 'dr' %}sm:grid-cols-4{% else %}sm:grid-cols-3{% endif %} gap-2 sm:gap-3 bg-luxe-black p-1.5 rounded-2xl border border-gray-800">
                         <label class="cursor-pointer text-center p-4 rounded-xl text-xs font-semibold uppercase tracking-wider transition-all duration-300 block select-none border border-transparent" id="lbl-transfer">
                             <input type="radio" name="service_type" value="airport_transfer" checked class="sr-only" id="rad-transfer">
                             <i class="fas fa-plane-departure text-base text-luxe-gold mb-2 block"></i>
@@ -527,7 +527,7 @@
                     <img src="https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&q=80&w=1000" alt="Executive SUV Escalade" class="w-full h-[400px] object-cover group-hover:scale-105 transition-transform duration-700">
                     <div class="absolute bottom-0 inset-x-0 p-6 bg-gradient-to-t from-black/90 to-transparent">
                         <h4 class="text-lg font-bold font-display text-white uppercase tracking-wider mb-1">Cadillac Escalade ESV</h4>
-                        <p class="text-xs text-luxe-gold font-semibold uppercase tracking-widest">Aero Luxe Select Chauffeur standard</p>
+                        <p class="text-xs text-luxe-gold font-semibold uppercase tracking-widest">AeroLux Select Chauffeur standard</p>
                     </div>
                 </div>
             </div>
@@ -540,7 +540,7 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <!-- Section Header -->
         <div class="text-center max-w-3xl mx-auto mb-16 space-y-4">
-            <span class="text-xs uppercase font-bold tracking-widest text-luxe-gold">{% site_content 'about_section_tag' 'Why Aero Luxe Select' %}</span>
+            <span class="text-xs uppercase font-bold tracking-widest text-luxe-gold">{% site_content 'about_section_tag' 'Why AeroLux Select' %}</span>
             <h2 class="text-3xl sm:text-4xl font-extrabold font-display tracking-tight text-white">
                 {% site_content 'about_title' 'Uncompromising Professional Standards' %}
             </h2>

@@ -55,7 +55,7 @@ class Migration(migrations.Migration):
             name='Site',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(help_text='Display name of the site (e.g. "Aero Luxe Select NYC").', max_length=100)),
+                ('name', models.CharField(help_text='Display name of the site (e.g. "AeroLux Select NYC").', max_length=100)),
                 ('slug', models.SlugField(help_text='URL-safe identifier (e.g. "nyc", "dr").', unique=True)),
                 ('domain', models.CharField(help_text='Primary domain for this site (e.g. "nyc.aeroluxeselect.com").', max_length=255, unique=True)),
                 ('tagline', models.CharField(blank=True, default='', help_text='Short tagline shown in header or meta description.', max_length=255)),
@@ -123,7 +123,7 @@ class Migration(migrations.Migration):
             name='SiteSettings',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('company_name', models.CharField(default='Aero Luxe Select', max_length=200)),
+                ('company_name', models.CharField(default='AeroLux Select', max_length=200)),
                 ('developer_name', models.CharField(default='GABOOM', help_text='Developer credit displayed in the footer.', max_length=200)),
                 ('developer_phone', models.CharField(default='829 509 84 12', help_text='Developer contact phone.', max_length=30)),
                 ('contact_email', models.EmailField(blank=True, default='', max_length=254)),

@@ -1,1 +1,1 @@
-# Aero Luxe Select — Core App
+# AeroLux Select — Core App

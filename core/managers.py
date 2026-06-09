@@ -1,5 +1,5 @@
 """
-Aero Luxe Select — Custom Model Managers
+AeroLux Select — Custom Model Managers
 Gestionnaires de modèles personnalisés pour le filtrage par site et par statut actif.
 
 These managers provide automatic queryset filtering so that views and templates

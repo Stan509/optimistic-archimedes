@@ -1,5 +1,5 @@
 """
-Aero Luxe Select — Template Context Processors
+AeroLux Select — Template Context Processors
 Processeurs de contexte pour injecter les variables globales dans tous les templates.
 
 Provides:

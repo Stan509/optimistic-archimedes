@@ -115,7 +115,7 @@ def send_booking_emails(booking):
         <div style="max-w: 600px; margin: 0 auto; background-color: #111; border: 1px solid #222; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.5);">
             <!-- Header -->
             <div style="background-color: #0D0D0D; padding: 30px; text-align: center; border-bottom: 1px solid #C9A84C;">
-                <h1 style="color: #C9A84C; font-size: 24px; font-weight: bold; text-transform: uppercase; letter-spacing: 2px; margin: 0;">AERO LUXE SELECT</h1>
+                <h1 style="color: #C9A84C; font-size: 24px; font-weight: bold; text-transform: uppercase; letter-spacing: 2px; margin: 0;">AEROLUX SELECT</h1>
                 <p style="color: #888; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; margin: 5px 0 0 0;">Chauffeur Service Confirmation</p>
             </div>
             
@@ -187,11 +187,11 @@ def send_booking_emails(booking):
     
     # ── DISPATCH & CUSTOMER SPECIFIC SUBJECTS ──
     subject_dispatch = f"[DISPATCH ALERT] New Booking Confirmation: {booking.booking_reference}"
-    subject_customer = f"Your Aero Luxe Select Booking Confirmation: {booking.booking_reference}"
+    subject_customer = f"Your AeroLux Select Booking Confirmation: {booking.booking_reference}"
     
     # Plain text alternative
     text_content = f"""
-    AERO LUXE SELECT - BOOKING CONFIRMATION
+    AEROLUX SELECT - BOOKING CONFIRMATION
     --------------------------------------
     Booking Reference: {booking.booking_reference}
     Service Type: {booking.get_service_type_display()}
@@ -242,7 +242,7 @@ def send_booking_emails(booking):
             }
             payload = {
                 "personalizations": [{"to": [{"email": to_email}]}],
-                "from": {"email": from_email, "name": "Aero Luxe Select"},
+                "from": {"email": from_email, "name": "AeroLux Select"},
                 "subject": subject,
                 "content": [
                     {"type": "text/plain", "value": text_content},
@@ -263,7 +263,7 @@ def send_booking_emails(booking):
                 "Content-Type": "application/json"
             }
             payload = {
-                "from": f"Aero Luxe Select <{from_email}>",
+                "from": f"AeroLux Select <{from_email}>",
                 "to": [to_email],
                 "subject": subject,
                 "text": text_content,
@@ -281,7 +281,7 @@ def send_booking_emails(booking):
             
             auth = ("api", api_key)
             payload = {
-                "from": f"Aero Luxe Select <{from_email}>",
+                "from": f"AeroLux Select <{from_email}>",
                 "to": to_email,
                 "subject": subject,
                 "text": text_content,

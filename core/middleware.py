@@ -1,5 +1,5 @@
 """
-Aero Luxe Select — Site Detection Middleware
+AeroLux Select — Site Detection Middleware
 Middleware de detection du site courant.
 
 Resolution order:

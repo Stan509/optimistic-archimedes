@@ -65,4 +65,10 @@ urlpatterns = [
 
     # Email Configuration
     path('settings/email/', views.email_settings, name='email_settings'),
+
+    # Admin User Management
+    path('admins/', views.admin_users_list, name='admin_users'),
+    path('admins/add/', views.admin_user_form, name='add_admin'),
+    path('admins/<int:pk>/edit/', views.admin_user_form, name='edit_admin'),
+    path('admins/<int:pk>/delete/', views.admin_user_delete, name='delete_admin'),
 ]

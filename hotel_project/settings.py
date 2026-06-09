@@ -1,5 +1,5 @@
 """
-Django settings for Aero Luxe Select project.
+Django settings for AeroLux Select project.
 Multi-site luxury car rental & airport transfer system.
 
 Developed by GABOOM | Tel: 829 509 84 12
@@ -197,7 +197,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
 # ==========================================================================
-# AERO LUXE SELECT CONFIGURATION
+# AEROLUX SELECT CONFIGURATION
 # ==========================================================================
 
 # Multi-site configuration
@@ -253,4 +253,4 @@ HOURLY_RATE_RANGE = {
 # ==========================================================================
 DEVELOPER_NAME = 'GABOOM'
 DEVELOPER_PHONE = '829 509 84 12'
-COMPANY_NAME = 'Aero Luxe Select'
+COMPANY_NAME = 'AeroLux Select'

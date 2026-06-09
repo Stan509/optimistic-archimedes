@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Aero Luxe Select -- DigitalOcean Deployment Script
+AeroLux Select -- DigitalOcean Deployment Script
 
 Automates the full production deployment:
   1. Creates a DigitalOcean Spaces bucket for media files
@@ -324,7 +324,7 @@ def wait_for_deployment(app_id):
 
 def main():
     print("+" + "=" * 58 + "+")
-    print("|    AERO LUXE SELECT -- Production Deployment             |")
+    print("|    AEROLUX SELECT -- Production Deployment             |")
     print("|    DigitalOcean App Platform                            |")
     print("+" + "=" * 58 + "+")
 

@@ -1,0 +1,79 @@
+{% extends "dashboard/base.html" %}
+
+{% block title %}
+    {% if admin_user %}Edit {{ admin_user.username }}{% else %}New Admin{% endif %} — AeroLux Select
+{% endblock %}
+{% block dashboard_header %}{% if admin_user %}Edit Admin{% else %}New Admin{% endif %}{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto space-y-8">
+    <!-- Back Link -->
+    <a href="{% url 'dashboard:admin_users' %}" class="inline-flex items-center space-x-2 text-luxury-muted hover:text-gold-400 transition-colors text-sm">
+        <i class="fa-solid fa-arrow-left"></i>
+        <span>Back to Admin Users</span>
+    </a>
+
+    <!-- Form Card -->
+    <div class="bg-luxury-dark border border-luxury-border rounded-2xl overflow-hidden">
+        <div class="px-8 py-5 border-b border-luxury-border bg-luxury-card/50">
+            <h3 class="text-lg font-bold font-serif tracking-wide">
+                {% if admin_user %}
+                    <i class="fa-solid fa-user-pen text-gold-400 mr-2"></i>Edit {{ admin_user.username }}
+                {% else %}
+                    <i class="fa-solid fa-user-plus text-gold-400 mr-2"></i>Create New Admin
+                {% endif %}
+            </h3>
+        </div>
+
+        <form method="POST" class="p-8 space-y-6">
+            {% csrf_token %}
+
+            <!-- Username -->
+            <div>
+                <label for="username" class="block text-xs uppercase tracking-widest font-bold text-luxury-muted mb-2">Username</label>
+                <input type="text" name="username" id="username" value="{{ admin_user.username|default:'' }}" required
+                    class="w-full bg-luxury-black border border-luxury-border rounded-xl px-4 py-3 text-sm text-white placeholder-luxury-muted focus:border-gold-500/50 outline-none transition-colors"
+                    placeholder="e.g. DeeAdmin">
+            </div>
+
+            <!-- Email -->
+            <div>
+                <label for="email" class="block text-xs uppercase tracking-widest font-bold text-luxury-muted mb-2">Email</label>
+                <input type="email" name="email" id="email" value="{{ admin_user.email|default:'' }}"
+                    class="w-full bg-luxury-black border border-luxury-border rounded-xl px-4 py-3 text-sm text-white placeholder-luxury-muted focus:border-gold-500/50 outline-none transition-colors"
+                    placeholder="admin@aerolux.com">
+            </div>
+
+            <!-- Password -->
+            <div>
+                <label for="password" class="block text-xs uppercase tracking-widest font-bold text-luxury-muted mb-2">
+                    Password {% if admin_user %}<span class="text-luxury-muted font-normal normal-case">(leave empty to keep current)</span>{% endif %}
+                </label>
+                <input type="password" name="password" id="password" {% if not admin_user %}required{% endif %}
+                    class="w-full bg-luxury-black border border-luxury-border rounded-xl px-4 py-3 text-sm text-white placeholder-luxury-muted focus:border-gold-500/50 outline-none transition-colors"
+                    placeholder="{% if admin_user %}Leave empty to keep current{% else %}Enter password{% endif %}">
+            </div>
+
+            <!-- Super Admin Toggle -->
+            <div class="flex items-center space-x-3 bg-luxury-black/50 border border-luxury-border rounded-xl px-5 py-4">
+                <input type="checkbox" name="is_superuser" id="is_superuser" {% if admin_user.is_superuser %}checked{% endif %}
+                    class="w-4 h-4 rounded text-gold-500 focus:ring-gold-500 bg-luxury-black border-luxury-border">
+                <label for="is_superuser" class="text-sm font-medium cursor-pointer select-none">
+                    <span class="text-white">Super Administrator</span>
+                    <span class="block text-xs text-luxury-muted mt-0.5">Full access to all features including admin management</span>
+                </label>
+            </div>
+
+            <!-- Actions -->
+            <div class="flex items-center justify-end space-x-4 pt-4 border-t border-luxury-border">
+                <a href="{% url 'dashboard:admin_users' %}" class="px-5 py-2.5 rounded-xl text-sm font-medium text-luxury-muted hover:text-white border border-luxury-border hover:border-luxury-muted transition-all">
+                    Cancel
+                </a>
+                <button type="submit" class="gold-gradient text-luxury-black px-6 py-2.5 rounded-xl text-sm font-semibold hover:shadow-lg hover:shadow-gold-500/20 transition-all">
+                    {% if admin_user %}Save Changes{% else %}Create Admin{% endif %}
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

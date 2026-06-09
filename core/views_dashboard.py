@@ -1,5 +1,5 @@
 """
-Aero Luxe Select — Dashboard Views
+AeroLux Select — Dashboard Views
 
 Unified admin dashboard for managing both NYC and DR sites.
 All views require admin authentication.
@@ -886,3 +886,90 @@ def email_settings(request):
         'active_tab': 'settings',
     }
     return render(request, 'dashboard/email_settings.html', context)
+
+
+# =========================================================================
+# ADMIN USER MANAGEMENT
+# =========================================================================
+
+@user_passes_test(is_admin, login_url='dashboard:login')
+def admin_users_list(request):
+    """List all admin/staff users."""
+    from django.contrib.auth.models import User
+    admins = User.objects.filter(
+        Q(is_staff=True) | Q(is_superuser=True)
+    ).order_by('-is_superuser', 'username')
+
+    context = {
+        'admins': admins,
+        'active_tab': 'admins',
+    }
+    return render(request, 'dashboard/admin_users.html', context)
+
+
+@user_passes_test(is_admin, login_url='dashboard:login')
+def admin_user_form(request, pk=None):
+    """Add or edit an admin user."""
+    from django.contrib.auth.models import User
+
+    admin_user = None
+    if pk:
+        admin_user = get_object_or_404(User, pk=pk)
+
+    if request.method == 'POST':
+        username = request.POST.get('username', '').strip()
+        email = request.POST.get('email', '').strip()
+        password = request.POST.get('password', '').strip()
+        is_superuser = request.POST.get('is_superuser') == 'on'
+
+        if admin_user:
+            # Edit existing
+            admin_user.username = username
+            admin_user.email = email
+            admin_user.is_superuser = is_superuser
+            admin_user.is_staff = True
+            if password:
+                admin_user.set_password(password)
+            admin_user.save()
+            messages.success(request, f'Admin "{username}" updated successfully.')
+        else:
+            # Create new
+            if User.objects.filter(username=username).exists():
+                messages.error(request, f'Username "{username}" already exists.')
+                return render(request, 'dashboard/admin_user_form.html', {
+                    'admin_user': admin_user,
+                    'active_tab': 'admins',
+                })
+            new_user = User.objects.create_user(
+                username=username,
+                email=email,
+                password=password or 'changeme123',
+            )
+            new_user.is_staff = True
+            new_user.is_superuser = is_superuser
+            new_user.save()
+            messages.success(request, f'Admin "{username}" created successfully.')
+
+        return redirect('dashboard:admin_users')
+
+    context = {
+        'admin_user': admin_user,
+        'active_tab': 'admins',
+    }
+    return render(request, 'dashboard/admin_user_form.html', context)
+
+
+@user_passes_test(is_admin, login_url='dashboard:login')
+def admin_user_delete(request, pk):
+    """Delete an admin user."""
+    from django.contrib.auth.models import User
+    admin_user = get_object_or_404(User, pk=pk)
+
+    if admin_user == request.user:
+        messages.error(request, 'You cannot delete your own account.')
+    else:
+        username = admin_user.username
+        admin_user.delete()
+        messages.success(request, f'Admin "{username}" deleted.')
+
+    return redirect('dashboard:admin_users')

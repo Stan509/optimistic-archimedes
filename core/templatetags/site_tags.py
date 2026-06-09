@@ -1,5 +1,5 @@
 """
-Aero Luxe Select — Custom Template Tags
+AeroLux Select — Custom Template Tags
 
 Provides site-specific template functionality.
 """

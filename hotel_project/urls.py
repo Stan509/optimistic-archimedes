@@ -1,5 +1,5 @@
 """
-Aero Luxe Select -- URL Configuration
+AeroLux Select -- URL Configuration
 
 Routes are organized as:
 - /nyc/     -> NYC public site (development prefix)
@@ -49,6 +49,6 @@ else:
     ]
 
 # Customize Django admin
-admin.site.site_header = 'Aero Luxe Select -- Administration'
-admin.site.site_title = 'Aero Luxe Select Admin'
+admin.site.site_header = 'AeroLux Select -- Administration'
+admin.site.site_title = 'AeroLux Select Admin'
 admin.site.index_title = 'System Administration'

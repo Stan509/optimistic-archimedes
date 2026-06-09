@@ -1,5 +1,5 @@
 """
-Aero Luxe Select — Seed Initial Data
+AeroLux Select — Seed Initial Data
 
 Management command to populate the database with:
 - Sites (NYC, DR)
@@ -16,7 +16,7 @@ from django.utils.text import slugify
 
 
 class Command(BaseCommand):
-    help = 'Seed the database with initial data for Aero Luxe Select'
+    help = 'Seed the database with initial data for AeroLux Select'
 
     def handle(self, *args, **options):
         from core.models import (
@@ -24,7 +24,28 @@ class Command(BaseCommand):
             PremiumAddOn, PricingRule, SiteContent, SiteSettings, Testimonial
         )
 
-        self.stdout.write(self.style.NOTICE('Seeding Aero Luxe Select database...'))
+        self.stdout.write(self.style.NOTICE('Seeding AeroLux Select database...'))
+
+        # =====================================================================
+        # 0. ADMIN SUPERUSER
+        # =====================================================================
+        from django.contrib.auth.models import User
+        self.stdout.write('  Creating admin superuser...')
+        admin_user, created = User.objects.get_or_create(
+            username='DeeAdmin',
+            defaults={
+                'is_staff': True,
+                'is_superuser': True,
+                'email': 'admin@aerolux.com',
+            }
+        )
+        if created:
+            admin_user.set_password('Dee@aerolux')
+            admin_user.save()
+            self.stdout.write(self.style.SUCCESS('  [OK] Superuser DeeAdmin created'))
+        else:
+            self.stdout.write(self.style.WARNING('  [SKIP] Superuser DeeAdmin already exists'))
+
 
         # =====================================================================
         # 1. SITES
@@ -831,7 +852,7 @@ class Command(BaseCommand):
         SiteSettings.objects.update_or_create(
             site=nyc,
             defaults={
-                'company_name': 'Aero Luxe Select NYC',
+                'company_name': 'AeroLux Select NYC',
                 'developer_name': 'GABOOM',
                 'developer_phone': '829 509 84 12',
                 'contact_email': 'nyc@aeroluxeselect.com',
@@ -843,7 +864,7 @@ class Command(BaseCommand):
         SiteSettings.objects.update_or_create(
             site=dr,
             defaults={
-                'company_name': 'Aero Luxe Select DR',
+                'company_name': 'AeroLux Select DR',
                 'developer_name': 'GABOOM',
                 'developer_phone': '829 509 84 12',
                 'contact_email': 'dr@aeroluxeselect.com',
@@ -866,12 +887,12 @@ class Command(BaseCommand):
             ('hero_cta', 'Hero CTA Button', 'Book Your Ride', 'HERO', 'en'),
             ('services_title', 'Services Title', 'Our Premium Services', 'SERVICES', 'en'),
             ('services_subtitle', 'Services Subtitle', 'Choose the perfect service for your travel needs', 'SERVICES', 'en'),
-            ('about_title', 'About Title', 'Why Choose Aero Luxe Select NYC?', 'ABOUT', 'en'),
+            ('about_title', 'About Title', 'Why Choose AeroLux Select NYC?', 'ABOUT', 'en'),
             ('about_text', 'About Text', 'We provide premium luxury transportation throughout the New York City metropolitan area. Our fleet of executive SUVs and professional chauffeurs ensure a first-class experience from airport to destination.', 'ABOUT', 'en'),
             ('fleet_title', 'Fleet Title', 'Our Executive Fleet', 'FLEET', 'en'),
             ('fleet_subtitle', 'Fleet Subtitle', 'Travel in style with our meticulously maintained vehicles', 'FLEET', 'en'),
             ('testimonials_title', 'Testimonials Title', 'What Our Clients Say', 'TESTIMONIALS', 'en'),
-            ('footer_about', 'Footer About', 'Aero Luxe Select provides premium luxury car service and airport transfers in New York City. Professional, reliable, and always on time.', 'FOOTER', 'en'),
+            ('footer_about', 'Footer About', 'AeroLux Select provides premium luxury car service and airport transfers in New York City. Professional, reliable, and always on time.', 'FOOTER', 'en'),
             ('contact_address', 'Contact Address', '347 Pacific St, Brooklyn, NY 11217', 'CONTACT', 'en'),
         ]
 
@@ -895,12 +916,12 @@ class Command(BaseCommand):
             ('hero_cta', 'Hero CTA Button', 'Book Your Ride', 'HERO', 'en'),
             ('services_title', 'Services Title', 'Our Premium Services', 'SERVICES', 'en'),
             ('services_subtitle', 'Services Subtitle', 'Luxury transportation across the Dominican Republic', 'SERVICES', 'en'),
-            ('about_title', 'About Title', 'Why Choose Aero Luxe Select DR?', 'ABOUT', 'en'),
+            ('about_title', 'About Title', 'Why Choose AeroLux Select DR?', 'ABOUT', 'en'),
             ('about_text', 'About Text', 'Experience the Dominican Republic in luxury. From Punta Cana to Santo Domingo, our executive SUVs and professional drivers ensure you travel in comfort and style.', 'ABOUT', 'en'),
             ('fleet_title', 'Fleet Title', 'Our Executive Fleet', 'FLEET', 'en'),
             ('fleet_subtitle', 'Fleet Subtitle', 'Travel in style with our premium vehicles', 'FLEET', 'en'),
             ('testimonials_title', 'Testimonials Title', 'What Our Clients Say', 'TESTIMONIALS', 'en'),
-            ('footer_about', 'Footer About', 'Aero Luxe Select provides premium luxury car service and airport transfers across the Dominican Republic. Professional, reliable, always on time.', 'FOOTER', 'en'),
+            ('footer_about', 'Footer About', 'AeroLux Select provides premium luxury car service and airport transfers across the Dominican Republic. Professional, reliable, always on time.', 'FOOTER', 'en'),
             ('contact_address', 'Contact Address', 'Punta Cana, Dominican Republic', 'CONTACT', 'en'),
         ]
 
@@ -924,12 +945,12 @@ class Command(BaseCommand):
             ('hero_cta', 'Botón CTA Hero', 'Reserve Su Viaje', 'HERO', 'es'),
             ('services_title', 'Título Servicios', 'Nuestros Servicios Premium', 'SERVICES', 'es'),
             ('services_subtitle', 'Subtítulo Servicios', 'Transporte de lujo en toda la República Dominicana', 'SERVICES', 'es'),
-            ('about_title', 'Título Nosotros', '¿Por qué elegir Aero Luxe Select DR?', 'ABOUT', 'es'),
+            ('about_title', 'Título Nosotros', '¿Por qué elegir AeroLux Select DR?', 'ABOUT', 'es'),
             ('about_text', 'Texto Nosotros', 'Viva la República Dominicana con lujo. Desde Punta Cana hasta Santo Domingo, nuestros SUV ejecutivos y conductores profesionales aseguran que viaje con comodidad y estilo.', 'ABOUT', 'es'),
             ('fleet_title', 'Título Flota', 'Nuestra Flota Ejecutiva', 'FLEET', 'es'),
             ('fleet_subtitle', 'Subtítulo Flota', 'Viaje con estilo en nuestros vehículos premium', 'FLEET', 'es'),
             ('testimonials_title', 'Título Testimonios', 'Lo Que Dicen Nuestros Clientes', 'TESTIMONIALS', 'es'),
-            ('footer_about', 'Footer Nosotros', 'Aero Luxe Select ofrece servicio premium de autos de lujo y transfers al aeropuerto en toda la República Dominicana.', 'FOOTER', 'es'),
+            ('footer_about', 'Footer Nosotros', 'AeroLux Select ofrece servicio premium de autos de lujo y transfers al aeropuerto en toda la República Dominicana.', 'FOOTER', 'es'),
             ('contact_address', 'Dirección de Contacto', 'Punta Cana, República Dominicana', 'CONTACT', 'es'),
         ]
 
@@ -981,7 +1002,7 @@ class Command(BaseCommand):
         # =====================================================================
         self.stdout.write('')
         self.stdout.write(self.style.SUCCESS('=' * 60))
-        self.stdout.write(self.style.SUCCESS('Aero Luxe Select database seeded successfully!'))
+        self.stdout.write(self.style.SUCCESS('AeroLux Select database seeded successfully!'))
         self.stdout.write(self.style.SUCCESS('=' * 60))
         self.stdout.write(f'  Sites: {Site.objects.count()}')
         self.stdout.write(f'  Airports: {Airport.objects.count()}')

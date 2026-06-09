@@ -1,5 +1,5 @@
 """
-Aero Luxe Select — Admin Configuration
+AeroLux Select — Admin Configuration
 Configuration de l'interface d'administration Django pour tous les modèles core.
 """
 

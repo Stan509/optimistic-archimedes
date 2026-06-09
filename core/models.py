@@ -1,8 +1,8 @@
 """
-Aero Luxe Select — Core Models
+AeroLux Select — Core Models
 Modèles principaux du système de location de voitures de luxe et transferts aéroport.
 
-This module contains every model for the Aero Luxe Select platform:
+This module contains every model for the AeroLux Select platform:
   • Site / SiteSettings / SiteContent  — Multi-site CMS
   • Airport / Destination / PricingRule — Geography & pricing engine
   • VehicleCategory / Vehicle          — Fleet management
@@ -45,7 +45,7 @@ from core.managers import ActiveManager, SiteFilterManager, SiteFilterActiveMana
 
 class ServiceType(models.TextChoices):
     """
-    Types de service proposés par Aero Luxe Select.
+    Types de service proposés par AeroLux Select.
     """
     AIRPORT_TRANSFER = 'airport_transfer', 'Airport Transfer'
     POINT_TO_POINT = 'point_to_point', 'Point-to-Point'
@@ -136,13 +136,13 @@ phone_validator = RegexValidator(
 
 class Site(models.Model):
     """
-    Represents a distinct Aero Luxe Select website (e.g. NYC, Dominican Republic).
+    Represents a distinct AeroLux Select website (e.g. NYC, Dominican Republic).
     Each site has its own branding, domain, hero content, and default language.
     """
 
     name = models.CharField(
         max_length=100,
-        help_text='Display name of the site (e.g. "Aero Luxe Select NYC").',
+        help_text='Display name of the site (e.g. "AeroLux Select NYC").',
     )
     slug = models.SlugField(
         max_length=50,
@@ -979,7 +979,7 @@ class Booking(models.Model):
     def generate_reference():
         """
         Generate a unique booking reference.
-        Format: ALS-XXXXXXXX  (ALS = Aero Luxe Select, 8 alphanumeric chars)
+        Format: ALS-XXXXXXXX  (ALS = AeroLux Select, 8 alphanumeric chars)
         """
         chars = string.ascii_uppercase + string.digits
         while True:
@@ -1208,7 +1208,7 @@ class SiteSettings(models.Model):
     # ── Company info ──
     company_name = models.CharField(
         max_length=200,
-        default='Aero Luxe Select',
+        default='AeroLux Select',
     )
     developer_name = models.CharField(
         max_length=200,

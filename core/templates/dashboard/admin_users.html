@@ -1,0 +1,87 @@
+{% extends "dashboard/base.html" %}
+
+{% block title %}Admin Users — AeroLux Select{% endblock %}
+{% block dashboard_header %}Admin Users{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto space-y-8">
+    <!-- Header -->
+    <div class="flex items-center justify-between">
+        <div>
+            <h2 class="text-2xl font-bold font-serif tracking-wide">Administrator Accounts</h2>
+            <p class="text-luxury-muted text-sm mt-1">Manage who can access the dashboard</p>
+        </div>
+        <a href="{% url 'dashboard:add_admin' %}" class="gold-gradient text-luxury-black px-5 py-2.5 rounded-xl text-sm font-semibold hover:shadow-lg hover:shadow-gold-500/20 transition-all flex items-center space-x-2">
+            <i class="fa-solid fa-user-plus"></i>
+            <span>Add Admin</span>
+        </a>
+    </div>
+
+    <!-- Admin Users Table -->
+    <div class="bg-luxury-dark border border-luxury-border rounded-2xl overflow-hidden">
+        <table class="w-full text-sm">
+            <thead class="bg-luxury-card border-b border-luxury-border">
+                <tr>
+                    <th class="text-left px-6 py-4 font-semibold text-luxury-muted uppercase tracking-wider text-xs">User</th>
+                    <th class="text-left px-6 py-4 font-semibold text-luxury-muted uppercase tracking-wider text-xs">Email</th>
+                    <th class="text-left px-6 py-4 font-semibold text-luxury-muted uppercase tracking-wider text-xs">Role</th>
+                    <th class="text-left px-6 py-4 font-semibold text-luxury-muted uppercase tracking-wider text-xs">Last Login</th>
+                    <th class="text-right px-6 py-4 font-semibold text-luxury-muted uppercase tracking-wider text-xs">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-luxury-border">
+                {% for admin in admins %}
+                <tr class="hover:bg-luxury-card/50 transition-colors">
+                    <td class="px-6 py-4">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-9 h-9 rounded-full gold-gradient flex items-center justify-center text-luxury-black font-bold text-xs uppercase">
+                                {{ admin.username|slice:":2" }}
+                            </div>
+                            <span class="font-semibold">{{ admin.username }}</span>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 text-luxury-muted">{{ admin.email|default:"—" }}</td>
+                    <td class="px-6 py-4">
+                        {% if admin.is_superuser %}
+                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-gold-500/15 text-gold-400 border border-gold-500/25">
+                            <i class="fa-solid fa-crown mr-1.5 text-[10px]"></i>Super Admin
+                        </span>
+                        {% else %}
+                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-blue-500/15 text-blue-400 border border-blue-500/25">
+                            <i class="fa-solid fa-user-shield mr-1.5 text-[10px]"></i>Staff
+                        </span>
+                        {% endif %}
+                    </td>
+                    <td class="px-6 py-4 text-luxury-muted text-xs">
+                        {% if admin.last_login %}
+                            {{ admin.last_login|timesince }} ago
+                        {% else %}
+                            Never
+                        {% endif %}
+                    </td>
+                    <td class="px-6 py-4 text-right">
+                        <div class="flex items-center justify-end space-x-2">
+                            <a href="{% url 'dashboard:edit_admin' admin.pk %}" class="w-8 h-8 rounded-lg bg-luxury-card border border-luxury-border flex items-center justify-center text-luxury-muted hover:text-gold-400 hover:border-gold-500/40 transition-all" title="Edit">
+                                <i class="fa-solid fa-pen-to-square text-xs"></i>
+                            </a>
+                            {% if admin != request.user %}
+                            <a href="{% url 'dashboard:delete_admin' admin.pk %}" class="w-8 h-8 rounded-lg bg-luxury-card border border-luxury-border flex items-center justify-center text-luxury-muted hover:text-red-400 hover:border-red-500/40 transition-all" title="Delete" onclick="return confirm('Delete admin {{ admin.username }}?')">
+                                <i class="fa-solid fa-trash-can text-xs"></i>
+                            </a>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="px-6 py-12 text-center text-luxury-muted">
+                        <i class="fa-solid fa-users text-3xl mb-3 block text-luxury-border"></i>
+                        No admin users found.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

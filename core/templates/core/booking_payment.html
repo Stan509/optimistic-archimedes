@@ -2,7 +2,7 @@
 {% load static %}
 {% load site_tags %}
 
-{% block title %}Book Chauffeur — Step 4: Secure Checkout | Aero Luxe Select{% endblock %}
+{% block title %}Book Chauffeur — Step 4: Secure Checkout | AeroLux Select{% endblock %}
 
 {% block content %}
 <section class="py-16 bg-luxe-black min-h-[85vh]">
@@ -93,7 +93,7 @@
                                 </div>
                             </div>
                             <p class="text-[10px] text-gray-500 leading-relaxed font-light">
-                                Aero Luxe Select never processes or logs full credit card metrics in local files. All calculations occur safely within Stripe tokens.
+                                AeroLux Select never processes or logs full credit card metrics in local files. All calculations occur safely within Stripe tokens.
                             </p>
                         </div>
 
@@ -114,7 +114,7 @@
                         <div class="flex items-start space-x-3 bg-luxe-black/30 p-4 rounded-xl border border-gray-800 my-4">
                             <input type="checkbox" name="terms" id="terms-checkbox" required class="mt-1 h-4 w-4 rounded border-gray-800 bg-luxe-black text-luxe-gold focus:ring-luxe-gold focus:ring-offset-luxe-black cursor-pointer">
                             <label for="terms-checkbox" class="text-xs text-gray-400 font-light leading-relaxed select-none cursor-pointer">
-                                I agree to the <a href="#" id="open-terms-modal" class="text-luxe-gold underline hover:text-luxe-gold-bright transition-colors" onclick="event.preventDefault(); event.stopPropagation();">Terms of Service</a>, Chauffeur Gratuity Policy, and Cancellation Rules of Aero Luxe Select.
+                                I agree to the <a href="#" id="open-terms-modal" class="text-luxe-gold underline hover:text-luxe-gold-bright transition-colors" onclick="event.preventDefault(); event.stopPropagation();">Terms of Service</a>, Chauffeur Gratuity Policy, and Cancellation Rules of AeroLux Select.
                             </label>
                         </div>
 
@@ -209,7 +209,7 @@
             {% if site_settings.terms_and_conditions %}
                 {{ site_settings.terms_and_conditions|linebreaks }}
             {% else %}
-                <p>By booking with {{ current_site.name|default:"Aero Luxe Select" }}, you agree to our standard terms of service. Cancellations must be made at least 24 hours prior to scheduled pickup for a full refund. Standard chauffeur gratuity rules apply.</p>
+                <p>By booking with {{ current_site.name|default:"AeroLux Select" }}, you agree to our standard terms of service. Cancellations must be made at least 24 hours prior to scheduled pickup for a full refund. Standard chauffeur gratuity rules apply.</p>
             {% endif %}
         </div>
         
