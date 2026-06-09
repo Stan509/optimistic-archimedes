@@ -334,27 +334,23 @@ def booking_step2(request):
                 base_fee = float(site_settings.airport_base_fee) if site_settings else 15.0
                 price_per_mile = float(site_settings.price_per_mile) if site_settings else 3.5
 
-                for cat in categories:
-                    if not cat.vehicles.filter(is_active=True, sites=site).exists():
-                        category_prices[cat.id] = None
-                        continue
-                    # Check for fixed-price zone rules first
-                    zone_rule = PricingRule.objects.filter(
-                        airport__site=site,
-                        vehicle_category=cat,
-                        service_type='airport_transfer',
-                        is_active=True,
-                        zone_min_distance_km__isnull=False,
-                    ).first()
-                    if zone_rule:
-                        fare = float(zone_rule.base_price)
-                    else:
-                        # Fallback: use a standard per-mile estimate (20 miles default)
-                        fare = base_fee + (price_per_mile * 20)
+                # Check for fixed-price zone rules first
+                zone_rule = PricingRule.objects.filter(
+                    airport__site=site,
+                    vehicle_category=cat,
+                    service_type='airport_transfer',
+                    is_active=True,
+                    zone_min_distance_km__isnull=False,
+                ).first()
+                if zone_rule:
+                    fare = float(zone_rule.base_price)
+                else:
+                    # Fallback: use a standard per-mile estimate (20 miles default)
+                    fare = base_fee + (price_per_mile * 20)
 
-                    if booking_data.get('round_trip'):
-                        fare = fare * 2.0
-                    category_prices[cat.id] = fare
+                if booking_data.get('round_trip'):
+                    fare = fare * 2.0
+                category_prices[cat.id] = fare
             elif service_type == 'luxury_rental':
                 rule = PricingRule.objects.filter(
                     airport__site=site,
