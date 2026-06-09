@@ -104,10 +104,13 @@ class LanguageChoice(models.TextChoices):
 
 
 class PricingZone(models.TextChoices):
-    """Zones tarifaires pour le pricing basé sur la zone (République Dominicaine)."""
+    """Zones tarifaires pour le pricing basé sur la zone (République Dominicaine & NYC)."""
     HOTEL_ZONE = 'hotel_zone', 'Hotel Zone'
     CITY_CENTER = 'city_center', 'City Center'
     REMOTE = 'remote', 'Remote Area'
+    MANHATTAN_DOWNTOWN = 'manhattan_downtown', 'Manhattan Downtown'
+    MANHATTAN_MIDTOWN = 'manhattan_midtown', 'Manhattan Midtown'
+    MANHATTAN_UPTOWN = 'manhattan_uptown', 'Manhattan Uptown'
 
 
 # ──────────────────────────────────────────────
@@ -830,6 +833,19 @@ class Booking(models.Model):
         blank=True,
         default='',
         help_text='Specific instructions for chauffeur meeting point (e.g. Exit Gate B).'
+    )
+    passenger_count = models.PositiveIntegerField(
+        default=1,
+        validators=[MinValueValidator(1), MaxValueValidator(50)],
+        help_text='Number of passengers for this ride.'
+    )
+    linked_booking = models.ForeignKey(
+        'self',
+        on_delete=models.SET_NULL,
+        related_name='return_bookings',
+        blank=True,
+        null=True,
+        help_text='Reference to the linked leg of a round-trip booking.'
     )
     return_date = models.DateField(
         null=True,

@@ -12,6 +12,8 @@ from django.views.decorators.http import require_GET
 from django.conf import settings
 from datetime import date, timedelta, datetime
 import json
+import math
+
 
 
 def _get_site_or_404(request):
@@ -202,6 +204,97 @@ def fleet_detail(request, slug):
     return render(request, 'core/fleet_detail.html', context)
 
 
+def _haversine_distance(lat1, lon1, lat2, lon2):
+    try:
+        lat1, lon1, lat2, lon2 = float(lat1), float(lon1), float(lat2), float(lon2)
+    except (ValueError, TypeError):
+        return 0.0
+    R = 3958.8  # Earth radius in miles
+    d_lat = math.radians(lat2 - lat1)
+    d_lon = math.radians(lon2 - lon1)
+    a = (math.sin(d_lat / 2) ** 2 +
+         math.cos(math.radians(lat1)) * math.cos(math.radians(lat2)) *
+         math.sin(d_lon / 2) ** 2)
+    c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+    return R * c
+
+
+def _get_airport_transfer_price(site, slug, cat, booking_data):
+    from core.models import SiteSettings, PricingRule, Airport
+    site_settings = SiteSettings.get_settings(site)
+    base_fee = float(site_settings.airport_base_fee) if site_settings else 15.0
+    price_per_mile = float(site_settings.price_per_mile) if site_settings else 3.5
+
+    p_lat = booking_data.get('pickup_lat')
+    p_lng = booking_data.get('pickup_lng')
+    d_lat = booking_data.get('dropoff_lat')
+    d_lng = booking_data.get('dropoff_lng')
+    airport_id = booking_data.get('airport_id')
+    is_dest_to_airport = booking_data.get('transfer_direction') == 'DEST_TO_AIRPORT'
+    
+    address_lat = p_lat if is_dest_to_airport else d_lat
+    address_lng = p_lng if is_dest_to_airport else d_lng
+    address_str = booking_data.get('pickup_address') if is_dest_to_airport else booking_data.get('destination_address')
+    
+    airport_lat = d_lat if is_dest_to_airport else p_lat
+    airport_lng = d_lng if is_dest_to_airport else p_lng
+    
+    if not airport_lat or not airport_lng:
+        try:
+            airport_obj = Airport.objects.get(id=airport_id)
+            airport_lat = airport_obj.latitude
+            airport_lng = airport_obj.longitude
+        except Exception:
+            pass
+            
+    if address_lat and address_lng and airport_lat and airport_lng:
+        miles = _haversine_distance(airport_lat, airport_lng, address_lat, address_lng)
+    else:
+        miles = 20.0
+
+    assigned_zone = None
+    if slug == 'nyc' and address_str:
+        addr_lower = address_str.lower()
+        if "manhattan" in addr_lower or "new york county" in addr_lower or (address_lat and 40.7000 <= float(address_lat) <= 40.8800 and -74.0200 <= float(address_lng) <= -73.9000):
+            try:
+                lat_val = float(address_lat)
+                if lat_val < 40.7480:
+                    assigned_zone = 'manhattan_downtown'
+                elif lat_val <= 40.7680:
+                    assigned_zone = 'manhattan_midtown'
+                else:
+                    assigned_zone = 'manhattan_uptown'
+            except (ValueError, TypeError):
+                assigned_zone = 'manhattan_midtown'
+
+    rule = None
+    if assigned_zone:
+        rule = PricingRule.objects.filter(
+            airport__site=site,
+            vehicle_category=cat,
+            service_type='airport_transfer',
+            zone_name=assigned_zone,
+            is_active=True
+        ).first()
+
+    if rule:
+        return float(rule.base_price)
+        
+    distance_km = miles * 1.60934
+    dist_rule = PricingRule.objects.filter(
+        airport__site=site,
+        vehicle_category=cat,
+        service_type='airport_transfer',
+        is_active=True,
+        zone_min_distance_km__lte=distance_km,
+        zone_max_distance_km__gte=distance_km
+    ).first()
+    if dist_rule:
+        return float(dist_rule.base_price)
+        
+    return base_fee + (price_per_mile * miles)
+
+
 # =========================================================================
 # BOOKING FLOW (Multi-step)
 # =========================================================================
@@ -235,6 +328,12 @@ def booking_step1(request):
                 messages.error(request, 'Return date and time are required for round-trip bookings.')
                 return redirect(f'/{slug}/book/')
 
+        # Get passenger count
+        try:
+            passenger_count = int(request.POST.get('passenger_count', 1))
+        except ValueError:
+            passenger_count = 1
+
         # Store selections in session
         request.session['booking'] = {
             'service_type': service_type,
@@ -247,6 +346,11 @@ def booking_step1(request):
             'dropoff_address': request.POST.get('dropoff_address', ''),
             'pickup_date': request.POST.get('pickup_date'),
             'pickup_time': request.POST.get('pickup_time'),
+            'passenger_count': passenger_count,
+            'pickup_lat': request.POST.get('pickup_lat', ''),
+            'pickup_lng': request.POST.get('pickup_lng', ''),
+            'dropoff_lat': request.POST.get('dropoff_lat', ''),
+            'dropoff_lng': request.POST.get('dropoff_lng', ''),
             'flight_number': request.POST.get('flight_number', ''),
             'hours_requested': request.POST.get('hours_requested', '3'),
             'round_trip': round_trip,
@@ -328,26 +432,7 @@ def booking_step2(request):
                 stops = int(booking_data.get('number_of_stops', 0))
                 category_prices[cat.id] = fare + (stops * 20.0)
             elif service_type == 'airport_transfer':
-                # Address-based: use per-mile pricing from SiteSettings
-                from core.models import SiteSettings
-                site_settings = SiteSettings.get_settings(site)
-                base_fee = float(site_settings.airport_base_fee) if site_settings else 15.0
-                price_per_mile = float(site_settings.price_per_mile) if site_settings else 3.5
-
-                # Check for fixed-price zone rules first
-                zone_rule = PricingRule.objects.filter(
-                    airport__site=site,
-                    vehicle_category=cat,
-                    service_type='airport_transfer',
-                    is_active=True,
-                    zone_min_distance_km__isnull=False,
-                ).first()
-                if zone_rule:
-                    fare = float(zone_rule.base_price)
-                else:
-                    # Fallback: use a standard per-mile estimate (20 miles default)
-                    fare = base_fee + (price_per_mile * 20)
-
+                fare = _get_airport_transfer_price(site, slug, cat, booking_data)
                 if booking_data.get('round_trip'):
                     fare = fare * 2.0
                 category_prices[cat.id] = fare
@@ -400,23 +485,11 @@ def booking_step2(request):
             ).first()
             pure_price = float(rule.base_price) if rule else 150.0
         else:
-            # Airport transfer - use per-mile pricing
-            from core.models import SiteSettings
-            site_settings = SiteSettings.get_settings(site)
-            base_fee = float(site_settings.airport_base_fee) if site_settings else 15.0
-            ppm = float(site_settings.price_per_mile) if site_settings else 3.5
-
-            zone_rule = PricingRule.objects.filter(
-                airport__site=site,
-                vehicle_category_id=category_id,
-                service_type='airport_transfer',
-                is_active=True,
-                zone_min_distance_km__isnull=False,
-            ).first()
-            if zone_rule:
-                pure_price = float(zone_rule.base_price)
-            else:
-                pure_price = base_fee + (ppm * 20)
+            try:
+                cat_obj = VehicleCategory.objects.get(id=category_id)
+                pure_price = _get_airport_transfer_price(site, slug, cat_obj, booking_data)
+            except Exception:
+                pure_price = 150.00
 
         booking_data['base_price'] = pure_price
         request.session['booking'] = booking_data
@@ -573,6 +646,7 @@ def booking_payment(request):
                 return_time=booking_data.get('return_time') or None,
                 number_of_stops=booking_data.get('number_of_stops', 0),
                 stop_addresses=booking_data.get('stop_addresses', ''),
+                passenger_count=booking_data.get('passenger_count', 1),
             )
 
             # Set foreign keys
@@ -616,11 +690,61 @@ def booking_payment(request):
             booking.calculate_total()
             booking.payment_method = request.POST.get('payment_method', 'STRIPE')
 
+            # Save to get PK
             booking.save()
 
             # Add selected add-ons
             if addon_ids:
                 booking.addons.set(addon_ids)
+                # Recalculate total after addons are set
+                booking.calculate_total()
+                booking.save()
+
+            # --- Round-Trip Split: Create return leg Booking ---
+            if booking.round_trip and booking.return_date and booking.return_time:
+                # Invert pickup/dropoff addresses and transfer directions
+                return_direction = 'DEST_TO_AIRPORT' if booking.transfer_direction == 'AIRPORT_TO_DEST' else 'AIRPORT_TO_DEST'
+                return_pickup_address = booking.dropoff_address
+                return_dropoff_address = booking.pickup_address
+
+                booking2 = Booking(
+                    site=booking.site,
+                    service_type=booking.service_type,
+                    transfer_direction=return_direction,
+                    meeting_point=booking.meeting_point,
+                    customer_name=booking.customer_name,
+                    customer_email=booking.customer_email,
+                    customer_phone=booking.customer_phone,
+                    customer_whatsapp=booking.customer_whatsapp,
+                    pickup_address=return_pickup_address,
+                    dropoff_address=return_dropoff_address,
+                    pickup_date=booking.return_date,
+                    pickup_time=booking.return_time,
+                    flight_number='',
+                    customer_notes=booking.customer_notes,
+                    booking_source=booking.booking_source,
+                    round_trip=False,
+                    return_date=None,
+                    return_time=None,
+                    number_of_stops=booking.number_of_stops,
+                    stop_addresses=booking.stop_addresses,
+                    passenger_count=booking.passenger_count,
+                    linked_booking=booking,
+                    airport=booking.airport,
+                    destination=booking.destination,
+                    vehicle_category=booking.vehicle_category,
+                    payment_method=booking.payment_method,
+                    payment_status=booking.payment_status,
+                    stripe_payment_id=booking.stripe_payment_id,
+                    base_price=Decimal('0.00'),
+                    addons_total=Decimal('0.00'),
+                    platform_fee=Decimal('0.00'),
+                    total_price=Decimal('0.00'),
+                )
+                booking2.save()
+
+                if addon_ids:
+                    booking2.addons.set(addon_ids)
 
             # --- Trigger Automated Email Confirmations ---
             try:

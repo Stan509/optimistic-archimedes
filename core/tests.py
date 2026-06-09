@@ -814,5 +814,110 @@ class LanguageAndTranslationTestCase(TestCase):
         self.assertContains(response, 'CACHE_NAME')
 
 
+class RoundTripSplitTestCase(TestCase):
+    def setUp(self):
+        self.nyc = Site.objects.create(
+            slug='nyc',
+            name='New York City',
+            domain='aeroluxeselect-nyc.com',
+            is_active=True
+        )
+        self.jfk = Airport.objects.create(
+            site=self.nyc,
+            code='JFK',
+            name='JFK Airport',
+            is_active=True
+        )
+        self.midtown = Destination.objects.create(
+            airport=self.jfk,
+            name='Midtown',
+            is_active=True
+        )
+        self.exec_suv = VehicleCategory.objects.create(
+            slug='executive-suv',
+            name='Executive SUV',
+            is_active=True,
+            order=1
+        )
+        self.meet_greet = PremiumAddOn.objects.create(
+            name='Meet & Greet',
+            slug='meet-greet',
+            price=Decimal('25.00'),
+            is_active=True
+        )
+
+    def test_round_trip_split_on_payment(self):
+        """A round-trip booking should split into two separate records during checkout."""
+        client = Client()
+        session = client.session
+        session['booking'] = {
+            'service_type': 'airport_transfer',
+            'airport_id': self.jfk.id,
+            'destination_id': self.midtown.id,
+            'vehicle_category_id': self.exec_suv.id,
+            'base_price': 100.0,
+            'customer_name': 'Alice Smith',
+            'customer_email': 'alice@example.com',
+            'customer_phone': '+12125550199',
+            'pickup_date': '2026-06-12',
+            'pickup_time': '12:00',
+            'passenger_count': 4,
+            'pickup_address': 'JFK Airport Terminal 4',
+            'destination_address': 'Times Square Hotel',
+            'transfer_direction': 'AIRPORT_TO_DEST',
+            'round_trip': True,
+            'return_date': '2026-06-15',
+            'return_time': '15:00',
+            'selected_addons': [self.meet_greet.id],
+        }
+        session.save()
+
+        # Submit valid payment to trigger creation of both legs
+        response = client.post(
+            reverse('site_nyc:booking_payment'),
+            {
+                'payment_method': 'CASH',
+                'terms': 'on'
+            },
+            HTTP_HOST='aeroluxeselect-nyc.com'
+        )
+        self.assertEqual(response.status_code, 302)
+
+        # Check that we have exactly 2 bookings in the database
+        bookings = Booking.objects.all().order_by('id')
+        self.assertEqual(bookings.count(), 2)
+
+        outbound = bookings[0]
+        inbound = bookings[1]
+
+        # Verify outbound booking
+        self.assertEqual(outbound.customer_name, 'Alice Smith')
+        self.assertEqual(outbound.passenger_count, 4)
+        self.assertEqual(outbound.round_trip, True)
+        self.assertEqual(outbound.pickup_address, 'JFK Airport Terminal 4')
+        self.assertEqual(outbound.dropoff_address, 'Times Square Hotel')
+        self.assertEqual(outbound.transfer_direction, 'AIRPORT_TO_DEST')
+        self.assertEqual(outbound.base_price, Decimal('100.00'))
+        self.assertEqual(outbound.addons_total, Decimal('25.00'))
+        self.assertEqual(outbound.total_price, Decimal('225.00')) # (100 * 2) + 25
+
+        # Verify inbound/return booking
+        self.assertEqual(inbound.customer_name, 'Alice Smith')
+        self.assertEqual(inbound.passenger_count, 4)
+        self.assertEqual(inbound.round_trip, False)
+        # Swapped addresses
+        self.assertEqual(inbound.pickup_address, 'Times Square Hotel')
+        self.assertEqual(inbound.dropoff_address, 'JFK Airport Terminal 4')
+        self.assertEqual(inbound.transfer_direction, 'DEST_TO_AIRPORT')
+        # Free fare
+        self.assertEqual(inbound.base_price, Decimal('0.00'))
+        self.assertEqual(inbound.total_price, Decimal('0.00'))
+        self.assertEqual(inbound.linked_booking, outbound)
+
+        # Add-ons should be copied
+        self.assertIn(self.meet_greet, inbound.addons.all())
+
+
+
 
 

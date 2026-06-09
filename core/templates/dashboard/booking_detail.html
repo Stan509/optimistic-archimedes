@@ -71,6 +71,29 @@
                     <span class="block text-xs text-luxury-muted italic mt-1">Not provided</span>
                     {% endif %}
                 </div>
+                <div>
+                    <span class="block text-xs text-luxury-muted uppercase tracking-wider">Passengers</span>
+                    <span class="block font-semibold text-white text-base mt-1">
+                        <i class="fa-solid fa-users mr-1.5 text-luxury-muted"></i>{{ booking.passenger_count }}
+                    </span>
+                </div>
+                <div>
+                    <span class="block text-xs text-luxury-muted uppercase tracking-wider">Linked Booking</span>
+                    {% if booking.linked_booking %}
+                    <a href="{% url 'dashboard:booking_detail' booking.linked_booking.id %}" class="block font-semibold text-gold-400 hover:underline text-base mt-1">
+                        <i class="fa-solid fa-link mr-1"></i>Outbound: {{ booking.linked_booking.booking_reference }}
+                    </a>
+                    {% elif booking.return_bookings.all %}
+                    <span class="block font-semibold text-gold-400 text-base mt-1">
+                        <i class="fa-solid fa-link mr-1"></i>Return Leg:
+                        {% for return_b in booking.return_bookings.all %}
+                        <a href="{% url 'dashboard:booking_detail' return_b.id %}" class="hover:underline font-mono">{{ return_b.booking_reference }}</a>{% if not forloop.last %}, {% endif %}
+                        {% endfor %}
+                    </span>
+                    {% else %}
+                    <span class="block text-xs text-luxury-muted italic mt-1">None (Single leg)</span>
+                    {% endif %}
+                </div>
             </div>
         </div>
 

@@ -47,6 +47,10 @@
                             <span class="font-bold text-white">{{ booking.customer_name }}</span>
                         </div>
                         <div>
+                            <span class="block text-[10px] text-gray-500 uppercase tracking-widest font-bold">Passengers</span>
+                            <span class="font-bold text-white">{{ booking.passenger_count }} Passenger{{ booking.passenger_count|pluralize }}</span>
+                        </div>
+                        <div>
                             <span class="block text-[10px] text-gray-500 uppercase tracking-widest font-bold">Scheduled Pickup</span>
                             <span class="font-bold text-white">{{ booking.pickup_date }} at {{ booking.pickup_time }}</span>
                         </div>

@@ -108,6 +108,10 @@
 
                 <form action="{% site_url 'booking_step1' %}" method="POST" id="booking-step1-form" class="space-y-6">
                     {% csrf_token %}
+                    <input type="hidden" name="pickup_lat" id="pickup_lat">
+                    <input type="hidden" name="pickup_lng" id="pickup_lng">
+                    <input type="hidden" name="dropoff_lat" id="dropoff_lat">
+                    <input type="hidden" name="dropoff_lng" id="dropoff_lng">
 
                     <!-- Service Type selector -->
                     <div>
@@ -304,6 +308,49 @@
                         </div>
                     </div>
 
+                    <!-- Date, Time, Passengers and Flight details -->
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <div>
+                            <label for="pickup_date" class="block text-xs uppercase tracking-widest font-bold text-gray-400 mb-2">Pickup Date</label>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-luxe-gold">
+                                    <i class="fas fa-calendar-days text-sm"></i>
+                                </span>
+                                <input type="date" name="pickup_date" id="pickup_date" required min="{{ today }}" value="{{ today }}" class="block w-full pl-11 pr-4 py-4 bg-luxe-black/80 rounded-xl border border-gray-800 focus:border-luxe-gold text-sm text-white focus:outline-none focus:ring-1 focus:ring-luxe-gold">
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label for="pickup_time" class="block text-xs uppercase tracking-widest font-bold text-gray-400 mb-2">Pickup Time</label>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-luxe-gold">
+                                    <i class="fas fa-clock text-sm"></i>
+                                </span>
+                                <input type="time" name="pickup_time" id="pickup_time" required value="12:00" class="block w-full pl-11 pr-4 py-4 bg-luxe-black/80 rounded-xl border border-gray-800 focus:border-luxe-gold text-sm text-white focus:outline-none focus:ring-1 focus:ring-luxe-gold">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label for="passenger_count" class="block text-xs uppercase tracking-widest font-bold text-gray-400 mb-2">Passengers</label>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-luxe-gold">
+                                    <i class="fas fa-users text-sm"></i>
+                                </span>
+                                <input type="number" name="passenger_count" id="passenger_count" required min="1" max="14" value="1" class="block w-full pl-11 pr-4 py-4 bg-luxe-black/80 rounded-xl border border-gray-800 focus:border-luxe-gold text-sm text-white focus:outline-none focus:ring-1 focus:ring-luxe-gold">
+                            </div>
+                        </div>
+
+                        <div id="div-flight">
+                            <label for="flight_number" class="block text-xs uppercase tracking-widest font-bold text-gray-400 mb-2">Flight Number</label>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-luxe-gold">
+                                    <i class="fas fa-plane text-sm"></i>
+                                </span>
+                                <input type="text" name="flight_number" id="flight_number" placeholder="e.g. AA1234" class="block w-full pl-11 pr-4 py-4 bg-luxe-black/80 rounded-xl border border-gray-800 focus:border-luxe-gold text-sm text-white focus:outline-none focus:ring-1 focus:ring-luxe-gold uppercase">
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Round-trip Section (For Airport Transfer and Point-to-Point) -->
                     <div id="div-round-trip" class="py-2 border-t border-gray-800">
                         <div class="flex items-center space-x-3">
@@ -336,38 +383,7 @@
                         </div>
                     </div>
 
-                    <!-- Date, Time and Flight details -->
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div>
-                            <label for="pickup_date" class="block text-xs uppercase tracking-widest font-bold text-gray-400 mb-2">Pickup Date</label>
-                            <div class="relative">
-                                <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-luxe-gold">
-                                    <i class="fas fa-calendar-days text-sm"></i>
-                                </span>
-                                <input type="date" name="pickup_date" id="pickup_date" required min="{{ today }}" value="{{ today }}" class="block w-full pl-11 pr-4 py-4 bg-luxe-black/80 rounded-xl border border-gray-800 focus:border-luxe-gold text-sm text-white focus:outline-none focus:ring-1 focus:ring-luxe-gold">
-                            </div>
-                        </div>
-                        
-                        <div>
-                            <label for="pickup_time" class="block text-xs uppercase tracking-widest font-bold text-gray-400 mb-2">Pickup Time</label>
-                            <div class="relative">
-                                <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-luxe-gold">
-                                    <i class="fas fa-clock text-sm"></i>
-                                </span>
-                                <input type="time" name="pickup_time" id="pickup_time" required value="12:00" class="block w-full pl-11 pr-4 py-4 bg-luxe-black/80 rounded-xl border border-gray-800 focus:border-luxe-gold text-sm text-white focus:outline-none focus:ring-1 focus:ring-luxe-gold">
-                            </div>
-                        </div>
 
-                        <div id="div-flight">
-                            <label for="flight_number" class="block text-xs uppercase tracking-widest font-bold text-gray-400 mb-2">Flight Number</label>
-                            <div class="relative">
-                                <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-luxe-gold">
-                                    <i class="fas fa-plane text-sm"></i>
-                                </span>
-                                <input type="text" name="flight_number" id="flight_number" placeholder="e.g. AA1234" class="block w-full pl-11 pr-4 py-4 bg-luxe-black/80 rounded-xl border border-gray-800 focus:border-luxe-gold text-sm text-white focus:outline-none focus:ring-1 focus:ring-luxe-gold uppercase">
-                            </div>
-                        </div>
-                    </div>
 
                     <!-- Meeting Point Field (Visible for all service types) -->
                     <div class="py-4 border-t border-gray-800 space-y-2">
@@ -925,6 +941,8 @@
                 if (!isNaN(lat) && !isNaN(lng)) {
                     pickupMarker.setLatLng([lat, lng]);
                     bookingMap.flyTo([lat, lng], 11);
+                    document.getElementById('pickup_lat').value = lat;
+                    document.getElementById('pickup_lng').value = lng;
                 }
             }
         });
@@ -982,6 +1000,14 @@
                     startWrapper.style.order = "1";
                     endWrapper.style.order = "3";
                 }
+                // Swap coordinate inputs values
+                const pLat = document.getElementById('pickup_lat').value;
+                const pLng = document.getElementById('pickup_lng').value;
+                document.getElementById('pickup_lat').value = document.getElementById('dropoff_lat').value;
+                document.getElementById('pickup_lng').value = document.getElementById('dropoff_lng').value;
+                document.getElementById('dropoff_lat').value = pLat;
+                document.getElementById('dropoff_lng').value = pLng;
+
                 checkValidation();
             });
         }
@@ -1071,10 +1097,16 @@
                                 dropoffMarker.setLatLng([lat, lng]);
                                 geocodeStatus.classList.remove('hidden');
                                 geocodeStatusText.textContent = data[0].display_name.substring(0, 80) + '...';
+                                document.getElementById('dropoff_lat').value = lat;
+                                document.getElementById('dropoff_lng').value = lng;
                             } else if (type === 'pickup') {
                                 pickupMarker.setLatLng([lat, lng]);
+                                document.getElementById('pickup_lat').value = lat;
+                                document.getElementById('pickup_lng').value = lng;
                             } else if (type === 'dropoff') {
                                 dropoffMarker.setLatLng([lat, lng]);
+                                document.getElementById('dropoff_lat').value = lat;
+                                document.getElementById('dropoff_lng').value = lng;
                             }
                             
                             // Draw route line between markers
@@ -1110,6 +1142,8 @@
             pickupMarker.on('dragend', function (e) {
                 const position = pickupMarker.getLatLng();
                 reverseGeocode(position.lat, position.lng, pickupAddress);
+                document.getElementById('pickup_lat').value = position.lat;
+                document.getElementById('pickup_lng').value = position.lng;
                 drawRoute();
             });
 
@@ -1121,6 +1155,8 @@
                 } else {
                     reverseGeocode(position.lat, position.lng, dropoffAddress);
                 }
+                document.getElementById('dropoff_lat').value = position.lat;
+                document.getElementById('dropoff_lng').value = position.lng;
                 drawRoute();
             });
 
@@ -1136,15 +1172,21 @@
                     // For airport transfer, map click sets destination
                     dropoffMarker.setLatLng(latlng);
                     reverseGeocode(latlng.lat, latlng.lng, destinationAddress);
+                    document.getElementById('dropoff_lat').value = latlng.lat;
+                    document.getElementById('dropoff_lng').value = latlng.lng;
                     drawRoute();
                 } else {
                     if (activeInput === 'pickup') {
                         pickupMarker.setLatLng(latlng);
                         reverseGeocode(latlng.lat, latlng.lng, pickupAddress);
+                        document.getElementById('pickup_lat').value = latlng.lat;
+                        document.getElementById('pickup_lng').value = latlng.lng;
                         activeInput = 'dropoff';
                     } else {
                         dropoffMarker.setLatLng(latlng);
                         reverseGeocode(latlng.lat, latlng.lng, dropoffAddress);
+                        document.getElementById('dropoff_lat').value = latlng.lat;
+                        document.getElementById('dropoff_lng').value = latlng.lng;
                         activeInput = 'pickup';
                     }
                     drawRoute();

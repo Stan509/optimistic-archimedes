@@ -224,10 +224,11 @@ def send_booking_emails(booking):
                 subject=subject,
                 body=text_content,
                 from_email=from_email,
-                to=[to_email],
-                backend=backend
+                to=[to_email]
             )
             email.attach_alternative(html_template, "text/html")
+            if backend:
+                email.connection = backend
             email.send()
             
         # 2. SendGrid Provider
