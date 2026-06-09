@@ -601,6 +601,18 @@ class PricingRule(models.Model):
         help_text='Zone name for zone-based pricing (leave blank for destination-based).',
     )
 
+    # ── Distance-based zone pricing ──
+    zone_min_distance_km = models.PositiveIntegerField(
+        blank=True,
+        null=True,
+        help_text='Minimum distance in km for this fixed-price zone.',
+    )
+    zone_max_distance_km = models.PositiveIntegerField(
+        blank=True,
+        null=True,
+        help_text='Maximum distance in km for this fixed-price zone.',
+    )
+
     is_active = models.BooleanField(default=True)
 
     objects = models.Manager()
@@ -625,9 +637,10 @@ class PricingRule(models.Model):
                 raise ValidationError(
                     'Specify either a destination OR a zone name, not both.'
                 )
-            if not self.destination and not self.zone_name:
+            # Allow rules with zone_min_distance_km as distance-based zones
+            if not self.destination and not self.zone_name and not self.zone_min_distance_km:
                 raise ValidationError(
-                    'You must specify a destination or a zone name.'
+                    'You must specify a destination, a zone name, or a distance-based zone range.'
                 )
         else:
             if self.destination or self.zone_name:
@@ -1336,6 +1349,22 @@ class SiteSettings(models.Model):
         blank=True,
         default='',
         help_text='Terms and conditions text displayed during checkout.'
+    )
+
+    # ── Airport Transfer Distance Pricing ──
+    price_per_mile = models.DecimalField(
+        max_digits=6,
+        decimal_places=2,
+        default=Decimal('3.50'),
+        validators=[MinValueValidator(Decimal('0.00'))],
+        help_text='Rate per mile for airport transfer distance-based pricing.',
+    )
+    airport_base_fee = models.DecimalField(
+        max_digits=8,
+        decimal_places=2,
+        default=Decimal('15.00'),
+        validators=[MinValueValidator(Decimal('0.00'))],
+        help_text='Base pickup/dropoff fee added to every airport transfer.',
     )
 
     class Meta:

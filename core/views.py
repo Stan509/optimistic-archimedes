@@ -239,7 +239,8 @@ def booking_step1(request):
         request.session['booking'] = {
             'service_type': service_type,
             'airport_id': request.POST.get('airport_id'),
-            'destination_id': request.POST.get('destination_id'),
+            'destination_id': request.POST.get('destination_id', ''),
+            'destination_address': request.POST.get('destination_address', ''),
             'transfer_direction': request.POST.get('transfer_direction', 'AIRPORT_TO_DEST'),
             'meeting_point': request.POST.get('meeting_point', ''),
             'pickup_address': request.POST.get('pickup_address', ''),
@@ -326,21 +327,34 @@ def booking_step2(request):
                     fare = fare * 2.0
                 stops = int(booking_data.get('number_of_stops', 0))
                 category_prices[cat.id] = fare + (stops * 20.0)
-            elif service_type == 'airport_transfer' and airport_id and destination_id:
-                try:
-                    rule = PricingRule.objects.get(
-                        airport_id=airport_id,
-                        destination_id=destination_id,
+            elif service_type == 'airport_transfer':
+                # Address-based: use per-mile pricing from SiteSettings
+                from core.models import SiteSettings
+                site_settings = SiteSettings.get_settings(site)
+                base_fee = float(site_settings.airport_base_fee) if site_settings else 15.0
+                price_per_mile = float(site_settings.price_per_mile) if site_settings else 3.5
+
+                for cat in categories:
+                    if not cat.vehicles.filter(is_active=True, sites=site).exists():
+                        category_prices[cat.id] = None
+                        continue
+                    # Check for fixed-price zone rules first
+                    zone_rule = PricingRule.objects.filter(
+                        airport__site=site,
                         vehicle_category=cat,
                         service_type='airport_transfer',
-                        is_active=True
-                    )
-                    base_price = float(rule.base_price)
+                        is_active=True,
+                        zone_min_distance_km__isnull=False,
+                    ).first()
+                    if zone_rule:
+                        fare = float(zone_rule.base_price)
+                    else:
+                        # Fallback: use a standard per-mile estimate (20 miles default)
+                        fare = base_fee + (price_per_mile * 20)
+
                     if booking_data.get('round_trip'):
-                        base_price = base_price * 2.0
-                    category_prices[cat.id] = base_price
-                except PricingRule.DoesNotExist:
-                    category_prices[cat.id] = None
+                        fare = fare * 2.0
+                    category_prices[cat.id] = fare
             elif service_type == 'luxury_rental':
                 rule = PricingRule.objects.filter(
                     airport__site=site,
@@ -390,17 +404,23 @@ def booking_step2(request):
             ).first()
             pure_price = float(rule.base_price) if rule else 150.0
         else:
-            try:
-                rule = PricingRule.objects.get(
-                    airport_id=airport_id,
-                    destination_id=destination_id,
-                    vehicle_category_id=category_id,
-                    service_type='airport_transfer',
-                    is_active=True
-                )
-                pure_price = float(rule.base_price)
-            except PricingRule.DoesNotExist:
-                pure_price = 0.0
+            # Airport transfer - use per-mile pricing
+            from core.models import SiteSettings
+            site_settings = SiteSettings.get_settings(site)
+            base_fee = float(site_settings.airport_base_fee) if site_settings else 15.0
+            ppm = float(site_settings.price_per_mile) if site_settings else 3.5
+
+            zone_rule = PricingRule.objects.filter(
+                airport__site=site,
+                vehicle_category_id=category_id,
+                service_type='airport_transfer',
+                is_active=True,
+                zone_min_distance_km__isnull=False,
+            ).first()
+            if zone_rule:
+                pure_price = float(zone_rule.base_price)
+            else:
+                pure_price = base_fee + (ppm * 20)
 
         booking_data['base_price'] = pure_price
         request.session['booking'] = booking_data
@@ -546,7 +566,7 @@ def booking_payment(request):
                 customer_phone=booking_data['customer_phone'],
                 customer_whatsapp=booking_data.get('customer_whatsapp', ''),
                 pickup_address=booking_data.get('pickup_address', ''),
-                dropoff_address=booking_data.get('dropoff_address', ''),
+                dropoff_address=booking_data.get('destination_address', '') or booking_data.get('dropoff_address', ''),
                 pickup_date=booking_data.get('pickup_date'),
                 pickup_time=booking_data.get('pickup_time'),
                 flight_number=booking_data.get('flight_number', ''),

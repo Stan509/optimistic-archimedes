@@ -2,7 +2,7 @@
 {% load static %}
 {% load site_tags %}
 
-{% block title %}Book Chauffeur — Step 1: Trip Routing | AeroLux Select{% endblock %}
+{% block title %}Book Chauffeur â€” Step 1: Trip Routing | AeroLux Select{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
@@ -118,10 +118,10 @@
                 <!-- Direction State Tracker -->
                 <input type="hidden" name="transfer_direction" id="transfer_direction" value="AIRPORT_TO_DEST">
 
-                <!-- Airport Transfer wrapper (airport_id and destination_id with Toggle switch) -->
+                <!-- Airport Transfer wrapper (airport + address with Toggle switch) -->
                 <div id="div-airport-transfer-wrapper" class="space-y-4">
                     <div class="flex flex-col md:flex-row items-center gap-4 relative">
-                        <!-- Left Block: Start -->
+                        <!-- Left Block: Airport Select -->
                         <div id="transfer-start-wrapper" class="w-full font-light">
                             <label id="lbl-transfer-start" for="airport_id" class="block text-xs uppercase tracking-widest font-bold text-gray-400 mb-2">Origin Airport</label>
                             <div class="relative">
@@ -131,7 +131,7 @@
                                 <select name="airport_id" id="airport_id" class="block w-full pl-11 pr-10 py-4 bg-luxe-black/80 rounded-xl border border-gray-800 focus:border-luxe-gold text-sm text-white focus:outline-none focus:ring-1 focus:ring-luxe-gold appearance-none">
                                     <option value="" disabled selected>Select Airport...</option>
                                     {% for airport in airports %}
-                                    <option value="{{ airport.id }}">{{ airport.code }} — {{ airport.name }}</option>
+                                    <option value="{{ airport.id }}" data-lat="{{ airport.latitude }}" data-lng="{{ airport.longitude }}">{{ airport.code }} â€” {{ airport.name }}</option>
                                     {% empty %}
                                     <option value="" disabled>No serviced airports in this hub</option>
                                     {% endfor %}
@@ -149,20 +149,19 @@
                             </button>
                         </div>
 
-                        <!-- Right Block: End -->
+                        <!-- Right Block: Destination Address (free text) -->
                         <div id="transfer-end-wrapper" class="w-full font-light">
-                            <label id="lbl-transfer-end" for="destination_id" class="block text-xs uppercase tracking-widest font-bold text-gray-400 mb-2">Drop-off Destination</label>
+                            <label id="lbl-transfer-end" for="destination_address" class="block text-xs uppercase tracking-widest font-bold text-gray-400 mb-2">Drop-off Address</label>
                             <div class="relative">
                                 <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-luxe-gold">
                                     <i class="fas fa-map-pin text-sm" id="icon-transfer-end"></i>
                                 </span>
-                                <select name="destination_id" id="destination_id" disabled class="block w-full pl-11 pr-10 py-4 bg-luxe-black/40 rounded-xl border border-gray-800 text-sm text-gray-500 focus:outline-none focus:ring-1 focus:ring-luxe-gold appearance-none">
-                                    <option value="" disabled selected>Please select airport first...</option>
-                                </select>
-                                <span class="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-500 pointer-events-none">
-                                    <i class="fas fa-chevron-down text-xs"></i>
-                                </span>
+                                <input type="text" name="destination_address" id="destination_address" placeholder="Enter your destination address..." class="block w-full pl-11 pr-4 py-4 bg-luxe-black/80 rounded-xl border border-gray-800 focus:border-luxe-gold text-sm text-white focus:outline-none focus:ring-1 focus:ring-luxe-gold font-light" autocomplete="off">
                             </div>
+                            <p id="geocode-status" class="text-[10px] text-gray-500 mt-1 font-light hidden">
+                                <i class="fas fa-map-marker-alt text-luxe-gold mr-1"></i>
+                                <span id="geocode-status-text">Address found â€” displaying on map</span>
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -380,7 +379,6 @@
         const lblTransfer = document.getElementById('lbl-transfer');
         const lblHourly = document.getElementById('lbl-hourly');
         const lblP2P = document.getElementById('lbl-p2p');
-
         const iconHourly = document.getElementById('icon-hourly');
         const iconP2P = document.getElementById('icon-p2p');
         const spanHourly = document.getElementById('span-hourly');
@@ -397,393 +395,221 @@
         const divReturnFields = document.getElementById('div-return-fields');
 
         const airportSelect = document.getElementById('airport_id');
-        const destinationSelect = document.getElementById('destination_id');
+        const destinationAddress = document.getElementById('destination_address');
         const pickupAddress = document.getElementById('pickup_address');
         const dropoffAddress = document.getElementById('dropoff_address');
         const roundTripCheckbox = document.getElementById('round_trip');
         const returnDateInput = document.getElementById('return_date');
         const returnTimeInput = document.getElementById('return_time');
         const submitBtn = document.getElementById('submit-btn');
+        const geocodeStatus = document.getElementById('geocode-status');
+        const geocodeStatusText = document.getElementById('geocode-status-text');
 
-        // Form Validation logic
         function checkValidation() {
             let isValid = false;
-
             if (radTransfer.checked) {
-                if (airportSelect.value && destinationSelect.value) {
-                    isValid = true;
-                }
+                if (airportSelect.value && destinationAddress.value.trim() !== '') isValid = true;
             } else if (radHourly.checked) {
-                if (pickupAddress.value.trim() !== '') {
-                    isValid = true;
-                }
+                if (pickupAddress.value.trim() !== '') isValid = true;
             } else if (radP2P.checked) {
-                if (pickupAddress.value.trim() !== '' && dropoffAddress.value.trim() !== '') {
-                    isValid = true;
-                }
+                if (pickupAddress.value.trim() !== '' && dropoffAddress.value.trim() !== '') isValid = true;
             } else if (radRental && radRental.checked) {
-                if (pickupAddress.value.trim() !== '' && dropoffAddress.value.trim() !== '') {
-                    isValid = true;
-                }
+                if (pickupAddress.value.trim() !== '' && dropoffAddress.value.trim() !== '') isValid = true;
             }
-            
-            // Check round-trip coordinates
-            if (isValid && roundTripCheckbox.checked) {
-                if (!returnDateInput.value || !returnTimeInput.value) {
-                    isValid = false;
-                }
+            if (isValid && roundTripCheckbox.checked && !radHourly.checked) {
+                if (!returnDateInput.value || !returnTimeInput.value) isValid = false;
             }
-
+            submitBtn.disabled = !isValid;
             if (isValid) {
-                submitBtn.disabled = false;
                 submitBtn.classList.remove('opacity-60', 'cursor-not-allowed');
                 submitBtn.classList.add('hover:scale-[1.01]', 'cursor-pointer');
             } else {
-                submitBtn.disabled = true;
                 submitBtn.classList.add('opacity-60', 'cursor-not-allowed');
                 submitBtn.classList.remove('hover:scale-[1.01]', 'cursor-pointer');
             }
         }
 
-        // Service Type Visual Toggles
         function updateServiceType() {
-            lblTransfer.className = "cursor-pointer text-center p-4 rounded-xl text-xs font-semibold uppercase tracking-wider transition-all duration-300 block select-none border border-transparent hover:bg-luxe-grey";
-            lblHourly.className = "cursor-pointer text-center p-4 rounded-xl text-xs font-semibold uppercase tracking-wider transition-all duration-300 block select-none border border-transparent hover:bg-luxe-grey";
-            lblP2P.className = "cursor-pointer text-center p-4 rounded-xl text-xs font-semibold uppercase tracking-wider transition-all duration-300 block select-none border border-transparent hover:bg-luxe-grey";
-            if (lblRental) {
-                lblRental.className = "cursor-pointer text-center p-4 rounded-xl text-xs font-semibold uppercase tracking-wider transition-all duration-300 block select-none border border-transparent hover:bg-luxe-grey";
-            }
-            
+            const baseClass = "cursor-pointer text-center p-4 rounded-xl text-xs font-semibold uppercase tracking-wider transition-all duration-300 block select-none border border-transparent hover:bg-luxe-grey";
+            const activeClass = "cursor-pointer text-center p-4 rounded-xl text-xs font-semibold uppercase tracking-wider bg-luxe-gold/10 border border-luxe-gold/50 text-luxe-gold block select-none";
+            lblTransfer.className = baseClass; lblHourly.className = baseClass; lblP2P.className = baseClass;
+            if (lblRental) lblRental.className = baseClass;
             iconHourly.className = "fas fa-clock text-base text-gray-500 mb-2 block";
             iconP2P.className = "fas fa-route text-base text-gray-500 mb-2 block";
-            if (iconRental) {
-                iconRental.className = "fas fa-car text-base text-gray-500 mb-2 block";
-            }
-            spanHourly.className = "block text-gray-400";
-            spanP2P.className = "block text-gray-400";
-            if (spanRental) {
-                spanRental.className = "block text-gray-400";
-            }
+            if (iconRental) iconRental.className = "fas fa-car text-base text-gray-500 mb-2 block";
+            spanHourly.className = "block text-gray-400"; spanP2P.className = "block text-gray-400";
+            if (spanRental) spanRental.className = "block text-gray-400";
 
             if (radTransfer.checked) {
-                lblTransfer.className = "cursor-pointer text-center p-4 rounded-xl text-xs font-semibold uppercase tracking-wider bg-luxe-gold/10 border border-luxe-gold/50 text-luxe-gold block select-none";
-                
-                divAirportTransferWrapper.classList.remove('hidden');
-                divFlight.classList.remove('hidden');
-                divHourly.classList.add('hidden');
-                divCustomAddresses.classList.add('hidden');
-                divStopsSection.classList.add('hidden');
-                divRoundTrip.classList.remove('hidden');
-                
-                airportSelect.required = true;
-                destinationSelect.required = true;
-                pickupAddress.required = false;
-                dropoffAddress.required = false;
-            } 
-            else if (radP2P.checked) {
-                lblP2P.className = "cursor-pointer text-center p-4 rounded-xl text-xs font-semibold uppercase tracking-wider bg-luxe-gold/10 border border-luxe-gold/50 text-luxe-gold block select-none";
-                iconP2P.className = "fas fa-route text-base text-luxe-gold mb-2 block";
-                spanP2P.className = "block text-white";
-
-                divAirportTransferWrapper.classList.add('hidden');
-                divFlight.classList.add('hidden');
-                divHourly.classList.add('hidden');
-                divCustomAddresses.classList.remove('hidden');
-                divDropoffLocation.classList.remove('hidden');
-                divStopsSection.classList.remove('hidden');
-                divStopsCountWrapper.classList.remove('hidden');
-                divRoundTrip.classList.remove('hidden');
-
-                airportSelect.required = false;
-                destinationSelect.required = false;
-                pickupAddress.required = true;
-                dropoffAddress.required = true;
-            }
-            else if (radHourly.checked) {
-                lblHourly.className = "cursor-pointer text-center p-4 rounded-xl text-xs font-semibold uppercase tracking-wider bg-luxe-gold/10 border border-luxe-gold/50 text-luxe-gold block select-none";
-                iconHourly.className = "fas fa-clock text-base text-luxe-gold mb-2 block";
-                spanHourly.className = "block text-white";
-
-                divAirportTransferWrapper.classList.add('hidden');
-                divFlight.classList.add('hidden');
-                divHourly.classList.remove('hidden');
-                divCustomAddresses.classList.remove('hidden');
-                divDropoffLocation.classList.add('hidden');
-                divStopsSection.classList.remove('hidden');
+                lblTransfer.className = activeClass;
+                divAirportTransferWrapper.classList.remove('hidden'); divFlight.classList.remove('hidden');
+                divHourly.classList.add('hidden'); divCustomAddresses.classList.add('hidden');
+                divStopsSection.classList.add('hidden'); divRoundTrip.classList.remove('hidden');
+                airportSelect.required = true; pickupAddress.required = false; dropoffAddress.required = false;
+            } else if (radP2P.checked) {
+                lblP2P.className = activeClass; iconP2P.className = "fas fa-route text-base text-luxe-gold mb-2 block"; spanP2P.className = "block text-white";
+                divAirportTransferWrapper.classList.add('hidden'); divFlight.classList.add('hidden');
+                divHourly.classList.add('hidden'); divCustomAddresses.classList.remove('hidden');
+                divDropoffLocation.classList.remove('hidden'); divStopsSection.classList.remove('hidden');
+                divStopsCountWrapper.classList.remove('hidden'); divRoundTrip.classList.remove('hidden');
+                airportSelect.required = false; pickupAddress.required = true; dropoffAddress.required = true;
+            } else if (radHourly.checked) {
+                lblHourly.className = activeClass; iconHourly.className = "fas fa-clock text-base text-luxe-gold mb-2 block"; spanHourly.className = "block text-white";
+                divAirportTransferWrapper.classList.add('hidden'); divFlight.classList.add('hidden');
+                divHourly.classList.remove('hidden'); divCustomAddresses.classList.remove('hidden');
+                divDropoffLocation.classList.add('hidden'); divStopsSection.classList.remove('hidden');
                 divStopsCountWrapper.classList.add('hidden');
-
-                airportSelect.required = false;
-                destinationSelect.required = false;
-                pickupAddress.required = true;
-                dropoffAddress.required = false;
-            }
-            else if (radRental && radRental.checked) {
-                lblRental.className = "cursor-pointer text-center p-4 rounded-xl text-xs font-semibold uppercase tracking-wider bg-luxe-gold/10 border border-luxe-gold/50 text-luxe-gold block select-none";
-                iconRental.className = "fas fa-car text-base text-luxe-gold mb-2 block";
-                spanRental.className = "block text-white";
-
-                divAirportTransferWrapper.classList.add('hidden');
-                divFlight.classList.add('hidden');
-                divHourly.classList.add('hidden');
-                divCustomAddresses.classList.remove('hidden');
-                divDropoffLocation.classList.remove('hidden');
-                divStopsSection.classList.add('hidden');
+                divRoundTrip.classList.add('hidden'); roundTripCheckbox.checked = false;
+                airportSelect.required = false; pickupAddress.required = true; dropoffAddress.required = false;
+            } else if (radRental && radRental.checked) {
+                lblRental.className = activeClass; iconRental.className = "fas fa-car text-base text-luxe-gold mb-2 block"; spanRental.className = "block text-white";
+                divAirportTransferWrapper.classList.add('hidden'); divFlight.classList.add('hidden');
+                divHourly.classList.add('hidden'); divCustomAddresses.classList.remove('hidden');
+                divDropoffLocation.classList.remove('hidden'); divStopsSection.classList.add('hidden');
                 divRoundTrip.classList.remove('hidden');
-
-                airportSelect.required = false;
-                destinationSelect.required = false;
-                pickupAddress.required = true;
-                dropoffAddress.required = true;
+                airportSelect.required = false; pickupAddress.required = true; dropoffAddress.required = true;
             }
-            toggleRoundTripFields();
-            checkValidation();
-            
-            // Refresh map layout if needed
-            if (bookingMap) {
-                setTimeout(() => {
-                    bookingMap.invalidateSize();
-                }, 200);
-            }
+            toggleRoundTripFields(); checkValidation();
+            if (bookingMap) setTimeout(() => bookingMap.invalidateSize(), 200);
         }
 
         function toggleRoundTripFields() {
             if (roundTripCheckbox.checked && !divRoundTrip.classList.contains('hidden')) {
-                divReturnFields.classList.remove('hidden');
-                returnDateInput.required = true;
-                returnTimeInput.required = true;
+                divReturnFields.classList.remove('hidden'); returnDateInput.required = true; returnTimeInput.required = true;
             } else {
-                divReturnFields.classList.add('hidden');
-                returnDateInput.required = false;
-                returnTimeInput.required = false;
+                divReturnFields.classList.add('hidden'); returnDateInput.required = false; returnTimeInput.required = false;
             }
             checkValidation();
         }
 
-        // Attach Event Listeners to Radios
         radTransfer.addEventListener('change', updateServiceType);
         radHourly.addEventListener('change', updateServiceType);
         radP2P.addEventListener('change', updateServiceType);
-        if (radRental) {
-            radRental.addEventListener('change', updateServiceType);
-        }
+        if (radRental) radRental.addEventListener('change', updateServiceType);
         roundTripCheckbox.addEventListener('change', toggleRoundTripFields);
         returnDateInput.addEventListener('change', checkValidation);
         returnTimeInput.addEventListener('change', checkValidation);
 
-        // Fetch Destinations dynamically on Airport Selection
         airportSelect.addEventListener('change', () => {
-            const airportId = airportSelect.value;
-            if (!airportId) return;
-
-            // Reset and show loading state
-            destinationSelect.disabled = true;
-            destinationSelect.innerHTML = '<option value="" disabled selected>Loading premium destinations...</option>';
-            destinationSelect.className = "block w-full pl-11 pr-10 py-4 bg-luxe-black/40 rounded-xl border border-gray-800 text-sm text-gray-500 appearance-none";
-
-            // AJAX Call to destinations API
-            fetch(`/{{ site_slug }}/api/destinations/${airportId}/`)
-                .then(response => response.json())
-                .then(data => {
-                    destinationSelect.innerHTML = '<option value="" disabled selected>Select Destination...</option>';
-                    if (data.destinations && data.destinations.length > 0) {
-                        data.destinations.forEach(dest => {
-                            const opt = document.createElement('option');
-                            opt.value = dest.id;
-                            opt.textContent = `${dest.name} (${dest.destination_type})`;
-                            destinationSelect.appendChild(opt);
-                        });
-                        destinationSelect.disabled = false;
-                        destinationSelect.className = "block w-full pl-11 pr-10 py-4 bg-luxe-black/80 rounded-xl border border-gray-800 text-sm text-white focus:border-luxe-gold focus:outline-none focus:ring-1 focus:ring-luxe-gold appearance-none";
-                    } else {
-                        destinationSelect.innerHTML = '<option value="" disabled>No destinations mapped active</option>';
-                    }
-                    checkValidation();
-                })
-                .catch(error => {
-                    console.error('Error fetching destinations:', error);
-                    destinationSelect.innerHTML = '<option value="" disabled>Error loading destinations</option>';
-                    checkValidation();
-                });
+            checkValidation();
+            if (bookingMap) {
+                const opt = airportSelect.options[airportSelect.selectedIndex];
+                const lat = parseFloat(opt.dataset.lat), lng = parseFloat(opt.dataset.lng);
+                if (!isNaN(lat) && !isNaN(lng)) { pickupMarker.setLatLng([lat, lng]); bookingMap.flyTo([lat, lng], 11); }
+            }
         });
 
-        // Other change events to trigger validation
-        destinationSelect.addEventListener('change', checkValidation);
+        let geocodeTimeout = null;
+        destinationAddress.addEventListener('input', () => {
+            checkValidation(); clearTimeout(geocodeTimeout);
+            const q = destinationAddress.value.trim();
+            if (q.length < 5) { geocodeStatus.classList.add('hidden'); return; }
+            geocodeTimeout = setTimeout(() => geocodeAddress(q, 'destination'), 800);
+        });
         pickupAddress.addEventListener('input', checkValidation);
         dropoffAddress.addEventListener('input', checkValidation);
 
-        // Inversion/Switch Direction Logic
-        const btnSwitchDirection = document.getElementById('btn-switch-direction');
-        const transferDirectionInput = document.getElementById('transfer_direction');
-        const lblTransferStart = document.getElementById('lbl-transfer-start');
-        const lblTransferEnd = document.getElementById('lbl-transfer-end');
-        const iconTransferStart = document.getElementById('icon-transfer-start');
-        const iconTransferEnd = document.getElementById('icon-transfer-end');
+        // Direction switch
+        const btnSwitch = document.getElementById('btn-switch-direction');
+        const dirInput = document.getElementById('transfer_direction');
+        const lblStart = document.getElementById('lbl-transfer-start');
+        const lblEnd = document.getElementById('lbl-transfer-end');
+        const iconStart = document.getElementById('icon-transfer-start');
+        const iconEnd = document.getElementById('icon-transfer-end');
+        const startW = document.getElementById('transfer-start-wrapper');
+        const endW = document.getElementById('transfer-end-wrapper');
 
-        if (btnSwitchDirection) {
-            btnSwitchDirection.addEventListener('click', () => {
-                const currentDir = transferDirectionInput.value;
-                const startWrapper = document.getElementById('transfer-start-wrapper');
-                const endWrapper = document.getElementById('transfer-end-wrapper');
-                if (currentDir === 'AIRPORT_TO_DEST') {
-                    transferDirectionInput.value = 'DEST_TO_AIRPORT';
-                    lblTransferStart.textContent = "Destination Airport";
-                    lblTransferEnd.textContent = "Pickup Location (Hotel)";
-                    iconTransferStart.className = "fas fa-plane-arrival text-sm";
-                    iconTransferEnd.className = "fas fa-map-pin text-sm";
-                    startWrapper.style.order = "3";
-                    endWrapper.style.order = "1";
+        if (btnSwitch) {
+            btnSwitch.addEventListener('click', () => {
+                if (dirInput.value === 'AIRPORT_TO_DEST') {
+                    dirInput.value = 'DEST_TO_AIRPORT';
+                    lblStart.textContent = "Destination Airport"; lblEnd.textContent = "Pickup Address";
+                    iconStart.className = "fas fa-plane-arrival text-sm"; iconEnd.className = "fas fa-map-pin text-sm";
+                    destinationAddress.placeholder = "Enter your pickup address...";
+                    startW.style.order = "3"; endW.style.order = "1";
                 } else {
-                    transferDirectionInput.value = 'AIRPORT_TO_DEST';
-                    lblTransferStart.textContent = "Origin Airport";
-                    lblTransferEnd.textContent = "Drop-off Destination";
-                    iconTransferStart.className = "fas fa-plane-departure text-sm";
-                    iconTransferEnd.className = "fas fa-map-pin text-sm";
-                    startWrapper.style.order = "1";
-                    endWrapper.style.order = "3";
+                    dirInput.value = 'AIRPORT_TO_DEST';
+                    lblStart.textContent = "Origin Airport"; lblEnd.textContent = "Drop-off Address";
+                    iconStart.className = "fas fa-plane-departure text-sm"; iconEnd.className = "fas fa-map-pin text-sm";
+                    destinationAddress.placeholder = "Enter your destination address...";
+                    startW.style.order = "1"; endW.style.order = "3";
                 }
+                checkValidation();
             });
         }
 
-        // Initialize Leaflet Dark Map
-        const mapElement = document.getElementById('booking-map');
-        let bookingMap;
-        let pickupMarker;
-        let dropoffMarker;
+        // Leaflet Map
+        const mapEl = document.getElementById('booking-map');
+        let bookingMap, pickupMarker, dropoffMarker, routeLine;
 
-        if (mapElement) {
-            // Default center: NYC (40.7128, -74.0060)
-            const mapCenter = [40.7128, -74.0060];
-            bookingMap = L.map('booking-map', {
-                zoomControl: true,
-                attributionControl: false
-            }).setView(mapCenter, 11);
+        if (mapEl) {
+            {% if site_slug == 'dr' %}const mapCenter = [18.7357, -69.9509];{% else %}const mapCenter = [40.7128, -74.0060];{% endif %}
+            bookingMap = L.map('booking-map', { zoomControl: true, attributionControl: false }).setView(mapCenter, 11);
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { maxZoom: 20 }).addTo(bookingMap);
 
-            // CURATED PREMIUM DARK TILES
-            L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-                maxZoom: 20
-            }).addTo(bookingMap);
+            const goldIcon = L.divIcon({ className: 'custom-div-icon', html: '<div class="w-8 h-8 rounded-full bg-luxe-gold/20 flex items-center justify-center relative"><div class="w-4 h-4 rounded-full bg-luxe-gold flex items-center justify-center shadow-lg"><i class="fas fa-location-dot text-black text-[9px]"></i></div></div>', iconSize: [32, 32], iconAnchor: [16, 16] });
+            const silverIcon = L.divIcon({ className: 'custom-div-icon', html: '<div class="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center relative"><div class="w-4 h-4 rounded-full bg-white flex items-center justify-center shadow-lg"><i class="fas fa-flag text-black text-[9px]"></i></div></div>', iconSize: [32, 32], iconAnchor: [16, 16] });
 
-            // Leaflet Custom Icons
-            const goldIcon = L.divIcon({
-                className: 'custom-div-icon',
-                html: `<div class="w-8 h-8 rounded-full bg-luxe-gold/20 flex items-center justify-center relative"><div class="w-4 h-4 rounded-full bg-luxe-gold flex items-center justify-center shadow-lg"><i class="fas fa-location-dot text-black text-[9px]"></i></div></div>`,
-                iconSize: [32, 32],
-                iconAnchor: [16, 16]
-            });
+            pickupMarker = L.marker(mapCenter, { draggable: true, icon: goldIcon }).addTo(bookingMap);
+            dropoffMarker = L.marker([mapCenter[0] + 0.05, mapCenter[1] + 0.05], { draggable: true, icon: silverIcon }).addTo(bookingMap);
 
-            const silverIcon = L.divIcon({
-                className: 'custom-div-icon',
-                html: `<div class="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center relative"><div class="w-4 h-4 rounded-full bg-white flex items-center justify-center shadow-lg"><i class="fas fa-flag text-black text-[9px]"></i></div></div>`,
-                iconSize: [32, 32],
-                iconAnchor: [16, 16]
-            });
-
-            // Create markers
-            pickupMarker = L.marker([40.764500, -73.974500], {
-                draggable: true,
-                icon: goldIcon
-            }).addTo(bookingMap);
-
-            dropoffMarker = L.marker([40.641311, -73.778139], {
-                draggable: true,
-                icon: silverIcon
-            }).addTo(bookingMap);
-
-            // Helper to reverse-geocode coordinates using open free Nominatim OSM API
-            function reverseGeocode(lat, lng, targetInput) {
+            function reverseGeocode(lat, lng, input) {
                 fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`)
-                    .then(response => response.json())
-                    .then(data => {
+                    .then(r => r.json()).then(data => {
                         if (data && data.display_name) {
-                            // Extract a cleaner address (street, city)
-                            const addressParts = data.address;
-                            let cleanAddress = data.display_name;
-                            if (addressParts) {
-                                const road = addressParts.road || addressParts.pedestrian || addressParts.suburb || "";
-                                const houseNumber = addressParts.house_number || "";
-                                const city = addressParts.city || addressParts.town || addressParts.village || "";
-                                if (road) {
-                                    cleanAddress = `${houseNumber} ${road}, ${city}`.trim();
-                                }
-                            }
-                            targetInput.value = cleanAddress;
-                            targetInput.dispatchEvent(new Event('input'));
-                            checkValidation();
+                            const a = data.address; let addr = data.display_name;
+                            if (a) { const road = a.road||a.pedestrian||a.suburb||""; const num = a.house_number||""; const city = a.city||a.town||a.village||""; if (road) addr = `${num} ${road}, ${city}`.trim(); }
+                            input.value = addr; input.dispatchEvent(new Event('input')); checkValidation();
                         }
-                    })
-                    .catch(err => console.error("Error geocoding:", err));
+                    }).catch(e => console.error("Geocode error:", e));
             }
 
-            // Dragend events
-            pickupMarker.on('dragend', function (e) {
-                const position = pickupMarker.getLatLng();
-                reverseGeocode(position.lat, position.lng, pickupAddress);
-            });
+            function geocodeAddress(query, type) {
+                fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`)
+                    .then(r => r.json()).then(data => {
+                        if (data && data.length > 0) {
+                            const lat = parseFloat(data[0].lat), lng = parseFloat(data[0].lon);
+                            if (type === 'destination') { dropoffMarker.setLatLng([lat, lng]); geocodeStatus.classList.remove('hidden'); geocodeStatusText.textContent = data[0].display_name.substring(0, 80) + '...'; }
+                            else if (type === 'pickup') pickupMarker.setLatLng([lat, lng]);
+                            else dropoffMarker.setLatLng([lat, lng]);
+                            drawRoute();
+                            bookingMap.fitBounds(L.latLngBounds([pickupMarker.getLatLng(), dropoffMarker.getLatLng()]), { padding: [40, 40] });
+                        } else if (type === 'destination') { geocodeStatus.classList.remove('hidden'); geocodeStatusText.textContent = 'Address not found â€” please refine'; }
+                    }).catch(e => console.error("Geocode error:", e));
+            }
 
-            dropoffMarker.on('dragend', function (e) {
-                const position = dropoffMarker.getLatLng();
-                reverseGeocode(position.lat, position.lng, dropoffAddress);
-            });
+            function drawRoute() {
+                if (routeLine) bookingMap.removeLayer(routeLine);
+                routeLine = L.polyline([pickupMarker.getLatLng(), dropoffMarker.getLatLng()], { color: '#C9A84C', weight: 2, opacity: 0.6, dashArray: '8, 8' }).addTo(bookingMap);
+            }
 
-            // Map click handler (sets active input)
+            pickupMarker.on('dragend', () => { reverseGeocode(pickupMarker.getLatLng().lat, pickupMarker.getLatLng().lng, pickupAddress); drawRoute(); });
+            dropoffMarker.on('dragend', () => { const p = dropoffMarker.getLatLng(); if (radTransfer.checked) reverseGeocode(p.lat, p.lng, destinationAddress); else reverseGeocode(p.lat, p.lng, dropoffAddress); drawRoute(); });
+
             let activeInput = 'pickup';
             pickupAddress.addEventListener('focus', () => activeInput = 'pickup');
             dropoffAddress.addEventListener('focus', () => activeInput = 'dropoff');
+            destinationAddress.addEventListener('focus', () => activeInput = 'destination');
 
-            bookingMap.on('click', function(e) {
-                if (radTransfer.checked) return; // Disallow raw coordinates on airport transfer (preset lists only)
-                
-                const latlng = e.latlng;
-                if (activeInput === 'pickup') {
-                    pickupMarker.setLatLng(latlng);
-                    reverseGeocode(latlng.lat, latlng.lng, pickupAddress);
-                    activeInput = 'dropoff'; // Switch focus helper
-                } else {
-                    dropoffMarker.setLatLng(latlng);
-                    reverseGeocode(latlng.lat, latlng.lng, dropoffAddress);
-                    activeInput = 'pickup';
-                }
+            bookingMap.on('click', (e) => {
+                const ll = e.latlng;
+                if (radTransfer.checked) { dropoffMarker.setLatLng(ll); reverseGeocode(ll.lat, ll.lng, destinationAddress); }
+                else if (activeInput === 'pickup') { pickupMarker.setLatLng(ll); reverseGeocode(ll.lat, ll.lng, pickupAddress); activeInput = 'dropoff'; }
+                else { dropoffMarker.setLatLng(ll); reverseGeocode(ll.lat, ll.lng, dropoffAddress); activeInput = 'pickup'; }
+                drawRoute();
             });
 
-            // When clicking the visual map cards, flyTo coordinate
-            const mapPickup = document.getElementById('map-pickup');
-            const mapDropoff = document.getElementById('map-dropoff');
-
-            if (mapPickup) {
-                mapPickup.addEventListener('click', () => {
-                    const plazaCoords = [40.764500, -73.974500];
-                    pickupMarker.setLatLng(plazaCoords);
-                    bookingMap.flyTo(plazaCoords, 14);
-                    pickupAddress.value = "The Plaza Hotel, Fifth Avenue, NYC";
-                    pickupAddress.dispatchEvent(new Event('input'));
-                });
-            }
-
-            if (mapDropoff) {
-                mapDropoff.addEventListener('click', () => {
-                    const jfkCoords = [40.641311, -73.778139];
-                    dropoffMarker.setLatLng(jfkCoords);
-                    bookingMap.flyTo(jfkCoords, 14);
-                    dropoffAddress.value = "JFK International Airport, Queens, NY";
-                    dropoffAddress.dispatchEvent(new Event('input'));
-                });
-            }
+            let pGeo, dGeo;
+            pickupAddress.addEventListener('input', () => { clearTimeout(pGeo); const q = pickupAddress.value.trim(); if (q.length >= 5) pGeo = setTimeout(() => geocodeAddress(q, 'pickup'), 800); });
+            dropoffAddress.addEventListener('input', () => { clearTimeout(dGeo); const q = dropoffAddress.value.trim(); if (q.length >= 5) dGeo = setTimeout(() => geocodeAddress(q, 'dropoff'), 800); });
         }
 
-        // URL Search Params pre-selection
         const urlParams = new URLSearchParams(window.location.search);
-        const serviceTypeParam = urlParams.get('service_type');
-        if (serviceTypeParam === 'luxury_rental' && radRental) {
-            radRental.checked = true;
-        } else if (serviceTypeParam === 'point_to_point') {
-            radP2P.checked = true;
-        } else if (serviceTypeParam === 'hourly') {
-            radHourly.checked = true;
-        } else if (serviceTypeParam === 'airport_transfer') {
-            radTransfer.checked = true;
-        }
-
-        // Initial setup
+        const stp = urlParams.get('service_type');
+        if (stp === 'luxury_rental' && radRental) radRental.checked = true;
+        else if (stp === 'point_to_point') radP2P.checked = true;
+        else if (stp === 'hourly') radHourly.checked = true;
+        else if (stp === 'airport_transfer') radTransfer.checked = true;
         updateServiceType();
     });
 </script>

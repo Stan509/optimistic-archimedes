@@ -128,6 +128,24 @@
                         <textarea name="terms_and_conditions" rows="6" placeholder="Enter terms and conditions text..." class="w-full bg-luxury-black border border-luxury-border rounded-xl px-4 py-3 text-sm text-white focus:border-gold-500/50 outline-none transition-colors">{{ settings.terms_and_conditions }}</textarea>
                         <p class="text-[9px] text-luxury-muted mt-1">This text is displayed in a popup modal at the checkout payment page.</p>
                     </div>
+
+                    <h4 class="sm:col-span-2 font-serif font-semibold text-sm border-b border-luxury-border pb-2 pt-4">
+                        <i class="fa-solid fa-plane-departure text-gold-400 mr-2"></i>Airport Transfer Pricing
+                    </h4>
+
+                    <!-- Price Per Mile -->
+                    <div>
+                        <label class="block text-xs uppercase tracking-wider text-luxury-muted font-semibold mb-2">Price Per Mile ($)</label>
+                        <input type="number" name="price_per_mile" step="0.01" min="0" value="{{ settings.price_per_mile }}" class="w-full bg-luxury-black border border-luxury-border rounded-xl px-4 py-3 text-sm text-white focus:border-gold-500/50 outline-none transition-colors font-mono">
+                        <p class="text-[9px] text-luxury-muted mt-1">Rate charged per mile for airport transfers using address-based routing.</p>
+                    </div>
+
+                    <!-- Airport Base Fee -->
+                    <div>
+                        <label class="block text-xs uppercase tracking-wider text-luxury-muted font-semibold mb-2">Airport Base Fee ($)</label>
+                        <input type="number" name="airport_base_fee" step="0.01" min="0" value="{{ settings.airport_base_fee }}" class="w-full bg-luxury-black border border-luxury-border rounded-xl px-4 py-3 text-sm text-white focus:border-gold-500/50 outline-none transition-colors font-mono">
+                        <p class="text-[9px] text-luxury-muted mt-1">Fixed base fee added to every airport transfer (pickup/dropoff charge).</p>
+                    </div>
                 </div>
 
                 <!-- Submit Buttons Row -->

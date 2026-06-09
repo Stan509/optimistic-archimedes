@@ -152,10 +152,10 @@
                     <!-- Direction State Tracker -->
                     <input type="hidden" name="transfer_direction" id="transfer_direction" value="AIRPORT_TO_DEST">
 
-                    <!-- Airport Transfer wrapper (airport_id and destination_id with Toggle switch) -->
+                    <!-- Airport Transfer wrapper (airport + address with Toggle switch) -->
                     <div id="div-airport-transfer-wrapper" class="space-y-4">
                         <div class="flex flex-col md:flex-row items-center gap-4 relative">
-                            <!-- Left Block: Start -->
+                            <!-- Left Block: Airport Select (default: Origin Airport) -->
                             <div id="transfer-start-wrapper" class="w-full font-light">
                                 <label id="lbl-transfer-start" for="airport_id" class="block text-xs uppercase tracking-widest font-bold text-gray-400 mb-2">Origin Airport</label>
                                 <div class="relative">
@@ -165,7 +165,7 @@
                                     <select name="airport_id" id="airport_id" class="block w-full pl-11 pr-10 py-4 bg-luxe-black/80 rounded-xl border border-gray-800 focus:border-luxe-gold text-sm text-white focus:outline-none focus:ring-1 focus:ring-luxe-gold appearance-none">
                                         <option value="" disabled selected>Select Airport...</option>
                                         {% for airport in airports %}
-                                        <option value="{{ airport.id }}">{{ airport.code }} — {{ airport.name }}</option>
+                                        <option value="{{ airport.id }}" data-lat="{{ airport.latitude }}" data-lng="{{ airport.longitude }}">{{ airport.code }} — {{ airport.name }}</option>
                                         {% empty %}
                                         <option value="" disabled>No serviced airports in this hub</option>
                                         {% endfor %}
@@ -183,20 +183,20 @@
                                 </button>
                             </div>
 
-                            <!-- Right Block: End -->
+                            <!-- Right Block: Destination Address (free text with geocoding) -->
                             <div id="transfer-end-wrapper" class="w-full font-light">
-                                <label id="lbl-transfer-end" for="destination_id" class="block text-xs uppercase tracking-widest font-bold text-gray-400 mb-2">Drop-off Destination</label>
+                                <label id="lbl-transfer-end" for="destination_address" class="block text-xs uppercase tracking-widest font-bold text-gray-400 mb-2">Drop-off Address</label>
                                 <div class="relative">
                                     <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-luxe-gold">
                                         <i class="fas fa-map-pin text-sm" id="icon-transfer-end"></i>
                                     </span>
-                                    <select name="destination_id" id="destination_id" disabled class="block w-full pl-11 pr-10 py-4 bg-luxe-black/40 rounded-xl border border-gray-800 text-sm text-gray-500 focus:outline-none focus:ring-1 focus:ring-luxe-gold appearance-none">
-                                        <option value="" disabled selected>Please select airport first...</option>
-                                    </select>
-                                    <span class="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-500 pointer-events-none">
-                                        <i class="fas fa-chevron-down text-xs"></i>
-                                    </span>
+                                    <input type="text" name="destination_address" id="destination_address" placeholder="Enter your destination address..." class="block w-full pl-11 pr-4 py-4 bg-luxe-black/80 rounded-xl border border-gray-800 focus:border-luxe-gold text-sm text-white focus:outline-none focus:ring-1 focus:ring-luxe-gold font-light" autocomplete="off">
                                 </div>
+                                <!-- Geocoding result info -->
+                                <p id="geocode-status" class="text-[10px] text-gray-500 mt-1 font-light hidden">
+                                    <i class="fas fa-map-marker-alt text-luxe-gold mr-1"></i>
+                                    <span id="geocode-status-text">Address found — displaying on map</span>
+                                </p>
                             </div>
                         </div>
                     </div>
@@ -739,20 +739,23 @@
         const divReturnFields = document.getElementById('div-return-fields');
 
         const airportSelect = document.getElementById('airport_id');
-        const destinationSelect = document.getElementById('destination_id');
+        const destinationAddress = document.getElementById('destination_address');
         const pickupAddress = document.getElementById('pickup_address');
         const dropoffAddress = document.getElementById('dropoff_address');
         const roundTripCheckbox = document.getElementById('round_trip');
         const returnDateInput = document.getElementById('return_date');
         const returnTimeInput = document.getElementById('return_time');
         const submitBtn = document.getElementById('submit-btn');
+        const geocodeStatus = document.getElementById('geocode-status');
+        const geocodeStatusText = document.getElementById('geocode-status-text');
 
         // Form Validation logic
         function checkValidation() {
             let isValid = false;
 
             if (radTransfer.checked) {
-                if (airportSelect.value && destinationSelect.value) {
+                // Airport transfer: need airport + destination address
+                if (airportSelect.value && destinationAddress.value.trim() !== '') {
                     isValid = true;
                 }
             } else if (radHourly.checked) {
@@ -769,8 +772,8 @@
                 }
             }
             
-            // Check round-trip coordinates
-            if (isValid && roundTripCheckbox.checked) {
+            // Check round-trip coordinates (only for non-hourly services)
+            if (isValid && roundTripCheckbox.checked && !radHourly.checked) {
                 if (!returnDateInput.value || !returnTimeInput.value) {
                     isValid = false;
                 }
@@ -818,7 +821,6 @@
                 divRoundTrip.classList.remove('hidden');
                 
                 airportSelect.required = true;
-                destinationSelect.required = true;
                 pickupAddress.required = false;
                 dropoffAddress.required = false;
             } 
@@ -837,7 +839,6 @@
                 divRoundTrip.classList.remove('hidden');
 
                 airportSelect.required = false;
-                destinationSelect.required = false;
                 pickupAddress.required = true;
                 dropoffAddress.required = true;
             }
@@ -853,9 +854,11 @@
                 divDropoffLocation.classList.add('hidden');
                 divStopsSection.classList.remove('hidden');
                 divStopsCountWrapper.classList.add('hidden');
+                // HIDE round-trip for hourly
+                divRoundTrip.classList.add('hidden');
+                roundTripCheckbox.checked = false;
 
                 airportSelect.required = false;
-                destinationSelect.required = false;
                 pickupAddress.required = true;
                 dropoffAddress.required = false;
             }
@@ -873,7 +876,6 @@
                 divRoundTrip.classList.remove('hidden');
 
                 airportSelect.required = false;
-                destinationSelect.required = false;
                 pickupAddress.required = true;
                 dropoffAddress.required = true;
             }
@@ -912,95 +914,96 @@
         returnDateInput.addEventListener('change', checkValidation);
         returnTimeInput.addEventListener('change', checkValidation);
 
-        // Fetch Destinations dynamically on Airport Selection
+        // Validation listeners for airport transfer
         airportSelect.addEventListener('change', () => {
-            const airportId = airportSelect.value;
-            if (!airportId) return;
+            checkValidation();
+            // Move map to airport location
+            if (bookingMap) {
+                const selectedOption = airportSelect.options[airportSelect.selectedIndex];
+                const lat = parseFloat(selectedOption.dataset.lat);
+                const lng = parseFloat(selectedOption.dataset.lng);
+                if (!isNaN(lat) && !isNaN(lng)) {
+                    pickupMarker.setLatLng([lat, lng]);
+                    bookingMap.flyTo([lat, lng], 11);
+                }
+            }
+        });
 
-            // Reset and show loading state
-            destinationSelect.disabled = true;
-            destinationSelect.innerHTML = '<option value="" disabled selected>Loading premium destinations...</option>';
-            destinationSelect.className = "block w-full pl-11 pr-10 py-4 bg-luxe-black/40 rounded-xl border border-gray-800 text-sm text-gray-500 appearance-none";
-
-            // AJAX Call to destinations API
-            fetch(`/{{ site_slug }}/api/destinations/${airportId}/`)
-                .then(response => response.json())
-                .then(data => {
-                    destinationSelect.innerHTML = '<option value="" disabled selected>Select Destination...</option>';
-                    if (data.destinations && data.destinations.length > 0) {
-                        data.destinations.forEach(dest => {
-                            const opt = document.createElement('option');
-                            opt.value = dest.id;
-                            opt.textContent = `${dest.name} (${dest.destination_type})`;
-                            destinationSelect.appendChild(opt);
-                        });
-                        destinationSelect.disabled = false;
-                        destinationSelect.className = "block w-full pl-11 pr-10 py-4 bg-luxe-black/80 rounded-xl border border-gray-800 text-sm text-white focus:border-luxe-gold focus:outline-none focus:ring-1 focus:ring-luxe-gold appearance-none";
-                    } else {
-                        destinationSelect.innerHTML = '<option value="" disabled>No destinations mapped active</option>';
-                    }
-                    checkValidation();
-                })
-                .catch(error => {
-                    console.error('Error fetching destinations:', error);
-                    destinationSelect.innerHTML = '<option value="" disabled>Error loading destinations</option>';
-                    checkValidation();
-                });
+        // Geocoding for destination address (airport transfer)
+        let geocodeTimeout = null;
+        destinationAddress.addEventListener('input', () => {
+            checkValidation();
+            clearTimeout(geocodeTimeout);
+            const query = destinationAddress.value.trim();
+            if (query.length < 5) {
+                geocodeStatus.classList.add('hidden');
+                return;
+            }
+            geocodeTimeout = setTimeout(() => {
+                geocodeAddress(query, 'destination');
+            }, 800);
         });
 
         // Other change events to trigger validation
-        destinationSelect.addEventListener('change', checkValidation);
         pickupAddress.addEventListener('input', checkValidation);
         dropoffAddress.addEventListener('input', checkValidation);
 
-        // Inversion/Switch Direction Logic
+        // ── Direction Switch Logic ──
         const btnSwitchDirection = document.getElementById('btn-switch-direction');
         const transferDirectionInput = document.getElementById('transfer_direction');
         const lblTransferStart = document.getElementById('lbl-transfer-start');
         const lblTransferEnd = document.getElementById('lbl-transfer-end');
         const iconTransferStart = document.getElementById('icon-transfer-start');
         const iconTransferEnd = document.getElementById('icon-transfer-end');
+        const startWrapper = document.getElementById('transfer-start-wrapper');
+        const endWrapper = document.getElementById('transfer-end-wrapper');
 
         if (btnSwitchDirection) {
             btnSwitchDirection.addEventListener('click', () => {
                 const currentDir = transferDirectionInput.value;
-                const startWrapper = document.getElementById('transfer-start-wrapper');
-                const endWrapper = document.getElementById('transfer-end-wrapper');
                 if (currentDir === 'AIRPORT_TO_DEST') {
+                    // Switch to: Pickup Address → Airport
                     transferDirectionInput.value = 'DEST_TO_AIRPORT';
                     lblTransferStart.textContent = "Destination Airport";
-                    lblTransferEnd.textContent = "Pickup Location (Hotel)";
+                    lblTransferEnd.textContent = "Pickup Address";
                     iconTransferStart.className = "fas fa-plane-arrival text-sm";
                     iconTransferEnd.className = "fas fa-map-pin text-sm";
+                    destinationAddress.placeholder = "Enter your pickup address...";
                     startWrapper.style.order = "3";
                     endWrapper.style.order = "1";
                 } else {
+                    // Switch back to: Airport → Destination Address
                     transferDirectionInput.value = 'AIRPORT_TO_DEST';
                     lblTransferStart.textContent = "Origin Airport";
-                    lblTransferEnd.textContent = "Drop-off Destination";
+                    lblTransferEnd.textContent = "Drop-off Address";
                     iconTransferStart.className = "fas fa-plane-departure text-sm";
                     iconTransferEnd.className = "fas fa-map-pin text-sm";
+                    destinationAddress.placeholder = "Enter your destination address...";
                     startWrapper.style.order = "1";
                     endWrapper.style.order = "3";
                 }
+                checkValidation();
             });
         }
 
-        // Initialize Leaflet Dark Map
+        // ── Initialize Leaflet Dark Map ──
         const mapElement = document.getElementById('booking-map');
         let bookingMap;
         let pickupMarker;
         let dropoffMarker;
+        let routeLine;
 
         if (mapElement) {
-            // Default center: NYC (40.7128, -74.0060)
+            {% if site_slug == 'dr' %}
+            const mapCenter = [18.7357, -69.9509];
+            {% else %}
             const mapCenter = [40.7128, -74.0060];
+            {% endif %}
             bookingMap = L.map('booking-map', {
                 zoomControl: true,
                 attributionControl: false
             }).setView(mapCenter, 11);
 
-            // CURATED PREMIUM DARK TILES
             L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
                 maxZoom: 20
             }).addTo(bookingMap);
@@ -1020,24 +1023,23 @@
                 iconAnchor: [16, 16]
             });
 
-            // Create markers
-            pickupMarker = L.marker([40.764500, -73.974500], {
+            // Create markers at default positions
+            pickupMarker = L.marker(mapCenter, {
                 draggable: true,
                 icon: goldIcon
             }).addTo(bookingMap);
 
-            dropoffMarker = L.marker([40.641311, -73.778139], {
+            dropoffMarker = L.marker([mapCenter[0] + 0.05, mapCenter[1] + 0.05], {
                 draggable: true,
                 icon: silverIcon
             }).addTo(bookingMap);
 
-            // Helper to reverse-geocode coordinates using open free Nominatim OSM API
+            // Helper to reverse-geocode coordinates using Nominatim
             function reverseGeocode(lat, lng, targetInput) {
                 fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`)
                     .then(response => response.json())
                     .then(data => {
                         if (data && data.display_name) {
-                            // Extract a cleaner address (street, city)
                             const addressParts = data.address;
                             let cleanAddress = data.display_name;
                             if (addressParts) {
@@ -1056,60 +1058,118 @@
                     .catch(err => console.error("Error geocoding:", err));
             }
 
-            // Dragend events
+            // Forward geocode an address string and place marker on map
+            function geocodeAddress(query, type) {
+                fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data && data.length > 0) {
+                            const lat = parseFloat(data[0].lat);
+                            const lng = parseFloat(data[0].lon);
+                            
+                            if (type === 'destination') {
+                                dropoffMarker.setLatLng([lat, lng]);
+                                geocodeStatus.classList.remove('hidden');
+                                geocodeStatusText.textContent = data[0].display_name.substring(0, 80) + '...';
+                            } else if (type === 'pickup') {
+                                pickupMarker.setLatLng([lat, lng]);
+                            } else if (type === 'dropoff') {
+                                dropoffMarker.setLatLng([lat, lng]);
+                            }
+                            
+                            // Draw route line between markers
+                            drawRoute();
+                            
+                            // Fit map to show both markers
+                            const bounds = L.latLngBounds([pickupMarker.getLatLng(), dropoffMarker.getLatLng()]);
+                            bookingMap.fitBounds(bounds, { padding: [40, 40] });
+                        } else {
+                            if (type === 'destination') {
+                                geocodeStatus.classList.remove('hidden');
+                                geocodeStatusText.textContent = 'Address not found — please refine';
+                            }
+                        }
+                    })
+                    .catch(err => {
+                        console.error("Geocoding error:", err);
+                    });
+            }
+
+            // Draw a route line between pickup and dropoff
+            function drawRoute() {
+                if (routeLine) {
+                    bookingMap.removeLayer(routeLine);
+                }
+                routeLine = L.polyline(
+                    [pickupMarker.getLatLng(), dropoffMarker.getLatLng()],
+                    { color: '#C9A84C', weight: 2, opacity: 0.6, dashArray: '8, 8' }
+                ).addTo(bookingMap);
+            }
+
+            // Dragend events for markers
             pickupMarker.on('dragend', function (e) {
                 const position = pickupMarker.getLatLng();
                 reverseGeocode(position.lat, position.lng, pickupAddress);
+                drawRoute();
             });
 
             dropoffMarker.on('dragend', function (e) {
                 const position = dropoffMarker.getLatLng();
-                reverseGeocode(position.lat, position.lng, dropoffAddress);
+                // Determine which input to update based on service type
+                if (radTransfer.checked) {
+                    reverseGeocode(position.lat, position.lng, destinationAddress);
+                } else {
+                    reverseGeocode(position.lat, position.lng, dropoffAddress);
+                }
+                drawRoute();
             });
 
-            // Map click handler (sets active input)
+            // Map click handler
             let activeInput = 'pickup';
             pickupAddress.addEventListener('focus', () => activeInput = 'pickup');
             dropoffAddress.addEventListener('focus', () => activeInput = 'dropoff');
+            destinationAddress.addEventListener('focus', () => activeInput = 'destination');
 
             bookingMap.on('click', function(e) {
-                if (radTransfer.checked) return; // Disallow raw coordinates on airport transfer (preset lists only)
-                
                 const latlng = e.latlng;
-                if (activeInput === 'pickup') {
-                    pickupMarker.setLatLng(latlng);
-                    reverseGeocode(latlng.lat, latlng.lng, pickupAddress);
-                    activeInput = 'dropoff'; // Switch focus helper
-                } else {
+                if (radTransfer.checked) {
+                    // For airport transfer, map click sets destination
                     dropoffMarker.setLatLng(latlng);
-                    reverseGeocode(latlng.lat, latlng.lng, dropoffAddress);
-                    activeInput = 'pickup';
+                    reverseGeocode(latlng.lat, latlng.lng, destinationAddress);
+                    drawRoute();
+                } else {
+                    if (activeInput === 'pickup') {
+                        pickupMarker.setLatLng(latlng);
+                        reverseGeocode(latlng.lat, latlng.lng, pickupAddress);
+                        activeInput = 'dropoff';
+                    } else {
+                        dropoffMarker.setLatLng(latlng);
+                        reverseGeocode(latlng.lat, latlng.lng, dropoffAddress);
+                        activeInput = 'pickup';
+                    }
+                    drawRoute();
                 }
             });
 
-            // When clicking the visual map cards, flyTo coordinate
-            const mapPickup = document.getElementById('map-pickup');
-            const mapDropoff = document.getElementById('map-dropoff');
+            // Geocoding for pickup/dropoff address fields (P2P, hourly, rental)
+            let pickupGeoTimeout = null;
+            let dropoffGeoTimeout = null;
 
-            if (mapPickup) {
-                mapPickup.addEventListener('click', () => {
-                    const plazaCoords = [40.764500, -73.974500];
-                    pickupMarker.setLatLng(plazaCoords);
-                    bookingMap.flyTo(plazaCoords, 14);
-                    pickupAddress.value = "The Plaza Hotel, Fifth Avenue, NYC";
-                    pickupAddress.dispatchEvent(new Event('input'));
-                });
-            }
+            pickupAddress.addEventListener('input', () => {
+                clearTimeout(pickupGeoTimeout);
+                const query = pickupAddress.value.trim();
+                if (query.length >= 5) {
+                    pickupGeoTimeout = setTimeout(() => geocodeAddress(query, 'pickup'), 800);
+                }
+            });
 
-            if (mapDropoff) {
-                mapDropoff.addEventListener('click', () => {
-                    const jfkCoords = [40.641311, -73.778139];
-                    dropoffMarker.setLatLng(jfkCoords);
-                    bookingMap.flyTo(jfkCoords, 14);
-                    dropoffAddress.value = "JFK International Airport, Queens, NY";
-                    dropoffAddress.dispatchEvent(new Event('input'));
-                });
-            }
+            dropoffAddress.addEventListener('input', () => {
+                clearTimeout(dropoffGeoTimeout);
+                const query = dropoffAddress.value.trim();
+                if (query.length >= 5) {
+                    dropoffGeoTimeout = setTimeout(() => geocodeAddress(query, 'dropoff'), 800);
+                }
+            });
         }
 
         // URL Search Params pre-selection
@@ -1128,11 +1188,10 @@
         // Initial setup
         updateServiceType();
 
-        // 3D Parallax & Mouse Interactivity for NYC Hero Image
+        // 3D Parallax & Mouse Interactivity for Hero Image
         const parallaxImg = document.getElementById('hero-parallax-img');
         const heroSection = document.getElementById('hero-section');
         if (parallaxImg && heroSection) {
-            // Target and current variables for interpolation (lerp)
             let targetX = 0, targetY = 0, targetRotX = 0, targetRotY = 0;
             let currentX = 0, currentY = 0, currentRotX = 0, currentRotY = 0;
             
@@ -1140,10 +1199,8 @@
             let mouseX = 0, mouseY = 0;
             let mouseActive = false;
 
-            // Tracking mouse movement inside hero
             heroSection.addEventListener('mousemove', (e) => {
                 const rect = heroSection.getBoundingClientRect();
-                // Normalize coordinates from -1 to 1 based on the center of the hero section
                 mouseX = ((e.clientX - rect.left) / rect.width) * 2 - 1;
                 mouseY = ((e.clientY - rect.top) / rect.height) * 2 - 1;
                 mouseActive = true;
@@ -1153,47 +1210,39 @@
                 mouseActive = false;
             }, { passive: true });
 
-            // Smooth animation loop using requestAnimationFrame
             function animate() {
                 time += 1;
 
-                // Ambient floating component (constantly shifting)
                 const ambX = Math.sin(time * 0.008) * 15;
                 const ambY = Math.cos(time * 0.006) * 10;
                 const ambRotX = Math.sin(time * 0.005) * 0.8;
                 const ambRotY = Math.cos(time * 0.005) * 0.8;
 
                 if (mouseActive) {
-                    // Combine mouse interaction (360 degrees rotation/parallax) with subtle ambient floating
                     targetX = mouseX * -25 + ambX * 0.3;
                     targetY = mouseY * -25 + ambY * 0.3;
-                    targetRotX = mouseY * 4.5 + ambRotX * 0.3; // Tilt on X axis
-                    targetRotY = mouseX * -4.5 + ambRotY * 0.3; // Tilt on Y axis
+                    targetRotX = mouseY * 4.5 + ambRotX * 0.3;
+                    targetRotY = mouseX * -4.5 + ambRotY * 0.3;
                 } else {
-                    // Pure ambient float if mouse is idle or outside the hero
                     targetX = ambX;
                     targetY = ambY;
                     targetRotX = ambRotX;
                     targetRotY = ambRotY;
                 }
 
-                // Add scroll parallax component to Y axis
                 const scrollOffset = window.pageYOffset * 0.3;
                 const finalTargetY = targetY + scrollOffset;
 
-                // Linear interpolation (lerp) for buttery-smooth ease-out transitions
                 currentX += (targetX - currentX) * 0.08;
                 currentY += (finalTargetY - currentY) * 0.08;
                 currentRotX += (targetRotX - currentRotX) * 0.08;
                 currentRotY += (targetRotY - currentRotY) * 0.08;
 
-                // Apply dynamic 3D transform to create a living window effect
                 parallaxImg.style.transform = `translate3d(${currentX}px, ${currentY}px, 0) rotateX(${currentRotX}deg) rotateY(${currentRotY}deg) scale(1.15)`;
 
                 requestAnimationFrame(animate);
             }
 
-            // Start the loop
             requestAnimationFrame(animate);
         }
     });

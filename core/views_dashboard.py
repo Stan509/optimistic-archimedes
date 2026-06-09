@@ -818,6 +818,13 @@ def dashboard_settings(request):
         settings_obj.social_tiktok = request.POST.get('social_tiktok', '')
         settings_obj.google_analytics_id = request.POST.get('google_analytics_id', '')
         settings_obj.terms_and_conditions = request.POST.get('terms_and_conditions', '')
+        # Airport Transfer Pricing
+        ppm = request.POST.get('price_per_mile', '')
+        abf = request.POST.get('airport_base_fee', '')
+        if ppm:
+            settings_obj.price_per_mile = ppm
+        if abf:
+            settings_obj.airport_base_fee = abf
         settings_obj.save()
         messages.success(request, f'Settings for {site.name} updated successfully.')
 
