@@ -1,185 +1,141 @@
 {% extends 'dashboard/base.html' %}
 
-{% block title %}
-    {% if rule %}Edit Pricing Rule{% else %}New Pricing Rule{% endif %} — AeroLux Select
-{% endblock %}
-
-{% block dashboard_header %}
-    {% if rule %}Edit Pricing Rule{% else %}Add Pricing Rule{% endif %}
-{% endblock %}
+{% block title %}{% if rule %}Edit{% else %}New{% endif %} Pricing Rule — AeroLux Select{% endblock %}
+{% block dashboard_header %}{% if rule %}Edit Pricing Rule{% else %}New Pricing Rule{% endif %}{% endblock %}
 
 {% block content %}
-<div class="max-w-4xl mx-auto space-y-8">
-    
-    <!-- Top Action bar -->
-    <div class="flex items-center space-x-3 bg-luxury-card border border-luxury-border p-6 rounded-2xl">
-        <a href="{% url 'dashboard:pricing' %}" class="w-10 h-10 rounded-xl bg-luxury-black border border-luxury-border flex items-center justify-center text-luxury-muted hover:text-gold-400 transition-colors">
-            <i class="fa-solid fa-arrow-left"></i>
-        </a>
-        <div>
-            <h2 class="text-xl font-bold font-serif tracking-wide gold-text-gradient">
-                {% if rule %}Update Routing Pricing{% else %}Register Routing Pricing Rule{% endif %}
-            </h2>
-            <p class="text-xs text-luxury-muted mt-1">Configure base costs, distance modifiers, and zone maps for client transfer route quotes.</p>
-        </div>
-    </div>
-
-    <!-- Pricing rule constraints Warning Alert -->
-    <div class="p-4 rounded-xl flex items-start space-x-3 bg-amber-500/10 border border-amber-500/30 text-amber-400">
-        <div class="mt-0.5">
-            <i class="fa-solid fa-triangle-exclamation"></i>
-        </div>
-        <div class="flex-1 text-xs">
-            <h4 class="font-bold uppercase tracking-wider mb-0.5">Pricing Engine Validation Alert</h4>
-            <p>You must specify either a **Specific Destination** OR a **Pricing Zone** (not both, and at least one must be set) to prevent pricing calculation errors.</p>
-        </div>
-    </div>
-
-    <!-- Form Panel -->
+<div class="max-w-2xl mx-auto">
     <div class="bg-luxury-card border border-luxury-border rounded-2xl p-8 shadow-xl">
-        <form method="POST" class="space-y-6">
+        <div class="mb-8">
+            <h2 class="text-xl font-bold font-serif tracking-wide gold-text-gradient">
+                {% if rule %}Edit Pricing Rule{% else %}Create Pricing Rule{% endif %}
+            </h2>
+            <p class="text-xs text-luxury-muted mt-1">Configure Hourly or Point-to-Point service pricing.</p>
+        </div>
+
+        <form method="POST" action="" class="space-y-6">
             {% csrf_token %}
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- Airport -->
-                <div>
-                    <label class="block text-xs uppercase tracking-wider text-luxury-muted font-semibold mb-2">Origin Airport Hub *</label>
-                    <select name="airport" id="id_airport" required class="w-full bg-luxury-black border border-luxury-border rounded-xl px-4 py-3 text-sm text-white focus:border-gold-500/50 outline-none transition-colors">
-                        <option value="">Select Airport</option>
-                        {% for a in airports %}
-                        <option value="{{ a.id }}" {% if rule.airport.id == a.id %}selected{% endif %}>{{ a.code }} — {{ a.name }} ({{ a.site.name }})</option>
-                        {% endfor %}
-                    </select>
-                </div>
 
-                <!-- Vehicle Category -->
-                <div>
-                    <label class="block text-xs uppercase tracking-wider text-luxury-muted font-semibold mb-2">Vehicle Class Category *</label>
-                    <select name="vehicle_category" required class="w-full bg-luxury-black border border-luxury-border rounded-xl px-4 py-3 text-sm text-white focus:border-gold-500/50 outline-none transition-colors">
-                        <option value="">Select Fleet Class</option>
-                        {% for cat in categories %}
-                        <option value="{{ cat.id }}" {% if rule.vehicle_category.id == cat.id %}selected{% endif %}>{{ cat.name }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
+            <!-- Site -->
+            <div>
+                <label class="block text-xs font-semibold text-luxury-muted uppercase tracking-wider mb-2">Operating Site *</label>
+                <select name="site" required class="w-full bg-luxury-black border border-luxury-border text-white text-sm rounded-xl px-4 py-3 focus:border-gold-500/50 outline-none transition-colors">
+                    <option value="">Select Site</option>
+                    {% for s in sites %}
+                    <option value="{{ s.id }}" {% if rule and rule.site_id == s.id %}selected{% endif %}>
+                        {{ s.name }} ({{ s.slug|upper }})
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
 
-                <!-- Target Destination (dynamic JS list) -->
-                <div>
-                    <label class="block text-xs uppercase tracking-wider text-luxury-muted font-semibold mb-2">Target Destination Point (Option A)</label>
-                    <select name="destination" id="id_destination" class="w-full bg-luxury-black border border-luxury-border rounded-xl px-4 py-3 text-sm text-white focus:border-gold-500/50 outline-none transition-colors">
-                        <option value="">-- No Destination (Use Zone-Based) --</option>
-                        {% for a in airports %}
-                            {% for dest in a.destinations.all %}
-                            <option value="{{ dest.id }}" data-airport-id="{{ a.id }}" {% if rule.destination.id == dest.id %}selected{% endif %}>
-                                [{{ a.code }}] {{ dest.name }}
-                            </option>
-                            {% endfor %}
-                        {% endfor %}
-                    </select>
-                    <p class="text-[10px] text-luxury-muted mt-1">Leave blank if this pricing applies to a general zone (e.g. Hotel Zone).</p>
-                </div>
+            <!-- Service Type -->
+            <div>
+                <label class="block text-xs font-semibold text-luxury-muted uppercase tracking-wider mb-2">Service Type *</label>
+                <select name="service_type" required class="w-full bg-luxury-black border border-luxury-border text-white text-sm rounded-xl px-4 py-3 focus:border-gold-500/50 outline-none transition-colors">
+                    <option value="hourly" {% if rule and rule.service_type == 'hourly' %}selected{% endif %}>Hourly Service</option>
+                    <option value="point_to_point" {% if rule and rule.service_type == 'point_to_point' %}selected{% endif %}>Point-to-Point</option>
+                </select>
+            </div>
 
-                <!-- Zone Name -->
-                <div>
-                    <label class="block text-xs uppercase tracking-wider text-luxury-muted font-semibold mb-2">Pricing Zone Name (Option B)</label>
-                    <select name="zone_name" id="id_zone_name" class="w-full bg-luxury-black border border-luxury-border rounded-xl px-4 py-3 text-sm text-white focus:border-gold-500/50 outline-none transition-colors">
-                        <option value="">-- No Zone (Use Destination-Based) --</option>
-                        <option value="hotel_zone" {% if rule.zone_name == 'hotel_zone' %}selected{% endif %}>Hotel Zone</option>
-                        <option value="city_center" {% if rule.zone_name == 'city_center' %}selected{% endif %}>City Center</option>
-                        <option value="remote" {% if rule.zone_name == 'remote' %}selected{% endif %}>Remote Area</option>
-                    </select>
-                    <p class="text-[10px] text-luxury-muted mt-1">Leave blank if this pricing applies to a specific destination point above.</p>
-                </div>
+            <!-- Vehicle (optional) -->
+            <div>
+                <label class="block text-xs font-semibold text-luxury-muted uppercase tracking-wider mb-2">Vehicle (optional)</label>
+                <select name="vehicle" class="w-full bg-luxury-black border border-luxury-border text-white text-sm rounded-xl px-4 py-3 focus:border-gold-500/50 outline-none transition-colors">
+                    <option value="">All Vehicles in Category (Fallback Rule)</option>
+                    {% for v in vehicles %}
+                    <option value="{{ v.id }}" {% if rule and rule.vehicle_id == v.id %}selected{% endif %}>
+                        {{ v.name }} ({{ v.category.name }})
+                    </option>
+                    {% endfor %}
+                </select>
+                <p class="text-[10px] text-luxury-muted mt-1">Leave empty to apply to all vehicles in the selected category.</p>
+            </div>
 
+            <!-- Vehicle Category -->
+            <div>
+                <label class="block text-xs font-semibold text-luxury-muted uppercase tracking-wider mb-2">Vehicle Category *</label>
+                <select name="vehicle_category" required class="w-full bg-luxury-black border border-luxury-border text-white text-sm rounded-xl px-4 py-3 focus:border-gold-500/50 outline-none transition-colors">
+                    <option value="">Select Category</option>
+                    {% for cat in categories %}
+                    <option value="{{ cat.id }}" {% if rule and rule.vehicle_category_id == cat.id %}selected{% endif %}>
+                        {{ cat.name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Pricing Grid -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <!-- Base Price -->
                 <div>
-                    <label class="block text-xs uppercase tracking-wider text-luxury-muted font-semibold mb-2">Base Pricing Rate (USD) *</label>
+                    <label class="block text-xs font-semibold text-luxury-muted uppercase tracking-wider mb-2">Base Price (USD) *</label>
                     <div class="relative">
-                        <span class="absolute left-4 top-1/2 -translate-y-1/2 text-luxury-muted text-sm font-semibold">$</span>
-                        <input type="number" name="base_price" step="0.01" min="0.00" required value="{{ rule.base_price|default:0.00 }}" class="w-full bg-luxury-black border border-luxury-border rounded-xl pl-8 pr-4 py-3 text-sm text-white focus:border-gold-500/50 outline-none transition-colors font-mono">
+                        <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gold-500 font-bold">$</span>
+                        <input type="number" name="base_price" step="0.01" min="0" required
+                            value="{% if rule %}{{ rule.base_price }}{% endif %}"
+                            class="w-full bg-luxury-black border border-luxury-border text-white text-sm rounded-xl pl-8 pr-4 py-3 focus:border-gold-500/50 outline-none transition-colors">
                     </div>
                 </div>
 
-                <!-- Price per KM -->
+                <!-- Price Per KM -->
                 <div>
-                    <label class="block text-xs uppercase tracking-wider text-luxury-muted font-semibold mb-2">Price Per Kilometer (optional)</label>
+                    <label class="block text-xs font-semibold text-luxury-muted uppercase tracking-wider mb-2">Price Per KM (P2P)</label>
                     <div class="relative">
-                        <span class="absolute left-4 top-1/2 -translate-y-1/2 text-luxury-muted text-sm font-semibold">$</span>
-                        <input type="number" name="price_per_km" step="0.01" min="0.00" value="{{ rule.price_per_km|default:'' }}" placeholder="0.00" class="w-full bg-luxury-black border border-luxury-border rounded-xl pl-8 pr-4 py-3 text-sm text-white focus:border-gold-500/50 outline-none transition-colors font-mono">
+                        <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gold-500 font-bold">$</span>
+                        <input type="number" name="price_per_km" step="0.01" min="0"
+                            value="{% if rule and rule.price_per_km %}{{ rule.price_per_km }}{% endif %}"
+                            placeholder="0.00"
+                            class="w-full bg-luxury-black border border-luxury-border text-white text-sm rounded-xl pl-8 pr-4 py-3 focus:border-gold-500/50 outline-none transition-colors placeholder-luxury-muted/50">
                     </div>
+                    <p class="text-[10px] text-luxury-muted mt-1">Applied beyond KM threshold for P2P</p>
+                </div>
+
+                <!-- KM Threshold -->
+                <div>
+                    <label class="block text-xs font-semibold text-luxury-muted uppercase tracking-wider mb-2">KM Threshold</label>
+                    <input type="number" name="km_threshold" min="0"
+                        value="{% if rule %}{{ rule.km_threshold }}{% else %}25{% endif %}"
+                        class="w-full bg-luxury-black border border-luxury-border text-white text-sm rounded-xl px-4 py-3 focus:border-gold-500/50 outline-none transition-colors">
+                    <p class="text-[10px] text-luxury-muted mt-1">Per-km charge starts beyond this distance</p>
                 </div>
 
                 <!-- Minimum Price -->
                 <div>
-                    <label class="block text-xs uppercase tracking-wider text-luxury-muted font-semibold mb-2">Minimum Floor Charge (USD)</label>
+                    <label class="block text-xs font-semibold text-luxury-muted uppercase tracking-wider mb-2">Minimum Floor Price</label>
                     <div class="relative">
-                        <span class="absolute left-4 top-1/2 -translate-y-1/2 text-luxury-muted text-sm font-semibold">$</span>
-                        <input type="number" name="minimum_price" step="0.01" min="0.00" value="{{ rule.minimum_price|default:0.00 }}" class="w-full bg-luxury-black border border-luxury-border rounded-xl pl-8 pr-4 py-3 text-sm text-white focus:border-gold-500/50 outline-none transition-colors font-mono">
+                        <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gold-500 font-bold">$</span>
+                        <input type="number" name="minimum_price" step="0.01" min="0"
+                            value="{% if rule %}{{ rule.minimum_price }}{% else %}0{% endif %}"
+                            class="w-full bg-luxury-black border border-luxury-border text-white text-sm rounded-xl pl-8 pr-4 py-3 focus:border-gold-500/50 outline-none transition-colors">
                     </div>
                 </div>
-
-                <!-- Surge Multiplier -->
-                <div>
-                    <label class="block text-xs uppercase tracking-wider text-luxury-muted font-semibold mb-2">Surge Pricing Multiplier (1.0 = none)</label>
-                    <input type="number" name="surge_multiplier" step="0.05" min="1.00" max="5.00" value="{{ rule.surge_multiplier|default:1.00 }}" class="w-full bg-luxury-black border border-luxury-border rounded-xl px-4 py-3 text-sm text-white focus:border-gold-500/50 outline-none transition-colors font-mono">
-                </div>
-
-                <!-- Active Status -->
-                <div class="md:col-span-2 py-2">
-                    <label class="inline-flex items-center space-x-3 cursor-pointer">
-                        <input type="checkbox" name="is_active" class="sr-only peer" {% if rule.is_active or not rule %}checked{% endif %}>
-                        <div class="w-11 h-6 bg-luxury-border peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-gold-500 relative"></div>
-                        <span class="text-xs font-semibold uppercase tracking-wider text-white">Active Rule in Pricing Engine</span>
-                    </label>
-                </div>
             </div>
 
-            <!-- Submit buttons row -->
-            <div class="flex items-center justify-end space-x-4 pt-6 border-t border-luxury-border">
-                <a href="{% url 'dashboard:pricing' %}" class="text-xs font-semibold text-luxury-muted hover:text-white transition-colors px-5 py-3 rounded-xl hover:bg-luxury-black/30 border border-transparent">
-                    Cancel
+            <!-- Active Toggle -->
+            <div class="flex items-center justify-between bg-luxury-black/50 border border-luxury-border rounded-xl px-4 py-3">
+                <div>
+                    <span class="text-sm font-semibold text-white">Active</span>
+                    <p class="text-[10px] text-luxury-muted">Enable or disable this pricing rule</p>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" name="is_active" class="sr-only peer"
+                        {% if not rule or rule.is_active %}checked{% endif %}>
+                    <div class="w-11 h-6 bg-gray-700 peer-focus:ring-2 peer-focus:ring-gold-500/30 rounded-full peer peer-checked:bg-gold-500 transition-colors"></div>
+                </label>
+            </div>
+
+            <!-- Actions -->
+            <div class="flex items-center justify-between pt-4">
+                <a href="{% url 'dashboard:pricing' %}" class="text-xs text-luxury-muted hover:text-white transition-colors">
+                    <i class="fa-solid fa-arrow-left mr-1"></i> Cancel
                 </a>
-                <button type="submit" class="gold-gradient text-luxury-black text-xs font-semibold px-8 py-3 rounded-xl hover:opacity-95 transition-all shadow-lg shadow-gold-500/15">
-                    {% if rule %}Save Pricing Changes{% else %}Create Pricing Rule{% endif %}
+                <button type="submit" class="gold-gradient text-luxury-black text-xs font-semibold px-8 py-3 rounded-xl hover:opacity-95 transition-all shadow-lg shadow-gold-500/10">
+                    <i class="fa-solid fa-save mr-1.5"></i>
+                    {% if rule %}Update Rule{% else %}Create Rule{% endif %}
                 </button>
             </div>
-
         </form>
     </div>
 </div>
-{% endblock %}
-
-{% block extra_js %}
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-        const airportSelect = document.getElementById('id_airport');
-        const destinationSelect = document.getElementById('id_destination');
-
-        // Dynamic Filtering of Destination Dropdown Options by Airport Selection
-        function filterDestinations() {
-            const selectedAirportId = airportSelect.value;
-            const options = destinationSelect.options;
-
-            for (let i = 0; i < options.length; i++) {
-                const opt = options[i];
-                const optAirportId = opt.getAttribute('data-airport-id');
-
-                if (!optAirportId) {
-                    // Always show the blank/none option
-                    opt.style.display = '';
-                } else if (optAirportId === selectedAirportId) {
-                    opt.style.display = '';
-                } else {
-                    opt.style.display = 'none';
-                    if (opt.selected) {
-                        destinationSelect.value = ''; // Reset selected if hidden
-                    }
-                }
-            }
-        }
-
-        airportSelect.addEventListener('change', filterDestinations);
-        filterDestinations(); // Run on startup
-    });
-</script>
 {% endblock %}

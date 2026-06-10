@@ -39,10 +39,16 @@ urlpatterns = [
     path('airports/<int:airport_id>/destinations/add/', views.destination_form, name='add_destination'),
     path('destinations/<int:pk>/edit/', views.destination_form, name='edit_destination'),
 
-    # Pricing Management
+    # Pricing Management (Hourly & P2P)
     path('pricing/', views.dashboard_pricing, name='pricing'),
     path('pricing/add/', views.pricing_form, name='add_pricing'),
     path('pricing/<int:pk>/edit/', views.pricing_form, name='edit_pricing'),
+
+    # Zone Vehicle Pricing (Airport Transfer Fixed Prices)
+    path('pricing/zones/', views.zone_pricing_list, name='zone_pricing'),
+    path('pricing/zones/add/', views.zone_pricing_form, name='add_zone_pricing'),
+    path('pricing/zones/<int:pk>/edit/', views.zone_pricing_form, name='edit_zone_pricing'),
+    path('pricing/zones/<int:pk>/delete/', views.zone_pricing_delete, name='delete_zone_pricing'),
 
     # CMS - Site Content Editors
     path('cms/nyc/', views.cms_editor, {'site_slug': 'nyc'}, name='cms_nyc'),

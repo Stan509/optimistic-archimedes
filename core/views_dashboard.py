@@ -513,30 +513,26 @@ def destination_form(request, airport_id=None, pk=None):
 
 
 # =========================================================================
-# PRICING MANAGEMENT
+# PRICING MANAGEMENT (Hourly & Point-to-Point)
 # =========================================================================
 
 @user_passes_test(is_admin, login_url='dashboard:login')
 def dashboard_pricing(request):
-    """Manage pricing rules."""
+    """Manage pricing rules for Hourly and Point-to-Point services."""
     from core.models import PricingRule
 
     site_filter = request.GET.get('site', '')
-    airport_filter = request.GET.get('airport', '')
 
     rules = PricingRule.objects.all().select_related(
-        'airport', 'airport__site', 'destination', 'vehicle_category'
+        'site', 'vehicle', 'vehicle_category'
     )
 
     if site_filter:
-        rules = rules.filter(airport__site__slug=site_filter)
-    if airport_filter:
-        rules = rules.filter(airport_id=airport_filter)
+        rules = rules.filter(site__slug=site_filter)
 
     context = {
-        'rules': rules.order_by('airport__site__slug', 'airport__code', 'destination__name'),
+        'rules': rules.order_by('site__slug', 'service_type', 'base_price'),
         'site_filter': site_filter,
-        'airport_filter': airport_filter,
         'active_tab': 'pricing',
     }
     return render(request, 'dashboard/pricing.html', context)
@@ -544,34 +540,39 @@ def dashboard_pricing(request):
 
 @user_passes_test(is_admin, login_url='dashboard:login')
 def pricing_form(request, pk=None):
-    """Add or edit a pricing rule."""
-    from core.models import PricingRule, Airport, Destination, VehicleCategory
+    """Add or edit a pricing rule (Hourly/P2P only)."""
+    from core.models import PricingRule, Site, Vehicle, VehicleCategory
 
     rule = None
     if pk:
         rule = get_object_or_404(PricingRule, pk=pk)
 
-    airports = Airport.objects.filter(is_active=True).select_related('site')
+    sites = Site.objects.filter(is_active=True)
+    vehicles = Vehicle.objects.filter(is_active=True).select_related('category')
     categories = VehicleCategory.objects.filter(is_active=True)
 
     if request.method == 'POST':
         data = {
-            'airport_id': int(request.POST.get('airport')),
+            'site_id': int(request.POST.get('site')),
             'vehicle_category_id': int(request.POST.get('vehicle_category')),
+            'service_type': request.POST.get('service_type', 'hourly'),
             'base_price': float(request.POST.get('base_price', 0)),
             'minimum_price': float(request.POST.get('minimum_price', 0)),
-            'surge_multiplier': float(request.POST.get('surge_multiplier', 1.0)),
-            'zone_name': request.POST.get('zone_name', 'standard'),
+            'km_threshold': int(request.POST.get('km_threshold', 25)),
             'is_active': request.POST.get('is_active') == 'on',
         }
 
-        dest_id = request.POST.get('destination')
-        if dest_id:
-            data['destination_id'] = int(dest_id)
+        vehicle_id = request.POST.get('vehicle')
+        if vehicle_id:
+            data['vehicle_id'] = int(vehicle_id)
+        else:
+            data['vehicle_id'] = None
 
         price_per_km = request.POST.get('price_per_km')
         if price_per_km:
             data['price_per_km'] = float(price_per_km)
+        else:
+            data['price_per_km'] = None
 
         if rule:
             for key, value in data.items():
@@ -587,11 +588,100 @@ def pricing_form(request, pk=None):
 
     context = {
         'rule': rule,
-        'airports': airports,
+        'sites': sites,
+        'vehicles': vehicles,
         'categories': categories,
         'active_tab': 'pricing',
     }
     return render(request, 'dashboard/pricing_form.html', context)
+
+
+# =========================================================================
+# ZONE VEHICLE PRICING (Airport Transfer Fixed Prices)
+# =========================================================================
+
+@user_passes_test(is_admin, login_url='dashboard:login')
+def zone_pricing_list(request):
+    """List zone-based fixed pricing for airport transfers."""
+    from core.models import ZoneVehiclePrice, Airport
+
+    site_filter = request.GET.get('site', '')
+    airport_filter = request.GET.get('airport', '')
+
+    prices = ZoneVehiclePrice.objects.all().select_related(
+        'airport', 'airport__site', 'vehicle', 'vehicle__category'
+    )
+
+    if site_filter:
+        prices = prices.filter(airport__site__slug=site_filter)
+    if airport_filter:
+        prices = prices.filter(airport_id=airport_filter)
+
+    airports = Airport.objects.filter(is_active=True).select_related('site')
+
+    context = {
+        'prices': prices.order_by('airport__site__slug', 'airport__code', 'zone_name', 'vehicle__name'),
+        'airports': airports,
+        'site_filter': site_filter,
+        'airport_filter': airport_filter,
+        'active_tab': 'zone_pricing',
+    }
+    return render(request, 'dashboard/zone_pricing.html', context)
+
+
+@user_passes_test(is_admin, login_url='dashboard:login')
+def zone_pricing_form(request, pk=None):
+    """Add or edit a zone vehicle price."""
+    from core.models import ZoneVehiclePrice, Airport, Vehicle
+
+    price_obj = None
+    if pk:
+        price_obj = get_object_or_404(ZoneVehiclePrice, pk=pk)
+
+    airports = Airport.objects.filter(is_active=True).select_related('site')
+    vehicles = Vehicle.objects.filter(is_active=True).select_related('category')
+
+    if request.method == 'POST':
+        data = {
+            'airport_id': int(request.POST.get('airport')),
+            'vehicle_id': int(request.POST.get('vehicle')),
+            'zone_name': request.POST.get('zone_name', '').strip(),
+            'price': float(request.POST.get('price', 0)),
+            'is_active': request.POST.get('is_active') == 'on',
+        }
+
+        if price_obj:
+            for key, value in data.items():
+                setattr(price_obj, key, value)
+            price_obj.save()
+            messages.success(request, f'Zone price for "{data["zone_name"]}" updated.')
+        else:
+            price_obj = ZoneVehiclePrice(**data)
+            price_obj.save()
+            messages.success(request, f'Zone price for "{data["zone_name"]}" created.')
+
+        return redirect('dashboard:zone_pricing')
+
+    context = {
+        'price_obj': price_obj,
+        'airports': airports,
+        'vehicles': vehicles,
+        'active_tab': 'zone_pricing',
+    }
+    return render(request, 'dashboard/zone_pricing_form.html', context)
+
+
+@user_passes_test(is_admin, login_url='dashboard:login')
+def zone_pricing_delete(request, pk):
+    """Delete a zone vehicle price."""
+    from core.models import ZoneVehiclePrice
+    price_obj = get_object_or_404(ZoneVehiclePrice, pk=pk)
+    zone_name = price_obj.zone_name
+    price_obj.delete()
+    messages.success(request, f'Zone price for "{zone_name}" deleted.')
+    return redirect('dashboard:zone_pricing')
+
+
 
 
 # =========================================================================

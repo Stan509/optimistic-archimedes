@@ -519,50 +519,47 @@ class Vehicle(models.Model):
 
 
 # ═══════════════════════════════════════════════
-#  PRICING RULE  — Zone / destination-based pricing
+#  PRICING RULE  — Hourly & Point-to-Point pricing
 # ═══════════════════════════════════════════════
 
 class PricingRule(models.Model):
     """
-    Pricing rule linking an airport (+ optional destination or zone) to a
-    vehicle category.
+    Pricing rule for Hourly and Point-to-Point services.
 
-    Two pricing modes:
-      1. Destination-based — destination FK is set, price is fixed.
-      2. Zone-based        — zone_name is set, covers a geographical area.
+    For Airport Transfers, use ZoneVehiclePrice instead.
 
-    DR reference pricing:
-      PUJ → Hotel zone:      $120 – $150
-      SDQ → Santo Domingo:   $95  – $130
-      Remote zones:          $160 – $220
-      Hourly:                $65  – $90/hr  (min 3 h)
+    Hourly:        base_price per hour × hours
+    Point-to-Point: base_price + (price_per_km × km beyond km_threshold)
     """
 
-    airport = models.ForeignKey(
-        Airport,
+    site = models.ForeignKey(
+        Site,
         on_delete=models.CASCADE,
         related_name='pricing_rules',
-        help_text='Origin airport.',
+        help_text='Site this rule applies to.',
     )
-    destination = models.ForeignKey(
-        Destination,
-        on_delete=models.SET_NULL,
+    vehicle = models.ForeignKey(
+        Vehicle,
+        on_delete=models.CASCADE,
         related_name='pricing_rules',
         blank=True,
         null=True,
-        help_text='Specific destination (leave blank for zone-based pricing).',
+        help_text='Specific vehicle this price applies to.',
     )
     vehicle_category = models.ForeignKey(
         VehicleCategory,
         on_delete=models.CASCADE,
         related_name='pricing_rules',
-        help_text='Vehicle category this price applies to.',
+        help_text='Vehicle category (used as fallback if no vehicle-specific rule).',
     )
     service_type = models.CharField(
         max_length=20,
-        choices=ServiceType.choices,
-        default=ServiceType.AIRPORT_TRANSFER,
-        help_text='Type of service this pricing rule applies to.',
+        choices=[
+            ('hourly', 'Hourly Service'),
+            ('point_to_point', 'Point-to-Point'),
+        ],
+        default='hourly',
+        help_text='Type of service (Hourly or Point-to-Point only).',
     )
 
     # ── Pricing fields ──
@@ -570,7 +567,7 @@ class PricingRule(models.Model):
         max_digits=10,
         decimal_places=2,
         validators=[MinValueValidator(Decimal('0.00'))],
-        help_text='Base price in USD for this route / zone.',
+        help_text='Base price in USD (hourly rate or P2P base fare).',
     )
     price_per_km = models.DecimalField(
         max_digits=6,
@@ -578,7 +575,11 @@ class PricingRule(models.Model):
         blank=True,
         null=True,
         validators=[MinValueValidator(Decimal('0.00'))],
-        help_text='Optional per-kilometre surcharge.',
+        help_text='Price per km for Point-to-Point (applied beyond km_threshold).',
+    )
+    km_threshold = models.PositiveIntegerField(
+        default=25,
+        help_text='Distance threshold in km. Per-km pricing starts beyond this distance.',
     )
     minimum_price = models.DecimalField(
         max_digits=10,
@@ -586,34 +587,6 @@ class PricingRule(models.Model):
         default=Decimal('0.00'),
         validators=[MinValueValidator(Decimal('0.00'))],
         help_text='Minimum charge (floor).',
-    )
-    surge_multiplier = models.DecimalField(
-        max_digits=4,
-        decimal_places=2,
-        default=Decimal('1.00'),
-        validators=[MinValueValidator(Decimal('1.00')), MaxValueValidator(Decimal('5.00'))],
-        help_text='Surge pricing multiplier (1.0 = no surge).',
-    )
-
-    # ── Zone-based pricing ──
-    zone_name = models.CharField(
-        max_length=30,
-        choices=PricingZone.choices,
-        blank=True,
-        default='',
-        help_text='Zone name for zone-based pricing (leave blank for destination-based).',
-    )
-
-    # ── Distance-based zone pricing ──
-    zone_min_distance_km = models.PositiveIntegerField(
-        blank=True,
-        null=True,
-        help_text='Minimum distance in km for this fixed-price zone.',
-    )
-    zone_max_distance_km = models.PositiveIntegerField(
-        blank=True,
-        null=True,
-        help_text='Maximum distance in km for this fixed-price zone.',
     )
 
     is_active = models.BooleanField(default=True)
@@ -624,43 +597,72 @@ class PricingRule(models.Model):
     class Meta:
         verbose_name = 'Pricing Rule'
         verbose_name_plural = 'Pricing Rules'
-        ordering = ['airport', 'zone_name', 'base_price']
+        ordering = ['site', 'service_type', 'base_price']
 
     def __str__(self):
-        if self.service_type == ServiceType.AIRPORT_TRANSFER:
-            target = self.destination.name if self.destination else self.get_zone_name_display() or 'General'
-            return f'[{self.get_service_type_display()}] {self.airport.code} → {target} ({self.vehicle_category.name}): ${self.base_price}'
-        else:
-            return f'[{self.get_service_type_display()}] {self.airport.code} — {self.vehicle_category.name}: ${self.base_price}'
-
-    def clean(self):
-        super().clean()
-        if self.service_type == ServiceType.AIRPORT_TRANSFER:
-            if self.destination and self.zone_name:
-                raise ValidationError(
-                    'Specify either a destination OR a zone name, not both.'
-                )
-            # Allow rules with zone_min_distance_km as distance-based zones
-            if not self.destination and not self.zone_name and not self.zone_min_distance_km:
-                raise ValidationError(
-                    'You must specify a destination, a zone name, or a distance-based zone range.'
-                )
-        else:
-            if self.destination or self.zone_name:
-                raise ValidationError(
-                    'Destination and Zone Name must be blank for Hourly and Point-to-Point pricing rules.'
-                )
+        vehicle_name = self.vehicle.name if self.vehicle else self.vehicle_category.name
+        return f'[{self.get_service_type_display()}] {self.site.slug.upper()} — {vehicle_name}: ${self.base_price}'
 
     def get_effective_price(self, distance_km=None):
         """
-        Calculate the effective price for a given distance.
-        Applies surge multiplier and respects minimum_price.
+        Calculate effective price for Point-to-Point based on distance.
+        Per-km charge applies only beyond km_threshold.
         """
         price = self.base_price
-        if self.price_per_km and distance_km:
-            price += self.price_per_km * Decimal(str(distance_km))
-        price *= self.surge_multiplier
+        if self.price_per_km and distance_km and distance_km > self.km_threshold:
+            extra_km = Decimal(str(distance_km - self.km_threshold))
+            price += self.price_per_km * extra_km
         return max(price, self.minimum_price)
+
+
+# ═══════════════════════════════════════════════
+#  ZONE VEHICLE PRICE  — Airport transfer fixed pricing
+# ═══════════════════════════════════════════════
+
+class ZoneVehiclePrice(models.Model):
+    """
+    Fixed price for airport transfers based on:
+      Airport → Vehicle → Zone → Price
+
+    Each combination of airport, vehicle, and zone has a unique fixed price.
+    This replaces the old PricingRule approach for airport transfers.
+    """
+
+    airport = models.ForeignKey(
+        Airport,
+        on_delete=models.CASCADE,
+        related_name='zone_prices',
+        help_text='Airport for this pricing.',
+    )
+    vehicle = models.ForeignKey(
+        Vehicle,
+        on_delete=models.CASCADE,
+        related_name='zone_prices',
+        help_text='Specific vehicle for this pricing.',
+    )
+    zone_name = models.CharField(
+        max_length=100,
+        help_text='Zone name (e.g. "Punta Cana Hotels", "Manhattan Midtown").',
+    )
+    price = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        validators=[MinValueValidator(Decimal('0.00'))],
+        help_text='Fixed price in USD for this airport→vehicle→zone combination.',
+    )
+    is_active = models.BooleanField(default=True)
+
+    objects = models.Manager()
+    active = ActiveManager()
+
+    class Meta:
+        verbose_name = 'Zone Vehicle Price'
+        verbose_name_plural = 'Zone Vehicle Prices'
+        ordering = ['airport', 'zone_name', 'vehicle']
+        unique_together = [['airport', 'vehicle', 'zone_name']]
+
+    def __str__(self):
+        return f'{self.airport.code} → {self.vehicle.name} → {self.zone_name}: ${self.price}'
 
 
 # ═══════════════════════════════════════════════
@@ -884,6 +886,14 @@ class Booking(models.Model):
     )
 
     # ── Vehicle ──
+    vehicle = models.ForeignKey(
+        Vehicle,
+        on_delete=models.SET_NULL,
+        related_name='bookings',
+        blank=True,
+        null=True,
+        help_text='Specific vehicle selected for this booking.',
+    )
     vehicle_category = models.ForeignKey(
         VehicleCategory,
         on_delete=models.SET_NULL,

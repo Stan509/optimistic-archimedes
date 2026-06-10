@@ -146,3 +146,25 @@ def get_site_prefix(context):
     """Return the current site URL prefix."""
     slug = context.get('current_site_slug', 'nyc')
     return f'/{slug}'
+
+
+@register.filter
+def dict_get(dictionary, key):
+    """
+    Get value from dictionary using any key type.
+    Tries int key first, then string key.
+    Usage: {{ dict|dict_get:key }}
+    """
+    if dictionary is None:
+        return None
+    try:
+        return dictionary[key]
+    except (KeyError, TypeError):
+        try:
+            return dictionary[int(key)]
+        except (KeyError, TypeError, ValueError):
+            try:
+                return dictionary[str(key)]
+            except (KeyError, TypeError):
+                return None
+

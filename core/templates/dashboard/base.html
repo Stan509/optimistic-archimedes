@@ -152,10 +152,20 @@
                     <span class="font-medium text-sm">Airports & Zones</span>
                 </a>
 
-                <a href="{% url 'dashboard:pricing' %}" class="flex items-center space-x-3.5 px-4 py-3 rounded-lg text-luxury-muted hover:text-white hover:bg-luxury-card transition-all {% if active_tab == 'pricing' %}sidebar-active{% endif %}">
-                    <i class="fa-solid fa-dollar-sign w-5 text-center text-lg"></i>
-                    <span class="font-medium text-sm">Pricing Rules</span>
-                </a>
+                <!-- Pricing Dropdown -->
+                <div>
+                    <div class="flex items-center justify-between px-4 py-3 rounded-lg text-luxury-muted hover:text-white hover:bg-luxury-card cursor-pointer transition-all {% if active_tab == 'pricing' or active_tab == 'zone_pricing' %}text-gold-400{% endif %}" onclick="togglePricingMenu()">
+                        <div class="flex items-center space-x-3.5">
+                            <i class="fa-solid fa-dollar-sign w-5 text-center text-lg"></i>
+                            <span class="font-medium text-sm">Pricing</span>
+                        </div>
+                        <i id="pricing-chevron" class="fa-solid fa-chevron-right text-xs transition-transform duration-200 {% if active_tab == 'pricing' or active_tab == 'zone_pricing' %}rotate-90{% endif %}"></i>
+                    </div>
+                    <div id="pricing-submenu" class="pl-12 pr-4 py-1 space-y-1 {% if active_tab != 'pricing' and active_tab != 'zone_pricing' %}hidden{% endif %}">
+                        <a href="{% url 'dashboard:pricing' %}" class="block py-2 text-xs text-luxury-muted hover:text-gold-400 transition-colors {% if active_tab == 'pricing' %}text-gold-400 font-semibold{% endif %}">Hourly & P2P Rules</a>
+                        <a href="{% url 'dashboard:zone_pricing' %}" class="block py-2 text-xs text-luxury-muted hover:text-gold-400 transition-colors {% if active_tab == 'zone_pricing' %}text-gold-400 font-semibold{% endif %}">Airports & Zones</a>
+                    </div>
+                </div>
 
                 <!-- CMS Submenu Toggle -->
                 <div>
@@ -348,6 +358,15 @@
         function toggleCmsMenu() {
             const submenu = document.getElementById('cms-submenu');
             const chevron = document.getElementById('cms-chevron');
+            if (submenu) {
+                submenu.classList.toggle('hidden');
+                chevron.classList.toggle('rotate-90');
+            }
+        }
+
+        function togglePricingMenu() {
+            const submenu = document.getElementById('pricing-submenu');
+            const chevron = document.getElementById('pricing-chevron');
             if (submenu) {
                 submenu.classList.toggle('hidden');
                 chevron.classList.toggle('rotate-90');

@@ -11,6 +11,7 @@ from core.models import (
     Airport,
     Destination,
     PricingRule,
+    ZoneVehiclePrice,
     VehicleCategory,
     Vehicle,
     PremiumAddOn,
@@ -65,11 +66,10 @@ class DestinationInline(admin.TabularInline):
     show_change_link = True
 
 
-class PricingRuleInline(admin.TabularInline):
-    model = PricingRule
-    fk_name = 'airport'
+class ZoneVehiclePriceInline(admin.TabularInline):
+    model = ZoneVehiclePrice
     extra = 0
-    fields = ('destination', 'zone_name', 'vehicle_category', 'base_price', 'surge_multiplier', 'is_active')
+    fields = ('vehicle', 'zone_name', 'price', 'is_active')
     show_change_link = True
 
 
@@ -124,7 +124,7 @@ class AirportAdmin(admin.ModelAdmin):
     list_filter = ('site', 'country', 'is_active')
     search_fields = ('name', 'code', 'city')
     list_select_related = ('site',)
-    inlines = [DestinationInline, PricingRuleInline]
+    inlines = [DestinationInline, ZoneVehiclePriceInline]
 
     fieldsets = (
         (None, {
@@ -171,28 +171,34 @@ class DestinationAdmin(admin.ModelAdmin):
 
 @admin.register(PricingRule)
 class PricingRuleAdmin(admin.ModelAdmin):
-    list_display = ('airport', 'target_display', 'vehicle_category', 'base_price', 'surge_multiplier', 'is_active')
-    list_filter = ('airport__site', 'vehicle_category', 'zone_name', 'is_active')
-    search_fields = ('airport__code', 'airport__name', 'destination__name', 'zone_name')
-    list_select_related = ('airport', 'destination', 'vehicle_category')
+    list_display = ('site', 'service_type', 'vehicle_display', 'vehicle_category', 'base_price', 'price_per_km', 'km_threshold', 'is_active')
+    list_filter = ('site', 'service_type', 'vehicle_category', 'is_active')
+    search_fields = ('vehicle__name', 'vehicle_category__name')
+    list_select_related = ('site', 'vehicle', 'vehicle_category')
 
     fieldsets = (
-        ('Route', {
-            'fields': ('airport', 'destination', 'zone_name', 'vehicle_category'),
+        ('Service', {
+            'fields': ('site', 'service_type', 'vehicle', 'vehicle_category'),
         }),
         ('Pricing', {
-            'fields': ('base_price', 'price_per_km', 'minimum_price', 'surge_multiplier'),
+            'fields': ('base_price', 'price_per_km', 'km_threshold', 'minimum_price'),
         }),
         ('Status', {
             'fields': ('is_active',),
         }),
     )
 
-    @admin.display(description='Target')
-    def target_display(self, obj):
-        if obj.destination:
-            return obj.destination.name
-        return obj.get_zone_name_display() or '—'
+    @admin.display(description='Vehicle')
+    def vehicle_display(self, obj):
+        return obj.vehicle.name if obj.vehicle else '—'
+
+
+@admin.register(ZoneVehiclePrice)
+class ZoneVehiclePriceAdmin(admin.ModelAdmin):
+    list_display = ('airport', 'vehicle', 'zone_name', 'price', 'is_active')
+    list_filter = ('airport__site', 'airport', 'is_active')
+    search_fields = ('zone_name', 'vehicle__name', 'airport__code')
+    list_select_related = ('airport', 'vehicle', 'airport__site')
 
 
 # ──────────────────────────────────────────────
@@ -274,7 +280,7 @@ class BookingAdmin(admin.ModelAdmin):
     )
     list_filter = ('site', 'status', 'service_type', 'payment_status', 'booking_source', 'pickup_date')
     search_fields = ('booking_reference', 'customer_name', 'customer_email', 'customer_phone', 'flight_number')
-    list_select_related = ('site', 'airport', 'destination', 'vehicle_category')
+    list_select_related = ('site', 'airport', 'destination', 'vehicle', 'vehicle_category')
     readonly_fields = ('booking_reference', 'created_at', 'updated_at')
     filter_horizontal = ('addons',)
     date_hierarchy = 'pickup_date'
@@ -297,7 +303,7 @@ class BookingAdmin(admin.ModelAdmin):
             'fields': ('hours_requested', 'hourly_rate'),
         }),
         ('Vehicle & Add-Ons', {
-            'fields': ('vehicle_category', 'addons'),
+            'fields': ('vehicle', 'vehicle_category', 'addons'),
         }),
         ('Pricing', {
             'fields': ('base_price', 'addons_total', 'platform_fee', 'total_price', 'currency'),
