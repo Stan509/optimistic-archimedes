@@ -696,6 +696,8 @@ def booking_payment(request):
             # Add selected add-ons
             if addon_ids:
                 booking.addons.set(addon_ids)
+                # Force reload from database to clear relation cache
+                booking = Booking.objects.get(pk=booking.pk)
                 # Recalculate total after addons are set
                 booking.calculate_total()
                 booking.save()
