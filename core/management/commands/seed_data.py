@@ -21,7 +21,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         from core.models import (
             Site, Airport, Destination, VehicleCategory, Vehicle,
-            PremiumAddOn, PricingRule, SiteContent, SiteSettings, Testimonial
+            PremiumAddOn, PricingRule, ZoneVehiclePrice, SiteContent, SiteSettings, Testimonial
         )
 
         self.stdout.write(self.style.NOTICE('Seeding AeroLux Select database...'))
@@ -657,7 +657,7 @@ class Command(BaseCommand):
                 if os.path.exists(full_path):
                     vehicle.image = image_path
                     vehicle.save(update_fields=['image'])
-                    self.stdout.write(f'    {vehicle_name} → {image_path}')
+                    self.stdout.write(f'    {vehicle_name} -> {image_path}')
                 else:
                     self.stdout.write(self.style.WARNING(f'    {vehicle_name} — image not found: {image_path}'))
             except Vehicle.DoesNotExist:
@@ -674,7 +674,7 @@ class Command(BaseCommand):
                 if os.path.exists(full_path):
                     cat.image = image_path
                     cat.save(update_fields=['image'])
-                    self.stdout.write(f'    Category {cat.name} → {image_path}')
+                    self.stdout.write(f'    Category {cat.name} -> {image_path}')
             except VehicleCategory.DoesNotExist:
                 pass
 
@@ -749,7 +749,7 @@ class Command(BaseCommand):
         # =====================================================================
         # 7. PRICING RULES
         # =====================================================================
-        self.stdout.write('  Creating pricing rules...')
+        self.stdout.write('  Creating pricing rules and zone vehicle prices...')
         
         from decimal import Decimal
 
@@ -781,6 +781,8 @@ class Command(BaseCommand):
             ('EWR', 'Brooklyn — Downtown', 100.00),
         ]
 
+        # Seed ZoneVehiclePrice (Airport Transfers fixed pricing)
+        self.stdout.write('    Creating NYC zone vehicle prices...')
         for airport_code, dest_name, price in nyc_pricing:
             try:
                 airport = Airport.objects.get(code=airport_code, site=nyc)
@@ -788,18 +790,19 @@ class Command(BaseCommand):
                 for category in all_categories:
                     cat_multiplier = multipliers[category.slug]
                     cat_price = Decimal(str(price)) * cat_multiplier
-                    PricingRule.objects.update_or_create(
-                        airport=airport,
-                        destination=destination,
-                        vehicle_category=category,
-                        defaults={
-                            'base_price': cat_price,
-                            'minimum_price': cat_price,
-                            'surge_multiplier': 1.0,
-                            'zone_name': 'standard',
-                            'is_active': True,
-                        }
-                    )
+                    # Get all vehicles in this category
+                    vehicles = Vehicle.objects.filter(category=category)
+                    for vehicle in vehicles:
+                        vehicle_price = cat_price * Decimal(str(vehicle.price_multiplier))
+                        ZoneVehiclePrice.objects.update_or_create(
+                            airport=airport,
+                            vehicle=vehicle,
+                            zone_name=dest_name,
+                            defaults={
+                                'price': vehicle_price,
+                                'is_active': True,
+                            }
+                        )
             except (Airport.DoesNotExist, Destination.DoesNotExist):
                 pass
 
@@ -820,6 +823,8 @@ class Command(BaseCommand):
             ('SDQ', 'Boca Chica', 65.00, 'city_center'),
         ]
 
+        # Seed DR Zone Vehicle Prices
+        self.stdout.write('    Creating DR zone vehicle prices...')
         for airport_code, dest_name, price, zone in dr_pricing:
             try:
                 airport = Airport.objects.get(code=airport_code, site=dr)
@@ -827,22 +832,86 @@ class Command(BaseCommand):
                 for category in all_categories:
                     cat_multiplier = multipliers[category.slug]
                     cat_price = Decimal(str(price)) * cat_multiplier
-                    PricingRule.objects.update_or_create(
-                        airport=airport,
-                        destination=destination,
-                        vehicle_category=category,
-                        defaults={
-                            'base_price': cat_price,
-                            'minimum_price': cat_price,
-                            'surge_multiplier': 1.0,
-                            'zone_name': zone,
-                            'is_active': True,
-                        }
-                    )
+                    vehicles = Vehicle.objects.filter(category=category)
+                    for vehicle in vehicles:
+                        vehicle_price = cat_price * Decimal(str(vehicle.price_multiplier))
+                        ZoneVehiclePrice.objects.update_or_create(
+                            airport=airport,
+                            vehicle=vehicle,
+                            zone_name=dest_name,
+                            defaults={
+                                'price': vehicle_price,
+                                'is_active': True,
+                            }
+                        )
             except (Airport.DoesNotExist, Destination.DoesNotExist):
                 pass
 
-        self.stdout.write(self.style.SUCCESS('  [OK] Pricing rules created'))
+        # Seed Hourly/P2P rules
+        self.stdout.write('    Creating Hourly and Point-to-Point pricing rules...')
+        
+        hourly_rates = {
+            'executive-suv': Decimal('95.00'),
+            'business-sedan': Decimal('75.00'),
+            'luxury-sedan': Decimal('120.00'),
+            'minivan': Decimal('80.00'),
+            'sprinter-van': Decimal('150.00'),
+            'limousine': Decimal('180.00'),
+        }
+        
+        p2p_base_fares = {
+            'executive-suv': Decimal('120.00'),
+            'business-sedan': Decimal('90.00'),
+            'luxury-sedan': Decimal('150.00'),
+            'minivan': Decimal('100.00'),
+            'sprinter-van': Decimal('200.00'),
+            'limousine': Decimal('250.00'),
+        }
+        
+        p2p_per_km_rates = {
+            'executive-suv': Decimal('3.50'),
+            'business-sedan': Decimal('2.50'),
+            'luxury-sedan': Decimal('4.00'),
+            'minivan': Decimal('3.00'),
+            'sprinter-van': Decimal('5.00'),
+            'limousine': Decimal('6.00'),
+        }
+
+        # Seed for both NYC and DR
+        for s in [nyc, dr]:
+            for category in all_categories:
+                # 1. Hourly Rule
+                hr_rate = hourly_rates.get(category.slug, Decimal('80.00'))
+                PricingRule.objects.update_or_create(
+                    site=s,
+                    vehicle_category=category,
+                    service_type='hourly',
+                    vehicle=None,
+                    defaults={
+                        'base_price': hr_rate,
+                        'minimum_price': hr_rate,
+                        'is_active': True,
+                    }
+                )
+                
+                # 2. Point-to-Point Rule
+                p2p_base = p2p_base_fares.get(category.slug, Decimal('100.00'))
+                p2p_per_km = p2p_per_km_rates.get(category.slug, Decimal('3.00'))
+                PricingRule.objects.update_or_create(
+                    site=s,
+                    vehicle_category=category,
+                    service_type='point_to_point',
+                    vehicle=None,
+                    defaults={
+                        'base_price': p2p_base,
+                        'price_per_km': p2p_per_km,
+                        'km_threshold': 25,
+                        'minimum_price': p2p_base,
+                        'is_active': True,
+                    }
+                )
+
+        self.stdout.write(self.style.SUCCESS('  [OK] Pricing rules and zone vehicle prices created'))
 
         # =====================================================================
         # 8. SITE SETTINGS
