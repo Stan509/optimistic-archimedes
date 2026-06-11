@@ -163,8 +163,8 @@ def create_or_update_app(spaces_key=None, spaces_secret=None):
     envs = [
         {"key": "DJANGO_SECRET_KEY", "value": django_secret, "type": "SECRET"},
         {"key": "DJANGO_DEBUG", "value": "False"},
-        {"key": "DJANGO_ALLOWED_HOSTS", "value": ".ondigitalocean.app,aeroluxeselect-nyc.com,aeroluxeselect-dr.com,www.aeroluxeselect-nyc.com,www.aeroluxeselect-dr.com,localhost"},
-        {"key": "CSRF_TRUSTED_ORIGINS", "value": "https://aeroluxeselect-nyc.com,https://aeroluxeselect-dr.com,https://www.aeroluxeselect-nyc.com,https://www.aeroluxeselect-dr.com"},
+        {"key": "DJANGO_ALLOWED_HOSTS", "value": ".ondigitalocean.app,aeroluxselect.com,www.aeroluxselect.com,aeroluxeselect-nyc.com,aeroluxeselect-dr.com,www.aeroluxeselect-nyc.com,www.aeroluxeselect-dr.com,localhost"},
+        {"key": "CSRF_TRUSTED_ORIGINS", "value": "https://aeroluxselect.com,https://www.aeroluxselect.com,https://aeroluxeselect-nyc.com,https://aeroluxeselect-dr.com,https://www.aeroluxeselect-nyc.com,https://www.aeroluxeselect-dr.com"},
     ]
 
     if spaces_key and spaces_secret:
@@ -180,6 +180,16 @@ def create_or_update_app(spaces_key=None, spaces_secret=None):
         "spec": {
             "name": APP_NAME,
             "region": "nyc",
+            "domains": [
+                {
+                    "domain": "aeroluxselect.com",
+                    "type": "PRIMARY"
+                },
+                {
+                    "domain": "www.aeroluxselect.com",
+                    "type": "ALIAS"
+                }
+            ],
             "services": [
                 {
                     "name": "web",
