@@ -21,7 +21,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         from core.models import (
             Site, Airport, Destination, VehicleCategory, Vehicle,
-            PremiumAddOn, PricingRule, ZoneVehiclePrice, SiteContent, SiteSettings, Testimonial
+            PremiumAddOn, PricingRule, AirportCategoryPrice, SiteContent, SiteSettings, Testimonial
         )
 
         self.stdout.write(self.style.NOTICE('Seeding AeroLux Select database...'))
@@ -781,71 +781,35 @@ class Command(BaseCommand):
             ('EWR', 'Brooklyn — Downtown', 100.00),
         ]
 
-        # Seed ZoneVehiclePrice (Airport Transfers fixed pricing)
-        self.stdout.write('    Creating NYC zone vehicle prices...')
-        for airport_code, dest_name, price in nyc_pricing:
-            try:
-                airport = Airport.objects.get(code=airport_code, site=nyc)
-                destination = Destination.objects.get(airport=airport, name=dest_name)
-                for category in all_categories:
-                    cat_multiplier = multipliers[category.slug]
-                    cat_price = Decimal(str(price)) * cat_multiplier
-                    # Get all vehicles in this category
-                    vehicles = Vehicle.objects.filter(category=category)
-                    for vehicle in vehicles:
-                        vehicle_price = cat_price * Decimal(str(vehicle.price_multiplier))
-                        ZoneVehiclePrice.objects.update_or_create(
-                            airport=airport,
-                            vehicle=vehicle,
-                            zone_name=dest_name,
-                            defaults={
-                                'price': vehicle_price,
-                                'is_active': True,
-                            }
-                        )
-            except (Airport.DoesNotExist, Destination.DoesNotExist):
-                pass
-
-        # DR Pricing (from business plan)
-        dr_pricing = [
-            # PUJ → Hotels: $120-150
-            ('PUJ', 'Bávaro — Hotel Zone', 120.00, 'hotel_zone'),
-            ('PUJ', 'Cap Cana', 130.00, 'hotel_zone'),
-            ('PUJ', 'Punta Cana Village', 100.00, 'city_center'),
-            ('PUJ', 'Hard Rock Hotel', 125.00, 'hotel_zone'),
-            ('PUJ', 'Casa de Campo', 180.00, 'remote'),
-            ('PUJ', 'Bayahíbe', 160.00, 'remote'),
-            # SDQ → Santo Domingo: $95-130
-            ('SDQ', 'Zona Colonial', 95.00, 'city_center'),
-            ('SDQ', 'Piantini', 100.00, 'city_center'),
-            ('SDQ', 'Naco', 105.00, 'city_center'),
-            ('SDQ', 'Juan Dolio', 130.00, 'remote'),
-            ('SDQ', 'Boca Chica', 65.00, 'city_center'),
-        ]
-
-        # Seed DR Zone Vehicle Prices
-        self.stdout.write('    Creating DR zone vehicle prices...')
-        for airport_code, dest_name, price, zone in dr_pricing:
-            try:
-                airport = Airport.objects.get(code=airport_code, site=dr)
-                destination = Destination.objects.get(airport=airport, name=dest_name)
-                for category in all_categories:
-                    cat_multiplier = multipliers[category.slug]
-                    cat_price = Decimal(str(price)) * cat_multiplier
-                    vehicles = Vehicle.objects.filter(category=category)
-                    for vehicle in vehicles:
-                        vehicle_price = cat_price * Decimal(str(vehicle.price_multiplier))
-                        ZoneVehiclePrice.objects.update_or_create(
-                            airport=airport,
-                            vehicle=vehicle,
-                            zone_name=dest_name,
-                            defaults={
-                                'price': vehicle_price,
-                                'is_active': True,
-                            }
-                        )
-            except (Airport.DoesNotExist, Destination.DoesNotExist):
-                pass
+        # Seed AirportCategoryPrice (Airport Transfers base + per-km pricing)
+        self.stdout.write('    Creating Airport Category Prices...')
+        all_airports = Airport.objects.all()
+        for airport in all_airports:
+            # Determine standard base price for this airport
+            if airport.site.slug == 'nyc':
+                std_base = Decimal('80.00')
+                std_base_km = 25
+                std_per_km = Decimal('3.50')
+            else:
+                std_base = Decimal('100.00')
+                std_base_km = 30
+                std_per_km = Decimal('3.00')
+                
+            for category in all_categories:
+                cat_multiplier = multipliers[category.slug]
+                cat_base_price = std_base * cat_multiplier
+                cat_per_km = std_per_km * cat_multiplier
+                
+                AirportCategoryPrice.objects.update_or_create(
+                    airport=airport,
+                    vehicle_category=category,
+                    defaults={
+                        'base_price': cat_base_price,
+                        'base_km': std_base_km,
+                        'price_per_km': cat_per_km,
+                        'is_active': True,
+                    }
+                )
 
         # Seed Hourly/P2P rules
         self.stdout.write('    Creating Hourly and Point-to-Point pricing rules...')
@@ -1080,6 +1044,7 @@ class Command(BaseCommand):
         self.stdout.write(f'  Vehicles: {Vehicle.objects.count()}')
         self.stdout.write(f'  Add-ons: {PremiumAddOn.objects.count()}')
         self.stdout.write(f'  Pricing Rules: {PricingRule.objects.count()}')
+        self.stdout.write(f'  Airport Category Prices: {AirportCategoryPrice.objects.count()}')
         self.stdout.write(f'  CMS Content: {SiteContent.objects.count()}')
         self.stdout.write(f'  Testimonials: {Testimonial.objects.count()}')
         self.stdout.write('')

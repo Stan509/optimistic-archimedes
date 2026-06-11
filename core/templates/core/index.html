@@ -7,38 +7,10 @@
 {% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
 <style>
-    /* Styling to make the map look extremely premium and integration fit */
-    .leaflet-container {
+    #booking-map {
         background: #0A0A0A !important;
         font-family: 'Outfit', sans-serif;
-    }
-    .leaflet-bar {
-        border: 1px solid #222 !important;
-        box-shadow: none !important;
-        border-radius: 8px !important;
-        overflow: hidden;
-    }
-    .leaflet-bar a {
-        background-color: #121212 !important;
-        color: #C9A84C !important;
-        border-bottom: 1px solid #222 !important;
-        transition: all 0.3s ease;
-    }
-    .leaflet-bar a:hover {
-        background-color: #1C1C1E !important;
-        color: #DFBA5B !important;
-    }
-    .leaflet-popup-content-wrapper, .leaflet-popup-tip {
-        background: #121212 !important;
-        color: #FFFFFF !important;
-        border: 1px solid #C9A84C !important;
-        border-radius: 8px !important;
-    }
-    .leaflet-popup-content {
-        font-weight: 500;
-        font-size: 11px;
     }
     .hero-perspective {
         perspective: 1200px;
@@ -112,6 +84,7 @@
                     <input type="hidden" name="pickup_lng" id="pickup_lng">
                     <input type="hidden" name="dropoff_lat" id="dropoff_lat">
                     <input type="hidden" name="dropoff_lng" id="dropoff_lng">
+                    <input type="hidden" name="distance_km" id="distance_km">
 
                     <!-- Service Type selector -->
                     <div>
@@ -356,7 +329,7 @@
                         <div class="flex items-center space-x-3">
                             <input type="checkbox" name="round_trip" id="round_trip" class="w-4 h-4 rounded text-luxe-gold focus:ring-luxe-gold bg-luxe-black border-gray-800">
                             <label for="round_trip" class="text-xs text-gray-400 font-bold uppercase tracking-wider select-none cursor-pointer">
-                                Request Round-Trip leg (x2 Fare multiplier)
+                                Request Round-Trip leg
                             </label>
                         </div>
                         
@@ -717,7 +690,7 @@
 {% endblock %}
 
 {% block extra_js %}
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script src="https://maps.googleapis.com/maps/api/js?key={{ site_settings.google_maps_api_key }}&libraries=places"></script>
 <script>
     document.addEventListener('DOMContentLoaded', () => {
         const radTransfer = document.getElementById('rad-transfer');
@@ -932,17 +905,19 @@
 
         // Validation listeners for airport transfer
         airportSelect.addEventListener('change', () => {
-            checkValidation();
             // Move map to airport location
-            if (bookingMap) {
+            if (bookingMap && pickupMarker) {
                 const selectedOption = airportSelect.options[airportSelect.selectedIndex];
                 const lat = parseFloat(selectedOption.dataset.lat);
                 const lng = parseFloat(selectedOption.dataset.lng);
                 if (!isNaN(lat) && !isNaN(lng)) {
-                    pickupMarker.setLatLng([lat, lng]);
-                    bookingMap.flyTo([lat, lng], 11);
+                    const loc = { lat, lng };
+                    pickupMarker.setPosition(loc);
+                    bookingMap.panTo(loc);
+                    bookingMap.setZoom(11);
                     document.getElementById('pickup_lat').value = lat;
                     document.getElementById('pickup_lng').value = lng;
+                    calculateRoute();
                 }
             }
         });
@@ -1000,6 +975,7 @@
                     startWrapper.style.order = "1";
                     endWrapper.style.order = "3";
                 }
+                
                 // Swap coordinate inputs values
                 const pLat = document.getElementById('pickup_lat').value;
                 const pLng = document.getElementById('pickup_lng').value;
@@ -1008,192 +984,303 @@
                 document.getElementById('dropoff_lat').value = pLat;
                 document.getElementById('dropoff_lng').value = pLng;
 
+                if (pickupMarker && dropoffMarker) {
+                    const startPos = pickupMarker.getPosition();
+                    const endPos = dropoffMarker.getPosition();
+                    pickupMarker.setPosition(endPos);
+                    dropoffMarker.setPosition(startPos);
+                    calculateRoute();
+                }
+
                 checkValidation();
             });
         }
 
-        // ── Initialize Leaflet Dark Map ──
+        // ── Initialize Google Maps Dark Map ──
         const mapElement = document.getElementById('booking-map');
         let bookingMap;
         let pickupMarker;
         let dropoffMarker;
-        let routeLine;
+        let directionsService;
+        let directionsRenderer;
+        let geocoder;
+
+        const darkMapStyle = [
+            { elementType: "geometry", stylers: [{ color: "#1a1a1a" }] },
+            { elementType: "labels.text.stroke", stylers: [{ color: "#1a1a1a" }] },
+            { elementType: "labels.text.fill", stylers: [{ color: "#746855" }] },
+            { featureType: "administrative.locality", elementType: "labels.text.fill", stylers: [{ color: "#d59563" }] },
+            { featureType: "poi", elementType: "labels.text.fill", stylers: [{ color: "#d59563" }] },
+            { featureType: "poi.park", elementType: "geometry", stylers: [{ color: "#121a16" }] },
+            { featureType: "poi.park", elementType: "labels.text.fill", stylers: [{ color: "#6b9a76" }] },
+            { featureType: "road", elementType: "geometry", stylers: [{ color: "#2d2d2d" }] },
+            { featureType: "road", elementType: "geometry.stroke", stylers: [{ color: "#1a1a1a" }] },
+            { featureType: "road", elementType: "labels.text.fill", stylers: [{ color: "#9ca5b3" }] },
+            { featureType: "road.highway", elementType: "geometry", stylers: [{ color: "#746855" }] },
+            { featureType: "road.highway", elementType: "geometry.stroke", stylers: [{ color: "#1f2835" }] },
+            { featureType: "road.highway", elementType: "labels.text.fill", stylers: [{ color: "#f3d19c" }] },
+            { featureType: "transit", elementType: "geometry", stylers: [{ color: "#222222" }] },
+            { featureType: "transit.station", elementType: "labels.text.fill", stylers: [{ color: "#d59563" }] },
+            { featureType: "water", elementType: "geometry", stylers: [{ color: "#0d0d0d" }] },
+            { featureType: "water", elementType: "labels.text.fill", stylers: [{ color: "#515c6d" }] },
+            { featureType: "water", elementType: "labels.text.stroke", stylers: [{ color: "#0d0d0d" }] }
+        ];
 
         if (mapElement) {
             {% if site_slug == 'dr' %}
-            const mapCenter = [18.7357, -69.9509];
+            const mapCenter = { lat: 18.7357, lng: -69.9509 };
             {% else %}
-            const mapCenter = [40.7128, -74.0060];
+            const mapCenter = { lat: 40.7128, lng: -74.0060 };
             {% endif %}
-            bookingMap = L.map('booking-map', {
+
+            bookingMap = new google.maps.Map(mapElement, {
+                center: mapCenter,
+                zoom: 11,
+                styles: darkMapStyle,
+                disableDefaultUI: false,
                 zoomControl: true,
-                attributionControl: false
-            }).setView(mapCenter, 11);
-
-            L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-                maxZoom: 20
-            }).addTo(bookingMap);
-
-            // Leaflet Custom Icons
-            const goldIcon = L.divIcon({
-                className: 'custom-div-icon',
-                html: `<div class="w-8 h-8 rounded-full bg-luxe-gold/20 flex items-center justify-center relative"><div class="w-4 h-4 rounded-full bg-luxe-gold flex items-center justify-center shadow-lg"><i class="fas fa-location-dot text-black text-[9px]"></i></div></div>`,
-                iconSize: [32, 32],
-                iconAnchor: [16, 16]
+                mapTypeControl: false,
+                streetViewControl: false,
+                fullscreenControl: false
             });
 
-            const silverIcon = L.divIcon({
-                className: 'custom-div-icon',
-                html: `<div class="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center relative"><div class="w-4 h-4 rounded-full bg-white flex items-center justify-center shadow-lg"><i class="fas fa-flag text-black text-[9px]"></i></div></div>`,
-                iconSize: [32, 32],
-                iconAnchor: [16, 16]
-            });
-
-            // Create markers at default positions
-            pickupMarker = L.marker(mapCenter, {
-                draggable: true,
-                icon: goldIcon
-            }).addTo(bookingMap);
-
-            dropoffMarker = L.marker([mapCenter[0] + 0.05, mapCenter[1] + 0.05], {
-                draggable: true,
-                icon: silverIcon
-            }).addTo(bookingMap);
-
-            // Helper to reverse-geocode coordinates using Nominatim
-            function reverseGeocode(lat, lng, targetInput) {
-                fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data && data.display_name) {
-                            const addressParts = data.address;
-                            let cleanAddress = data.display_name;
-                            if (addressParts) {
-                                const road = addressParts.road || addressParts.pedestrian || addressParts.suburb || "";
-                                const houseNumber = addressParts.house_number || "";
-                                const city = addressParts.city || addressParts.town || addressParts.village || "";
-                                if (road) {
-                                    cleanAddress = `${houseNumber} ${road}, ${city}`.trim();
-                                }
-                            }
-                            targetInput.value = cleanAddress;
-                            targetInput.dispatchEvent(new Event('input'));
-                            checkValidation();
-                        }
-                    })
-                    .catch(err => console.error("Error geocoding:", err));
-            }
-
-            // Forward geocode an address string and place marker on map
-            function geocodeAddress(query, type) {
-                fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`)
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data && data.length > 0) {
-                            const lat = parseFloat(data[0].lat);
-                            const lng = parseFloat(data[0].lon);
-                            
-                            if (type === 'destination') {
-                                dropoffMarker.setLatLng([lat, lng]);
-                                geocodeStatus.classList.remove('hidden');
-                                geocodeStatusText.textContent = data[0].display_name.substring(0, 80) + '...';
-                                document.getElementById('dropoff_lat').value = lat;
-                                document.getElementById('dropoff_lng').value = lng;
-                            } else if (type === 'pickup') {
-                                pickupMarker.setLatLng([lat, lng]);
-                                document.getElementById('pickup_lat').value = lat;
-                                document.getElementById('pickup_lng').value = lng;
-                            } else if (type === 'dropoff') {
-                                dropoffMarker.setLatLng([lat, lng]);
-                                document.getElementById('dropoff_lat').value = lat;
-                                document.getElementById('dropoff_lng').value = lng;
-                            }
-                            
-                            // Draw route line between markers
-                            drawRoute();
-                            
-                            // Fit map to show both markers
-                            const bounds = L.latLngBounds([pickupMarker.getLatLng(), dropoffMarker.getLatLng()]);
-                            bookingMap.fitBounds(bounds, { padding: [40, 40] });
-                        } else {
-                            if (type === 'destination') {
-                                geocodeStatus.classList.remove('hidden');
-                                geocodeStatusText.textContent = 'Address not found — please refine';
-                            }
-                        }
-                    })
-                    .catch(err => {
-                        console.error("Geocoding error:", err);
-                    });
-            }
-
-            // Draw a route line between pickup and dropoff
-            function drawRoute() {
-                if (routeLine) {
-                    bookingMap.removeLayer(routeLine);
+            directionsService = new google.maps.DirectionsService();
+            directionsRenderer = new google.maps.DirectionsRenderer({
+                map: bookingMap,
+                suppressMarkers: true,
+                polylineOptions: {
+                    strokeColor: "#C9A84C",
+                    strokeOpacity: 0.8,
+                    strokeWeight: 4
                 }
-                routeLine = L.polyline(
-                    [pickupMarker.getLatLng(), dropoffMarker.getLatLng()],
-                    { color: '#C9A84C', weight: 2, opacity: 0.6, dashArray: '8, 8' }
-                ).addTo(bookingMap);
+            });
+
+            geocoder = new google.maps.Geocoder();
+
+            const goldIcon = {
+                path: google.maps.SymbolPath.CIRCLE,
+                fillColor: '#C9A84C',
+                fillOpacity: 1,
+                strokeColor: '#FFFFFF',
+                strokeWeight: 2,
+                scale: 8
+            };
+
+            const silverIcon = {
+                path: google.maps.SymbolPath.CIRCLE,
+                fillColor: '#FFFFFF',
+                fillOpacity: 1,
+                strokeColor: '#C9A84C',
+                strokeWeight: 2,
+                scale: 8
+            };
+
+            pickupMarker = new google.maps.Marker({
+                position: mapCenter,
+                map: bookingMap,
+                draggable: true,
+                icon: goldIcon,
+                title: "Pickup Point"
+            });
+
+            dropoffMarker = new google.maps.Marker({
+                position: { lat: mapCenter.lat + 0.03, lng: mapCenter.lng + 0.03 },
+                map: bookingMap,
+                draggable: true,
+                icon: silverIcon,
+                title: "Drop-off Point"
+            });
+
+            // Initialize places autocomplete
+            const autocompleteOptions = {
+                fields: ["address_components", "geometry", "formatted_address"],
+                types: ["address"]
+            };
+
+            const pickupAutocomplete = new google.maps.places.Autocomplete(pickupAddress, autocompleteOptions);
+            const dropoffAutocomplete = new google.maps.places.Autocomplete(dropoffAddress, autocompleteOptions);
+            const destAutocomplete = new google.maps.places.Autocomplete(destinationAddress, autocompleteOptions);
+
+            pickupAutocomplete.bindTo("bounds", bookingMap);
+            dropoffAutocomplete.bindTo("bounds", bookingMap);
+            destAutocomplete.bindTo("bounds", bookingMap);
+
+            function onPlaceChanged(autocomplete, type) {
+                const place = autocomplete.getPlace();
+                if (!place.geometry || !place.geometry.location) {
+                    return;
+                }
+
+                const loc = place.geometry.location;
+                if (type === 'pickup') {
+                    pickupMarker.setPosition(loc);
+                    document.getElementById('pickup_lat').value = loc.lat();
+                    document.getElementById('pickup_lng').value = loc.lng();
+                } else {
+                    dropoffMarker.setPosition(loc);
+                    document.getElementById('dropoff_lat').value = loc.lat();
+                    document.getElementById('dropoff_lng').value = loc.lng();
+                }
+
+                calculateRoute();
+            }
+
+            pickupAutocomplete.addListener("place_changed", () => onPlaceChanged(pickupAutocomplete, 'pickup'));
+            dropoffAutocomplete.addListener("place_changed", () => onPlaceChanged(dropoffAutocomplete, 'dropoff'));
+            destAutocomplete.addListener("place_changed", () => onPlaceChanged(destAutocomplete, 'dropoff'));
+
+            // Geocoding function
+            function geocodeAddress(query, type) {
+                if (!geocoder) return;
+                geocoder.geocode({ address: query }, (results, status) => {
+                    if (status === "OK" && results[0]) {
+                        const loc = results[0].geometry.location;
+                        if (type === 'destination') {
+                            dropoffMarker.setPosition(loc);
+                            geocodeStatus.classList.remove('hidden');
+                            geocodeStatusText.textContent = results[0].formatted_address.substring(0, 80) + '...';
+                            document.getElementById('dropoff_lat').value = loc.lat();
+                            document.getElementById('dropoff_lng').value = loc.lng();
+                        } else if (type === 'pickup') {
+                            pickupMarker.setPosition(loc);
+                            document.getElementById('pickup_lat').value = loc.lat();
+                            document.getElementById('pickup_lng').value = loc.lng();
+                        } else if (type === 'dropoff') {
+                            dropoffMarker.setPosition(loc);
+                            document.getElementById('dropoff_lat').value = loc.lat();
+                            document.getElementById('dropoff_lng').value = loc.lng();
+                        }
+                        
+                        calculateRoute();
+                        
+                        const bounds = new google.maps.LatLngBounds();
+                        bounds.extend(pickupMarker.getPosition());
+                        bounds.extend(dropoffMarker.getPosition());
+                        bookingMap.fitBounds(bounds, 40);
+                    } else {
+                        if (type === 'destination') {
+                            geocodeStatus.classList.remove('hidden');
+                            geocodeStatusText.textContent = 'Address not found — please refine';
+                        }
+                    }
+                });
+            }
+
+            function reverseGeocode(latLng, inputElement) {
+                if (!geocoder) return;
+                geocoder.geocode({ location: latLng }, (results, status) => {
+                    if (status === "OK" && results[0]) {
+                        inputElement.value = results[0].formatted_address;
+                        inputElement.dispatchEvent(new Event('input'));
+                        checkValidation();
+                        calculateRoute();
+                    }
+                });
+            }
+
+            function calculateRoute() {
+                const start = pickupMarker.getPosition();
+                const end = dropoffMarker.getPosition();
+
+                if (!start || !end) return;
+
+                const request = {
+                    origin: start,
+                    destination: end,
+                    travelMode: google.maps.TravelMode.DRIVING
+                };
+
+                directionsService.route(request, (result, status) => {
+                    if (status === "OK") {
+                        directionsRenderer.setDirections(result);
+                        
+                        const route = result.routes[0];
+                        let totalDistanceMeters = 0;
+                        for (let i = 0; i < route.legs.length; i++) {
+                            totalDistanceMeters += route.legs[i].distance.value;
+                        }
+                        const distanceKm = totalDistanceMeters / 1000.0;
+                        
+                        document.getElementById('distance_km').value = distanceKm.toFixed(2);
+                        
+                        if (geocodeStatus && geocodeStatusText) {
+                            geocodeStatus.classList.remove('hidden');
+                            geocodeStatusText.textContent = `Route distance: ${distanceKm.toFixed(1)} km`;
+                        }
+                    } else {
+                        // Fallback using Haversine
+                        const d_km = haversineDistance(start.lat(), start.lng(), end.lat(), end.lng());
+                        document.getElementById('distance_km').value = d_km.toFixed(2);
+                        
+                        if (geocodeStatus && geocodeStatusText) {
+                            geocodeStatus.classList.remove('hidden');
+                            geocodeStatusText.textContent = `Direct line: ${d_km.toFixed(1)} km (route unavailable)`;
+                        }
+                    }
+                });
+            }
+
+            function haversineDistance(lat1, lon1, lat2, lon2) {
+                const R = 6371; // Earth radius in km
+                const dLat = (lat2 - lat1) * Math.PI / 180;
+                const dLon = (lon2 - lon1) * Math.PI / 180;
+                const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                          Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                          Math.sin(dLon / 2) * Math.sin(dLon / 2);
+                const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+                return R * c;
             }
 
             // Dragend events for markers
-            pickupMarker.on('dragend', function (e) {
-                const position = pickupMarker.getLatLng();
-                reverseGeocode(position.lat, position.lng, pickupAddress);
-                document.getElementById('pickup_lat').value = position.lat;
-                document.getElementById('pickup_lng').value = position.lng;
-                drawRoute();
+            pickupMarker.addListener("dragend", () => {
+                const pos = pickupMarker.getPosition();
+                document.getElementById('pickup_lat').value = pos.lat();
+                document.getElementById('pickup_lng').value = pos.lng();
+                reverseGeocode(pos, pickupAddress);
             });
 
-            dropoffMarker.on('dragend', function (e) {
-                const position = dropoffMarker.getLatLng();
-                // Determine which input to update based on service type
+            dropoffMarker.addListener("dragend", () => {
+                const pos = dropoffMarker.getPosition();
+                document.getElementById('dropoff_lat').value = pos.lat();
+                document.getElementById('dropoff_lng').value = pos.lng();
                 if (radTransfer.checked) {
-                    reverseGeocode(position.lat, position.lng, destinationAddress);
+                    reverseGeocode(pos, destinationAddress);
                 } else {
-                    reverseGeocode(position.lat, position.lng, dropoffAddress);
+                    reverseGeocode(pos, dropoffAddress);
                 }
-                document.getElementById('dropoff_lat').value = position.lat;
-                document.getElementById('dropoff_lng').value = position.lng;
-                drawRoute();
             });
 
-            // Map click handler
+            // Map click listener
             let activeInput = 'pickup';
             pickupAddress.addEventListener('focus', () => activeInput = 'pickup');
             dropoffAddress.addEventListener('focus', () => activeInput = 'dropoff');
             destinationAddress.addEventListener('focus', () => activeInput = 'destination');
 
-            bookingMap.on('click', function(e) {
-                const latlng = e.latlng;
+            bookingMap.addListener("click", (e) => {
+                const loc = e.latLng;
                 if (radTransfer.checked) {
-                    // For airport transfer, map click sets destination
-                    dropoffMarker.setLatLng(latlng);
-                    reverseGeocode(latlng.lat, latlng.lng, destinationAddress);
-                    document.getElementById('dropoff_lat').value = latlng.lat;
-                    document.getElementById('dropoff_lng').value = latlng.lng;
-                    drawRoute();
+                    dropoffMarker.setPosition(loc);
+                    document.getElementById('dropoff_lat').value = loc.lat();
+                    document.getElementById('dropoff_lng').value = loc.lng();
+                    reverseGeocode(loc, destinationAddress);
                 } else {
                     if (activeInput === 'pickup') {
-                        pickupMarker.setLatLng(latlng);
-                        reverseGeocode(latlng.lat, latlng.lng, pickupAddress);
-                        document.getElementById('pickup_lat').value = latlng.lat;
-                        document.getElementById('pickup_lng').value = latlng.lng;
+                        pickupMarker.setPosition(loc);
+                        document.getElementById('pickup_lat').value = loc.lat();
+                        document.getElementById('pickup_lng').value = loc.lng();
+                        reverseGeocode(loc, pickupAddress);
                         activeInput = 'dropoff';
                     } else {
-                        dropoffMarker.setLatLng(latlng);
-                        reverseGeocode(latlng.lat, latlng.lng, dropoffAddress);
-                        document.getElementById('dropoff_lat').value = latlng.lat;
-                        document.getElementById('dropoff_lng').value = latlng.lng;
+                        dropoffMarker.setPosition(loc);
+                        document.getElementById('dropoff_lat').value = loc.lat();
+                        document.getElementById('dropoff_lng').value = loc.lng();
+                        reverseGeocode(loc, dropoffAddress);
                         activeInput = 'pickup';
                     }
-                    drawRoute();
                 }
+                calculateRoute();
             });
 
-            // Geocoding for pickup/dropoff address fields (P2P, hourly, rental)
             let pickupGeoTimeout = null;
             let dropoffGeoTimeout = null;
 

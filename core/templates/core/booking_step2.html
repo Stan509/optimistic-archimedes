@@ -2,7 +2,7 @@
 {% load static %}
 {% load site_tags %}
 
-{% block title %}Book Chauffeur — Step 2: Select Vehicle | AeroLux Select{% endblock %}
+{% block title %}Book Chauffeur — Step 2: Select Vehicle Class | AeroLux Select{% endblock %}
 
 {% block content %}
 <section class="py-16 bg-luxe-black min-h-[85vh]">
@@ -12,7 +12,7 @@
         <div class="mb-12">
             <div class="flex justify-between items-center text-xs uppercase tracking-wider text-gray-500 font-semibold mb-3">
                 <span class="text-gray-400">1. Trip Routing</span>
-                <span class="text-luxe-gold">2. Select Vehicle</span>
+                <span class="text-luxe-gold">2. Select Class</span>
                 <span>3. Passenger Details</span>
                 <span>4. Payment & Checkout</span>
             </div>
@@ -25,98 +25,76 @@
         <!-- Header -->
         <div class="text-center space-y-2 mb-10">
             <span class="text-xs uppercase font-bold tracking-widest text-luxe-gold">Step 2 of 4</span>
-            <h1 class="text-3xl font-bold font-display text-white">Select Your Vehicle</h1>
+            <h1 class="text-3xl font-bold font-display text-white">Select Vehicle Class</h1>
             <p class="text-xs text-gray-400 font-light max-w-md mx-auto">
-                Choose from our premium fleet. Vehicles are grouped by category for easy selection.
+                Choose from our executive vehicle classes. Pricing is computed based on your itinerary.
             </p>
         </div>
 
-        <!-- Vehicle Categories & Individual Vehicles -->
-        <div class="space-y-10">
-            {% for cat_id, group in categories_with_vehicles.items %}
-            <div class="space-y-4">
-                <!-- Category Header -->
-                <div class="flex items-center space-x-3 border-b border-gray-800 pb-3">
-                    <div class="w-8 h-8 bg-luxe-gold/10 rounded-lg flex items-center justify-center">
-                        <i class="fas fa-car-side text-luxe-gold text-sm"></i>
+        <!-- Vehicle Categories Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for category in categories %}
+            <form method="POST" action="" class="group">
+                {% csrf_token %}
+                <input type="hidden" name="category_id" value="{{ category.id }}">
+                
+                <button type="submit" class="w-full text-left glass-card rounded-2xl overflow-hidden border border-gray-800 hover:border-luxe-gold/50 transition-all duration-300 hover:shadow-lg hover:shadow-luxe-gold/5 cursor-pointer flex flex-col h-full">
+                    <!-- Category Image -->
+                    <div class="relative w-full h-48 bg-luxe-black overflow-hidden">
+                        {% if category.image %}
+                        <img src="{{ category.image.url }}" alt="{{ category.name }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy">
+                        {% else %}
+                        <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-900 to-luxe-black">
+                            <i class="fas fa-car text-4xl text-gray-700"></i>
+                        </div>
+                        {% endif %}
                     </div>
-                    <div>
-                        <h2 class="text-lg font-bold font-display text-white">{{ group.category.name }}</h2>
-                        <p class="text-[10px] text-gray-500 uppercase tracking-widest">
-                            Up to {{ group.category.passengers_capacity }} Passengers · {{ group.category.luggage_capacity }} Luggage
-                        </p>
-                    </div>
-                </div>
 
-                <!-- Vehicles Grid -->
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {% for vehicle in group.vehicles %}
-                    <form method="POST" action="" class="group">
-                        {% csrf_token %}
-                        <input type="hidden" name="vehicle_id" value="{{ vehicle.id }}">
-                        
-                        <button type="submit" class="w-full text-left glass-card rounded-2xl overflow-hidden border border-gray-800 hover:border-luxe-gold/50 transition-all duration-300 hover:shadow-lg hover:shadow-luxe-gold/5 cursor-pointer">
-                            <!-- Vehicle Image -->
-                            <div class="relative w-full h-44 bg-luxe-black overflow-hidden">
-                                {% if vehicle.image %}
-                                <img src="{{ vehicle.image.url }}" alt="{{ vehicle.name }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy">
-                                {% else %}
-                                <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-900 to-luxe-black">
-                                    <i class="fas fa-car text-4xl text-gray-700"></i>
-                                </div>
-                                {% endif %}
-                                <!-- Year Badge -->
-                                <div class="absolute top-3 left-3 bg-luxe-black/80 backdrop-blur-sm px-2.5 py-1 rounded-lg border border-gray-800">
-                                    <span class="text-[9px] uppercase font-bold tracking-widest text-luxe-gold">{{ vehicle.model_year }}</span>
-                                </div>
+                    <!-- Category Info -->
+                    <div class="p-5 flex-grow flex flex-col justify-between space-y-4">
+                        <div class="space-y-2">
+                            <h3 class="text-base font-bold text-white group-hover:text-luxe-gold transition-colors">{{ category.name }}</h3>
+                            <p class="text-xs text-gray-400 font-light line-clamp-3 leading-relaxed">{{ category.description }}</p>
+                        </div>
+
+                        <div class="space-y-3 pt-3 border-t border-gray-800/50">
+                            <!-- Capacity Badges -->
+                            <div class="flex items-center space-x-4 text-xs text-gray-400">
+                                <span class="flex items-center space-x-1.5">
+                                    <i class="fas fa-users text-luxe-gold text-xs"></i>
+                                    <span>Up to {{ category.passengers_capacity }} Passengers</span>
+                                </span>
+                                <span class="flex items-center space-x-1.5">
+                                    <i class="fas fa-suitcase text-luxe-gold text-xs"></i>
+                                    <span>{{ category.luggage_capacity }} Bags</span>
+                                </span>
                             </div>
 
-                            <!-- Vehicle Info -->
-                            <div class="p-4 space-y-3">
+                            <!-- Price & Select -->
+                            <div class="flex items-center justify-between pt-1">
+                                {% with price=category_prices|dict_get:category.id %}
+                                {% if price is not None %}
                                 <div>
-                                    <h3 class="text-sm font-bold text-white group-hover:text-luxe-gold transition-colors">{{ vehicle.name }}</h3>
-                                    <p class="text-[10px] text-gray-500 uppercase tracking-wider mt-0.5">{{ group.category.name }}</p>
+                                    <span class="text-[9px] uppercase text-gray-500 block">Estimated Price</span>
+                                    <span class="text-xl font-bold text-luxe-gold font-display">${{ price|floatformat:2 }}</span>
                                 </div>
-
-                                <!-- Capacity Badges -->
-                                <div class="flex items-center space-x-3 text-[10px] text-gray-400">
-                                    <span class="flex items-center space-x-1">
-                                        <i class="fas fa-users text-luxe-gold text-[9px]"></i>
-                                        <span>{{ group.category.passengers_capacity }} Pax</span>
-                                    </span>
-                                    <span class="flex items-center space-x-1">
-                                        <i class="fas fa-suitcase text-luxe-gold text-[9px]"></i>
-                                        <span>{{ group.category.luggage_capacity }} Bags</span>
-                                    </span>
-                                </div>
-
-                                <!-- Price & Select -->
-                                <div class="flex items-center justify-between pt-2 border-t border-gray-800/50">
-                                    {% with price=vehicle_prices|dict_get:vehicle.id %}
-                                    {% if price is not None %}
-                                    <div>
-                                        <span class="text-[9px] uppercase text-gray-500 block">From</span>
-                                        <span class="text-lg font-bold text-luxe-gold font-display">${{ price|floatformat:0 }}</span>
-                                    </div>
-                                    {% else %}
-                                    <span class="text-xs text-gray-500 italic">Price on request</span>
-                                    {% endif %}
-                                    {% endwith %}
-                                    <span class="text-[10px] uppercase font-bold tracking-wider text-luxe-gold bg-luxe-gold/10 px-3 py-1.5 rounded-lg group-hover:bg-luxe-gold group-hover:text-luxe-black transition-all">
-                                        Select <i class="fas fa-chevron-right text-[8px] ml-1"></i>
-                                    </span>
-                                </div>
+                                {% else %}
+                                <span class="text-xs text-gray-500 italic">Price on request</span>
+                                {% endif %}
+                                {% endwith %}
+                                <span class="text-[10px] uppercase font-bold tracking-wider text-luxe-gold bg-luxe-gold/10 px-3.5 py-2 rounded-lg group-hover:bg-luxe-gold group-hover:text-luxe-black transition-all">
+                                    Select Class <i class="fas fa-chevron-right text-[8px] ml-1"></i>
+                                </span>
                             </div>
-                        </button>
-                    </form>
-                    {% endfor %}
-                </div>
-            </div>
+                        </div>
+                    </div>
+                </button>
+            </form>
             {% empty %}
-            <div class="text-center py-20">
+            <div class="col-span-full text-center py-20">
                 <i class="fas fa-car text-4xl text-gray-700 mb-4 block"></i>
-                <h3 class="text-lg font-bold text-white">No Vehicles Available</h3>
-                <p class="text-xs text-gray-500 mt-1">No vehicles are currently available for this service in this region.</p>
+                <h3 class="text-lg font-bold text-white">No Vehicle Classes Available</h3>
+                <p class="text-xs text-gray-500 mt-1">No vehicle classes are currently available for this service.</p>
             </div>
             {% endfor %}
         </div>

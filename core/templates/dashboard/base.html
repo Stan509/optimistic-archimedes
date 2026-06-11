@@ -154,16 +154,16 @@
 
                 <!-- Pricing Dropdown -->
                 <div>
-                    <div class="flex items-center justify-between px-4 py-3 rounded-lg text-luxury-muted hover:text-white hover:bg-luxury-card cursor-pointer transition-all {% if active_tab == 'pricing' or active_tab == 'zone_pricing' %}text-gold-400{% endif %}" onclick="togglePricingMenu()">
+                    <div class="flex items-center justify-between px-4 py-3 rounded-lg text-luxury-muted hover:text-white hover:bg-luxury-card cursor-pointer transition-all {% if active_tab == 'pricing' or active_tab == 'airport_pricing' %}text-gold-400{% endif %}" onclick="togglePricingMenu()">
                         <div class="flex items-center space-x-3.5">
                             <i class="fa-solid fa-dollar-sign w-5 text-center text-lg"></i>
                             <span class="font-medium text-sm">Pricing</span>
                         </div>
-                        <i id="pricing-chevron" class="fa-solid fa-chevron-right text-xs transition-transform duration-200 {% if active_tab == 'pricing' or active_tab == 'zone_pricing' %}rotate-90{% endif %}"></i>
+                        <i id="pricing-chevron" class="fa-solid fa-chevron-right text-xs transition-transform duration-200 {% if active_tab == 'pricing' or active_tab == 'airport_pricing' %}rotate-90{% endif %}"></i>
                     </div>
-                    <div id="pricing-submenu" class="pl-12 pr-4 py-1 space-y-1 {% if active_tab != 'pricing' and active_tab != 'zone_pricing' %}hidden{% endif %}">
+                    <div id="pricing-submenu" class="pl-12 pr-4 py-1 space-y-1 {% if active_tab != 'pricing' and active_tab != 'airport_pricing' %}hidden{% endif %}">
                         <a href="{% url 'dashboard:pricing' %}" class="block py-2 text-xs text-luxury-muted hover:text-gold-400 transition-colors {% if active_tab == 'pricing' %}text-gold-400 font-semibold{% endif %}">Hourly & P2P Rules</a>
-                        <a href="{% url 'dashboard:zone_pricing' %}" class="block py-2 text-xs text-luxury-muted hover:text-gold-400 transition-colors {% if active_tab == 'zone_pricing' %}text-gold-400 font-semibold{% endif %}">Airports & Zones</a>
+                        <a href="{% url 'dashboard:airport_pricing' %}" class="block py-2 text-xs text-luxury-muted hover:text-gold-400 transition-colors {% if active_tab == 'airport_pricing' %}text-gold-400 font-semibold{% endif %}">Airports & Categories</a>
                     </div>
                 </div>
 

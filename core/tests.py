@@ -86,12 +86,20 @@ class DynamicPricingAndCommissionTestCase(TestCase):
         )
         # Create pricing rule
         self.rule = PricingRule.objects.create(
-            airport=self.jfk,
-            destination=self.midtown,
+            site=self.nyc,
             vehicle_category=self.exec_suv,
+            service_type='hourly',
             base_price=Decimal('85.00'),
             minimum_price=Decimal('85.00'),
-            surge_multiplier=Decimal('1.00'),
+            is_active=True
+        )
+        from core.models import AirportCategoryPrice
+        self.airport_price = AirportCategoryPrice.objects.create(
+            airport=self.jfk,
+            vehicle_category=self.exec_suv,
+            base_price=Decimal('85.00'),
+            base_km=25,
+            price_per_km=Decimal('3.50'),
             is_active=True
         )
         # Create add-ons
@@ -278,19 +286,26 @@ class BookingFlowViewsTestCase(TestCase):
         )
         # Setup pricing rules
         self.p2p_rule = PricingRule.objects.create(
-            airport=self.jfk,
-            destination=None,
+            site=self.nyc,
             vehicle_category=self.exec_suv,
             service_type='point_to_point',
             base_price=Decimal('100.00'),
             is_active=True
         )
         self.hourly_rule = PricingRule.objects.create(
-            airport=self.jfk,
-            destination=None,
+            site=self.nyc,
             vehicle_category=self.exec_suv,
             service_type='hourly',
             base_price=Decimal('75.00'),
+            is_active=True
+        )
+        from core.models import AirportCategoryPrice
+        self.airport_price = AirportCategoryPrice.objects.create(
+            airport=self.jfk,
+            vehicle_category=self.exec_suv,
+            base_price=Decimal('85.00'),
+            base_km=25,
+            price_per_km=Decimal('3.50'),
             is_active=True
         )
 

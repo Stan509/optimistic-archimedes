@@ -295,6 +295,31 @@ def send_booking_emails(booking):
                 timeout=10
             )
             response.raise_for_status()
+
+        # 5. Brevo Provider
+        elif provider == 'BREVO':
+            api_key = settings_obj.email_api_key
+            if not api_key:
+                raise ValueError("Brevo API key not configured in SiteSettings")
+            
+            headers = {
+                "api-key": api_key,
+                "Content-Type": "application/json"
+            }
+            payload = {
+                "sender": {"email": from_email, "name": "AeroLux Select"},
+                "to": [{"email": to_email}],
+                "subject": subject,
+                "htmlContent": html_template,
+                "textContent": text_content
+            }
+            response = requests.post(
+                "https://api.brevo.com/v3/smtp/email",
+                json=payload,
+                headers=headers,
+                timeout=10
+            )
+            response.raise_for_status()
             
         else:
             raise ValueError(f"Unknown email provider: {provider}")

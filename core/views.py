@@ -219,80 +219,95 @@ def _haversine_distance(lat1, lon1, lat2, lon2):
     return R * c
 
 
-def _get_airport_transfer_price(site, slug, vehicle, booking_data):
-    """Get fixed zone price for airport transfer for a specific vehicle."""
-    from core.models import SiteSettings, ZoneVehiclePrice, Airport
-    site_settings = SiteSettings.get_settings(site)
-    base_fee = float(site_settings.airport_base_fee) if site_settings else 15.0
-    price_per_mile = float(site_settings.price_per_mile) if site_settings else 3.5
-
+def _get_airport_transfer_price_for_category(site, slug, category, booking_data):
+    """Get calculated price for airport transfer for a vehicle category based on distance."""
+    from core.models import AirportCategoryPrice, Airport, SiteSettings
     airport_id = booking_data.get('airport_id')
+    if not airport_id:
+        return 0.0
 
-    # Try to find a zone vehicle price
-    zone_prices = ZoneVehiclePrice.objects.filter(
+    ac_price = AirportCategoryPrice.objects.filter(
         airport_id=airport_id,
-        vehicle=vehicle,
-        is_active=True,
-    )
-    if zone_prices.exists():
-        # Return the first matching zone price (admin should define zones per airport)
-        return float(zone_prices.first().price)
+        vehicle_category=category,
+        is_active=True
+    ).first()
 
-    # Fallback: distance-based calculation
-    p_lat = booking_data.get('pickup_lat')
-    p_lng = booking_data.get('pickup_lng')
-    d_lat = booking_data.get('dropoff_lat')
-    d_lng = booking_data.get('dropoff_lng')
-    is_dest_to_airport = booking_data.get('transfer_direction') == 'DEST_TO_AIRPORT'
-
-    airport_lat = d_lat if is_dest_to_airport else p_lat
-    airport_lng = d_lng if is_dest_to_airport else p_lng
-    address_lat = p_lat if is_dest_to_airport else d_lat
-    address_lng = p_lng if is_dest_to_airport else d_lng
-
-    if not airport_lat or not airport_lng:
-        try:
-            airport_obj = Airport.objects.get(id=airport_id)
-            airport_lat = airport_obj.latitude
-            airport_lng = airport_obj.longitude
-        except Exception:
-            pass
-
-    if address_lat and address_lng and airport_lat and airport_lng:
-        miles = _haversine_distance(airport_lat, airport_lng, address_lat, address_lng)
+    if ac_price:
+        base_price = float(ac_price.base_price)
+        base_km = float(ac_price.base_km)
+        price_per_km = float(ac_price.price_per_km)
     else:
-        miles = 20.0
+        site_settings = SiteSettings.get_settings(site)
+        base_price = float(site_settings.airport_base_fee) if site_settings else 15.0
+        base_km = 25.0
+        price_per_km = 3.5
 
-    return base_fee + (price_per_mile * miles)
+    try:
+        distance_km = float(booking_data.get('distance_km', 0.0) or 0.0)
+    except (ValueError, TypeError):
+        distance_km = 0.0
+
+    # Fallback to haversine if distance is not passed
+    if distance_km <= 0.0:
+        p_lat = booking_data.get('pickup_lat')
+        p_lng = booking_data.get('pickup_lng')
+        d_lat = booking_data.get('dropoff_lat')
+        d_lng = booking_data.get('dropoff_lng')
+        is_dest_to_airport = booking_data.get('transfer_direction') == 'DEST_TO_AIRPORT'
+
+        airport_lat = d_lat if is_dest_to_airport else p_lat
+        airport_lng = d_lng if is_dest_to_airport else p_lng
+        address_lat = p_lat if is_dest_to_airport else d_lat
+        address_lng = p_lng if is_dest_to_airport else d_lng
+
+        if not airport_lat or not airport_lng:
+            try:
+                airport_obj = Airport.objects.get(id=airport_id)
+                airport_lat = airport_obj.latitude
+                airport_lng = airport_obj.longitude
+            except Exception:
+                pass
+
+        if address_lat and address_lng and airport_lat and airport_lng:
+            miles = _haversine_distance(airport_lat, airport_lng, address_lat, address_lng)
+            distance_km = miles * 1.60934
+        else:
+            distance_km = 20.0
+
+    if distance_km <= base_km:
+        fare = base_price
+    else:
+        fare = base_price + (distance_km - base_km) * price_per_km
+
+    return fare
 
 
-def _get_vehicle_price(site, slug, vehicle, booking_data):
-    """Calculate price for any service type for a specific vehicle."""
+def _get_category_price(site, slug, category, booking_data):
+    """Calculate price for any service type for a specific vehicle category."""
     from core.models import PricingRule
     service_type = booking_data.get('service_type', 'airport_transfer')
 
     if service_type == 'airport_transfer':
-        fare = _get_airport_transfer_price(site, slug, vehicle, booking_data)
+        fare = _get_airport_transfer_price_for_category(site, slug, category, booking_data)
         return fare
 
     elif service_type == 'hourly':
         hours = int(booking_data.get('hours_requested', 3))
         if hours > 12:
             hours = 12
-        # Find pricing rule: vehicle-specific first, then category fallback
         rule = PricingRule.objects.filter(
             site=site,
-            vehicle=vehicle,
+            vehicle_category=category,
             service_type='hourly',
-            is_active=True
+            is_active=True,
+            vehicle__isnull=True,
         ).first()
         if not rule:
             rule = PricingRule.objects.filter(
                 site=site,
-                vehicle_category=vehicle.category,
+                vehicle_category=category,
                 service_type='hourly',
-                is_active=True,
-                vehicle__isnull=True,
+                is_active=True
             ).first()
         hourly_rate = float(rule.base_price) if rule else float(settings.HOURLY_RATE_RANGE['min'])
         return hourly_rate * hours
@@ -300,17 +315,17 @@ def _get_vehicle_price(site, slug, vehicle, booking_data):
     elif service_type == 'point_to_point':
         rule = PricingRule.objects.filter(
             site=site,
-            vehicle=vehicle,
+            vehicle_category=category,
             service_type='point_to_point',
-            is_active=True
+            is_active=True,
+            vehicle__isnull=True,
         ).first()
         if not rule:
             rule = PricingRule.objects.filter(
                 site=site,
-                vehicle_category=vehicle.category,
+                vehicle_category=category,
                 service_type='point_to_point',
-                is_active=True,
-                vehicle__isnull=True,
+                is_active=True
             ).first()
 
         base_price = float(rule.base_price) if rule else 80.0
@@ -318,35 +333,39 @@ def _get_vehicle_price(site, slug, vehicle, booking_data):
 
         # Distance-based surcharge beyond km_threshold
         if rule and rule.price_per_km:
+            try:
+                km = float(booking_data.get('distance_km', 0.0) or 0.0)
+            except (ValueError, TypeError):
+                km = 0.0
+            
             p_lat = booking_data.get('pickup_lat')
             p_lng = booking_data.get('pickup_lng')
             d_lat = booking_data.get('dropoff_lat')
             d_lng = booking_data.get('dropoff_lng')
-            if p_lat and p_lng and d_lat and d_lng:
+            if km <= 0.0 and p_lat and p_lng and d_lat and d_lng:
                 miles = _haversine_distance(p_lat, p_lng, d_lat, d_lng)
                 km = miles * 1.60934
-                threshold = rule.km_threshold or 25
-                if km > threshold:
-                    fare += float(rule.price_per_km) * (km - threshold)
+            
+            threshold = rule.km_threshold or 25
+            if km > threshold:
+                fare += float(rule.price_per_km) * (km - threshold)
 
-        stops = int(booking_data.get('number_of_stops', 0))
-        fare += stops * 20.0
         return fare
 
     elif service_type == 'luxury_rental':
         rule = PricingRule.objects.filter(
             site=site,
-            vehicle=vehicle,
+            vehicle_category=category,
             service_type='luxury_rental',
-            is_active=True
+            is_active=True,
+            vehicle__isnull=True,
         ).first()
         if not rule:
             rule = PricingRule.objects.filter(
                 site=site,
-                vehicle_category=vehicle.category,
+                vehicle_category=category,
                 service_type='luxury_rental',
-                is_active=True,
-                vehicle__isnull=True,
+                is_active=True
             ).first()
         return float(rule.base_price) if rule else 150.0
 
@@ -409,6 +428,7 @@ def booking_step1(request):
             'pickup_lng': request.POST.get('pickup_lng', ''),
             'dropoff_lat': request.POST.get('dropoff_lat', ''),
             'dropoff_lng': request.POST.get('dropoff_lng', ''),
+            'distance_km': request.POST.get('distance_km', ''),
             'flight_number': request.POST.get('flight_number', ''),
             'hours_requested': request.POST.get('hours_requested', '3'),
             'round_trip': round_trip,
@@ -437,8 +457,8 @@ def booking_step1(request):
 
 def booking_step2(request):
     """
-    Step 2: Select individual vehicle.
-    Shows available vehicles grouped by category with per-vehicle pricing.
+    Step 2: Select vehicle category.
+    Shows available vehicle categories with per-category pricing.
     """
     site, slug = _get_site_or_404(request)
     booking_data = request.session.get('booking', {})
@@ -448,57 +468,49 @@ def booking_step2(request):
         return redirect(f'/{slug}/book/')
 
     try:
-        from core.models import VehicleCategory, Vehicle
+        from core.models import VehicleCategory
 
-        # Get all active vehicles for this site, grouped by category
-        vehicles = Vehicle.objects.filter(
-            is_active=True,
-            sites=site,
-        ).select_related('category').order_by('category__order', 'name')
+        # Get all active categories
+        categories = VehicleCategory.objects.filter(is_active=True).order_by('order')
 
-        # Calculate pricing for each vehicle
-        vehicle_prices = {}
-        for v in vehicles:
+        # Calculate pricing for each category
+        category_prices = {}
+        for cat in categories:
             try:
-                vehicle_prices[v.id] = _get_vehicle_price(site, slug, v, booking_data)
+                price = _get_category_price(site, slug, cat, booking_data)
+                if booking_data.get('service_type') != 'hourly' and booking_data.get('round_trip'):
+                    price = price * 2.0
+                if booking_data.get('service_type') == 'point_to_point':
+                    stops = int(booking_data.get('number_of_stops', 0) or 0)
+                    price += stops * 20.0
+                category_prices[cat.id] = price
             except Exception:
-                vehicle_prices[v.id] = None
-
-        # Group vehicles by category for display
-        categories_with_vehicles = {}
-        for v in vehicles:
-            cat = v.category
-            if cat.id not in categories_with_vehicles:
-                categories_with_vehicles[cat.id] = {
-                    'category': cat,
-                    'vehicles': [],
-                }
-            categories_with_vehicles[cat.id]['vehicles'].append(v)
+                category_prices[cat.id] = None
 
     except Exception as e:
-        vehicles = []
-        vehicle_prices = {}
-        categories_with_vehicles = {}
+        categories = []
+        category_prices = {}
 
     if request.method == 'POST':
-        vehicle_id = request.POST.get('vehicle_id')
-        if vehicle_id:
+        category_id = request.POST.get('category_id')
+        if category_id:
             try:
-                selected_vehicle = Vehicle.objects.get(id=vehicle_id)
-                booking_data['vehicle_id'] = int(vehicle_id)
-                booking_data['vehicle_category_id'] = selected_vehicle.category_id
+                selected_category = VehicleCategory.objects.get(id=category_id)
+                booking_data['vehicle_category_id'] = int(category_id)
+                if 'vehicle_id' in booking_data:
+                    del booking_data['vehicle_id']
 
-                # Save the pure base price for this vehicle
-                pure_price = _get_vehicle_price(site, slug, selected_vehicle, booking_data)
+                # Save the pure base price for this category
+                pure_price = _get_category_price(site, slug, selected_category, booking_data)
                 booking_data['base_price'] = pure_price
                 request.session['booking'] = booking_data
                 return redirect(f'/{slug}/book/details/')
-            except Vehicle.DoesNotExist:
-                messages.error(request, 'Selected vehicle not found.')
+            except VehicleCategory.DoesNotExist:
+                messages.error(request, 'Selected category not found.')
 
     context = {
-        'categories_with_vehicles': categories_with_vehicles,
-        'vehicle_prices': vehicle_prices,
+        'categories': categories,
+        'category_prices': category_prices,
         'booking_data': booking_data,
         'site_slug': slug,
         'language': _get_language(request),
@@ -513,18 +525,16 @@ def booking_step3(request):
     site, slug = _get_site_or_404(request)
     booking_data = request.session.get('booking', {})
 
-    if not booking_data or not booking_data.get('vehicle_id'):
-        messages.warning(request, 'Please select a vehicle first.')
+    if not booking_data or not booking_data.get('vehicle_category_id'):
+        messages.warning(request, 'Please select a vehicle category first.')
         return redirect(f'/{slug}/book/vehicle/')
 
     try:
-        from core.models import PremiumAddOn, Vehicle, VehicleCategory
+        from core.models import PremiumAddOn, VehicleCategory
         addons = PremiumAddOn.objects.filter(is_active=True)
-        vehicle = Vehicle.objects.select_related('category').get(id=booking_data['vehicle_id'])
-        category = vehicle.category
+        category = VehicleCategory.objects.get(id=booking_data['vehicle_category_id'])
     except Exception:
         addons = []
-        vehicle = None
         category = None
 
     if request.method == 'POST':
@@ -543,7 +553,6 @@ def booking_step3(request):
 
     context = {
         'addons': addons,
-        'vehicle': vehicle,
         'category': category,
         'booking_data': booking_data,
         'base_price': fare,
@@ -886,28 +895,26 @@ def api_destinations(request, airport_id):
 @require_GET
 def api_pricing(request):
     """
-    Return pricing for vehicles.
-    Query params: service_type, hours, vehicle_id, round_trip
+    Return pricing for vehicle categories.
+    Query params: service_type, hours, vehicle_category_id, round_trip, distance_km
     """
     try:
-        from core.models import PricingRule, Vehicle, ZoneVehiclePrice
+        from core.models import VehicleCategory
 
         service_type = request.GET.get('service_type', 'airport_transfer')
         round_trip = request.GET.get('round_trip') == 'true'
 
         site, slug = _get_site_or_404(request)
 
-        # Get vehicles for this site
-        vehicles = Vehicle.objects.filter(
-            is_active=True, sites=site
-        ).select_related('category').order_by('category__order', 'name')
+        # Get categories
+        categories = VehicleCategory.objects.filter(is_active=True).order_by('order')
 
-        vehicle_id = request.GET.get('vehicle_id')
-        if vehicle_id:
-            vehicles = vehicles.filter(id=vehicle_id)
+        category_id = request.GET.get('vehicle_category_id') or request.GET.get('category_id')
+        if category_id:
+            categories = categories.filter(id=category_id)
 
         pricing = []
-        for v in vehicles:
+        for cat in categories:
             booking_data = {
                 'service_type': service_type,
                 'airport_id': request.GET.get('airport_id'),
@@ -917,20 +924,59 @@ def api_pricing(request):
                 'pickup_lng': request.GET.get('pickup_lng', ''),
                 'dropoff_lat': request.GET.get('dropoff_lat', ''),
                 'dropoff_lng': request.GET.get('dropoff_lng', ''),
+                'distance_km': request.GET.get('distance_km', ''),
                 'round_trip': round_trip,
                 'transfer_direction': request.GET.get('transfer_direction', 'AIRPORT_TO_DEST'),
             }
             try:
-                price = _get_vehicle_price(site, slug, v, booking_data)
+                # Get starting price (single leg, no stops)
+                start_booking_data = booking_data.copy()
+                start_booking_data['round_trip'] = False
+                start_booking_data['number_of_stops'] = 0
+                start_booking_data['hours_requested'] = 1  # for hourly rate display
+                starting_price = _get_category_price(site, slug, cat, start_booking_data)
+
+                # Get actual computed price for this category
+                price = _get_category_price(site, slug, cat, booking_data)
+                
+                # Apply round trip multiplier to final price
+                if service_type != 'hourly' and round_trip:
+                    price = price * 2.0
+
+                if service_type == 'point_to_point':
+                    stops = int(booking_data.get('number_of_stops', 0) or 0)
+                    price += stops * 20.0
             except Exception:
                 price = None
+                starting_price = None
+
+            # Get hourly rate / hours if hourly
+            hourly_rate = None
+            hours = None
+            if service_type == 'hourly':
+                try:
+                    from core.models import PricingRule
+                    rule = PricingRule.objects.filter(
+                        site=site,
+                        vehicle_category=cat,
+                        service_type='hourly',
+                        is_active=True,
+                        vehicle__isnull=True,
+                    ).first()
+                    hourly_rate = float(rule.base_price) if rule else float(settings.HOURLY_RATE_RANGE['min'])
+                    hours = int(booking_data['hours_requested'])
+                except Exception:
+                    pass
 
             pricing.append({
-                'vehicle_id': v.id,
-                'vehicle_name': v.name,
-                'vehicle_category': v.category.name,
-                'vehicle_category_id': v.category.id,
+                'category_id': cat.id,
+                'category_name': cat.name,
+                'vehicle_category': cat.name,
+                'vehicle_category_id': cat.id,
                 'base_price': price,
+                'starting_price': starting_price,
+                'hourly_rate': hourly_rate,
+                'hours': hours,
                 'service_type': service_type,
             })
 

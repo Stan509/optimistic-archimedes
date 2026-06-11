@@ -122,6 +122,12 @@
                         <input type="text" name="google_analytics_id" value="{{ settings.google_analytics_id }}" placeholder="G-XXXXXXXXXX" class="w-full bg-luxury-black border border-luxury-border rounded-xl px-4 py-3 text-sm text-white focus:border-gold-500/50 outline-none transition-colors font-mono">
                     </div>
 
+                    <!-- Google Maps API Key -->
+                    <div class="sm:col-span-2">
+                        <label class="block text-xs uppercase tracking-wider text-luxury-muted font-semibold mb-2">Google Maps API Key (With Places & Directions API enabled)</label>
+                        <input type="text" name="google_maps_api_key" value="{{ settings.google_maps_api_key|default:'' }}" placeholder="AIzaSy..." class="w-full bg-luxury-black border border-luxury-border rounded-xl px-4 py-3 text-sm text-white focus:border-gold-500/50 outline-none transition-colors font-mono">
+                    </div>
+
                     <!-- Terms & Conditions -->
                     <div class="sm:col-span-2">
                         <label class="block text-xs uppercase tracking-wider text-luxury-muted font-semibold mb-2">Terms & Conditions</label>

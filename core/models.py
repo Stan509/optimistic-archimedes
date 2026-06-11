@@ -619,36 +619,39 @@ class PricingRule(models.Model):
 #  ZONE VEHICLE PRICE  — Airport transfer fixed pricing
 # ═══════════════════════════════════════════════
 
-class ZoneVehiclePrice(models.Model):
+class AirportCategoryPrice(models.Model):
     """
-    Fixed price for airport transfers based on:
-      Airport → Vehicle → Zone → Price
-
-    Each combination of airport, vehicle, and zone has a unique fixed price.
-    This replaces the old PricingRule approach for airport transfers.
+    Base pricing configuration for airport transfers based on:
+      Airport → VehicleCategory → Base Price, Base KM, Price per extra KM
     """
 
     airport = models.ForeignKey(
         Airport,
         on_delete=models.CASCADE,
-        related_name='zone_prices',
+        related_name='category_prices',
         help_text='Airport for this pricing.',
     )
-    vehicle = models.ForeignKey(
-        Vehicle,
+    vehicle_category = models.ForeignKey(
+        VehicleCategory,
         on_delete=models.CASCADE,
-        related_name='zone_prices',
-        help_text='Specific vehicle for this pricing.',
+        related_name='airport_prices',
+        help_text='Vehicle category for this pricing.',
     )
-    zone_name = models.CharField(
-        max_length=100,
-        help_text='Zone name (e.g. "Punta Cana Hotels", "Manhattan Midtown").',
-    )
-    price = models.DecimalField(
+    base_price = models.DecimalField(
         max_digits=10,
         decimal_places=2,
         validators=[MinValueValidator(Decimal('0.00'))],
-        help_text='Fixed price in USD for this airport→vehicle→zone combination.',
+        help_text='Base price in USD for this airport and category.',
+    )
+    base_km = models.PositiveIntegerField(
+        default=25,
+        help_text='Base distance in kilometers included in the base price.',
+    )
+    price_per_km = models.DecimalField(
+        max_digits=6,
+        decimal_places=2,
+        validators=[MinValueValidator(Decimal('0.00'))],
+        help_text='Price per extra kilometer beyond the base distance.',
     )
     is_active = models.BooleanField(default=True)
 
@@ -656,13 +659,13 @@ class ZoneVehiclePrice(models.Model):
     active = ActiveManager()
 
     class Meta:
-        verbose_name = 'Zone Vehicle Price'
-        verbose_name_plural = 'Zone Vehicle Prices'
-        ordering = ['airport', 'zone_name', 'vehicle']
-        unique_together = [['airport', 'vehicle', 'zone_name']]
+        verbose_name = 'Airport Category Price'
+        verbose_name_plural = 'Airport Category Prices'
+        ordering = ['airport', 'vehicle_category']
+        unique_together = [['airport', 'vehicle_category']]
 
     def __str__(self):
-        return f'{self.airport.code} → {self.vehicle.name} → {self.zone_name}: ${self.price}'
+        return f'{self.airport.code} -> {self.vehicle_category.name}: ${self.base_price} (up to {self.base_km} km + ${self.price_per_km}/km)'
 
 
 # ═══════════════════════════════════════════════
@@ -1310,6 +1313,12 @@ class SiteSettings(models.Model):
         default='',
         help_text='Google Analytics measurement ID (G-XXXXXXXXXX).',
     )
+    google_maps_api_key = models.CharField(
+        max_length=255,
+        blank=True,
+        default='',
+        help_text='Google Maps API key for distance calculation and map routing.',
+    )
 
     # ── Email Service Configuration ──
     email_provider = models.CharField(
@@ -1319,6 +1328,7 @@ class SiteSettings(models.Model):
             ('SENDGRID', 'SendGrid'),
             ('RESEND', 'Resend'),
             ('MAILGUN', 'Mailgun'),
+            ('BREVO', 'Brevo'),
         ],
         default='SMTP',
         help_text='Third-party provider or SMTP for sending notifications.',

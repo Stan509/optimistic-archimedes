@@ -73,6 +73,7 @@
                             <option value="SENDGRID" {% if settings.email_provider == 'SENDGRID' %}selected{% endif %}>SendGrid API</option>
                             <option value="RESEND" {% if settings.email_provider == 'RESEND' %}selected{% endif %}>Resend API</option>
                             <option value="MAILGUN" {% if settings.email_provider == 'MAILGUN' %}selected{% endif %}>Mailgun API</option>
+                            <option value="BREVO" {% if settings.email_provider == 'BREVO' %}selected{% endif %}>Brevo API</option>
                         </select>
                     </div>
 
@@ -173,6 +174,9 @@
                 
                 if (val === 'SENDGRID') {
                     apiHeader.textContent = "SendGrid Configuration";
+                    domainField.classList.add('hidden');
+                } else if (val === 'BREVO') {
+                    apiHeader.textContent = "Brevo Configuration";
                     domainField.classList.add('hidden');
                 } else if (val === 'RESEND') {
                     apiHeader.textContent = "Resend Configuration";

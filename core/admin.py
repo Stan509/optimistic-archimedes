@@ -11,7 +11,7 @@ from core.models import (
     Airport,
     Destination,
     PricingRule,
-    ZoneVehiclePrice,
+    AirportCategoryPrice,
     VehicleCategory,
     Vehicle,
     PremiumAddOn,
@@ -66,10 +66,10 @@ class DestinationInline(admin.TabularInline):
     show_change_link = True
 
 
-class ZoneVehiclePriceInline(admin.TabularInline):
-    model = ZoneVehiclePrice
+class AirportCategoryPriceInline(admin.TabularInline):
+    model = AirportCategoryPrice
     extra = 0
-    fields = ('vehicle', 'zone_name', 'price', 'is_active')
+    fields = ('vehicle_category', 'base_price', 'base_km', 'price_per_km', 'is_active')
     show_change_link = True
 
 
@@ -124,7 +124,7 @@ class AirportAdmin(admin.ModelAdmin):
     list_filter = ('site', 'country', 'is_active')
     search_fields = ('name', 'code', 'city')
     list_select_related = ('site',)
-    inlines = [DestinationInline, ZoneVehiclePriceInline]
+    inlines = [DestinationInline, AirportCategoryPriceInline]
 
     fieldsets = (
         (None, {
@@ -193,12 +193,12 @@ class PricingRuleAdmin(admin.ModelAdmin):
         return obj.vehicle.name if obj.vehicle else '—'
 
 
-@admin.register(ZoneVehiclePrice)
-class ZoneVehiclePriceAdmin(admin.ModelAdmin):
-    list_display = ('airport', 'vehicle', 'zone_name', 'price', 'is_active')
+@admin.register(AirportCategoryPrice)
+class AirportCategoryPriceAdmin(admin.ModelAdmin):
+    list_display = ('airport', 'vehicle_category', 'base_price', 'base_km', 'price_per_km', 'is_active')
     list_filter = ('airport__site', 'airport', 'is_active')
-    search_fields = ('zone_name', 'vehicle__name', 'airport__code')
-    list_select_related = ('airport', 'vehicle', 'airport__site')
+    search_fields = ('vehicle_category__name', 'airport__code')
+    list_select_related = ('airport', 'vehicle_category', 'airport__site')
 
 
 # ──────────────────────────────────────────────

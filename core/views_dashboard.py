@@ -601,15 +601,15 @@ def pricing_form(request, pk=None):
 # =========================================================================
 
 @user_passes_test(is_admin, login_url='dashboard:login')
-def zone_pricing_list(request):
-    """List zone-based fixed pricing for airport transfers."""
-    from core.models import ZoneVehiclePrice, Airport
+def airport_pricing_list(request):
+    """List category-based pricing for airport transfers."""
+    from core.models import AirportCategoryPrice, Airport
 
     site_filter = request.GET.get('site', '')
     airport_filter = request.GET.get('airport', '')
 
-    prices = ZoneVehiclePrice.objects.all().select_related(
-        'airport', 'airport__site', 'vehicle', 'vehicle__category'
+    prices = AirportCategoryPrice.objects.all().select_related(
+        'airport', 'airport__site', 'vehicle_category'
     )
 
     if site_filter:
@@ -620,66 +620,81 @@ def zone_pricing_list(request):
     airports = Airport.objects.filter(is_active=True).select_related('site')
 
     context = {
-        'prices': prices.order_by('airport__site__slug', 'airport__code', 'zone_name', 'vehicle__name'),
+        'prices': prices.order_by('airport__site__slug', 'airport__code', 'vehicle_category__name'),
         'airports': airports,
         'site_filter': site_filter,
         'airport_filter': airport_filter,
-        'active_tab': 'zone_pricing',
+        'active_tab': 'airport_pricing',
     }
-    return render(request, 'dashboard/zone_pricing.html', context)
+    return render(request, 'dashboard/airport_pricing.html', context)
 
 
 @user_passes_test(is_admin, login_url='dashboard:login')
-def zone_pricing_form(request, pk=None):
-    """Add or edit a zone vehicle price."""
-    from core.models import ZoneVehiclePrice, Airport, Vehicle
+def airport_pricing_form(request, pk=None):
+    """Add or edit an airport category price."""
+    from core.models import AirportCategoryPrice, Airport, VehicleCategory
+    from django.db import IntegrityError
 
     price_obj = None
     if pk:
-        price_obj = get_object_or_404(ZoneVehiclePrice, pk=pk)
+        price_obj = get_object_or_404(AirportCategoryPrice, pk=pk)
 
     airports = Airport.objects.filter(is_active=True).select_related('site')
-    vehicles = Vehicle.objects.filter(is_active=True).select_related('category')
+    categories = VehicleCategory.objects.filter(is_active=True)
 
     if request.method == 'POST':
-        data = {
-            'airport_id': int(request.POST.get('airport')),
-            'vehicle_id': int(request.POST.get('vehicle')),
-            'zone_name': request.POST.get('zone_name', '').strip(),
-            'price': float(request.POST.get('price', 0)),
-            'is_active': request.POST.get('is_active') == 'on',
-        }
+        airport_id = int(request.POST.get('airport'))
+        category_id = int(request.POST.get('vehicle_category'))
+        base_price = float(request.POST.get('base_price', 0))
+        base_km = int(request.POST.get('base_km', 25))
+        price_per_km = float(request.POST.get('price_per_km', 0))
+        is_active = request.POST.get('is_active') == 'on'
 
         if price_obj:
-            for key, value in data.items():
-                setattr(price_obj, key, value)
-            price_obj.save()
-            messages.success(request, f'Zone price for "{data["zone_name"]}" updated.')
+            price_obj.airport_id = airport_id
+            price_obj.vehicle_category_id = category_id
+            price_obj.base_price = base_price
+            price_obj.base_km = base_km
+            price_obj.price_per_km = price_per_km
+            price_obj.is_active = is_active
+            try:
+                price_obj.save()
+                messages.success(request, f'Airport price updated successfully.')
+                return redirect('dashboard:airport_pricing')
+            except IntegrityError:
+                messages.error(request, 'A pricing rule for this airport and vehicle category already exists.')
         else:
-            price_obj = ZoneVehiclePrice(**data)
-            price_obj.save()
-            messages.success(request, f'Zone price for "{data["zone_name"]}" created.')
-
-        return redirect('dashboard:zone_pricing')
+            try:
+                price_obj = AirportCategoryPrice.objects.create(
+                    airport_id=airport_id,
+                    vehicle_category_id=category_id,
+                    base_price=base_price,
+                    base_km=base_km,
+                    price_per_km=price_per_km,
+                    is_active=is_active
+                )
+                messages.success(request, f'Airport price rule created successfully.')
+                return redirect('dashboard:airport_pricing')
+            except IntegrityError:
+                messages.error(request, 'A pricing rule for this airport and vehicle category already exists.')
 
     context = {
         'price_obj': price_obj,
         'airports': airports,
-        'vehicles': vehicles,
-        'active_tab': 'zone_pricing',
+        'categories': categories,
+        'active_tab': 'airport_pricing',
     }
-    return render(request, 'dashboard/zone_pricing_form.html', context)
+    return render(request, 'dashboard/airport_pricing_form.html', context)
 
 
 @user_passes_test(is_admin, login_url='dashboard:login')
-def zone_pricing_delete(request, pk):
-    """Delete a zone vehicle price."""
-    from core.models import ZoneVehiclePrice
-    price_obj = get_object_or_404(ZoneVehiclePrice, pk=pk)
-    zone_name = price_obj.zone_name
+def airport_pricing_delete(request, pk):
+    """Delete an airport category price rule."""
+    from core.models import AirportCategoryPrice
+    price_obj = get_object_or_404(AirportCategoryPrice, pk=pk)
     price_obj.delete()
-    messages.success(request, f'Zone price for "{zone_name}" deleted.')
-    return redirect('dashboard:zone_pricing')
+    messages.success(request, 'Airport category pricing rule deleted.')
+    return redirect('dashboard:airport_pricing')
 
 
 
@@ -908,6 +923,7 @@ def dashboard_settings(request):
         settings_obj.social_tiktok = request.POST.get('social_tiktok', '')
         settings_obj.google_analytics_id = request.POST.get('google_analytics_id', '')
         settings_obj.terms_and_conditions = request.POST.get('terms_and_conditions', '')
+        settings_obj.google_maps_api_key = request.POST.get('google_maps_api_key', '').strip()
         # Airport Transfer Pricing
         ppm = request.POST.get('price_per_mile', '')
         abf = request.POST.get('airport_base_fee', '')
