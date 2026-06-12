@@ -69,7 +69,7 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <!-- Base Price -->
                 <div>
-                    <label class="block text-xs font-semibold text-luxury-muted uppercase tracking-wider mb-2">Base Price (USD) *</label>
+                    <label id="base-price-label" class="block text-xs font-semibold text-luxury-muted uppercase tracking-wider mb-2">Base Price (USD) *</label>
                     <div class="relative">
                         <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gold-500 font-bold">$</span>
                         <input type="number" name="base_price" step="0.01" min="0" required
@@ -139,3 +139,24 @@
     </div>
 </div>
 {% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const serviceTypeSelect = document.querySelector('select[name="service_type"]');
+        const basePriceLabel = document.getElementById('base-price-label');
+
+        function updateLabels() {
+            if (serviceTypeSelect.value === 'hourly') {
+                basePriceLabel.textContent = 'Price Per Hour (USD) *';
+            } else {
+                basePriceLabel.textContent = 'Base Fare (USD) *';
+            }
+        }
+
+        serviceTypeSelect.addEventListener('change', updateLabels);
+        updateLabels();
+    });
+</script>
+{% endblock %}
+

@@ -21,7 +21,8 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         from core.models import (
             Site, Airport, Destination, VehicleCategory, Vehicle,
-            PremiumAddOn, PricingRule, AirportCategoryPrice, SiteContent, SiteSettings, Testimonial
+            PremiumAddOn, PricingRule, AirportCategoryPrice, SiteContent, SiteSettings, Testimonial,
+            WhatsAppTemplate
         )
 
         self.stdout.write(self.style.NOTICE('Seeding AeroLux Select database...'))
@@ -907,6 +908,31 @@ class Command(BaseCommand):
         )
 
         self.stdout.write(self.style.SUCCESS('  [OK] Site settings created'))
+
+        # =====================================================================
+        # 8.5 WHATSAPP TEMPLATES
+        # =====================================================================
+        self.stdout.write('  Creating WhatsApp templates...')
+
+        whatsapp_defaults = {
+            'processing': 'Hello {customer_name}, thank you for choosing {company_name}. We have received your booking request {booking_reference}. We are currently processing it and will confirm shortly. Pickup: {pickup_address} on {pickup_date} at {pickup_time}.',
+            'confirmed': 'Hello {customer_name}, your booking {booking_reference} with {company_name} is CONFIRMED. Your driver will meet you at {pickup_address} on {pickup_date} at {pickup_time}. Total price: {total_price}. Balance: {balance}. Thank you!',
+            'reminder_12h': 'Hi {customer_name}, this is a reminder of your upcoming trip {booking_reference} with {company_name} in 12 hours. Pickup: {pickup_address} on {pickup_date} at {pickup_time}. We look forward to serving you!',
+            'cancelled': 'Hello {customer_name}, we confirm that your booking {booking_reference} with {company_name} has been cancelled. If this was a mistake or you have questions, please contact us.'
+        }
+
+        for site in [nyc, dr]:
+            comp_name = 'AeroLux Select NYC' if site == nyc else 'AeroLux Select DR'
+            for trigger_type, text in whatsapp_defaults.items():
+                formatted_text = text.replace('{company_name}', comp_name)
+                WhatsAppTemplate.objects.update_or_create(
+                    site=site,
+                    trigger_type=trigger_type,
+                    defaults={
+                        'message_content': formatted_text
+                    }
+                )
+        self.stdout.write(self.style.SUCCESS('  [OK] WhatsApp templates created'))
 
         # =====================================================================
         # 9. CMS CONTENT

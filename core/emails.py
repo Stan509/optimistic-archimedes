@@ -500,7 +500,53 @@ def send_booking_email(booking, email_type):
     except Exception as e:
         print(f"Error sending customer notification email: {str(e)}")
 
+    # Prepare/Log WhatsApp notification
+    try:
+        whatsapp_msg = get_formatted_whatsapp_message(booking, email_type)
+        import logging
+        logging.getLogger(__name__).info(
+            f"Prepared WhatsApp notification for Booking {booking.booking_reference} ({email_type}): {whatsapp_msg}"
+        )
+        print(f"[WHATSAPP PREPARED] To: {booking.customer_phone or booking.customer_whatsapp} - Message: {whatsapp_msg}")
+    except Exception as wa_err:
+        import logging
+        logging.getLogger(__name__).warning(
+            f"Failed to prepare WhatsApp notification for Booking {booking.booking_reference}: {str(wa_err)}"
+        )
+        print(f"[WHATSAPP ERROR] Failed to prepare WhatsApp notification: {str(wa_err)}")
+
 
 def send_booking_emails(booking):
     """Legacy backward compatibility method. Maps to processing phase."""
     send_booking_email(booking, 'processing')
+
+
+def get_default_whatsapp_template(trigger_type, company_name="AeroLux Select"):
+    """
+    Returns default text for WhatsApp templates if not customized in the DB.
+    """
+    whatsapp_defaults = {
+        'processing': 'Hello {customer_name}, thank you for choosing {company_name}. We have received your booking request {booking_reference}. We are currently processing it and will confirm shortly. Pickup: {pickup_address} on {pickup_date} at {pickup_time}.',
+        'confirmed': 'Hello {customer_name}, your booking {booking_reference} with {company_name} is CONFIRMED. Your driver will meet you at {pickup_address} on {pickup_date} at {pickup_time}. Total price: {total_price}. Balance: {balance}. Thank you!',
+        'reminder_12h': 'Hi {customer_name}, this is a reminder of your upcoming trip {booking_reference} with {company_name} in 12 hours. Pickup: {pickup_address} on {pickup_date} at {pickup_time}. We look forward to serving you!',
+        'cancelled': 'Hello {customer_name}, we confirm that your booking {booking_reference} with {company_name} has been cancelled. If this was a mistake or you have questions, please contact us.'
+    }
+    return whatsapp_defaults.get(trigger_type, "").replace('{company_name}', company_name)
+
+
+def get_formatted_whatsapp_message(booking, trigger_type):
+    """
+    Loads and formats the WhatsApp template for the given trigger type.
+    """
+    from core.models import WhatsAppTemplate
+    site = booking.site
+    company_name = site.name
+    
+    template = WhatsAppTemplate.objects.filter(site=site, trigger_type=trigger_type).first()
+    if not template:
+        template_text = get_default_whatsapp_template(trigger_type, company_name)
+    else:
+        template_text = template.message_content
+        
+    context = get_email_context(booking)
+    return format_template(template_text, context)

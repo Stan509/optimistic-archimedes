@@ -222,6 +222,21 @@ def booking_detail(request, booking_id):
     return_total = base_price + return_addons_total if booking.round_trip else Decimal('0.00')
     balance = booking.total_price - booking.amount_paid
 
+    # WhatsApp links generation
+    from urllib.parse import quote
+    from core.emails import get_formatted_whatsapp_message
+    
+    whatsapp_links = {}
+    phone_raw = booking.customer_whatsapp or booking.customer_phone or ""
+    phone_digits = "".join(c for c in phone_raw if c.isdigit())
+    
+    for t_type in ['processing', 'confirmed', 'reminder_12h', 'cancelled']:
+        try:
+            msg_text = get_formatted_whatsapp_message(booking, t_type)
+            whatsapp_links[t_type] = f"https://wa.me/{phone_digits}?text={quote(msg_text)}"
+        except Exception as e:
+            whatsapp_links[t_type] = "#"
+
     context = {
         'booking': booking,
         'outbound_base': base_price,
@@ -232,6 +247,7 @@ def booking_detail(request, booking_id):
         'outbound_total': outbound_total,
         'return_total': return_total,
         'balance': balance,
+        'whatsapp_links': whatsapp_links,
         'active_tab': 'bookings',
     }
     return render(request, 'dashboard/booking_detail.html', context)
@@ -1167,9 +1183,9 @@ def record_payment(request, booking_id):
 
 @user_passes_test(is_admin, login_url='dashboard:login')
 def email_template_editor(request):
-    """View to list, edit and seed customizable Brevo email templates."""
-    from core.models import Site, EmailTemplate
-    from core.emails import get_default_email_template
+    """View to list, edit and seed customizable Brevo email templates and WhatsApp templates."""
+    from core.models import Site, EmailTemplate, WhatsAppTemplate
+    from core.emails import get_default_email_template, get_default_whatsapp_template
     
     site_slug = request.GET.get('site', 'nyc')
     site = get_object_or_404(Site, slug=site_slug)
@@ -1178,8 +1194,14 @@ def email_template_editor(request):
     if email_type not in ['processing', 'confirmed', 'reminder_12h', 'cancelled']:
         email_type = 'processing'
         
+    tab = request.GET.get('tab', 'email')
+    if tab not in ['email', 'whatsapp']:
+        tab = 'email'
+        
     template_obj = EmailTemplate.objects.filter(site=site, email_type=email_type).first()
+    whatsapp_template_obj = WhatsAppTemplate.objects.filter(site=site, trigger_type=email_type).first()
     
+    # Email Template values
     if not template_obj:
         default_subj, default_html, default_text = get_default_email_template(email_type, site.name)
         subject_val = default_subj
@@ -1190,35 +1212,64 @@ def email_template_editor(request):
         html_val = template_obj.html_content
         text_val = template_obj.text_content
         
-    if request.method == 'POST':
-        subject_val = request.POST.get('subject', '').strip()
-        html_val = request.POST.get('html_content', '').strip()
-        text_val = request.POST.get('text_content', '').strip()
+    # WhatsApp Template values
+    if not whatsapp_template_obj:
+        whatsapp_message_val = get_default_whatsapp_template(email_type, site.name)
+    else:
+        whatsapp_message_val = whatsapp_template_obj.message_content
         
-        if not template_obj:
-            template_obj = EmailTemplate(
-                site=site,
-                email_type=email_type,
-                subject=subject_val,
-                html_content=html_val,
-                text_content=text_val
-            )
-        else:
-            template_obj.subject = subject_val
-            template_obj.html_content = html_val
-            template_obj.text_content = text_val
+    if request.method == 'POST':
+        if tab == 'email':
+            subject_val = request.POST.get('subject', '').strip()
+            html_val = request.POST.get('html_content', '').strip()
+            text_val = request.POST.get('text_content', '').strip()
             
-        template_obj.save()
-        messages.success(request, f'Email template "{email_type}" for {site.name} updated successfully.')
+            if not template_obj:
+                template_obj = EmailTemplate(
+                    site=site,
+                    email_type=email_type,
+                    subject=subject_val,
+                    html_content=html_val,
+                    text_content=text_val
+                )
+            else:
+                template_obj.subject = subject_val
+                template_obj.html_content = html_val
+                template_obj.text_content = text_val
+                
+            template_obj.save()
+            messages.success(request, f'Email template "{email_type}" for {site.name} updated successfully.')
+        elif tab == 'whatsapp':
+            whatsapp_message_val = request.POST.get('whatsapp_message', '').strip()
+            
+            if not whatsapp_template_obj:
+                whatsapp_template_obj = WhatsAppTemplate(
+                    site=site,
+                    trigger_type=email_type,
+                    message_content=whatsapp_message_val
+                )
+            else:
+                whatsapp_template_obj.message_content = whatsapp_message_val
+                
+            whatsapp_template_obj.save()
+            messages.success(request, f'WhatsApp template "{email_type}" for {site.name} updated successfully.')
         
     context = {
         'sites': Site.objects.filter(is_active=True),
         'current_site': site,
         'email_type': email_type,
+        'active_sub_tab': tab,
+        
+        # Email fields
         'subject': subject_val,
         'html_content': html_val,
         'text_content': text_val,
-        'active_tab': 'settings',
         'template_obj': template_obj,
+        
+        # WhatsApp fields
+        'whatsapp_message': whatsapp_message_val,
+        'whatsapp_template_obj': whatsapp_template_obj,
+        
+        'active_tab': 'settings',
     }
     return render(request, 'dashboard/email_templates.html', context)

@@ -448,6 +448,40 @@
             </div>
         </div>
 
+        <!-- WhatsApp Dispatch Console -->
+        <div class="bg-luxury-card border border-luxury-border rounded-2xl p-6 space-y-4">
+            <h3 class="font-serif font-semibold text-base border-b border-luxury-border pb-3 flex items-center space-x-2">
+                <i class="fa-brands fa-whatsapp text-emerald-400 text-lg"></i>
+                <span>WhatsApp Notification Dispatch</span>
+            </h3>
+            <p class="text-xs text-luxury-muted">Click to open WhatsApp preloaded with the dynamic template message for this customer.</p>
+            
+            {% if booking.customer_whatsapp or booking.customer_phone %}
+            <div class="space-y-2.5">
+                <a href="{{ whatsapp_links.processing }}" target="_blank" class="flex items-center justify-between p-3 rounded-xl bg-luxury-black/45 border border-luxury-border hover:border-emerald-500/30 text-xs transition-all hover:bg-emerald-500/5 group">
+                    <span class="text-luxury-muted group-hover:text-white">1. Send Under Review Message</span>
+                    <i class="fa-brands fa-whatsapp text-emerald-400 text-sm opacity-80 group-hover:opacity-100"></i>
+                </a>
+                <a href="{{ whatsapp_links.confirmed }}" target="_blank" class="flex items-center justify-between p-3 rounded-xl bg-luxury-black/45 border border-luxury-border hover:border-emerald-500/30 text-xs transition-all hover:bg-emerald-500/5 group">
+                    <span class="text-luxury-muted group-hover:text-white">2. Send Confirmation Message</span>
+                    <i class="fa-brands fa-whatsapp text-emerald-400 text-sm opacity-80 group-hover:opacity-100"></i>
+                </a>
+                <a href="{{ whatsapp_links.reminder_12h }}" target="_blank" class="flex items-center justify-between p-3 rounded-xl bg-luxury-black/45 border border-luxury-border hover:border-emerald-500/30 text-xs transition-all hover:bg-emerald-500/5 group">
+                    <span class="text-luxury-muted group-hover:text-white">3. Send 12h Reminder Message</span>
+                    <i class="fa-brands fa-whatsapp text-emerald-400 text-sm opacity-80 group-hover:opacity-100"></i>
+                </a>
+                <a href="{{ whatsapp_links.cancelled }}" target="_blank" class="flex items-center justify-between p-3 rounded-xl bg-luxury-black/45 border border-luxury-border hover:border-emerald-500/30 text-xs transition-all hover:bg-emerald-500/5 group">
+                    <span class="text-luxury-muted group-hover:text-white">4. Send Cancellation Message</span>
+                    <i class="fa-brands fa-whatsapp text-emerald-400 text-sm opacity-80 group-hover:opacity-100"></i>
+                </a>
+            </div>
+            {% else %}
+            <div class="text-center py-4 text-xs text-luxury-muted bg-luxury-black/10 rounded-xl border border-luxury-border border-dashed">
+                No phone or WhatsApp contact details on file to dispatch notifications.
+            </div>
+            {% endif %}
+        </div>
+
     </div>
 
 </div>

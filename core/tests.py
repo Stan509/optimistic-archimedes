@@ -1065,6 +1065,65 @@ class ManualPaymentsAndRemindersTestCase(TestCase):
         self.assertFalse(booking_far.reminder_sent)
         self.assertTrue(booking_near.reminder_sent)
 
+    def test_whatsapp_template_editor_view(self):
+        """Verify dashboard:email_template_editor works for WhatsApp tab."""
+        client = Client()
+        client.login(username='admin', password='password123')
+        
+        # 1. GET request for whatsapp tab
+        response = client.get(
+            reverse('dashboard:email_template_editor') + '?site=nyc&type=confirmed&tab=whatsapp',
+            HTTP_HOST='aeroluxeselect-nyc.com'
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'WhatsApp Message')
+        
+        # 2. POST request to save whatsapp template
+        from core.models import WhatsAppTemplate
+        # Delete any seeded template to verify creation
+        WhatsAppTemplate.objects.filter(site=self.nyc, trigger_type='confirmed').delete()
+        
+        response = client.post(
+            reverse('dashboard:email_template_editor') + '?site=nyc&type=confirmed&tab=whatsapp',
+            {
+                'whatsapp_message': 'Custom confirm template: {customer_name}'
+            },
+            HTTP_HOST='aeroluxeselect-nyc.com'
+        )
+        self.assertEqual(response.status_code, 200)
+        
+        # Check database
+        tpl = WhatsAppTemplate.objects.filter(site=self.nyc, trigger_type='confirmed').first()
+        self.assertIsNotNone(tpl)
+        self.assertEqual(tpl.message_content, 'Custom confirm template: {customer_name}')
+
+    def test_get_formatted_whatsapp_message(self):
+        """Test the get_formatted_whatsapp_message function formats placeholders."""
+        from core.emails import get_formatted_whatsapp_message
+        
+        # Call formatting with self.booking
+        formatted = get_formatted_whatsapp_message(self.booking, 'confirmed')
+        self.assertIn('Bob Jones', formatted)
+        self.assertIn('JFK Airport', formatted)
+        self.assertIn('$100.00', formatted)
+
+    def test_booking_detail_whatsapp_links(self):
+        """Verify that booking_detail page generates the correct whatsapp links in context."""
+        client = Client()
+        client.login(username='admin', password='password123')
+        
+        response = client.get(
+            reverse('dashboard:booking_detail', kwargs={'booking_id': self.booking.id}),
+            HTTP_HOST='aeroluxeselect-nyc.com'
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('whatsapp_links', response.context)
+        links = response.context['whatsapp_links']
+        self.assertIn('processing', links)
+        self.assertIn('confirmed', links)
+        self.assertTrue(links['confirmed'].startswith('https://wa.me/12125550199'))
+
+
 
 
 

@@ -76,7 +76,7 @@
                         {{ rule.vehicle_category.name }}
                     </td>
                     <td class="py-4 px-6 font-mono font-bold text-white text-base">
-                        ${{ rule.base_price|floatformat:2 }}
+                        ${{ rule.base_price|floatformat:2 }}{% if rule.service_type == 'hourly' %}<span class="text-xs text-luxury-muted font-normal">/hr</span>{% endif %}
                     </td>
                     <td class="py-4 px-6 font-mono text-xs text-luxury-muted">
                         {% if rule.price_per_km %}

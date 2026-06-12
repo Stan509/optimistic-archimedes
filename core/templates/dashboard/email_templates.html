@@ -1,20 +1,20 @@
 {% extends 'dashboard/base.html' %}
 
-{% block title %}Email Templates — AeroLux Select{% endblock %}
-{% block dashboard_header %}Email Customization{% endblock %}
+{% block title %}Notification Templates — AeroLux Select{% endblock %}
+{% block dashboard_header %}Template Customization{% endblock %}
 
 {% block content %}
 <!-- Top Actions Bar -->
 <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-luxury-card border border-luxury-border p-6 rounded-2xl">
     <div>
-        <h2 class="text-xl font-bold font-serif tracking-wide gold-text-gradient">Custom Email Skeletons</h2>
-        <p class="text-xs text-luxury-muted mt-1">Design and customize the transactional email templates dispatched to clients.</p>
+        <h2 class="text-xl font-bold font-serif tracking-wide gold-text-gradient">Custom Notification Templates</h2>
+        <p class="text-xs text-luxury-muted mt-1">Design and customize the transactional email templates and WhatsApp dispatch messages.</p>
     </div>
     
     <!-- Site selection switcher -->
     <div class="flex items-center bg-luxury-black p-1 rounded-xl border border-luxury-border text-xs">
         {% for s in sites %}
-        <a href="?site={{ s.slug }}&type={{ email_type }}" class="px-4 py-2 rounded-lg transition-all {% if current_site.slug == s.slug %}gold-gradient text-luxury-black font-semibold{% else %}text-luxury-muted hover:text-white{% endif %}">
+        <a href="?site={{ s.slug }}&type={{ email_type }}&tab={{ active_sub_tab }}" class="px-4 py-2 rounded-lg transition-all {% if current_site.slug == s.slug %}gold-gradient text-luxury-black font-semibold{% else %}text-luxury-muted hover:text-white{% endif %}">
             {{ s.name }} ({{ s.slug|upper }})
         </a>
         {% endfor %}
@@ -29,22 +29,22 @@
         <div class="bg-luxury-card border border-luxury-border p-4 rounded-xl space-y-1">
             <span class="block text-[10px] uppercase font-bold tracking-wider text-luxury-muted px-4 py-2">Template Trigger</span>
             
-            <a href="?site={{ current_site.slug }}&type=processing" class="flex items-center space-x-3 px-4 py-3 rounded-lg font-medium text-xs transition-all {% if email_type == 'processing' %}text-gold-400 bg-gold-500/10{% else %}text-luxury-muted hover:text-white hover:bg-luxury-black/35{% endif %}">
+            <a href="?site={{ current_site.slug }}&type=processing&tab={{ active_sub_tab }}" class="flex items-center space-x-3 px-4 py-3 rounded-lg font-medium text-xs transition-all {% if email_type == 'processing' %}text-gold-400 bg-gold-500/10{% else %}text-luxury-muted hover:text-white hover:bg-luxury-black/35{% endif %}">
                 <i class="fa-solid fa-hourglass-start text-sm"></i>
                 <span>1. Under Review / Processing</span>
             </a>
             
-            <a href="?site={{ current_site.slug }}&type=confirmed" class="flex items-center space-x-3 px-4 py-3 rounded-lg font-medium text-xs transition-all {% if email_type == 'confirmed' %}text-gold-400 bg-gold-500/10{% else %}text-luxury-muted hover:text-white hover:bg-luxury-black/35{% endif %}">
+            <a href="?site={{ current_site.slug }}&type=confirmed&tab={{ active_sub_tab }}" class="flex items-center space-x-3 px-4 py-3 rounded-lg font-medium text-xs transition-all {% if email_type == 'confirmed' %}text-gold-400 bg-gold-500/10{% else %}text-luxury-muted hover:text-white hover:bg-luxury-black/35{% endif %}">
                 <i class="fa-solid fa-circle-check text-sm"></i>
                 <span>2. Booking Confirmed</span>
             </a>
             
-            <a href="?site={{ current_site.slug }}&type=reminder_12h" class="flex items-center space-x-3 px-4 py-3 rounded-lg font-medium text-xs transition-all {% if email_type == 'reminder_12h' %}text-gold-400 bg-gold-500/10{% else %}text-luxury-muted hover:text-white hover:bg-luxury-black/35{% endif %}">
+            <a href="?site={{ current_site.slug }}&type=reminder_12h&tab={{ active_sub_tab }}" class="flex items-center space-x-3 px-4 py-3 rounded-lg font-medium text-xs transition-all {% if email_type == 'reminder_12h' %}text-gold-400 bg-gold-500/10{% else %}text-luxury-muted hover:text-white hover:bg-luxury-black/35{% endif %}">
                 <i class="fa-solid fa-bell text-sm"></i>
                 <span>3. 12-Hour Pickup Reminder</span>
             </a>
             
-            <a href="?site={{ current_site.slug }}&type=cancelled" class="flex items-center space-x-3 px-4 py-3 rounded-lg font-medium text-xs transition-all {% if email_type == 'cancelled' %}text-gold-400 bg-gold-500/10{% else %}text-luxury-muted hover:text-white hover:bg-luxury-black/35{% endif %}">
+            <a href="?site={{ current_site.slug }}&type=cancelled&tab={{ active_sub_tab }}" class="flex items-center space-x-3 px-4 py-3 rounded-lg font-medium text-xs transition-all {% if email_type == 'cancelled' %}text-gold-400 bg-gold-500/10{% else %}text-luxury-muted hover:text-white hover:bg-luxury-black/35{% endif %}">
                 <i class="fa-solid fa-ban text-sm"></i>
                 <span>4. Booking Cancelled</span>
             </a>
@@ -80,6 +80,16 @@
     <!-- Main Editor Section -->
     <div class="lg:col-span-3">
         <div class="bg-luxury-card border border-luxury-border rounded-2xl p-6 md:p-8 shadow-xl">
+            <!-- Sub-Tabs Switcher -->
+            <div class="flex border-b border-luxury-border mb-6">
+                <a href="?site={{ current_site.slug }}&type={{ email_type }}&tab=email" class="px-6 py-3 border-b-2 font-semibold text-xs transition-all {% if active_sub_tab == 'email' %}border-gold-500 text-gold-400{% else %}border-transparent text-luxury-muted hover:text-white{% endif %}">
+                    <i class="fa-solid fa-envelope mr-1.5"></i> Email Template
+                </a>
+                <a href="?site={{ current_site.slug }}&type={{ email_type }}&tab=whatsapp" class="px-6 py-3 border-b-2 font-semibold text-xs transition-all {% if active_sub_tab == 'whatsapp' %}border-gold-500 text-gold-400{% else %}border-transparent text-luxury-muted hover:text-white{% endif %}">
+                    <i class="fa-brands fa-whatsapp mr-1.5 text-emerald-400"></i> WhatsApp Message
+                </a>
+            </div>
+
             <form method="POST" action="" class="space-y-6">
                 {% csrf_token %}
                 
@@ -90,17 +100,30 @@
                         </h3>
                         <p class="text-xs text-luxury-muted mt-0.5">Site: <strong class="text-white">{{ current_site.name }}</strong></p>
                     </div>
-                    {% if not template_obj %}
-                    <span class="text-[10px] uppercase font-bold tracking-wider px-2.5 py-1 bg-amber-500/10 border border-amber-500/20 text-amber-400 rounded-full">
-                        Using Default Skeleton
-                    </span>
+                    {% if active_sub_tab == 'email' %}
+                        {% if not template_obj %}
+                        <span class="text-[10px] uppercase font-bold tracking-wider px-2.5 py-1 bg-amber-500/10 border border-amber-500/20 text-amber-400 rounded-full">
+                            Using Default Skeleton
+                        </span>
+                        {% else %}
+                        <span class="text-[10px] uppercase font-bold tracking-wider px-2.5 py-1 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 rounded-full">
+                            Customized Saved
+                        </span>
+                        {% endif %}
                     {% else %}
-                    <span class="text-[10px] uppercase font-bold tracking-wider px-2.5 py-1 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 rounded-full">
-                        Customized Saved
-                    </span>
+                        {% if not whatsapp_template_obj %}
+                        <span class="text-[10px] uppercase font-bold tracking-wider px-2.5 py-1 bg-amber-500/10 border border-amber-500/20 text-amber-400 rounded-full">
+                            Using Default Message
+                        </span>
+                        {% else %}
+                        <span class="text-[10px] uppercase font-bold tracking-wider px-2.5 py-1 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 rounded-full">
+                            Customized Saved
+                        </span>
+                        {% endif %}
                     {% endif %}
                 </div>
 
+                {% if active_sub_tab == 'email' %}
                 <!-- Subject field -->
                 <div>
                     <label class="block text-xs uppercase tracking-wider text-luxury-muted font-semibold mb-2">Email Subject Line *</label>
@@ -120,6 +143,14 @@
                     <textarea name="text_content" required rows="6" class="w-full bg-luxury-black border border-luxury-border rounded-xl p-4 text-xs text-white placeholder-luxury-muted focus:border-gold-500/50 outline-none transition-all font-mono resize-y">{{ text_content }}</textarea>
                     <p class="text-[10px] text-luxury-muted mt-1">Fallback alternative version for low-bandwidth or text-only mail clients.</p>
                 </div>
+                {% else %}
+                <!-- WhatsApp Message template -->
+                <div>
+                    <label class="block text-xs uppercase tracking-wider text-luxury-muted font-semibold mb-2">WhatsApp Message Content *</label>
+                    <textarea name="whatsapp_message" required rows="10" class="w-full bg-luxury-black border border-luxury-border rounded-xl p-4 text-xs text-white placeholder-luxury-muted focus:border-gold-500/50 outline-none transition-all font-mono resize-y">{{ whatsapp_message }}</textarea>
+                    <p class="text-[10px] text-luxury-muted mt-1">Plain text message template that will be sent via WhatsApp. Supports WhatsApp-style formatting (e.g., *bold*, _italics_).</p>
+                </div>
+                {% endif %}
 
                 <!-- Actions row -->
                 <div class="flex items-center justify-between pt-6 border-t border-luxury-border mt-6">
@@ -127,8 +158,8 @@
                         <i class="fa-solid fa-arrow-left mr-1"></i> Back to Configurations
                     </a>
                     
-                    <button type="submit" class="gold-gradient text-luxury-black text-xs font-semibold px-8 py-3.5 rounded-xl hover:opacity-95 transition-all shadow-lg shadow-gold-500/15">
-                        <i class="fa-solid fa-floppy-disk mr-1.5"></i>Save Email Template
+                    <button type="submit" class="gold-gradient text-luxury-black text-xs font-semibold px-8 py-3.5 rounded-xl hover:opacity-95 transition-all shadow-lg shadow-gold-500/15 font-sans">
+                        <i class="fa-solid fa-floppy-disk mr-1.5"></i>Save {% if active_sub_tab == 'email' %}Email Template{% else %}WhatsApp Message{% endif %}
                     </button>
                 </div>
             </form>

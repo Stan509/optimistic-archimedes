@@ -5,38 +5,10 @@
 {% block title %}Book Chauffeur â€” Step 1: Trip Routing | AeroLux Select{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
 <style>
-    /* Styling to make the map look extremely premium and integration fit */
-    .leaflet-container {
+    #booking-map {
         background: #0A0A0A !important;
         font-family: 'Outfit', sans-serif;
-    }
-    .leaflet-bar {
-        border: 1px solid #222 !important;
-        box-shadow: none !important;
-        border-radius: 8px !important;
-        overflow: hidden;
-    }
-    .leaflet-bar a {
-        background-color: #121212 !important;
-        color: #C9A84C !important;
-        border-bottom: 1px solid #222 !important;
-        transition: all 0.3s ease;
-    }
-    .leaflet-bar a:hover {
-        background-color: #1C1C1E !important;
-        color: #DFBA5B !important;
-    }
-    .leaflet-popup-content-wrapper, .leaflet-popup-tip {
-        background: #121212 !important;
-        color: #FFFFFF !important;
-        border: 1px solid #C9A84C !important;
-        border-radius: 8px !important;
-    }
-    .leaflet-popup-content {
-        font-weight: 500;
-        font-size: 11px;
     }
 </style>
 {% endblock %}
@@ -78,6 +50,7 @@
                 <input type="hidden" name="pickup_lng" id="pickup_lng" value="{{ booking_data.pickup_lng|default:'' }}">
                 <input type="hidden" name="dropoff_lat" id="dropoff_lat" value="{{ booking_data.dropoff_lat|default:'' }}">
                 <input type="hidden" name="dropoff_lng" id="dropoff_lng" value="{{ booking_data.dropoff_lng|default:'' }}">
+                <input type="hidden" name="distance_km" id="distance_km" value="{{ booking_data.distance_km|default:'' }}">
 
                 <!-- Service Type selector -->
                 <div>
@@ -374,7 +347,7 @@
 {% endblock %}
 
 {% block extra_js %}
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script src="https://maps.googleapis.com/maps/api/js?key={{ site_settings.google_maps_api_key }}&libraries=places"></script>
 <script>
     document.addEventListener('DOMContentLoaded', () => {
         const radTransfer = document.getElementById('rad-transfer');
@@ -395,6 +368,7 @@
         const lblTransfer = document.getElementById('lbl-transfer');
         const lblHourly = document.getElementById('lbl-hourly');
         const lblP2P = document.getElementById('lbl-p2p');
+
         const iconHourly = document.getElementById('icon-hourly');
         const iconP2P = document.getElementById('icon-p2p');
         const spanHourly = document.getElementById('span-hourly');
@@ -421,79 +395,152 @@
         const geocodeStatus = document.getElementById('geocode-status');
         const geocodeStatusText = document.getElementById('geocode-status-text');
 
+        // Form Validation logic
         function checkValidation() {
             let isValid = false;
+
             if (radTransfer.checked) {
-                if (airportSelect.value && destinationAddress.value.trim() !== '') isValid = true;
+                if (airportSelect.value && destinationAddress.value.trim() !== '') {
+                    isValid = true;
+                }
             } else if (radHourly.checked) {
-                if (pickupAddress.value.trim() !== '') isValid = true;
+                if (pickupAddress.value.trim() !== '') {
+                    isValid = true;
+                }
             } else if (radP2P.checked) {
-                if (pickupAddress.value.trim() !== '' && dropoffAddress.value.trim() !== '') isValid = true;
+                if (pickupAddress.value.trim() !== '' && dropoffAddress.value.trim() !== '') {
+                    isValid = true;
+                }
             } else if (radRental && radRental.checked) {
-                if (pickupAddress.value.trim() !== '' && dropoffAddress.value.trim() !== '') isValid = true;
+                if (pickupAddress.value.trim() !== '' && dropoffAddress.value.trim() !== '') {
+                    isValid = true;
+                }
             }
+            
             if (isValid && roundTripCheckbox.checked && !radHourly.checked) {
-                if (!returnDateInput.value || !returnTimeInput.value) isValid = false;
+                if (!returnDateInput.value || !returnTimeInput.value) {
+                    isValid = false;
+                }
             }
-            submitBtn.disabled = !isValid;
+
             if (isValid) {
+                submitBtn.disabled = false;
                 submitBtn.classList.remove('opacity-60', 'cursor-not-allowed');
                 submitBtn.classList.add('hover:scale-[1.01]', 'cursor-pointer');
             } else {
+                submitBtn.disabled = true;
                 submitBtn.classList.add('opacity-60', 'cursor-not-allowed');
                 submitBtn.classList.remove('hover:scale-[1.01]', 'cursor-pointer');
             }
         }
 
+        // Service Type Visual Toggles
         function updateServiceType() {
-            const baseClass = "cursor-pointer text-center p-4 rounded-xl text-xs font-semibold uppercase tracking-wider transition-all duration-300 block select-none border border-transparent hover:bg-luxe-grey";
-            const activeClass = "cursor-pointer text-center p-4 rounded-xl text-xs font-semibold uppercase tracking-wider bg-luxe-gold/10 border border-luxe-gold/50 text-luxe-gold block select-none";
-            lblTransfer.className = baseClass; lblHourly.className = baseClass; lblP2P.className = baseClass;
-            if (lblRental) lblRental.className = baseClass;
+            lblTransfer.className = "cursor-pointer text-center p-4 rounded-xl text-xs font-semibold uppercase tracking-wider transition-all duration-300 block select-none border border-transparent hover:bg-luxe-grey";
+            lblHourly.className = "cursor-pointer text-center p-4 rounded-xl text-xs font-semibold uppercase tracking-wider transition-all duration-300 block select-none border border-transparent hover:bg-luxe-grey";
+            lblP2P.className = "cursor-pointer text-center p-4 rounded-xl text-xs font-semibold uppercase tracking-wider transition-all duration-300 block select-none border border-transparent hover:bg-luxe-grey";
+            if (lblRental) {
+                lblRental.className = "cursor-pointer text-center p-4 rounded-xl text-xs font-semibold uppercase tracking-wider transition-all duration-300 block select-none border border-transparent hover:bg-luxe-grey";
+            }
+            
             iconHourly.className = "fas fa-clock text-base text-gray-500 mb-2 block";
             iconP2P.className = "fas fa-route text-base text-gray-500 mb-2 block";
-            if (iconRental) iconRental.className = "fas fa-car text-base text-gray-500 mb-2 block";
-            spanHourly.className = "block text-gray-400"; spanP2P.className = "block text-gray-400";
-            if (spanRental) spanRental.className = "block text-gray-400";
+            if (iconRental) {
+                iconRental.className = "fas fa-car text-base text-gray-500 mb-2 block";
+            }
+            spanHourly.className = "block text-gray-400";
+            spanP2P.className = "block text-gray-400";
+            if (spanRental) {
+                spanRental.className = "block text-gray-400";
+            }
 
             if (radTransfer.checked) {
-                lblTransfer.className = activeClass;
-                divAirportTransferWrapper.classList.remove('hidden'); divFlight.classList.remove('hidden');
-                divHourly.classList.add('hidden'); divCustomAddresses.classList.add('hidden');
-                divStopsSection.classList.add('hidden'); divRoundTrip.classList.remove('hidden');
-                airportSelect.required = true; pickupAddress.required = false; dropoffAddress.required = false;
-            } else if (radP2P.checked) {
-                lblP2P.className = activeClass; iconP2P.className = "fas fa-route text-base text-luxe-gold mb-2 block"; spanP2P.className = "block text-white";
-                divAirportTransferWrapper.classList.add('hidden'); divFlight.classList.add('hidden');
-                divHourly.classList.add('hidden'); divCustomAddresses.classList.remove('hidden');
-                divDropoffLocation.classList.remove('hidden'); divStopsSection.classList.remove('hidden');
-                divStopsCountWrapper.classList.remove('hidden'); divRoundTrip.classList.remove('hidden');
-                airportSelect.required = false; pickupAddress.required = true; dropoffAddress.required = true;
-            } else if (radHourly.checked) {
-                lblHourly.className = activeClass; iconHourly.className = "fas fa-clock text-base text-luxe-gold mb-2 block"; spanHourly.className = "block text-white";
-                divAirportTransferWrapper.classList.add('hidden'); divFlight.classList.add('hidden');
-                divHourly.classList.remove('hidden'); divCustomAddresses.classList.remove('hidden');
-                divDropoffLocation.classList.add('hidden'); divStopsSection.classList.remove('hidden');
-                divStopsCountWrapper.classList.add('hidden');
-                divRoundTrip.classList.add('hidden'); roundTripCheckbox.checked = false;
-                airportSelect.required = false; pickupAddress.required = true; dropoffAddress.required = false;
-            } else if (radRental && radRental.checked) {
-                lblRental.className = activeClass; iconRental.className = "fas fa-car text-base text-luxe-gold mb-2 block"; spanRental.className = "block text-white";
-                divAirportTransferWrapper.classList.add('hidden'); divFlight.classList.add('hidden');
-                divHourly.classList.add('hidden'); divCustomAddresses.classList.remove('hidden');
-                divDropoffLocation.classList.remove('hidden'); divStopsSection.classList.add('hidden');
+                lblTransfer.className = "cursor-pointer text-center p-4 rounded-xl text-xs font-semibold uppercase tracking-wider bg-luxe-gold/10 border border-luxe-gold/50 text-luxe-gold block select-none";
+                
+                divAirportTransferWrapper.classList.remove('hidden');
+                divFlight.classList.remove('hidden');
+                divHourly.classList.add('hidden');
+                divCustomAddresses.classList.add('hidden');
+                divStopsSection.classList.add('hidden');
                 divRoundTrip.classList.remove('hidden');
-                airportSelect.required = false; pickupAddress.required = true; dropoffAddress.required = true;
+                
+                airportSelect.required = true;
+                pickupAddress.required = false;
+                dropoffAddress.required = false;
+            } 
+            else if (radP2P.checked) {
+                lblP2P.className = "cursor-pointer text-center p-4 rounded-xl text-xs font-semibold uppercase tracking-wider bg-luxe-gold/10 border border-luxe-gold/50 text-luxe-gold block select-none";
+                iconP2P.className = "fas fa-route text-base text-luxe-gold mb-2 block";
+                spanP2P.className = "block text-white";
+
+                divAirportTransferWrapper.classList.add('hidden');
+                divFlight.classList.add('hidden');
+                divHourly.classList.add('hidden');
+                divCustomAddresses.classList.remove('hidden');
+                divDropoffLocation.classList.remove('hidden');
+                divStopsSection.classList.remove('hidden');
+                divStopsCountWrapper.classList.remove('hidden');
+                divRoundTrip.classList.remove('hidden');
+
+                airportSelect.required = false;
+                pickupAddress.required = true;
+                dropoffAddress.required = true;
             }
-            toggleRoundTripFields(); checkValidation();
-            if (bookingMap) setTimeout(() => bookingMap.invalidateSize(), 200);
+            else if (radHourly.checked) {
+                lblHourly.className = "cursor-pointer text-center p-4 rounded-xl text-xs font-semibold uppercase tracking-wider bg-luxe-gold/10 border border-luxe-gold/50 text-luxe-gold block select-none";
+                iconHourly.className = "fas fa-clock text-base text-luxe-gold mb-2 block";
+                spanHourly.className = "block text-white";
+
+                divAirportTransferWrapper.classList.add('hidden');
+                divFlight.classList.add('hidden');
+                divHourly.classList.remove('hidden');
+                divCustomAddresses.classList.remove('hidden');
+                divDropoffLocation.classList.add('hidden');
+                divStopsSection.classList.remove('hidden');
+                divStopsCountWrapper.classList.add('hidden');
+                divRoundTrip.classList.add('hidden');
+                roundTripCheckbox.checked = false;
+
+                airportSelect.required = false;
+                pickupAddress.required = true;
+                dropoffAddress.required = false;
+            }
+            else if (radRental && radRental.checked) {
+                lblRental.className = "cursor-pointer text-center p-4 rounded-xl text-xs font-semibold uppercase tracking-wider bg-luxe-gold/10 border border-luxe-gold/50 text-luxe-gold block select-none";
+                iconRental.className = "fas fa-car text-base text-luxe-gold mb-2 block";
+                spanRental.className = "block text-white";
+
+                divAirportTransferWrapper.classList.add('hidden');
+                divFlight.classList.add('hidden');
+                divHourly.classList.add('hidden');
+                divCustomAddresses.classList.remove('hidden');
+                divDropoffLocation.classList.remove('hidden');
+                divStopsSection.classList.add('hidden');
+                divRoundTrip.classList.remove('hidden');
+
+                airportSelect.required = false;
+                pickupAddress.required = true;
+                dropoffAddress.required = true;
+            }
+            toggleRoundTripFields();
+            checkValidation();
+            
+            if (bookingMap) {
+                setTimeout(() => {
+                    bookingMap.invalidateSize();
+                }, 200);
+            }
         }
 
         function toggleRoundTripFields() {
             if (roundTripCheckbox.checked && !divRoundTrip.classList.contains('hidden')) {
-                divReturnFields.classList.remove('hidden'); returnDateInput.required = true; returnTimeInput.required = true;
+                divReturnFields.classList.remove('hidden');
+                returnDateInput.required = true;
+                returnTimeInput.required = true;
             } else {
-                divReturnFields.classList.add('hidden'); returnDateInput.required = false; returnTimeInput.required = false;
+                divReturnFields.classList.add('hidden');
+                returnDateInput.required = false;
+                returnTimeInput.required = false;
             }
             checkValidation();
         }
@@ -501,145 +548,345 @@
         radTransfer.addEventListener('change', updateServiceType);
         radHourly.addEventListener('change', updateServiceType);
         radP2P.addEventListener('change', updateServiceType);
-        if (radRental) radRental.addEventListener('change', updateServiceType);
+        if (radRental) {
+            radRental.addEventListener('change', updateServiceType);
+        }
         roundTripCheckbox.addEventListener('change', toggleRoundTripFields);
         returnDateInput.addEventListener('change', checkValidation);
         returnTimeInput.addEventListener('change', checkValidation);
 
         airportSelect.addEventListener('change', () => {
-            checkValidation();
-            if (bookingMap) {
-                const opt = airportSelect.options[airportSelect.selectedIndex];
-                const lat = parseFloat(opt.dataset.lat), lng = parseFloat(opt.dataset.lng);
-                if (!isNaN(lat) && !isNaN(lng)) { 
-                    pickupMarker.setLatLng([lat, lng]); 
-                    bookingMap.flyTo([lat, lng], 11);
+            if (bookingMap && pickupMarker) {
+                const selectedOption = airportSelect.options[airportSelect.selectedIndex];
+                const lat = parseFloat(selectedOption.dataset.lat);
+                const lng = parseFloat(selectedOption.dataset.lng);
+                if (!isNaN(lat) && !isNaN(lng)) {
+                    const loc = { lat, lng };
+                    pickupMarker.setPosition(loc);
+                    bookingMap.panTo(loc);
+                    bookingMap.setZoom(11);
                     document.getElementById('pickup_lat').value = lat;
                     document.getElementById('pickup_lng').value = lng;
+                    calculateRoute();
                 }
             }
         });
 
         let geocodeTimeout = null;
         destinationAddress.addEventListener('input', () => {
-            checkValidation(); clearTimeout(geocodeTimeout);
-            const q = destinationAddress.value.trim();
-            if (q.length < 5) { geocodeStatus.classList.add('hidden'); return; }
-            geocodeTimeout = setTimeout(() => geocodeAddress(q, 'destination'), 800);
+            checkValidation();
+            clearTimeout(geocodeTimeout);
+            const query = destinationAddress.value.trim();
+            if (query.length < 5) {
+                geocodeStatus.classList.add('hidden');
+                return;
+            }
+            geocodeTimeout = setTimeout(() => {
+                geocodeAddress(query, 'destination');
+            }, 800);
         });
+
         pickupAddress.addEventListener('input', checkValidation);
         dropoffAddress.addEventListener('input', checkValidation);
 
-        // Direction switch
-        const btnSwitch = document.getElementById('btn-switch-direction');
-        const dirInput = document.getElementById('transfer_direction');
-        const lblStart = document.getElementById('lbl-transfer-start');
-        const lblEnd = document.getElementById('lbl-transfer-end');
-        const iconStart = document.getElementById('icon-transfer-start');
-        const iconEnd = document.getElementById('icon-transfer-end');
-        const startW = document.getElementById('transfer-start-wrapper');
-        const endW = document.getElementById('transfer-end-wrapper');
+        const btnSwitchDirection = document.getElementById('btn-switch-direction');
+        const transferDirectionInput = document.getElementById('transfer_direction');
+        const lblTransferStart = document.getElementById('lbl-transfer-start');
+        const lblTransferEnd = document.getElementById('lbl-transfer-end');
+        const iconTransferStart = document.getElementById('icon-transfer-start');
+        const iconTransferEnd = document.getElementById('icon-transfer-end');
+        const startWrapper = document.getElementById('transfer-start-wrapper');
+        const endWrapper = document.getElementById('transfer-end-wrapper');
 
-        if (btnSwitch) {
-            btnSwitch.addEventListener('click', () => {
-                if (dirInput.value === 'AIRPORT_TO_DEST') {
-                    dirInput.value = 'DEST_TO_AIRPORT';
-                    lblStart.textContent = "Destination Airport"; lblEnd.textContent = "Pickup Address";
-                    iconStart.className = "fas fa-plane-arrival text-sm"; iconEnd.className = "fas fa-map-pin text-sm";
+        if (btnSwitchDirection) {
+            btnSwitchDirection.addEventListener('click', () => {
+                const currentDir = transferDirectionInput.value;
+                if (currentDir === 'AIRPORT_TO_DEST') {
+                    transferDirectionInput.value = 'DEST_TO_AIRPORT';
+                    lblTransferStart.textContent = "Destination Airport";
+                    lblTransferEnd.textContent = "Pickup Address";
+                    iconTransferStart.className = "fas fa-plane-arrival text-sm";
+                    iconTransferEnd.className = "fas fa-map-pin text-sm";
                     destinationAddress.placeholder = "Enter your pickup address...";
-                    startW.style.order = "3"; endW.style.order = "1";
+                    startWrapper.style.order = "3";
+                    endWrapper.style.order = "1";
                 } else {
-                    dirInput.value = 'AIRPORT_TO_DEST';
-                    lblStart.textContent = "Origin Airport"; lblEnd.textContent = "Drop-off Address";
-                    iconStart.className = "fas fa-plane-departure text-sm"; iconEnd.className = "fas fa-map-pin text-sm";
+                    transferDirectionInput.value = 'AIRPORT_TO_DEST';
+                    lblTransferStart.textContent = "Origin Airport";
+                    lblTransferEnd.textContent = "Drop-off Address";
+                    iconTransferStart.className = "fas fa-plane-departure text-sm";
+                    iconTransferEnd.className = "fas fa-map-pin text-sm";
                     destinationAddress.placeholder = "Enter your destination address...";
-                    startW.style.order = "1"; endW.style.order = "3";
+                    startWrapper.style.order = "1";
+                    endWrapper.style.order = "3";
                 }
-                // Swap coordinate inputs values
+                
                 const pLat = document.getElementById('pickup_lat').value;
                 const pLng = document.getElementById('pickup_lng').value;
                 document.getElementById('pickup_lat').value = document.getElementById('dropoff_lat').value;
                 document.getElementById('pickup_lng').value = document.getElementById('dropoff_lng').value;
                 document.getElementById('dropoff_lat').value = pLat;
                 document.getElementById('dropoff_lng').value = pLng;
-                
+
+                if (pickupMarker && dropoffMarker) {
+                    const startPos = pickupMarker.getPosition();
+                    const endPos = dropoffMarker.getPosition();
+                    pickupMarker.setPosition(endPos);
+                    dropoffMarker.setPosition(startPos);
+                    calculateRoute();
+                }
+
                 checkValidation();
             });
         }
 
-        // Leaflet Map
-        const mapEl = document.getElementById('booking-map');
-        let bookingMap, pickupMarker, dropoffMarker, routeLine;
+        const mapElement = document.getElementById('booking-map');
+        let bookingMap;
+        let pickupMarker;
+        let dropoffMarker;
+        let directionsService;
+        let directionsRenderer;
+        let geocoder;
 
-        if (mapEl) {
-            {% if site_slug == 'dr' %}const mapCenter = [18.7357, -69.9509];{% else %}const mapCenter = [40.7128, -74.0060];{% endif %}
-            bookingMap = L.map('booking-map', { zoomControl: true, attributionControl: false }).setView(mapCenter, 11);
-            L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { maxZoom: 20 }).addTo(bookingMap);
+        const darkMapStyle = [
+            { elementType: "geometry", stylers: [{ color: "#1a1a1a" }] },
+            { elementType: "labels.text.stroke", stylers: [{ color: "#1a1a1a" }] },
+            { elementType: "labels.text.fill", stylers: [{ color: "#746855" }] },
+            { featureType: "administrative.locality", elementType: "labels.text.fill", stylers: [{ color: "#d59563" }] },
+            { featureType: "poi", elementType: "labels.text.fill", stylers: [{ color: "#d59563" }] },
+            { featureType: "poi.park", elementType: "geometry", stylers: [{ color: "#121a16" }] },
+            { featureType: "poi.park", elementType: "labels.text.fill", stylers: [{ color: "#6b9a76" }] },
+            { featureType: "road", elementType: "geometry", stylers: [{ color: "#2d2d2d" }] },
+            { featureType: "road", elementType: "geometry.stroke", stylers: [{ color: "#1a1a1a" }] },
+            { featureType: "road", elementType: "labels.text.fill", stylers: [{ color: "#9ca5b3" }] },
+            { featureType: "road.highway", elementType: "geometry", stylers: [{ color: "#746855" }] },
+            { featureType: "road.highway", elementType: "geometry.stroke", stylers: [{ color: "#1f2835" }] },
+            { featureType: "road.highway", elementType: "labels.text.fill", stylers: [{ color: "#f3d19c" }] },
+            { featureType: "transit", elementType: "geometry", stylers: [{ color: "#222222" }] },
+            { featureType: "transit.station", elementType: "labels.text.fill", stylers: [{ color: "#d59563" }] },
+            { featureType: "water", elementType: "geometry", stylers: [{ color: "#0d0d0d" }] },
+            { featureType: "water", elementType: "labels.text.fill", stylers: [{ color: "#515c6d" }] },
+            { featureType: "water", elementType: "labels.text.stroke", stylers: [{ color: "#0d0d0d" }] }
+        ];
 
-            const goldIcon = L.divIcon({ className: 'custom-div-icon', html: '<div class="w-8 h-8 rounded-full bg-luxe-gold/20 flex items-center justify-center relative"><div class="w-4 h-4 rounded-full bg-luxe-gold flex items-center justify-center shadow-lg"><i class="fas fa-location-dot text-black text-[9px]"></i></div></div>', iconSize: [32, 32], iconAnchor: [16, 16] });
-            const silverIcon = L.divIcon({ className: 'custom-div-icon', html: '<div class="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center relative"><div class="w-4 h-4 rounded-full bg-white flex items-center justify-center shadow-lg"><i class="fas fa-flag text-black text-[9px]"></i></div></div>', iconSize: [32, 32], iconAnchor: [16, 16] });
+        if (mapElement) {
+            {% if site_slug == 'dr' %}
+            const mapCenter = { lat: 18.7357, lng: -69.9509 };
+            {% else %}
+            const mapCenter = { lat: 40.7128, lng: -74.0060 };
+            {% endif %}
 
-            pickupMarker = L.marker(mapCenter, { draggable: true, icon: goldIcon }).addTo(bookingMap);
-            dropoffMarker = L.marker([mapCenter[0] + 0.05, mapCenter[1] + 0.05], { draggable: true, icon: silverIcon }).addTo(bookingMap);
+            bookingMap = new google.maps.Map(mapElement, {
+                center: mapCenter,
+                zoom: 11,
+                styles: darkMapStyle,
+                disableDefaultUI: false,
+                zoomControl: true,
+                mapTypeControl: false,
+                streetViewControl: false,
+                fullscreenControl: false
+            });
 
-            function reverseGeocode(lat, lng, input) {
-                fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`)
-                    .then(r => r.json()).then(data => {
-                        if (data && data.display_name) {
-                            const a = data.address; let addr = data.display_name;
-                            if (a) { const road = a.road||a.pedestrian||a.suburb||""; const num = a.house_number||""; const city = a.city||a.town||a.village||""; if (road) addr = `${num} ${road}, ${city}`.trim(); }
-                            input.value = addr; input.dispatchEvent(new Event('input')); checkValidation();
-                        }
-                    }).catch(e => console.error("Geocode error:", e));
+            directionsService = new google.maps.DirectionsService();
+            directionsRenderer = new google.maps.DirectionsRenderer({
+                map: bookingMap,
+                suppressMarkers: true,
+                polylineOptions: {
+                    strokeColor: "#C9A84C",
+                    strokeOpacity: 0.8,
+                    strokeWeight: 4
+                }
+            });
+
+            geocoder = new google.maps.Geocoder();
+
+            const goldIcon = {
+                path: google.maps.SymbolPath.CIRCLE,
+                fillColor: '#C9A84C',
+                fillOpacity: 1,
+                strokeColor: '#FFFFFF',
+                strokeWeight: 2,
+                scale: 8
+            };
+
+            const silverIcon = {
+                path: google.maps.SymbolPath.CIRCLE,
+                fillColor: '#FFFFFF',
+                fillOpacity: 1,
+                strokeColor: '#C9A84C',
+                strokeWeight: 2,
+                scale: 8
+            };
+
+            pickupMarker = new google.maps.Marker({
+                position: mapCenter,
+                map: bookingMap,
+                draggable: true,
+                icon: goldIcon,
+                title: "Pickup Point"
+            });
+
+            dropoffMarker = new google.maps.Marker({
+                position: { lat: mapCenter.lat + 0.03, lng: mapCenter.lng + 0.03 },
+                map: bookingMap,
+                draggable: true,
+                icon: silverIcon,
+                title: "Drop-off Point"
+            });
+
+            const autocompleteOptions = {
+                fields: ["address_components", "geometry", "formatted_address"],
+                types: ["address"]
+            };
+
+            const pickupAutocomplete = new google.maps.places.Autocomplete(pickupAddress, autocompleteOptions);
+            const dropoffAutocomplete = new google.maps.places.Autocomplete(dropoffAddress, autocompleteOptions);
+            const destAutocomplete = new google.maps.places.Autocomplete(destinationAddress, autocompleteOptions);
+
+            pickupAutocomplete.bindTo("bounds", bookingMap);
+            dropoffAutocomplete.bindTo("bounds", bookingMap);
+            destAutocomplete.bindTo("bounds", bookingMap);
+
+            function onPlaceChanged(autocomplete, type) {
+                const place = autocomplete.getPlace();
+                if (!place.geometry || !place.geometry.location) {
+                    return;
+                }
+
+                const loc = place.geometry.location;
+                if (type === 'pickup') {
+                    pickupMarker.setPosition(loc);
+                    document.getElementById('pickup_lat').value = loc.lat();
+                    document.getElementById('pickup_lng').value = loc.lng();
+                } else {
+                    dropoffMarker.setPosition(loc);
+                    document.getElementById('dropoff_lat').value = loc.lat();
+                    document.getElementById('dropoff_lng').value = loc.lng();
+                }
+
+                calculateRoute();
             }
+
+            pickupAutocomplete.addListener("place_changed", () => onPlaceChanged(pickupAutocomplete, 'pickup'));
+            dropoffAutocomplete.addListener("place_changed", () => onPlaceChanged(dropoffAutocomplete, 'dropoff'));
+            destAutocomplete.addListener("place_changed", () => onPlaceChanged(destAutocomplete, 'dropoff'));
 
             function geocodeAddress(query, type) {
-                fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`)
-                    .then(r => r.json()).then(data => {
-                        if (data && data.length > 0) {
-                            const lat = parseFloat(data[0].lat), lng = parseFloat(data[0].lon);
-                            if (type === 'destination') { 
-                                dropoffMarker.setLatLng([lat, lng]); 
-                                geocodeStatus.classList.remove('hidden'); 
-                                geocodeStatusText.textContent = data[0].display_name.substring(0, 80) + '...';
-                                document.getElementById('dropoff_lat').value = lat;
-                                document.getElementById('dropoff_lng').value = lng;
-                            }
-                            else if (type === 'pickup') {
-                                pickupMarker.setLatLng([lat, lng]);
-                                document.getElementById('pickup_lat').value = lat;
-                                document.getElementById('pickup_lng').value = lng;
-                            }
-                            else {
-                                dropoffMarker.setLatLng([lat, lng]);
-                                document.getElementById('dropoff_lat').value = lat;
-                                document.getElementById('dropoff_lng').value = lng;
-                            }
-                            drawRoute();
-                            bookingMap.fitBounds(L.latLngBounds([pickupMarker.getLatLng(), dropoffMarker.getLatLng()]), { padding: [40, 40] });
-                        } else if (type === 'destination') { geocodeStatus.classList.remove('hidden'); geocodeStatusText.textContent = 'Address not found — please refine'; }
-                    }).catch(e => console.error("Geocode error:", e));
+                if (!geocoder) return;
+                geocoder.geocode({ address: query }, (results, status) => {
+                    if (status === "OK" && results[0]) {
+                        const loc = results[0].geometry.location;
+                        if (type === 'destination') {
+                            dropoffMarker.setPosition(loc);
+                            geocodeStatus.classList.remove('hidden');
+                            geocodeStatusText.textContent = results[0].formatted_address.substring(0, 80) + '...';
+                            document.getElementById('dropoff_lat').value = loc.lat();
+                            document.getElementById('dropoff_lng').value = loc.lng();
+                        } else if (type === 'pickup') {
+                            pickupMarker.setPosition(loc);
+                            document.getElementById('pickup_lat').value = loc.lat();
+                            document.getElementById('pickup_lng').value = loc.lng();
+                        } else if (type === 'dropoff') {
+                            dropoffMarker.setPosition(loc);
+                            document.getElementById('dropoff_lat').value = loc.lat();
+                            document.getElementById('dropoff_lng').value = loc.lng();
+                        }
+                        
+                        calculateRoute();
+                        
+                        const bounds = new google.maps.LatLngBounds();
+                        bounds.extend(pickupMarker.getPosition());
+                        bounds.extend(dropoffMarker.getPosition());
+                        bookingMap.fitBounds(bounds, 40);
+                    } else {
+                        if (type === 'destination') {
+                            geocodeStatus.classList.remove('hidden');
+                            geocodeStatusText.textContent = 'Address not found — please refine';
+                        }
+                    }
+                });
             }
 
-            function drawRoute() {
-                if (routeLine) bookingMap.removeLayer(routeLine);
-                routeLine = L.polyline([pickupMarker.getLatLng(), dropoffMarker.getLatLng()], { color: '#C9A84C', weight: 2, opacity: 0.6, dashArray: '8, 8' }).addTo(bookingMap);
+            function reverseGeocode(latLng, inputElement) {
+                if (!geocoder) return;
+                geocoder.geocode({ location: latLng }, (results, status) => {
+                    if (status === "OK" && results[0]) {
+                        inputElement.value = results[0].formatted_address;
+                        inputElement.dispatchEvent(new Event('input'));
+                        checkValidation();
+                        calculateRoute();
+                    }
+                });
             }
 
-            pickupMarker.on('dragend', () => { 
-                const p = pickupMarker.getLatLng();
-                reverseGeocode(p.lat, p.lng, pickupAddress); 
-                document.getElementById('pickup_lat').value = p.lat;
-                document.getElementById('pickup_lng').value = p.lng;
-                drawRoute(); 
+            function calculateRoute() {
+                const start = pickupMarker.getPosition();
+                const end = dropoffMarker.getPosition();
+
+                if (!start || !end) return;
+
+                const request = {
+                    origin: start,
+                    destination: end,
+                    travelMode: google.maps.TravelMode.DRIVING
+                };
+
+                directionsService.route(request, (result, status) => {
+                    if (status === "OK") {
+                        directionsRenderer.setDirections(result);
+                        
+                        const route = result.routes[0];
+                        let totalDistanceMeters = 0;
+                        for (let i = 0; i < route.legs.length; i++) {
+                            totalDistanceMeters += route.legs[i].distance.value;
+                        }
+                        const distanceKm = totalDistanceMeters / 1000.0;
+                        
+                        document.getElementById('distance_km').value = distanceKm.toFixed(2);
+                        
+                        if (geocodeStatus && geocodeStatusText) {
+                            geocodeStatus.classList.remove('hidden');
+                            geocodeStatusText.textContent = `Route distance: ${distanceKm.toFixed(1)} km`;
+                        }
+                    } else {
+                        const d_km = haversineDistance(start.lat(), start.lng(), end.lat(), end.lng());
+                        document.getElementById('distance_km').value = d_km.toFixed(2);
+                        
+                        if (geocodeStatus && geocodeStatusText) {
+                            geocodeStatus.classList.remove('hidden');
+                            geocodeStatusText.textContent = `Direct line: ${d_km.toFixed(1)} km (route unavailable)`;
+                        }
+                    }
+                });
+            }
+
+            function haversineDistance(lat1, lon1, lat2, lon2) {
+                const R = 6371;
+                const dLat = (lat2 - lat1) * Math.PI / 180;
+                const dLon = (lon2 - lon1) * Math.PI / 180;
+                const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                          Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                          Math.sin(dLon / 2) * Math.sin(dLon / 2);
+                const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+                return R * c;
+            }
+
+            pickupMarker.addListener("dragend", () => {
+                const pos = pickupMarker.getPosition();
+                document.getElementById('pickup_lat').value = pos.lat();
+                document.getElementById('pickup_lng').value = pos.lng();
+                reverseGeocode(pos, pickupAddress);
             });
-            dropoffMarker.on('dragend', () => { 
-                const p = dropoffMarker.getLatLng(); 
-                if (radTransfer.checked) reverseGeocode(p.lat, p.lng, destinationAddress); 
-                else reverseGeocode(p.lat, p.lng, dropoffAddress); 
-                document.getElementById('dropoff_lat').value = p.lat;
-                document.getElementById('dropoff_lng').value = p.lng;
-                drawRoute(); 
+
+            dropoffMarker.addListener("dragend", () => {
+                const pos = dropoffMarker.getPosition();
+                document.getElementById('dropoff_lat').value = pos.lat();
+                document.getElementById('dropoff_lng').value = pos.lng();
+                if (radTransfer.checked) {
+                    reverseGeocode(pos, destinationAddress);
+                } else {
+                    reverseGeocode(pos, dropoffAddress);
+                }
             });
 
             let activeInput = 'pickup';
@@ -647,42 +894,63 @@
             dropoffAddress.addEventListener('focus', () => activeInput = 'dropoff');
             destinationAddress.addEventListener('focus', () => activeInput = 'destination');
 
-            bookingMap.on('click', (e) => {
-                const ll = e.latlng;
-                if (radTransfer.checked) { 
-                    dropoffMarker.setLatLng(ll); 
-                    reverseGeocode(ll.lat, ll.lng, destinationAddress);
-                    document.getElementById('dropoff_lat').value = ll.lat;
-                    document.getElementById('dropoff_lng').value = ll.lng;
+            bookingMap.addListener("click", (e) => {
+                const loc = e.latLng;
+                if (radTransfer.checked) {
+                    dropoffMarker.setPosition(loc);
+                    document.getElementById('dropoff_lat').value = loc.lat();
+                    document.getElementById('dropoff_lng').value = loc.lng();
+                    reverseGeocode(loc, destinationAddress);
+                } else {
+                    if (activeInput === 'pickup') {
+                        pickupMarker.setPosition(loc);
+                        document.getElementById('pickup_lat').value = loc.lat();
+                        document.getElementById('pickup_lng').value = loc.lng();
+                        reverseGeocode(loc, pickupAddress);
+                        activeInput = 'dropoff';
+                    } else {
+                        dropoffMarker.setPosition(loc);
+                        document.getElementById('dropoff_lat').value = loc.lat();
+                        document.getElementById('dropoff_lng').value = loc.lng();
+                        reverseGeocode(loc, dropoffAddress);
+                        activeInput = 'pickup';
+                    }
                 }
-                else if (activeInput === 'pickup') { 
-                    pickupMarker.setLatLng(ll); 
-                    reverseGeocode(ll.lat, ll.lng, pickupAddress); 
-                    document.getElementById('pickup_lat').value = ll.lat;
-                    document.getElementById('pickup_lng').value = ll.lng;
-                    activeInput = 'dropoff'; 
-                }
-                else { 
-                    dropoffMarker.setLatLng(ll); 
-                    reverseGeocode(ll.lat, ll.lng, dropoffAddress); 
-                    document.getElementById('dropoff_lat').value = ll.lat;
-                    document.getElementById('dropoff_lng').value = ll.lng;
-                    activeInput = 'pickup'; 
-                }
-                drawRoute();
+                calculateRoute();
             });
 
-            let pGeo, dGeo;
-            pickupAddress.addEventListener('input', () => { clearTimeout(pGeo); const q = pickupAddress.value.trim(); if (q.length >= 5) pGeo = setTimeout(() => geocodeAddress(q, 'pickup'), 800); });
-            dropoffAddress.addEventListener('input', () => { clearTimeout(dGeo); const q = dropoffAddress.value.trim(); if (q.length >= 5) dGeo = setTimeout(() => geocodeAddress(q, 'dropoff'), 800); });
+            let pickupGeoTimeout = null;
+            let dropoffGeoTimeout = null;
+
+            pickupAddress.addEventListener('input', () => {
+                clearTimeout(pickupGeoTimeout);
+                const query = pickupAddress.value.trim();
+                if (query.length >= 5) {
+                    pickupGeoTimeout = setTimeout(() => geocodeAddress(query, 'pickup'), 800);
+                }
+            });
+
+            dropoffAddress.addEventListener('input', () => {
+                clearTimeout(dropoffGeoTimeout);
+                const query = dropoffAddress.value.trim();
+                if (query.length >= 5) {
+                    dropoffGeoTimeout = setTimeout(() => geocodeAddress(query, 'dropoff'), 800);
+                }
+            });
         }
 
         const urlParams = new URLSearchParams(window.location.search);
-        const stp = urlParams.get('service_type');
-        if (stp === 'luxury_rental' && radRental) radRental.checked = true;
-        else if (stp === 'point_to_point') radP2P.checked = true;
-        else if (stp === 'hourly') radHourly.checked = true;
-        else if (stp === 'airport_transfer') radTransfer.checked = true;
+        const serviceTypeParam = urlParams.get('service_type');
+        if (serviceTypeParam === 'luxury_rental' && radRental) {
+            radRental.checked = true;
+        } else if (serviceTypeParam === 'point_to_point') {
+            radP2P.checked = true;
+        } else if (serviceTypeParam === 'hourly') {
+            radHourly.checked = true;
+        } else if (serviceTypeParam === 'airport_transfer') {
+            radTransfer.checked = true;
+        }
+
         updateServiceType();
     });
 </script>

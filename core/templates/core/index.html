@@ -1,1218 +1,1379 @@
-{% extends "core/base.html" %}
-{% load static %}
-{% load site_tags %}
-
-{% block title %}
-    {% if current_site.hero_title %}{{ current_site.hero_title }}{% else %}AeroLux Select | Premium Chauffeur & Transfers{% endif %}
-{% endblock %}
-
-{% block extra_css %}
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
-<style>
-    .leaflet-container {
-        background: #0A0A0A !important;
-        font-family: 'Outfit', sans-serif;
-    }
-    .leaflet-bar {
-        border: 1px solid #222 !important;
-        box-shadow: none !important;
-        border-radius: 8px !important;
-        overflow: hidden;
-    }
-    .leaflet-bar a {
-        background-color: #121212 !important;
-        color: #C9A84C !important;
-        border-bottom: 1px solid #222 !important;
-        transition: all 0.3s ease;
-    }
-    .leaflet-bar a:hover {
-        background-color: #1C1C1E !important;
-        color: #DFBA5B !important;
-    }
-    .leaflet-popup-content-wrapper, .leaflet-popup-tip {
-        background: #121212 !important;
-        color: #FFFFFF !important;
-        border: 1px solid #C9A84C !important;
-        border-radius: 8px !important;
-    }
-    .leaflet-popup-content {
-        font-weight: 500;
-        font-size: 11px;
-    }
-    .hero-perspective {
-        perspective: 1200px;
-        transform-style: preserve-3d;
-    }
-</style>
-{% endblock %}
-
-{% block content %}
-<!-- Immersive Hero Section -->
-<section id="hero-section" class="relative min-h-[60vh] md:min-h-[90vh] flex items-center justify-center overflow-hidden py-12 md:py-16 lg:py-24">
-    <!-- Video / Static Image Background -->
-    <div class="absolute inset-0 z-0 overflow-hidden hero-perspective">
-        <div class="absolute inset-0 bg-black/60 z-10"></div>
-        {% if current_site.slug == 'nyc' %}
-            <!-- Parallax Hero Image for NYC -->
-            <img src="{% static 'core/images/nyc-hero.jpg' %}?v=3" alt="NYC Premium Car Service" id="hero-parallax-img" class="w-full h-full md:h-[130%] object-cover md:object-cover object-center absolute top-0 md:-top-[15%] left-0 will-change-transform">
-        {% elif current_site.slug == 'dr' %}
-            <!-- Parallax Hero Image for DR -->
-            <img src="{% static 'core/images/dr-hero.jpg' %}?v=3" alt="Dominican Republic VIP Transfers" id="hero-parallax-img" class="w-full h-full md:h-[130%] object-cover md:object-cover object-center absolute top-0 md:-top-[15%] left-0 will-change-transform">
-        {% elif current_site.hero_video_url %}
-            <video autoplay loop muted playsinline class="w-full h-full object-cover">
-                <source src="{{ current_site.hero_video_url }}" type="video/mp4">
-            </video>
-        {% else %}
-            <!-- Luxury Black Vehicle Background -->
-            <img src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&q=80&w=1920" alt="AeroLux Select" class="w-full h-full object-cover object-center">
-        {% endif %}
-    </div>
-
-    <!-- Content & Booking Form Container -->
-    <div class="relative z-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-        <!-- Hero Text Column -->
-        <div class="lg:col-span-6 space-y-6 text-center lg:text-left">
-            <div class="inline-flex items-center space-x-2 bg-luxe-gold/10 border border-luxe-gold/30 px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider text-luxe-gold">
-                <i class="fas fa-crown"></i>
-                <span>Premium Chauffeur Service</span>
-            </div>
-            
-            <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight font-display text-white leading-tight">
-                {% site_content 'hero_title' current_site.hero_title|default:"AeroLux Select" %}
-            </h1>
-            
-            <p class="text-lg text-gray-300 max-w-xl mx-auto lg:mx-0 leading-relaxed font-light">
-                {% site_content 'hero_subtitle' current_site.hero_subtitle|default:"Experience ultimate luxury and security." %}
-            </p>
-            
-            <div class="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 pt-4">
-                <a href="#services" class="border border-white/20 hover:border-luxe-gold bg-white/5 hover:bg-luxe-gold/10 px-8 py-3.5 rounded-full text-sm uppercase tracking-wider font-semibold transition-all duration-300 w-full sm:w-auto text-center">
-                    Explore Services
-                </a>
-                <a href="{% site_url 'fleet' %}" class="text-sm font-semibold tracking-wider uppercase text-white hover:text-luxe-gold transition-all duration-300 flex items-center space-x-2 py-3">
-                    <span>View Our Fleet</span>
-                    <i class="fas fa-arrow-right text-xs"></i>
-                </a>
-            </div>
-        </div>
-
-        <!-- Dynamic Booking Widget Column -->
-        <div class="lg:col-span-6">
-            <div class="glass-card rounded-3xl p-6 sm:p-8 shadow-2xl relative overflow-hidden">
-                <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-luxe-gold to-luxe-gold-bright"></div>
-                <h3 class="text-xl font-semibold tracking-wider font-display mb-6 uppercase flex items-center space-x-2 text-luxe-gold">
-                    <i class="fas fa-calendar-check"></i>
-                    <span>Quick Reservation</span>
-                </h3>
-
-                <form action="{% site_url 'booking_step1' %}" method="POST" id="booking-step1-form" class="space-y-6">
-                    {% csrf_token %}
-                    <input type="hidden" name="pickup_lat" id="pickup_lat">
-                    <input type="hidden" name="pickup_lng" id="pickup_lng">
-                    <input type="hidden" name="dropoff_lat" id="dropoff_lat">
-                    <input type="hidden" name="dropoff_lng" id="dropoff_lng">
-                    <input type="hidden" name="distance_km" id="distance_km">
-
-                    <!-- Service Type selector -->
-                    <div>
-                        <label class="block text-xs uppercase tracking-widest font-bold text-gray-400 mb-3">Service Type</label>
-                    <div class="grid grid-cols-2 {% if site_slug == 'dr' %}sm:grid-cols-4{% else %}sm:grid-cols-3{% endif %} gap-2 sm:gap-3 bg-luxe-black p-1.5 rounded-2xl border border-gray-800">
-                        <label class="cursor-pointer text-center p-4 rounded-xl text-xs font-semibold uppercase tracking-wider transition-all duration-300 block select-none border border-transparent" id="lbl-transfer">
-                            <input type="radio" name="service_type" value="airport_transfer" checked class="sr-only" id="rad-transfer">
-                            <i class="fas fa-plane-departure text-base text-luxe-gold mb-2 block"></i>
-                            <span class="block">Airport Transfer</span>
-                        </label>
-                        <label class="cursor-pointer text-center p-4 rounded-xl text-xs font-semibold uppercase tracking-wider transition-all duration-300 block select-none border border-transparent" id="lbl-p2p">
-                            <input type="radio" name="service_type" value="point_to_point" class="sr-only" id="rad-p2p">
-                            <i class="fas fa-route text-base text-gray-500 mb-2 block" id="icon-p2p"></i>
-                            <span class="block text-gray-400" id="span-p2p">Point to Point</span>
-                        </label>
-                        <label class="cursor-pointer text-center p-4 rounded-xl text-xs font-semibold uppercase tracking-wider transition-all duration-300 block select-none border border-transparent" id="lbl-hourly">
-                            <input type="radio" name="service_type" value="hourly" class="sr-only" id="rad-hourly">
-                            <i class="fas fa-clock text-base text-gray-500 mb-2 block" id="icon-hourly"></i>
-                            <span class="block text-gray-400" id="span-hourly">Hourly Chauffeur</span>
-                        </label>
-                        {% if site_slug == 'dr' %}
-                        <label class="cursor-pointer text-center p-4 rounded-xl text-xs font-semibold uppercase tracking-wider transition-all duration-300 block select-none border border-transparent" id="lbl-rental">
-                            <input type="radio" name="service_type" value="luxury_rental" class="sr-only" id="rad-rental">
-                            <i class="fas fa-car text-base text-gray-500 mb-2 block" id="icon-rental"></i>
-                            <span class="block text-gray-400" id="span-rental">Luxury Rental</span>
-                        </label>
-                        {% endif %}
-                    </div>
-                    </div>
-
-                    <!-- Interactive Dark Map -->
-                    <div class="relative w-full h-[280px] bg-luxe-black border border-gray-800 rounded-2xl overflow-hidden shadow-inner group mb-2">
-                        <div id="booking-map" class="w-full h-full z-0"></div>
-                        <div class="absolute top-4 left-4 z-[1000] bg-luxe-black/90 px-3 py-1.5 rounded-lg border border-gray-800 backdrop-blur-md">
-                            <span class="text-[9px] uppercase font-bold tracking-widest text-luxe-gold flex items-center gap-1.5">
-                                <i class="fa-solid fa-map-location-dot animate-pulse"></i>
-                                <span>Interactive Luxury Routing Map</span>
-                            </span>
-                        </div>
-                    </div>
-
-                    <!-- Direction State Tracker -->
-                    <input type="hidden" name="transfer_direction" id="transfer_direction" value="AIRPORT_TO_DEST">
-
-                    <!-- Airport Transfer wrapper (airport + address with Toggle switch) -->
-                    <div id="div-airport-transfer-wrapper" class="space-y-4">
-                        <div class="flex flex-col md:flex-row items-center gap-4 relative">
-                            <!-- Left Block: Airport Select (default: Origin Airport) -->
-                            <div id="transfer-start-wrapper" class="w-full font-light">
-                                <label id="lbl-transfer-start" for="airport_id" class="block text-xs uppercase tracking-widest font-bold text-gray-400 mb-2">Origin Airport</label>
-                                <div class="relative">
-                                    <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-luxe-gold">
-                                        <i class="fas fa-plane-departure text-sm" id="icon-transfer-start"></i>
-                                    </span>
-                                    <select name="airport_id" id="airport_id" class="block w-full pl-11 pr-10 py-4 bg-luxe-black/80 rounded-xl border border-gray-800 focus:border-luxe-gold text-sm text-white focus:outline-none focus:ring-1 focus:ring-luxe-gold appearance-none">
-                                        <option value="" disabled selected>Select Airport...</option>
-                                        {% for airport in airports %}
-                                        <option value="{{ airport.id }}" data-lat="{{ airport.latitude }}" data-lng="{{ airport.longitude }}">{{ airport.code }} — {{ airport.name }}</option>
-                                        {% empty %}
-                                        <option value="" disabled>No serviced airports in this hub</option>
-                                        {% endfor %}
-                                    </select>
-                                    <span class="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-500 pointer-events-none">
-                                        <i class="fas fa-chevron-down text-xs"></i>
-                                    </span>
-                                </div>
-                            </div>
-
-                            <!-- Inversion Toggle Button -->
-                            <div class="flex justify-center items-center md:pt-6">
-                                <button type="button" id="btn-switch-direction" class="w-10 h-10 rounded-full bg-luxe-black border border-gray-800 text-luxe-gold hover:border-luxe-gold/50 hover:text-luxe-gold-bright transition-all duration-300 flex items-center justify-center shadow-lg active:scale-95 cursor-pointer" title="Switch Directions">
-                                    <i class="fas fa-right-left rotate-90 md:rotate-0 text-sm"></i>
-                                </button>
-                            </div>
-
-                            <!-- Right Block: Destination Address (free text with geocoding) -->
-                            <div id="transfer-end-wrapper" class="w-full font-light">
-                                <label id="lbl-transfer-end" for="destination_address" class="block text-xs uppercase tracking-widest font-bold text-gray-400 mb-2">Drop-off Address</label>
-                                <div class="relative">
-                                    <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-luxe-gold">
-                                        <i class="fas fa-map-pin text-sm" id="icon-transfer-end"></i>
-                                    </span>
-                                    <input type="text" name="destination_address" id="destination_address" placeholder="Enter your destination address..." class="block w-full pl-11 pr-4 py-4 bg-luxe-black/80 rounded-xl border border-gray-800 focus:border-luxe-gold text-sm text-white focus:outline-none focus:ring-1 focus:ring-luxe-gold font-light" autocomplete="off">
-                                </div>
-                                <!-- Geocoding result info -->
-                                <p id="geocode-status" class="text-[10px] text-gray-500 mt-1 font-light hidden">
-                                    <i class="fas fa-map-marker-alt text-luxe-gold mr-1"></i>
-                                    <span id="geocode-status-text">Address found — displaying on map</span>
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Hourly fields (Hidden by Default, minimum 3 hours, maximum 12 hours) -->
-                    <div id="div-hourly" class="hidden space-y-4">
-                        <div>
-                            <label for="hours_requested" class="block text-xs uppercase tracking-widest font-bold text-gray-400 mb-2">Hours Requested (3 - 12 Hours)</label>
-                            <div class="relative">
-                                <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-luxe-gold">
-                                    <i class="fas fa-stopwatch text-sm"></i>
-                                </span>
-                                <input type="number" name="hours_requested" id="hours_requested" min="3" max="12" value="3" class="block w-full pl-11 pr-4 py-4 bg-luxe-black/80 rounded-xl border border-gray-800 focus:border-luxe-gold text-sm text-white focus:outline-none focus:ring-1 focus:ring-luxe-gold">
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Custom Pickup / Drop-off Addresses as interactive cards (shown for hourly/point-to-point) -->
-                    <div id="div-custom-addresses" class="hidden grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <!-- Starting Location Card -->
-                        <div class="glass-card rounded-2xl p-5 border border-gray-800 hover:border-luxe-gold/50 transition-all duration-500 flex flex-col space-y-4 group">
-                            <div class="flex items-center justify-between">
-                                <label for="pickup_address" class="block text-xs uppercase tracking-widest font-bold text-gray-400">Pickup Location (Depart)</label>
-                                <span class="text-luxe-gold animate-pulse text-xs"><i class="fas fa-circle-dot"></i></span>
-                            </div>
-                            
-                            <!-- Visual Micro Map representation -->
-                            <div id="map-pickup" class="relative w-full h-28 bg-luxe-black border border-gray-900 rounded-xl overflow-hidden cursor-pointer group-hover:border-luxe-gold/30 transition-colors duration-500">
-                                <!-- SVG Grid lines simulating map streets -->
-                                <svg class="absolute inset-0 w-full h-full opacity-20 stroke-gray-700" xmlns="http://www.w3.org/2000/svg">
-                                    <defs>
-                                        <pattern id="grid-pickup-hero" width="20" height="20" patternUnits="userSpaceOnUse">
-                                            <path d="M 20 0 L 0 0 0 20" fill="none" stroke-width="0.5"/>
-                                        </pattern>
-                                    </defs>
-                                    <rect width="100%" height="100%" fill="url(#grid-pickup-hero)" />
-                                    <!-- Mock Route lines -->
-                                    <path d="M 20 50 Q 150 20 280 80" fill="none" stroke="#C9A84C" stroke-width="2" class="opacity-40" />
-                                </svg>
-                                <!-- Glowing GPS Marker pin -->
-                                <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center">
-                                    <div class="w-8 h-8 rounded-full bg-luxe-gold/20 flex items-center justify-center animate-ping absolute"></div>
-                                    <div class="w-4 h-4 rounded-full bg-luxe-gold/40 flex items-center justify-center animate-pulse absolute"></div>
-                                    <i class="fas fa-location-dot text-luxe-gold text-lg z-10 filter drop-shadow-[0_0_8px_rgba(201,168,76,0.6)]"></i>
-                                </div>
-                                <span class="absolute bottom-2 right-2 text-[8px] uppercase tracking-wider text-gray-500 font-bold bg-luxe-black/80 px-2 py-0.5 rounded border border-gray-900">Click to Select Plaza Hotel</span>
-                            </div>
-
-                            <!-- TextInput field integrated inside the card -->
-                            <div class="relative">
-                                <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-luxe-gold">
-                                    <i class="fas fa-search text-xs"></i>
-                                </span>
-                                <input type="text" name="pickup_address" id="pickup_address" placeholder="Enter starting address..." class="block w-full pl-10 pr-4 py-3.5 bg-luxe-black/90 rounded-xl border border-gray-800 focus:border-luxe-gold text-xs text-white focus:outline-none focus:ring-1 focus:ring-luxe-gold font-light transition-all duration-300">
-                            </div>
-                        </div>
-
-                        <!-- Destination Location Card -->
-                        <div id="div-dropoff-location" class="glass-card rounded-2xl p-5 border border-gray-800 hover:border-luxe-gold/50 transition-all duration-500 flex flex-col space-y-4 group">
-                            <div class="flex items-center justify-between">
-                                <label for="dropoff_address" class="block text-xs uppercase tracking-widest font-bold text-gray-400">Destination Location (Arrival)</label>
-                                <span class="text-luxe-gold animate-pulse text-xs"><i class="fas fa-location-dot"></i></span>
-                            </div>
-                            
-                            <!-- Visual Micro Map representation -->
-                            <div id="map-dropoff" class="relative w-full h-28 bg-luxe-black border border-gray-900 rounded-xl overflow-hidden cursor-pointer group-hover:border-luxe-gold/30 transition-colors duration-500">
-                                <!-- SVG Grid lines simulating map streets -->
-                                <svg class="absolute inset-0 w-full h-full opacity-20 stroke-gray-700" xmlns="http://www.w3.org/2000/svg">
-                                    <rect width="100%" height="100%" fill="url(#grid-pickup-hero)" />
-                                    <!-- Mock Route lines -->
-                                    <path d="M 280 80 Q 150 20 20 50" fill="none" stroke="#C9A84C" stroke-width="2" class="opacity-40" />
-                                </svg>
-                                <!-- Glowing GPS Marker pin -->
-                                <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center">
-                                    <div class="w-8 h-8 rounded-full bg-luxe-gold/20 flex items-center justify-center animate-ping absolute"></div>
-                                    <div class="w-4 h-4 rounded-full bg-luxe-gold/40 flex items-center justify-center animate-pulse absolute"></div>
-                                    <i class="fas fa-location-arrow text-luxe-gold text-base z-10 filter drop-shadow-[0_0_8px_rgba(201,168,76,0.6)]"></i>
-                                </div>
-                                <span class="absolute bottom-2 right-2 text-[8px] uppercase tracking-wider text-gray-500 font-bold bg-luxe-black/80 px-2 py-0.5 rounded border border-gray-900">Click to Select JFK Airport</span>
-                            </div>
-
-                            <!-- TextInput field integrated inside the card -->
-                            <div class="relative">
-                                <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-luxe-gold">
-                                    <i class="fas fa-search text-xs"></i>
-                                </span>
-                                <input type="text" name="dropoff_address" id="dropoff_address" placeholder="Enter destination address..." class="block w-full pl-10 pr-4 py-3.5 bg-luxe-black/90 rounded-xl border border-gray-800 focus:border-luxe-gold text-xs text-white focus:outline-none focus:ring-1 focus:ring-luxe-gold font-light transition-all duration-300">
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Intermediate Stops Section (For Hourly and Point-to-Point) -->
-                    <div id="div-stops-section" class="hidden space-y-4 bg-luxe-black/30 p-5 rounded-2xl border border-gray-800">
-                        <div class="flex items-center justify-between">
-                            <label for="number_of_stops" class="block text-xs uppercase tracking-widest font-bold text-gray-400">Intermediate Stops</label>
-                            <div class="flex items-center space-x-2" id="div-stops-count-wrapper">
-                                <span class="text-[10px] text-gray-500 font-semibold uppercase">Quantity:</span>
-                                <input type="number" name="number_of_stops" id="number_of_stops" min="0" value="0" class="w-16 bg-luxe-black border border-gray-800 rounded px-2 py-1 text-xs text-white focus:border-luxe-gold outline-none">
-                                <span class="text-[10px] text-luxe-gold font-bold">($20/stop for Point-to-Point)</span>
-                            </div>
-                        </div>
-                        <div>
-                            <label for="stop_addresses" class="block text-[10px] uppercase text-gray-500 font-bold mb-1">Stop Addresses</label>
-                            <textarea name="stop_addresses" id="stop_addresses" rows="2" placeholder="List address details for each stop..." class="block w-full px-4 py-3 bg-luxe-black rounded-lg border border-gray-800 focus:border-luxe-gold text-xs text-white focus:outline-none focus:ring-1 focus:ring-luxe-gold font-light"></textarea>
-                        </div>
-                    </div>
-
-                    <!-- Date, Time, Passengers and Flight details -->
-                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                        <div>
-                            <label for="pickup_date" class="block text-xs uppercase tracking-widest font-bold text-gray-400 mb-2">Pickup Date</label>
-                            <div class="relative">
-                                <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-luxe-gold">
-                                    <i class="fas fa-calendar-days text-sm"></i>
-                                </span>
-                                <input type="date" name="pickup_date" id="pickup_date" required min="{{ today }}" value="{{ today }}" class="block w-full pl-11 pr-4 py-4 bg-luxe-black/80 rounded-xl border border-gray-800 focus:border-luxe-gold text-sm text-white focus:outline-none focus:ring-1 focus:ring-luxe-gold">
-                            </div>
-                        </div>
-                        
-                        <div>
-                            <label for="pickup_time" class="block text-xs uppercase tracking-widest font-bold text-gray-400 mb-2">Pickup Time</label>
-                            <div class="relative">
-                                <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-luxe-gold">
-                                    <i class="fas fa-clock text-sm"></i>
-                                </span>
-                                <input type="time" name="pickup_time" id="pickup_time" required value="12:00" class="block w-full pl-11 pr-4 py-4 bg-luxe-black/80 rounded-xl border border-gray-800 focus:border-luxe-gold text-sm text-white focus:outline-none focus:ring-1 focus:ring-luxe-gold">
-                            </div>
-                        </div>
-
-                        <div>
-                            <label for="passenger_count" class="block text-xs uppercase tracking-widest font-bold text-gray-400 mb-2">Passengers</label>
-                            <div class="relative">
-                                <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-luxe-gold">
-                                    <i class="fas fa-users text-sm"></i>
-                                </span>
-                                <input type="number" name="passenger_count" id="passenger_count" required min="1" max="14" value="1" class="block w-full pl-11 pr-4 py-4 bg-luxe-black/80 rounded-xl border border-gray-800 focus:border-luxe-gold text-sm text-white focus:outline-none focus:ring-1 focus:ring-luxe-gold">
-                            </div>
-                        </div>
-
-                        <div id="div-flight">
-                            <label for="flight_number" class="block text-xs uppercase tracking-widest font-bold text-gray-400 mb-2">Flight Number</label>
-                            <div class="relative">
-                                <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-luxe-gold">
-                                    <i class="fas fa-plane text-sm"></i>
-                                </span>
-                                <input type="text" name="flight_number" id="flight_number" placeholder="e.g. AA1234" class="block w-full pl-11 pr-4 py-4 bg-luxe-black/80 rounded-xl border border-gray-800 focus:border-luxe-gold text-sm text-white focus:outline-none focus:ring-1 focus:ring-luxe-gold uppercase">
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Round-trip Section (For Airport Transfer and Point-to-Point) -->
-                    <div id="div-round-trip" class="py-2 border-t border-gray-800">
-                        <div class="flex items-center space-x-3">
-                            <input type="checkbox" name="round_trip" id="round_trip" class="w-4 h-4 rounded text-luxe-gold focus:ring-luxe-gold bg-luxe-black border-gray-800">
-                            <label for="round_trip" class="text-xs text-gray-400 font-bold uppercase tracking-wider select-none cursor-pointer">
-                                Request Round-Trip leg
-                            </label>
-                        </div>
-                        
-                        <!-- Return date/time subfields (dynamic show) -->
-                        <div id="div-return-fields" class="hidden grid grid-cols-1 md:grid-cols-2 gap-4 mt-4 pt-4 border-t border-gray-900">
-                            <div>
-                                <label for="return_date" class="block text-xs uppercase tracking-widest font-bold text-gray-400 mb-2">Return Date</label>
-                                <div class="relative">
-                                    <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-luxe-gold">
-                                        <i class="fas fa-calendar-days text-sm"></i>
-                                    </span>
-                                    <input type="date" name="return_date" id="return_date" min="{{ today }}" class="block w-full pl-11 pr-4 py-4 bg-luxe-black/80 rounded-xl border border-gray-800 focus:border-luxe-gold text-sm text-white focus:outline-none focus:ring-1 focus:ring-luxe-gold font-light">
-                                </div>
-                            </div>
-                            <div>
-                                <label for="return_time" class="block text-xs uppercase tracking-widest font-bold text-gray-400 mb-2">Return Time</label>
-                                <div class="relative">
-                                    <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-luxe-gold">
-                                        <i class="fas fa-clock text-sm"></i>
-                                    </span>
-                                    <input type="time" name="return_time" id="return_time" class="block w-full pl-11 pr-4 py-4 bg-luxe-black/80 rounded-xl border border-gray-800 focus:border-luxe-gold text-sm text-white focus:outline-none focus:ring-1 focus:ring-luxe-gold font-light">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-
-
-                    <!-- Meeting Point Field (Visible for all service types) -->
-                    <div class="py-4 border-t border-gray-800 space-y-2">
-                        <label for="meeting_point" class="block text-xs uppercase tracking-widest font-bold text-gray-400">Meeting Point (Lieu de rencontre)</label>
-                        <div class="relative">
-                            <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-luxe-gold">
-                                <i class="fas fa-handshake-simple text-sm"></i>
-                            </span>
-                            <input type="text" name="meeting_point" id="meeting_point" placeholder="e.g. Terminal B exit gate 4, or hotel lobby entrance" class="block w-full pl-11 pr-4 py-4 bg-luxe-black/80 rounded-xl border border-gray-800 focus:border-luxe-gold text-sm text-white focus:outline-none focus:ring-1 focus:ring-luxe-gold font-light font-sans">
-                        </div>
-                        <p class="text-[10px] text-gray-500 font-light">Specify coordinates or instructions on where to meet the private chauffeur upon pickup.</p>
-                    </div>
-
-                    <!-- Submit Button -->
-                    <button type="submit" id="submit-btn" disabled class="w-full gold-btn py-4.5 rounded-xl text-sm uppercase tracking-widest font-semibold mt-6 shadow-xl flex items-center justify-center space-x-3 cursor-not-allowed opacity-60">
-                        <span>Continue to Fleet Selection</span>
-                        <i class="fas fa-arrow-right text-xs"></i>
-                    </button>
-                </form>
-            </div>
-        </div>
-    </div>
-</section>
-
-<!-- Premium Services Grid -->
-<section id="services" class="py-24 bg-luxe-dark-grey relative">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <!-- Section Header -->
-        <div class="text-center max-w-3xl mx-auto mb-16 space-y-4">
-            <span class="text-xs uppercase font-bold tracking-widest text-luxe-gold">Luxury Offerings</span>
-            <h2 class="text-3xl sm:text-4xl font-extrabold tracking-tight font-display text-white">
-                {% site_content 'services_title' 'VIP Transportation Solutions' %}
-            </h2>
-            <div class="w-20 h-1 bg-luxe-gold mx-auto rounded-full"></div>
-            <p class="text-gray-400 font-light">
-                {% site_content 'services_subtitle' 'Every booking features a high-grade professional driver, modern comfort amenities, and absolute promptness.' %}
-            </p>
-        </div>
-
-        <!-- Services Grid -->
-        <div class="grid grid-cols-1 {% if site_slug == 'dr' %}md:grid-cols-4{% else %}md:grid-cols-3{% endif %} gap-8">
-            <!-- Airport Transfers -->
-            <div class="glass-card rounded-2xl p-8 hover:border-luxe-gold/40 hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between">
-                <div>
-                    <div class="w-14 h-14 bg-luxe-gold/10 border border-luxe-gold/20 rounded-xl flex items-center justify-center mb-6">
-                        <i class="fas fa-plane-departure text-xl text-luxe-gold"></i>
-                    </div>
-                    <h3 class="text-xl font-bold tracking-wide text-white font-display mb-4">Airport Transfers</h3>
-                    <p class="text-gray-400 text-sm leading-relaxed mb-6 font-light">
-                        Flat-rate VIP service with real-time flight tracking, airport meet & greet inside the terminal, and complete flight delay protection.
-                    </p>
-                </div>
-                <a href="{% site_url 'airport_transfer' %}" class="text-xs font-semibold tracking-wider uppercase text-luxe-gold hover:text-luxe-gold-bright transition-colors flex items-center space-x-2">
-                    <span>Learn More</span>
-                    <i class="fas fa-arrow-right text-[10px]"></i>
-                </a>
-            </div>
-
-            <!-- Hourly Chauffeur -->
-            <div class="glass-card rounded-2xl p-8 hover:border-luxe-gold/40 hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between">
-                <div>
-                    <div class="w-14 h-14 bg-luxe-gold/10 border border-luxe-gold/20 rounded-xl flex items-center justify-center mb-6">
-                        <i class="fas fa-clock text-xl text-luxe-gold"></i>
-                    </div>
-                    <h3 class="text-xl font-bold tracking-wide text-white font-display mb-4">Hourly Chauffeur</h3>
-                    <p class="text-gray-400 text-sm leading-relaxed mb-6 font-light">
-                        Premium dedicated service for executives, diplomatic personnel, and multi-stop corporate itineraries. Complete control with premium flex hours.
-                    </p>
-                </div>
-                <a href="{% site_url 'hourly_service' %}" class="text-xs font-semibold tracking-wider uppercase text-luxe-gold hover:text-luxe-gold-bright transition-colors flex items-center space-x-2">
-                    <span>Learn More</span>
-                    <i class="fas fa-arrow-right text-[10px]"></i>
-                </a>
-            </div>
-
-            <!-- Point-to-Point Transfers -->
-            <div class="glass-card rounded-2xl p-8 hover:border-luxe-gold/40 hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between">
-                <div>
-                    <div class="w-14 h-14 bg-luxe-gold/10 border border-luxe-gold/20 rounded-xl flex items-center justify-center mb-6">
-                        <i class="fas fa-route text-xl text-luxe-gold"></i>
-                    </div>
-                    <h3 class="text-xl font-bold tracking-wide text-white font-display mb-4">Point-to-Point</h3>
-                    <p class="text-gray-400 text-sm leading-relaxed mb-6 font-light">
-                        Direct premium transit between any two custom locations, featuring flat starting rates, multiple stop adjustments, and round-trip booking options.
-                    </p>
-                </div>
-                <a href="{% site_url 'booking_step1' %}?service_type=point_to_point" class="text-xs font-semibold tracking-wider uppercase text-luxe-gold hover:text-luxe-gold-bright transition-colors flex items-center space-x-2">
-                    <span>Book Now</span>
-                    <i class="fas fa-arrow-right text-[10px]"></i>
-                </a>
-            </div>
-
-            {% if site_slug == 'dr' %}
-            <!-- Luxury Car Rental -->
-            <div class="glass-card rounded-2xl p-8 hover:border-luxe-gold/40 hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between">
-                <div>
-                    <div class="w-14 h-14 bg-luxe-gold/10 border border-luxe-gold/20 rounded-xl flex items-center justify-center mb-6">
-                        <i class="fas fa-car text-xl text-luxe-gold"></i>
-                    </div>
-                    <h3 class="text-xl font-bold tracking-wide text-white font-display mb-4">Luxury Car Rental</h3>
-                    <p class="text-gray-400 text-sm leading-relaxed mb-6 font-light">
-                        Premium vehicle rentals in Dominican Republic. Choose from elite SUVs and sedans to experience maximum driving freedom and class.
-                    </p>
-                </div>
-                <a href="{% site_url 'luxury_rental' %}" class="text-xs font-semibold tracking-wider uppercase text-luxe-gold hover:text-luxe-gold-bright transition-colors flex items-center space-x-2">
-                    <span>Learn More</span>
-                    <i class="fas fa-arrow-right text-[10px]"></i>
-                </a>
-            </div>
-            {% endif %}
-        </div>
-    </div>
-</section>
-
-<!-- Executive Fleet Preview -->
-<section class="py-24 bg-luxe-black">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-16 items-center">
-            <div class="lg:col-span-5 space-y-6">
-                <span class="text-xs uppercase font-bold tracking-widest text-luxe-gold">{% site_content 'fleet_title' 'Elite Fleet' %}</span>
-                <h2 class="text-3xl sm:text-4xl font-extrabold font-display text-white tracking-tight leading-tight">
-                    {% site_content 'fleet_subtitle' 'Executive SUV Elite Class' %}
-                </h2>
-                <div class="w-16 h-1 bg-luxe-gold rounded-full"></div>
-                <p class="text-gray-400 text-sm leading-relaxed font-light">
-                    Our luxury fleet features the pristine and robust <strong class="text-white">Cadillac Escalade</strong> and <strong class="text-white">Chevrolet Suburban</strong>. Optimized for up to 6 passengers, offering spacious luggage storage, top-tier black leather cabins, and fully integrated Wi-Fi networks.
-                </p>
-                
-                <div class="grid grid-cols-2 gap-4 py-4 text-xs font-medium uppercase tracking-wider text-gray-300">
-                    <div class="flex items-center space-x-3">
-                        <i class="fas fa-users text-luxe-gold"></i>
-                        <span>6 Passengers Max</span>
-                    </div>
-                    <div class="flex items-center space-x-3">
-                        <i class="fas fa-suitcase text-luxe-gold"></i>
-                        <span>6 Large Bags Max</span>
-                    </div>
-                    <div class="flex items-center space-x-3">
-                        <i class="fas fa-wifi text-luxe-gold"></i>
-                        <span>Premium Cabin Wi-Fi</span>
-                    </div>
-                    <div class="flex items-center space-x-3">
-                        <i class="fas fa-bottle-water text-luxe-gold"></i>
-                        <span>Complimentary Water</span>
-                    </div>
-                </div>
-
-                <a href="{% site_url 'fleet' %}" class="gold-btn inline-block px-8 py-3.5 rounded-full text-xs uppercase tracking-widest font-semibold shadow-xl">
-                    View Fleet Catalogue
-                </a>
-            </div>
-
-            <!-- Right Fleet Interactive Display -->
-            <div class="lg:col-span-7 relative group">
-                <div class="absolute -inset-1 bg-gradient-to-r from-luxe-gold/30 to-luxe-gold-bright/30 rounded-3xl blur opacity-30 group-hover:opacity-50 transition duration-1000"></div>
-                <div class="relative glass-card rounded-3xl overflow-hidden shadow-2xl">
-                    <img src="https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&q=80&w=1000" alt="Executive SUV Escalade" class="w-full h-[400px] object-cover group-hover:scale-105 transition-transform duration-700">
-                    <div class="absolute bottom-0 inset-x-0 p-6 bg-gradient-to-t from-black/90 to-transparent">
-                        <h4 class="text-lg font-bold font-display text-white uppercase tracking-wider mb-1">Cadillac Escalade ESV</h4>
-                        <p class="text-xs text-luxe-gold font-semibold uppercase tracking-widest">AeroLux Select Chauffeur standard</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
-
-<!-- Why Choose Us Section -->
-<section class="py-24 bg-luxe-dark-grey relative overflow-hidden">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <!-- Section Header -->
-        <div class="text-center max-w-3xl mx-auto mb-16 space-y-4">
-            <span class="text-xs uppercase font-bold tracking-widest text-luxe-gold">{% site_content 'about_section_tag' 'Why AeroLux Select' %}</span>
-            <h2 class="text-3xl sm:text-4xl font-extrabold font-display tracking-tight text-white">
-                {% site_content 'about_title' 'Uncompromising Professional Standards' %}
-            </h2>
-            <div class="w-20 h-1 bg-luxe-gold mx-auto rounded-full"></div>
-            {% if site_slug == 'dr' or current_site_slug == 'dr' %}
-            <p class="text-gray-400 font-light mt-4 text-sm max-w-2xl mx-auto">
-                {% site_content 'about_text' '' %}
-            </p>
-            {% endif %}
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
-            <!-- Card 1 -->
-            <div class="glass-card rounded-2xl p-6 text-center hover:border-luxe-gold/30 transition-all duration-300">
-                <div class="w-12 h-12 bg-luxe-gold/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <i class="fas fa-hand-holding-dollar text-lg text-luxe-gold"></i>
-                </div>
-                <h4 class="text-sm font-bold uppercase tracking-wider text-white mb-2">Guaranteed Flat Rates</h4>
-                <p class="text-xs text-gray-400 leading-relaxed font-light">
-                    No hidden surge fees, no dynamic traffic penalties. You pay the exact quoted price at final reservation.
-                </p>
-            </div>
-
-            <!-- Card 2 -->
-            <div class="glass-card rounded-2xl p-6 text-center hover:border-luxe-gold/30 transition-all duration-300">
-                <div class="w-12 h-12 bg-luxe-gold/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <i class="fas fa-user-shield text-lg text-luxe-gold"></i>
-                </div>
-                <h4 class="text-sm font-bold uppercase tracking-wider text-white mb-2">Elite Security Drivers</h4>
-                <p class="text-xs text-gray-400 leading-relaxed font-light">
-                    Meticulously vetted, professional chauffeurs with extensive route optimization and defense-driving training.
-                </p>
-            </div>
-
-            <!-- Card 3 -->
-            <div class="glass-card rounded-2xl p-6 text-center hover:border-luxe-gold/30 transition-all duration-300">
-                <div class="w-12 h-12 bg-luxe-gold/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <i class="fas fa-comments text-lg text-luxe-gold"></i>
-                </div>
-                <h4 class="text-sm font-bold uppercase tracking-wider text-white mb-2">Direct 24/7 Dispatch</h4>
-                <p class="text-xs text-gray-400 leading-relaxed font-light">
-                    No complex automated phone loops. Instantly chat with real live support or your driver via WhatsApp 24/7.
-                </p>
-            </div>
-
-            <!-- Card 4 -->
-            <div class="glass-card rounded-2xl p-6 text-center hover:border-luxe-gold/30 transition-all duration-300">
-                <div class="w-12 h-12 bg-luxe-gold/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <i class="fas fa-gift text-lg text-luxe-gold"></i>
-                </div>
-                <h4 class="text-sm font-bold uppercase tracking-wider text-white mb-2">VIP Meet & Greet</h4>
-                <p class="text-xs text-gray-400 leading-relaxed font-light">
-                    Terminals contain fast-track airport customs escorts, porter luggage handling, and direct greeting signboards.
-                </p>
-            </div>
-        </div>
-    </div>
-</section>
-
-<!-- Client Testimonials -->
-<section class="py-24 bg-luxe-black">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <!-- Section Header -->
-        <div class="text-center max-w-3xl mx-auto mb-16 space-y-4">
-            <span class="text-xs uppercase font-bold tracking-widest text-luxe-gold">{% site_content 'testimonials_section_tag' 'Client Endorsements' %}</span>
-            <h2 class="text-3xl sm:text-4xl font-extrabold font-display tracking-tight text-white">
-                {% site_content 'testimonials_title' 'Trusted by Elite Global Travelers' %}
-            </h2>
-            <div class="w-20 h-1 bg-luxe-gold mx-auto rounded-full"></div>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {% for test in testimonials %}
-            <div class="glass-card rounded-2xl p-8 hover:border-luxe-gold/30 transition-all duration-300 relative">
-                <span class="absolute top-6 right-8 text-6xl text-luxe-gold/10 font-serif">“</span>
-                <div class="mb-4">
-                    {{ test.rating|star_rating }}
-                </div>
-                <p class="text-sm leading-relaxed text-gray-300 mb-6 font-light italic">
-                    "{{ test.content }}"
-                </p>
-                <div class="flex items-center space-x-3 pt-4 border-t border-gray-800">
-                    {% if test.image %}
-                    <img src="{{ test.image.url }}" alt="{{ test.author }}" class="w-10 h-10 rounded-full object-cover">
-                    {% else %}
-                    <div class="w-10 h-10 rounded-full bg-luxe-gold/20 flex items-center justify-center text-luxe-gold font-bold text-xs">
-                        {{ test.author|slice:":2"|upper }}
-                    </div>
-                    {% endif %}
-                    <div>
-                        <h4 class="text-xs font-bold uppercase tracking-wider text-white">{{ test.author }}</h4>
-                        <p class="text-[10px] text-gray-500 font-medium">{{ test.company|default:"Verified Client" }}</p>
-                    </div>
-                </div>
-            </div>
-            {% empty %}
-            <!-- Fallback Static Testimonials if Database is empty -->
-            <div class="glass-card rounded-2xl p-8 transition-all duration-300 relative">
-                <span class="absolute top-6 right-8 text-6xl text-luxe-gold/10 font-serif">“</span>
-                <div class="mb-4">
-                    <span class="text-luxe-gold">★★★★★</span>
-                </div>
-                <p class="text-sm leading-relaxed text-gray-300 mb-6 font-light italic">
-                    "Absolute professionalism. The driver was waiting terminal-side with a tablet, carried my heavy luggage, and the Escalade was immaculate. Highest recommendation."
-                </p>
-                <div class="flex items-center space-x-3 pt-4 border-t border-gray-800">
-                    <div class="w-10 h-10 rounded-full bg-luxe-gold/20 flex items-center justify-center text-luxe-gold font-bold text-xs">
-                        JD
-                    </div>
-                    <div>
-                        <h4 class="text-xs font-bold uppercase tracking-wider text-white">Jonathan Davis</h4>
-                        <p class="text-[10px] text-gray-500 font-medium">Managing Director, Atlas Capital</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="glass-card rounded-2xl p-8 transition-all duration-300 relative">
-                <span class="absolute top-6 right-8 text-6xl text-luxe-gold/10 font-serif">“</span>
-                <div class="mb-4">
-                    <span class="text-luxe-gold">★★★★★</span>
-                </div>
-                <p class="text-sm leading-relaxed text-gray-300 mb-6 font-light italic">
-                    "Booking our VIP transfer from PUJ to Punta Cana resort was flawless. Add-ons like the Terminal Fast-track saved us hours of custom wait lines. Extremely comfortable vehicle."
-                </p>
-                <div class="flex items-center space-x-3 pt-4 border-t border-gray-800">
-                    <div class="w-10 h-10 rounded-full bg-luxe-gold/20 flex items-center justify-center text-luxe-gold font-bold text-xs">
-                        SR
-                    </div>
-                    <div>
-                        <h4 class="text-xs font-bold uppercase tracking-wider text-white">Sarah Reynolds</h4>
-                        <p class="text-[10px] text-gray-500 font-medium">VIP Leisure Traveler</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="glass-card rounded-2xl p-8 transition-all duration-300 relative">
-                <span class="absolute top-6 right-8 text-6xl text-luxe-gold/10 font-serif">“</span>
-                <div class="mb-4">
-                    <span class="text-luxe-gold">★★★★★</span>
-                </div>
-                <p class="text-sm leading-relaxed text-gray-300 mb-6 font-light italic">
-                    "Chauffeur hourly service was excellent. We used it for local corporate events in Manhattan. Impeccable route knowledge, perfect cabin environment, quiet and peaceful."
-                </p>
-                <div class="flex items-center space-x-3 pt-4 border-t border-gray-800">
-                    <div class="w-10 h-10 rounded-full bg-luxe-gold/20 flex items-center justify-center text-luxe-gold font-bold text-xs">
-                        MH
-                    </div>
-                    <div>
-                        <h4 class="text-xs font-bold uppercase tracking-wider text-white">Marcus Harris</h4>
-                        <p class="text-[10px] text-gray-500 font-medium">VP of Events, Nexus Tech</p>
-                    </div>
-                </div>
-            </div>
-            {% endfor %}
-        </div>
-    </div>
-</section>
-{% endblock %}
-
-{% block extra_js %}
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-<script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const radTransfer = document.getElementById('rad-transfer');
-        const radHourly = document.getElementById('rad-hourly');
-        const radP2P = document.getElementById('rad-p2p');
-        {% if site_slug == 'dr' %}
-        const radRental = document.getElementById('rad-rental');
-        const lblRental = document.getElementById('lbl-rental');
-        const iconRental = document.getElementById('icon-rental');
-        const spanRental = document.getElementById('span-rental');
-        {% else %}
-        const radRental = null;
-        const lblRental = null;
-        const iconRental = null;
-        const spanRental = null;
-        {% endif %}
-
-        const lblTransfer = document.getElementById('lbl-transfer');
-        const lblHourly = document.getElementById('lbl-hourly');
-        const lblP2P = document.getElementById('lbl-p2p');
-
-        const iconHourly = document.getElementById('icon-hourly');
-        const iconP2P = document.getElementById('icon-p2p');
-        const spanHourly = document.getElementById('span-hourly');
-        const spanP2P = document.getElementById('span-p2p');
-
-        const divAirportTransferWrapper = document.getElementById('div-airport-transfer-wrapper');
-        const divHourly = document.getElementById('div-hourly');
-        const divFlight = document.getElementById('div-flight');
-        const divCustomAddresses = document.getElementById('div-custom-addresses');
-        const divDropoffLocation = document.getElementById('div-dropoff-location');
-        const divStopsSection = document.getElementById('div-stops-section');
-        const divStopsCountWrapper = document.getElementById('div-stops-count-wrapper');
-        const divRoundTrip = document.getElementById('div-round-trip');
-        const divReturnFields = document.getElementById('div-return-fields');
-
-        const airportSelect = document.getElementById('airport_id');
-        const destinationAddress = document.getElementById('destination_address');
-        const pickupAddress = document.getElementById('pickup_address');
-        const dropoffAddress = document.getElementById('dropoff_address');
-        const roundTripCheckbox = document.getElementById('round_trip');
-        const returnDateInput = document.getElementById('return_date');
-        const returnTimeInput = document.getElementById('return_time');
-        const submitBtn = document.getElementById('submit-btn');
-        const geocodeStatus = document.getElementById('geocode-status');
-        const geocodeStatusText = document.getElementById('geocode-status-text');
-
-        // Form Validation logic
-        function checkValidation() {
-            let isValid = false;
-
-            if (radTransfer.checked) {
-                if (airportSelect.value && destinationAddress.value.trim() !== '') {
-                    isValid = true;
-                }
-            } else if (radHourly.checked) {
-                if (pickupAddress.value.trim() !== '') {
-                    isValid = true;
-                }
-            } else if (radP2P.checked) {
-                if (pickupAddress.value.trim() !== '' && dropoffAddress.value.trim() !== '') {
-                    isValid = true;
-                }
-            } else if (radRental && radRental.checked) {
-                if (pickupAddress.value.trim() !== '' && dropoffAddress.value.trim() !== '') {
-                    isValid = true;
-                }
-            }
-            
-            if (isValid && roundTripCheckbox.checked && !radHourly.checked) {
-                if (!returnDateInput.value || !returnTimeInput.value) {
-                    isValid = false;
-                }
-            }
-
-            if (isValid) {
-                submitBtn.disabled = false;
-                submitBtn.classList.remove('opacity-60', 'cursor-not-allowed');
-                submitBtn.classList.add('hover:scale-[1.01]', 'cursor-pointer');
-            } else {
-                submitBtn.disabled = true;
-                submitBtn.classList.add('opacity-60', 'cursor-not-allowed');
-                submitBtn.classList.remove('hover:scale-[1.01]', 'cursor-pointer');
-            }
-        }
-
-        // Service Type Visual Toggles
-        function updateServiceType() {
-            const baseClass = "cursor-pointer text-center p-4 rounded-xl text-xs font-semibold uppercase tracking-wider transition-all duration-300 block select-none border border-transparent hover:bg-luxe-grey";
-            const activeClass = "cursor-pointer text-center p-4 rounded-xl text-xs font-semibold uppercase tracking-wider bg-luxe-gold/10 border border-luxe-gold/50 text-luxe-gold block select-none";
-            lblTransfer.className = baseClass;
-            lblHourly.className = baseClass;
-            lblP2P.className = baseClass;
-            if (lblRental) lblRental.className = baseClass;
-            
-            iconHourly.className = "fas fa-clock text-base text-gray-500 mb-2 block";
-            iconP2P.className = "fas fa-route text-base text-gray-500 mb-2 block";
-            if (iconRental) iconRental.className = "fas fa-car text-base text-gray-500 mb-2 block";
-            spanHourly.className = "block text-gray-400";
-            spanP2P.className = "block text-gray-400";
-            if (spanRental) spanRental.className = "block text-gray-400";
-
-            if (radTransfer.checked) {
-                lblTransfer.className = activeClass;
-                divAirportTransferWrapper.classList.remove('hidden');
-                divFlight.classList.remove('hidden');
-                divHourly.classList.add('hidden');
-                divCustomAddresses.classList.add('hidden');
-                divStopsSection.classList.add('hidden');
-                divRoundTrip.classList.remove('hidden');
-                airportSelect.required = true;
-                pickupAddress.required = false;
-                dropoffAddress.required = false;
-            } 
-            else if (radP2P.checked) {
-                lblP2P.className = activeClass;
-                iconP2P.className = "fas fa-route text-base text-luxe-gold mb-2 block";
-                spanP2P.className = "block text-white";
-                divAirportTransferWrapper.classList.add('hidden');
-                divFlight.classList.add('hidden');
-                divHourly.classList.add('hidden');
-                divCustomAddresses.classList.remove('hidden');
-                divDropoffLocation.classList.remove('hidden');
-                divStopsSection.classList.remove('hidden');
-                divStopsCountWrapper.classList.remove('hidden');
-                divRoundTrip.classList.remove('hidden');
-                airportSelect.required = false;
-                pickupAddress.required = true;
-                dropoffAddress.required = true;
-            }
-            else if (radHourly.checked) {
-                lblHourly.className = activeClass;
-                iconHourly.className = "fas fa-clock text-base text-luxe-gold mb-2 block";
-                spanHourly.className = "block text-white";
-                divAirportTransferWrapper.classList.add('hidden');
-                divFlight.classList.add('hidden');
-                divHourly.classList.remove('hidden');
-                divCustomAddresses.classList.remove('hidden');
-                divDropoffLocation.classList.add('hidden');
-                divStopsSection.classList.remove('hidden');
-                divStopsCountWrapper.classList.add('hidden');
-                divRoundTrip.classList.add('hidden');
-                roundTripCheckbox.checked = false;
-                airportSelect.required = false;
-                pickupAddress.required = true;
-                dropoffAddress.required = false;
-            }
-            else if (radRental && radRental.checked) {
-                lblRental.className = activeClass;
-                iconRental.className = "fas fa-car text-base text-luxe-gold mb-2 block";
-                spanRental.className = "block text-white";
-                divAirportTransferWrapper.classList.add('hidden');
-                divFlight.classList.add('hidden');
-                divHourly.classList.add('hidden');
-                divCustomAddresses.classList.remove('hidden');
-                divDropoffLocation.classList.remove('hidden');
-                divStopsSection.classList.add('hidden');
-                divRoundTrip.classList.remove('hidden');
-                airportSelect.required = false;
-                pickupAddress.required = true;
-                dropoffAddress.required = true;
-            }
-            toggleRoundTripFields();
-            checkValidation();
-            if (bookingMap) setTimeout(() => bookingMap.invalidateSize(), 200);
-        }
-
-        function toggleRoundTripFields() {
-            if (roundTripCheckbox.checked && !divRoundTrip.classList.contains('hidden')) {
-                divReturnFields.classList.remove('hidden');
-                returnDateInput.required = true;
-                returnTimeInput.required = true;
-            } else {
-                divReturnFields.classList.add('hidden');
-                returnDateInput.required = false;
-                returnTimeInput.required = false;
-            }
-            checkValidation();
-        }
-
-        // Attach Event Listeners to Radios
-        radTransfer.addEventListener('change', updateServiceType);
-        radHourly.addEventListener('change', updateServiceType);
-        radP2P.addEventListener('change', updateServiceType);
-        if (radRental) radRental.addEventListener('change', updateServiceType);
-        roundTripCheckbox.addEventListener('change', toggleRoundTripFields);
-        returnDateInput.addEventListener('change', checkValidation);
-        returnTimeInput.addEventListener('change', checkValidation);
-
-        // Airport select → move map
-        airportSelect.addEventListener('change', () => {
-            checkValidation();
-            if (bookingMap) {
-                const opt = airportSelect.options[airportSelect.selectedIndex];
-                const lat = parseFloat(opt.dataset.lat), lng = parseFloat(opt.dataset.lng);
-                if (!isNaN(lat) && !isNaN(lng)) { 
-                    pickupMarker.setLatLng([lat, lng]); 
-                    bookingMap.flyTo([lat, lng], 11);
-                    document.getElementById('pickup_lat').value = lat;
-                    document.getElementById('pickup_lng').value = lng;
-                    updateDistanceAndRoute();
-                }
-            }
-        });
-
-        // Geocoding for destination address (airport transfer)
-        let geocodeTimeout = null;
-        destinationAddress.addEventListener('input', () => {
-            checkValidation();
-            clearTimeout(geocodeTimeout);
-            const q = destinationAddress.value.trim();
-            if (q.length < 5) { geocodeStatus.classList.add('hidden'); return; }
-            geocodeTimeout = setTimeout(() => geocodeAddress(q, 'destination'), 800);
-        });
-
-        pickupAddress.addEventListener('input', checkValidation);
-        dropoffAddress.addEventListener('input', checkValidation);
-
-        // ── Direction Switch Logic ──
-        const btnSwitchDirection = document.getElementById('btn-switch-direction');
-        const transferDirectionInput = document.getElementById('transfer_direction');
-        const lblTransferStart = document.getElementById('lbl-transfer-start');
-        const lblTransferEnd = document.getElementById('lbl-transfer-end');
-        const iconTransferStart = document.getElementById('icon-transfer-start');
-        const iconTransferEnd = document.getElementById('icon-transfer-end');
-        const startWrapper = document.getElementById('transfer-start-wrapper');
-        const endWrapper = document.getElementById('transfer-end-wrapper');
-
-        if (btnSwitchDirection) {
-            btnSwitchDirection.addEventListener('click', () => {
-                if (transferDirectionInput.value === 'AIRPORT_TO_DEST') {
-                    transferDirectionInput.value = 'DEST_TO_AIRPORT';
-                    lblTransferStart.textContent = "Destination Airport";
-                    lblTransferEnd.textContent = "Pickup Address";
-                    iconTransferStart.className = "fas fa-plane-arrival text-sm";
-                    iconTransferEnd.className = "fas fa-map-pin text-sm";
-                    destinationAddress.placeholder = "Enter your pickup address...";
-                    startWrapper.style.order = "3";
-                    endWrapper.style.order = "1";
-                } else {
-                    transferDirectionInput.value = 'AIRPORT_TO_DEST';
-                    lblTransferStart.textContent = "Origin Airport";
-                    lblTransferEnd.textContent = "Drop-off Address";
-                    iconTransferStart.className = "fas fa-plane-departure text-sm";
-                    iconTransferEnd.className = "fas fa-map-pin text-sm";
-                    destinationAddress.placeholder = "Enter your destination address...";
-                    startWrapper.style.order = "1";
-                    endWrapper.style.order = "3";
-                }
-                
-                // Swap coordinate inputs values
-                const pLat = document.getElementById('pickup_lat').value;
-                const pLng = document.getElementById('pickup_lng').value;
-                document.getElementById('pickup_lat').value = document.getElementById('dropoff_lat').value;
-                document.getElementById('pickup_lng').value = document.getElementById('dropoff_lng').value;
-                document.getElementById('dropoff_lat').value = pLat;
-                document.getElementById('dropoff_lng').value = pLng;
-
-                if (pickupMarker && dropoffMarker) {
-                    const startPos = pickupMarker.getLatLng();
-                    const endPos = dropoffMarker.getLatLng();
-                    pickupMarker.setLatLng(endPos);
-                    dropoffMarker.setLatLng(startPos);
-                    updateDistanceAndRoute();
-                }
-
-                checkValidation();
-            });
-        }
-
-        // ── Initialize Leaflet Map (Dark Theme) ──
-        const mapElement = document.getElementById('booking-map');
-        let bookingMap, pickupMarker, dropoffMarker, routeLine;
-
-        if (mapElement) {
-            {% if site_slug == 'dr' %}const mapCenter = [18.7357, -69.9509];{% else %}const mapCenter = [40.7128, -74.0060];{% endif %}
-            bookingMap = L.map('booking-map', { zoomControl: true, attributionControl: false }).setView(mapCenter, 11);
-            L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { maxZoom: 20 }).addTo(bookingMap);
-
-            const goldIcon = L.divIcon({ className: 'custom-div-icon', html: '<div class="w-8 h-8 rounded-full bg-luxe-gold/20 flex items-center justify-center relative"><div class="w-4 h-4 rounded-full bg-luxe-gold flex items-center justify-center shadow-lg"><i class="fas fa-location-dot text-black text-[9px]"></i></div></div>', iconSize: [32, 32], iconAnchor: [16, 16] });
-            const silverIcon = L.divIcon({ className: 'custom-div-icon', html: '<div class="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center relative"><div class="w-4 h-4 rounded-full bg-white flex items-center justify-center shadow-lg"><i class="fas fa-flag text-black text-[9px]"></i></div></div>', iconSize: [32, 32], iconAnchor: [16, 16] });
-
-            pickupMarker = L.marker(mapCenter, { draggable: true, icon: goldIcon }).addTo(bookingMap);
-            dropoffMarker = L.marker([mapCenter[0] + 0.05, mapCenter[1] + 0.05], { draggable: true, icon: silverIcon }).addTo(bookingMap);
-
-            // ── Haversine distance calculation ──
-            function haversineDistance(lat1, lon1, lat2, lon2) {
-                const R = 6371;
-                const dLat = (lat2 - lat1) * Math.PI / 180;
-                const dLon = (lon2 - lon1) * Math.PI / 180;
-                const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-                          Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-                          Math.sin(dLon / 2) * Math.sin(dLon / 2);
-                const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-                return R * c;
-            }
-
-            // ── Draw route line and calculate distance ──
-            function updateDistanceAndRoute() {
-                if (routeLine) bookingMap.removeLayer(routeLine);
-                const p = pickupMarker.getLatLng();
-                const d = dropoffMarker.getLatLng();
-                routeLine = L.polyline([p, d], { color: '#C9A84C', weight: 2, opacity: 0.6, dashArray: '8, 8' }).addTo(bookingMap);
-                
-                const distKm = haversineDistance(p.lat, p.lng, d.lat, d.lng);
-                const distField = document.getElementById('distance_km');
-                if (distField) distField.value = distKm.toFixed(2);
-                
-                if (geocodeStatus && geocodeStatusText) {
-                    geocodeStatus.classList.remove('hidden');
-                    geocodeStatusText.textContent = `Route distance: ${distKm.toFixed(1)} km`;
-                }
-
-                bookingMap.fitBounds(L.latLngBounds([p, d]), { padding: [40, 40] });
-            }
-
-            // ── Reverse geocoding via Nominatim ──
-            function reverseGeocode(lat, lng, input) {
-                fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`)
-                    .then(r => r.json()).then(data => {
-                        if (data && data.display_name) {
-                            const a = data.address;
-                            let addr = data.display_name;
-                            if (a) {
-                                const road = a.road || a.pedestrian || a.suburb || "";
-                                const num = a.house_number || "";
-                                const city = a.city || a.town || a.village || "";
-                                if (road) addr = `${num} ${road}, ${city}`.trim();
-                            }
-                            input.value = addr;
-                            input.dispatchEvent(new Event('input'));
-                            checkValidation();
-                        }
-                    }).catch(e => console.error("Geocode error:", e));
-            }
-
-            // ── Forward geocoding via Nominatim ──
-            function geocodeAddress(query, type) {
-                fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`)
-                    .then(r => r.json()).then(data => {
-                        if (data && data.length > 0) {
-                            const lat = parseFloat(data[0].lat), lng = parseFloat(data[0].lon);
-                            if (type === 'destination') { 
-                                dropoffMarker.setLatLng([lat, lng]); 
-                                geocodeStatus.classList.remove('hidden'); 
-                                geocodeStatusText.textContent = data[0].display_name.substring(0, 80) + '...';
-                                document.getElementById('dropoff_lat').value = lat;
-                                document.getElementById('dropoff_lng').value = lng;
-                            }
-                            else if (type === 'pickup') {
-                                pickupMarker.setLatLng([lat, lng]);
-                                document.getElementById('pickup_lat').value = lat;
-                                document.getElementById('pickup_lng').value = lng;
-                            }
-                            else {
-                                dropoffMarker.setLatLng([lat, lng]);
-                                document.getElementById('dropoff_lat').value = lat;
-                                document.getElementById('dropoff_lng').value = lng;
-                            }
-                            updateDistanceAndRoute();
-                        } else if (type === 'destination') {
-                            geocodeStatus.classList.remove('hidden');
-                            geocodeStatusText.textContent = 'Address not found — please refine';
-                        }
-                    }).catch(e => console.error("Geocode error:", e));
-            }
-
-            // ── Marker drag events ──
-            pickupMarker.on('dragend', () => { 
-                const p = pickupMarker.getLatLng();
-                reverseGeocode(p.lat, p.lng, pickupAddress); 
-                document.getElementById('pickup_lat').value = p.lat;
-                document.getElementById('pickup_lng').value = p.lng;
-                updateDistanceAndRoute(); 
-            });
-            dropoffMarker.on('dragend', () => { 
-                const p = dropoffMarker.getLatLng(); 
-                if (radTransfer.checked) reverseGeocode(p.lat, p.lng, destinationAddress); 
-                else reverseGeocode(p.lat, p.lng, dropoffAddress); 
-                document.getElementById('dropoff_lat').value = p.lat;
-                document.getElementById('dropoff_lng').value = p.lng;
-                updateDistanceAndRoute(); 
-            });
-
-            // ── Map click handler ──
-            let activeInput = 'pickup';
-            pickupAddress.addEventListener('focus', () => activeInput = 'pickup');
-            dropoffAddress.addEventListener('focus', () => activeInput = 'dropoff');
-            destinationAddress.addEventListener('focus', () => activeInput = 'destination');
-
-            bookingMap.on('click', (e) => {
-                const ll = e.latlng;
-                if (radTransfer.checked) { 
-                    dropoffMarker.setLatLng(ll); 
-                    reverseGeocode(ll.lat, ll.lng, destinationAddress);
-                    document.getElementById('dropoff_lat').value = ll.lat;
-                    document.getElementById('dropoff_lng').value = ll.lng;
-                }
-                else if (activeInput === 'pickup') { 
-                    pickupMarker.setLatLng(ll); 
-                    reverseGeocode(ll.lat, ll.lng, pickupAddress); 
-                    document.getElementById('pickup_lat').value = ll.lat;
-                    document.getElementById('pickup_lng').value = ll.lng;
-                    activeInput = 'dropoff'; 
-                }
-                else { 
-                    dropoffMarker.setLatLng(ll); 
-                    reverseGeocode(ll.lat, ll.lng, dropoffAddress); 
-                    document.getElementById('dropoff_lat').value = ll.lat;
-                    document.getElementById('dropoff_lng').value = ll.lng;
-                    activeInput = 'pickup'; 
-                }
-                updateDistanceAndRoute();
-            });
-
-            // ── Address input geocoding with debounce ──
-            let pGeo, dGeo;
-            pickupAddress.addEventListener('input', () => { clearTimeout(pGeo); const q = pickupAddress.value.trim(); if (q.length >= 5) pGeo = setTimeout(() => geocodeAddress(q, 'pickup'), 800); });
-            dropoffAddress.addEventListener('input', () => { clearTimeout(dGeo); const q = dropoffAddress.value.trim(); if (q.length >= 5) dGeo = setTimeout(() => geocodeAddress(q, 'dropoff'), 800); });
-        }
-
-        // URL Search Params pre-selection
-        const urlParams = new URLSearchParams(window.location.search);
-        const serviceTypeParam = urlParams.get('service_type');
-        if (serviceTypeParam === 'luxury_rental' && radRental) {
-            radRental.checked = true;
-        } else if (serviceTypeParam === 'point_to_point') {
-            radP2P.checked = true;
-        } else if (serviceTypeParam === 'hourly') {
-            radHourly.checked = true;
-        } else if (serviceTypeParam === 'airport_transfer') {
-            radTransfer.checked = true;
-        }
-
-        // Initial setup
-        updateServiceType();
-
-        // 3D Parallax & Mouse Interactivity for Hero Image
-        const parallaxImg = document.getElementById('hero-parallax-img');
-        const heroSection = document.getElementById('hero-section');
-        if (parallaxImg && heroSection) {
-            let targetX = 0, targetY = 0, targetRotX = 0, targetRotY = 0;
-            let currentX = 0, currentY = 0, currentRotX = 0, currentRotY = 0;
-            
-            let time = 0;
-            let mouseX = 0, mouseY = 0;
-            let mouseActive = false;
-
-            heroSection.addEventListener('mousemove', (e) => {
-                const rect = heroSection.getBoundingClientRect();
-                mouseX = ((e.clientX - rect.left) / rect.width) * 2 - 1;
-                mouseY = ((e.clientY - rect.top) / rect.height) * 2 - 1;
-                mouseActive = true;
-            }, { passive: true });
-
-            heroSection.addEventListener('mouseleave', () => {
-                mouseActive = false;
-            }, { passive: true });
-
-            function animate() {
-                time += 1;
-
-                const ambX = Math.sin(time * 0.008) * 15;
-                const ambY = Math.cos(time * 0.006) * 10;
-                const ambRotX = Math.sin(time * 0.005) * 0.8;
-                const ambRotY = Math.cos(time * 0.005) * 0.8;
-
-                if (mouseActive) {
-                    targetX = mouseX * -25 + ambX * 0.3;
-                    targetY = mouseY * -25 + ambY * 0.3;
-                    targetRotX = mouseY * 4.5 + ambRotX * 0.3;
-                    targetRotY = mouseX * -4.5 + ambRotY * 0.3;
-                } else {
-                    targetX = ambX;
-                    targetY = ambY;
-                    targetRotX = ambRotX;
-                    targetRotY = ambRotY;
-                }
-
-                const scrollOffset = window.pageYOffset * 0.3;
-                const finalTargetY = targetY + scrollOffset;
-
-                currentX += (targetX - currentX) * 0.08;
-                currentY += (finalTargetY - currentY) * 0.08;
-                currentRotX += (targetRotX - currentRotX) * 0.08;
-                currentRotY += (targetRotY - currentRotY) * 0.08;
-
-                parallaxImg.style.transform = `translate3d(${currentX}px, ${currentY}px, 0) rotateX(${currentRotX}deg) rotateY(${currentRotY}deg) scale(1.15)`;
-
-                requestAnimationFrame(animate);
-            }
-
-            requestAnimationFrame(animate);
-        }
-    });
-</script>
-{% endblock %}
-
+{% extends "core/base.html" %}
+{% load static %}
+{% load site_tags %}
+
+{% block title %}
+    {% if current_site.hero_title %}{{ current_site.hero_title }}{% else %}AeroLux Select | Premium Chauffeur & Transfers{% endif %}
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    #booking-map {
+        background: #0A0A0A !important;
+        font-family: 'Outfit', sans-serif;
+    }
+    .hero-perspective {
+        perspective: 1200px;
+        transform-style: preserve-3d;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Immersive Hero Section -->
+<section id="hero-section" class="relative min-h-[60vh] md:min-h-[90vh] flex items-center justify-center overflow-hidden py-12 md:py-16 lg:py-24">
+    <!-- Video / Static Image Background -->
+    <div class="absolute inset-0 z-0 overflow-hidden hero-perspective">
+        <div class="absolute inset-0 bg-black/60 z-10"></div>
+        {% if current_site.slug == 'nyc' %}
+            <!-- Parallax Hero Image for NYC -->
+            <img src="{% static 'core/images/nyc-hero.jpg' %}?v=3" alt="NYC Premium Car Service" id="hero-parallax-img" class="w-full h-full md:h-[130%] object-cover md:object-cover object-center absolute top-0 md:-top-[15%] left-0 will-change-transform">
+        {% elif current_site.slug == 'dr' %}
+            <!-- Parallax Hero Image for DR -->
+            <img src="{% static 'core/images/dr-hero.jpg' %}?v=3" alt="Dominican Republic VIP Transfers" id="hero-parallax-img" class="w-full h-full md:h-[130%] object-cover md:object-cover object-center absolute top-0 md:-top-[15%] left-0 will-change-transform">
+        {% elif current_site.hero_video_url %}
+            <video autoplay loop muted playsinline class="w-full h-full object-cover">
+                <source src="{{ current_site.hero_video_url }}" type="video/mp4">
+            </video>
+        {% else %}
+            <!-- Luxury Black Vehicle Background -->
+            <img src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&q=80&w=1920" alt="AeroLux Select" class="w-full h-full object-cover object-center">
+        {% endif %}
+    </div>
+
+    <!-- Content & Booking Form Container -->
+    <div class="relative z-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+        <!-- Hero Text Column -->
+        <div class="lg:col-span-6 space-y-6 text-center lg:text-left">
+            <div class="inline-flex items-center space-x-2 bg-luxe-gold/10 border border-luxe-gold/30 px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider text-luxe-gold">
+                <i class="fas fa-crown"></i>
+                <span>Premium Chauffeur Service</span>
+            </div>
+            
+            <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight font-display text-white leading-tight">
+                {% site_content 'hero_title' current_site.hero_title|default:"AeroLux Select" %}
+            </h1>
+            
+            <p class="text-lg text-gray-300 max-w-xl mx-auto lg:mx-0 leading-relaxed font-light">
+                {% site_content 'hero_subtitle' current_site.hero_subtitle|default:"Experience ultimate luxury and security." %}
+            </p>
+            
+            <div class="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 pt-4">
+                <a href="#services" class="border border-white/20 hover:border-luxe-gold bg-white/5 hover:bg-luxe-gold/10 px-8 py-3.5 rounded-full text-sm uppercase tracking-wider font-semibold transition-all duration-300 w-full sm:w-auto text-center">
+                    Explore Services
+                </a>
+                <a href="{% site_url 'fleet' %}" class="text-sm font-semibold tracking-wider uppercase text-white hover:text-luxe-gold transition-all duration-300 flex items-center space-x-2 py-3">
+                    <span>View Our Fleet</span>
+                    <i class="fas fa-arrow-right text-xs"></i>
+                </a>
+            </div>
+        </div>
+
+        <!-- Dynamic Booking Widget Column -->
+        <div class="lg:col-span-6">
+            <div class="glass-card rounded-3xl p-6 sm:p-8 shadow-2xl relative overflow-hidden">
+                <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-luxe-gold to-luxe-gold-bright"></div>
+                <h3 class="text-xl font-semibold tracking-wider font-display mb-6 uppercase flex items-center space-x-2 text-luxe-gold">
+                    <i class="fas fa-calendar-check"></i>
+                    <span>Quick Reservation</span>
+                </h3>
+
+                <form action="{% site_url 'booking_step1' %}" method="POST" id="booking-step1-form" class="space-y-6">
+                    {% csrf_token %}
+                    <input type="hidden" name="pickup_lat" id="pickup_lat">
+                    <input type="hidden" name="pickup_lng" id="pickup_lng">
+                    <input type="hidden" name="dropoff_lat" id="dropoff_lat">
+                    <input type="hidden" name="dropoff_lng" id="dropoff_lng">
+                    <input type="hidden" name="distance_km" id="distance_km">
+
+                    <!-- Service Type selector -->
+                    <div>
+                        <label class="block text-xs uppercase tracking-widest font-bold text-gray-400 mb-3">Service Type</label>
+                    <div class="grid grid-cols-2 {% if site_slug == 'dr' %}sm:grid-cols-4{% else %}sm:grid-cols-3{% endif %} gap-2 sm:gap-3 bg-luxe-black p-1.5 rounded-2xl border border-gray-800">
+                        <label class="cursor-pointer text-center p-4 rounded-xl text-xs font-semibold uppercase tracking-wider transition-all duration-300 block select-none border border-transparent" id="lbl-transfer">
+                            <input type="radio" name="service_type" value="airport_transfer" checked class="sr-only" id="rad-transfer">
+                            <i class="fas fa-plane-departure text-base text-luxe-gold mb-2 block"></i>
+                            <span class="block">Airport Transfer</span>
+                        </label>
+                        <label class="cursor-pointer text-center p-4 rounded-xl text-xs font-semibold uppercase tracking-wider transition-all duration-300 block select-none border border-transparent" id="lbl-p2p">
+                            <input type="radio" name="service_type" value="point_to_point" class="sr-only" id="rad-p2p">
+                            <i class="fas fa-route text-base text-gray-500 mb-2 block" id="icon-p2p"></i>
+                            <span class="block text-gray-400" id="span-p2p">Point to Point</span>
+                        </label>
+                        <label class="cursor-pointer text-center p-4 rounded-xl text-xs font-semibold uppercase tracking-wider transition-all duration-300 block select-none border border-transparent" id="lbl-hourly">
+                            <input type="radio" name="service_type" value="hourly" class="sr-only" id="rad-hourly">
+                            <i class="fas fa-clock text-base text-gray-500 mb-2 block" id="icon-hourly"></i>
+                            <span class="block text-gray-400" id="span-hourly">Hourly Chauffeur</span>
+                        </label>
+                        {% if site_slug == 'dr' %}
+                        <label class="cursor-pointer text-center p-4 rounded-xl text-xs font-semibold uppercase tracking-wider transition-all duration-300 block select-none border border-transparent" id="lbl-rental">
+                            <input type="radio" name="service_type" value="luxury_rental" class="sr-only" id="rad-rental">
+                            <i class="fas fa-car text-base text-gray-500 mb-2 block" id="icon-rental"></i>
+                            <span class="block text-gray-400" id="span-rental">Luxury Rental</span>
+                        </label>
+                        {% endif %}
+                    </div>
+                    </div>
+
+                    <!-- Interactive Dark Map -->
+                    <div class="relative w-full h-[280px] bg-luxe-black border border-gray-800 rounded-2xl overflow-hidden shadow-inner group mb-2">
+                        <div id="booking-map" class="w-full h-full z-0"></div>
+                        <div class="absolute top-4 left-4 z-[1000] bg-luxe-black/90 px-3 py-1.5 rounded-lg border border-gray-800 backdrop-blur-md">
+                            <span class="text-[9px] uppercase font-bold tracking-widest text-luxe-gold flex items-center gap-1.5">
+                                <i class="fa-solid fa-map-location-dot animate-pulse"></i>
+                                <span>Interactive Luxury Routing Map</span>
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Direction State Tracker -->
+                    <input type="hidden" name="transfer_direction" id="transfer_direction" value="AIRPORT_TO_DEST">
+
+                    <!-- Airport Transfer wrapper (airport + address with Toggle switch) -->
+                    <div id="div-airport-transfer-wrapper" class="space-y-4">
+                        <div class="flex flex-col md:flex-row items-center gap-4 relative">
+                            <!-- Left Block: Airport Select (default: Origin Airport) -->
+                            <div id="transfer-start-wrapper" class="w-full font-light">
+                                <label id="lbl-transfer-start" for="airport_id" class="block text-xs uppercase tracking-widest font-bold text-gray-400 mb-2">Origin Airport</label>
+                                <div class="relative">
+                                    <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-luxe-gold">
+                                        <i class="fas fa-plane-departure text-sm" id="icon-transfer-start"></i>
+                                    </span>
+                                    <select name="airport_id" id="airport_id" class="block w-full pl-11 pr-10 py-4 bg-luxe-black/80 rounded-xl border border-gray-800 focus:border-luxe-gold text-sm text-white focus:outline-none focus:ring-1 focus:ring-luxe-gold appearance-none">
+                                        <option value="" disabled selected>Select Airport...</option>
+                                        {% for airport in airports %}
+                                        <option value="{{ airport.id }}" data-lat="{{ airport.latitude }}" data-lng="{{ airport.longitude }}">{{ airport.code }} ÔÇö {{ airport.name }}</option>
+                                        {% empty %}
+                                        <option value="" disabled>No serviced airports in this hub</option>
+                                        {% endfor %}
+                                    </select>
+                                    <span class="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-500 pointer-events-none">
+                                        <i class="fas fa-chevron-down text-xs"></i>
+                                    </span>
+                                </div>
+                            </div>
+
+                            <!-- Inversion Toggle Button -->
+                            <div class="flex justify-center items-center md:pt-6">
+                                <button type="button" id="btn-switch-direction" class="w-10 h-10 rounded-full bg-luxe-black border border-gray-800 text-luxe-gold hover:border-luxe-gold/50 hover:text-luxe-gold-bright transition-all duration-300 flex items-center justify-center shadow-lg active:scale-95 cursor-pointer" title="Switch Directions">
+                                    <i class="fas fa-right-left rotate-90 md:rotate-0 text-sm"></i>
+                                </button>
+                            </div>
+
+                            <!-- Right Block: Destination Address (free text with geocoding) -->
+                            <div id="transfer-end-wrapper" class="w-full font-light">
+                                <label id="lbl-transfer-end" for="destination_address" class="block text-xs uppercase tracking-widest font-bold text-gray-400 mb-2">Drop-off Address</label>
+                                <div class="relative">
+                                    <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-luxe-gold">
+                                        <i class="fas fa-map-pin text-sm" id="icon-transfer-end"></i>
+                                    </span>
+                                    <input type="text" name="destination_address" id="destination_address" placeholder="Enter your destination address..." class="block w-full pl-11 pr-4 py-4 bg-luxe-black/80 rounded-xl border border-gray-800 focus:border-luxe-gold text-sm text-white focus:outline-none focus:ring-1 focus:ring-luxe-gold font-light" autocomplete="off">
+                                </div>
+                                <!-- Geocoding result info -->
+                                <p id="geocode-status" class="text-[10px] text-gray-500 mt-1 font-light hidden">
+                                    <i class="fas fa-map-marker-alt text-luxe-gold mr-1"></i>
+                                    <span id="geocode-status-text">Address found ÔÇö displaying on map</span>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Hourly fields (Hidden by Default, minimum 3 hours, maximum 12 hours) -->
+                    <div id="div-hourly" class="hidden space-y-4">
+                        <div>
+                            <label for="hours_requested" class="block text-xs uppercase tracking-widest font-bold text-gray-400 mb-2">Hours Requested (3 - 12 Hours)</label>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-luxe-gold">
+                                    <i class="fas fa-stopwatch text-sm"></i>
+                                </span>
+                                <input type="number" name="hours_requested" id="hours_requested" min="3" max="12" value="3" class="block w-full pl-11 pr-4 py-4 bg-luxe-black/80 rounded-xl border border-gray-800 focus:border-luxe-gold text-sm text-white focus:outline-none focus:ring-1 focus:ring-luxe-gold">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Custom Pickup / Drop-off Addresses as interactive cards (shown for hourly/point-to-point) -->
+                    <div id="div-custom-addresses" class="hidden grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Starting Location Card -->
+                        <div class="glass-card rounded-2xl p-5 border border-gray-800 hover:border-luxe-gold/50 transition-all duration-500 flex flex-col space-y-4 group">
+                            <div class="flex items-center justify-between">
+                                <label for="pickup_address" class="block text-xs uppercase tracking-widest font-bold text-gray-400">Pickup Location (Depart)</label>
+                                <span class="text-luxe-gold animate-pulse text-xs"><i class="fas fa-circle-dot"></i></span>
+                            </div>
+                            
+                            <!-- Visual Micro Map representation -->
+                            <div id="map-pickup" class="relative w-full h-28 bg-luxe-black border border-gray-900 rounded-xl overflow-hidden cursor-pointer group-hover:border-luxe-gold/30 transition-colors duration-500">
+                                <!-- SVG Grid lines simulating map streets -->
+                                <svg class="absolute inset-0 w-full h-full opacity-20 stroke-gray-700" xmlns="http://www.w3.org/2000/svg">
+                                    <defs>
+                                        <pattern id="grid-pickup-hero" width="20" height="20" patternUnits="userSpaceOnUse">
+                                            <path d="M 20 0 L 0 0 0 20" fill="none" stroke-width="0.5"/>
+                                        </pattern>
+                                    </defs>
+                                    <rect width="100%" height="100%" fill="url(#grid-pickup-hero)" />
+                                    <!-- Mock Route lines -->
+                                    <path d="M 20 50 Q 150 20 280 80" fill="none" stroke="#C9A84C" stroke-width="2" class="opacity-40" />
+                                </svg>
+                                <!-- Glowing GPS Marker pin -->
+                                <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center">
+                                    <div class="w-8 h-8 rounded-full bg-luxe-gold/20 flex items-center justify-center animate-ping absolute"></div>
+                                    <div class="w-4 h-4 rounded-full bg-luxe-gold/40 flex items-center justify-center animate-pulse absolute"></div>
+                                    <i class="fas fa-location-dot text-luxe-gold text-lg z-10 filter drop-shadow-[0_0_8px_rgba(201,168,76,0.6)]"></i>
+                                </div>
+                                <span class="absolute bottom-2 right-2 text-[8px] uppercase tracking-wider text-gray-500 font-bold bg-luxe-black/80 px-2 py-0.5 rounded border border-gray-900">Click to Select Plaza Hotel</span>
+                            </div>
+
+                            <!-- TextInput field integrated inside the card -->
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-luxe-gold">
+                                    <i class="fas fa-search text-xs"></i>
+                                </span>
+                                <input type="text" name="pickup_address" id="pickup_address" placeholder="Enter starting address..." class="block w-full pl-10 pr-4 py-3.5 bg-luxe-black/90 rounded-xl border border-gray-800 focus:border-luxe-gold text-xs text-white focus:outline-none focus:ring-1 focus:ring-luxe-gold font-light transition-all duration-300">
+                            </div>
+                        </div>
+
+                        <!-- Destination Location Card -->
+                        <div id="div-dropoff-location" class="glass-card rounded-2xl p-5 border border-gray-800 hover:border-luxe-gold/50 transition-all duration-500 flex flex-col space-y-4 group">
+                            <div class="flex items-center justify-between">
+                                <label for="dropoff_address" class="block text-xs uppercase tracking-widest font-bold text-gray-400">Destination Location (Arrival)</label>
+                                <span class="text-luxe-gold animate-pulse text-xs"><i class="fas fa-location-dot"></i></span>
+                            </div>
+                            
+                            <!-- Visual Micro Map representation -->
+                            <div id="map-dropoff" class="relative w-full h-28 bg-luxe-black border border-gray-900 rounded-xl overflow-hidden cursor-pointer group-hover:border-luxe-gold/30 transition-colors duration-500">
+                                <!-- SVG Grid lines simulating map streets -->
+                                <svg class="absolute inset-0 w-full h-full opacity-20 stroke-gray-700" xmlns="http://www.w3.org/2000/svg">
+                                    <rect width="100%" height="100%" fill="url(#grid-pickup-hero)" />
+                                    <!-- Mock Route lines -->
+                                    <path d="M 280 80 Q 150 20 20 50" fill="none" stroke="#C9A84C" stroke-width="2" class="opacity-40" />
+                                </svg>
+                                <!-- Glowing GPS Marker pin -->
+                                <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center">
+                                    <div class="w-8 h-8 rounded-full bg-luxe-gold/20 flex items-center justify-center animate-ping absolute"></div>
+                                    <div class="w-4 h-4 rounded-full bg-luxe-gold/40 flex items-center justify-center animate-pulse absolute"></div>
+                                    <i class="fas fa-location-arrow text-luxe-gold text-base z-10 filter drop-shadow-[0_0_8px_rgba(201,168,76,0.6)]"></i>
+                                </div>
+                                <span class="absolute bottom-2 right-2 text-[8px] uppercase tracking-wider text-gray-500 font-bold bg-luxe-black/80 px-2 py-0.5 rounded border border-gray-900">Click to Select JFK Airport</span>
+                            </div>
+
+                            <!-- TextInput field integrated inside the card -->
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-luxe-gold">
+                                    <i class="fas fa-search text-xs"></i>
+                                </span>
+                                <input type="text" name="dropoff_address" id="dropoff_address" placeholder="Enter destination address..." class="block w-full pl-10 pr-4 py-3.5 bg-luxe-black/90 rounded-xl border border-gray-800 focus:border-luxe-gold text-xs text-white focus:outline-none focus:ring-1 focus:ring-luxe-gold font-light transition-all duration-300">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Intermediate Stops Section (For Hourly and Point-to-Point) -->
+                    <div id="div-stops-section" class="hidden space-y-4 bg-luxe-black/30 p-5 rounded-2xl border border-gray-800">
+                        <div class="flex items-center justify-between">
+                            <label for="number_of_stops" class="block text-xs uppercase tracking-widest font-bold text-gray-400">Intermediate Stops</label>
+                            <div class="flex items-center space-x-2" id="div-stops-count-wrapper">
+                                <span class="text-[10px] text-gray-500 font-semibold uppercase">Quantity:</span>
+                                <input type="number" name="number_of_stops" id="number_of_stops" min="0" value="0" class="w-16 bg-luxe-black border border-gray-800 rounded px-2 py-1 text-xs text-white focus:border-luxe-gold outline-none">
+                                <span class="text-[10px] text-luxe-gold font-bold">($20/stop for Point-to-Point)</span>
+                            </div>
+                        </div>
+                        <div>
+                            <label for="stop_addresses" class="block text-[10px] uppercase text-gray-500 font-bold mb-1">Stop Addresses</label>
+                            <textarea name="stop_addresses" id="stop_addresses" rows="2" placeholder="List address details for each stop..." class="block w-full px-4 py-3 bg-luxe-black rounded-lg border border-gray-800 focus:border-luxe-gold text-xs text-white focus:outline-none focus:ring-1 focus:ring-luxe-gold font-light"></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Date, Time, Passengers and Flight details -->
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <div>
+                            <label for="pickup_date" class="block text-xs uppercase tracking-widest font-bold text-gray-400 mb-2">Pickup Date</label>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-luxe-gold">
+                                    <i class="fas fa-calendar-days text-sm"></i>
+                                </span>
+                                <input type="date" name="pickup_date" id="pickup_date" required min="{{ today }}" value="{{ today }}" class="block w-full pl-11 pr-4 py-4 bg-luxe-black/80 rounded-xl border border-gray-800 focus:border-luxe-gold text-sm text-white focus:outline-none focus:ring-1 focus:ring-luxe-gold">
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label for="pickup_time" class="block text-xs uppercase tracking-widest font-bold text-gray-400 mb-2">Pickup Time</label>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-luxe-gold">
+                                    <i class="fas fa-clock text-sm"></i>
+                                </span>
+                                <input type="time" name="pickup_time" id="pickup_time" required value="12:00" class="block w-full pl-11 pr-4 py-4 bg-luxe-black/80 rounded-xl border border-gray-800 focus:border-luxe-gold text-sm text-white focus:outline-none focus:ring-1 focus:ring-luxe-gold">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label for="passenger_count" class="block text-xs uppercase tracking-widest font-bold text-gray-400 mb-2">Passengers</label>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-luxe-gold">
+                                    <i class="fas fa-users text-sm"></i>
+                                </span>
+                                <input type="number" name="passenger_count" id="passenger_count" required min="1" max="14" value="1" class="block w-full pl-11 pr-4 py-4 bg-luxe-black/80 rounded-xl border border-gray-800 focus:border-luxe-gold text-sm text-white focus:outline-none focus:ring-1 focus:ring-luxe-gold">
+                            </div>
+                        </div>
+
+                        <div id="div-flight">
+                            <label for="flight_number" class="block text-xs uppercase tracking-widest font-bold text-gray-400 mb-2">Flight Number</label>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-luxe-gold">
+                                    <i class="fas fa-plane text-sm"></i>
+                                </span>
+                                <input type="text" name="flight_number" id="flight_number" placeholder="e.g. AA1234" class="block w-full pl-11 pr-4 py-4 bg-luxe-black/80 rounded-xl border border-gray-800 focus:border-luxe-gold text-sm text-white focus:outline-none focus:ring-1 focus:ring-luxe-gold uppercase">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Round-trip Section (For Airport Transfer and Point-to-Point) -->
+                    <div id="div-round-trip" class="py-2 border-t border-gray-800">
+                        <div class="flex items-center space-x-3">
+                            <input type="checkbox" name="round_trip" id="round_trip" class="w-4 h-4 rounded text-luxe-gold focus:ring-luxe-gold bg-luxe-black border-gray-800">
+                            <label for="round_trip" class="text-xs text-gray-400 font-bold uppercase tracking-wider select-none cursor-pointer">
+                                Request Round-Trip leg
+                            </label>
+                        </div>
+                        
+                        <!-- Return date/time subfields (dynamic show) -->
+                        <div id="div-return-fields" class="hidden grid grid-cols-1 md:grid-cols-2 gap-4 mt-4 pt-4 border-t border-gray-900">
+                            <div>
+                                <label for="return_date" class="block text-xs uppercase tracking-widest font-bold text-gray-400 mb-2">Return Date</label>
+                                <div class="relative">
+                                    <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-luxe-gold">
+                                        <i class="fas fa-calendar-days text-sm"></i>
+                                    </span>
+                                    <input type="date" name="return_date" id="return_date" min="{{ today }}" class="block w-full pl-11 pr-4 py-4 bg-luxe-black/80 rounded-xl border border-gray-800 focus:border-luxe-gold text-sm text-white focus:outline-none focus:ring-1 focus:ring-luxe-gold font-light">
+                                </div>
+                            </div>
+                            <div>
+                                <label for="return_time" class="block text-xs uppercase tracking-widest font-bold text-gray-400 mb-2">Return Time</label>
+                                <div class="relative">
+                                    <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-luxe-gold">
+                                        <i class="fas fa-clock text-sm"></i>
+                                    </span>
+                                    <input type="time" name="return_time" id="return_time" class="block w-full pl-11 pr-4 py-4 bg-luxe-black/80 rounded-xl border border-gray-800 focus:border-luxe-gold text-sm text-white focus:outline-none focus:ring-1 focus:ring-luxe-gold font-light">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+
+                    <!-- Meeting Point Field (Visible for all service types) -->
+                    <div class="py-4 border-t border-gray-800 space-y-2">
+                        <label for="meeting_point" class="block text-xs uppercase tracking-widest font-bold text-gray-400">Meeting Point (Lieu de rencontre)</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-luxe-gold">
+                                <i class="fas fa-handshake-simple text-sm"></i>
+                            </span>
+                            <input type="text" name="meeting_point" id="meeting_point" placeholder="e.g. Terminal B exit gate 4, or hotel lobby entrance" class="block w-full pl-11 pr-4 py-4 bg-luxe-black/80 rounded-xl border border-gray-800 focus:border-luxe-gold text-sm text-white focus:outline-none focus:ring-1 focus:ring-luxe-gold font-light font-sans">
+                        </div>
+                        <p class="text-[10px] text-gray-500 font-light">Specify coordinates or instructions on where to meet the private chauffeur upon pickup.</p>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <button type="submit" id="submit-btn" disabled class="w-full gold-btn py-4.5 rounded-xl text-sm uppercase tracking-widest font-semibold mt-6 shadow-xl flex items-center justify-center space-x-3 cursor-not-allowed opacity-60">
+                        <span>Continue to Fleet Selection</span>
+                        <i class="fas fa-arrow-right text-xs"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Premium Services Grid -->
+<section id="services" class="py-24 bg-luxe-dark-grey relative">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Section Header -->
+        <div class="text-center max-w-3xl mx-auto mb-16 space-y-4">
+            <span class="text-xs uppercase font-bold tracking-widest text-luxe-gold">Luxury Offerings</span>
+            <h2 class="text-3xl sm:text-4xl font-extrabold tracking-tight font-display text-white">
+                {% site_content 'services_title' 'VIP Transportation Solutions' %}
+            </h2>
+            <div class="w-20 h-1 bg-luxe-gold mx-auto rounded-full"></div>
+            <p class="text-gray-400 font-light">
+                {% site_content 'services_subtitle' 'Every booking features a high-grade professional driver, modern comfort amenities, and absolute promptness.' %}
+            </p>
+        </div>
+
+        <!-- Services Grid -->
+        <div class="grid grid-cols-1 {% if site_slug == 'dr' %}md:grid-cols-4{% else %}md:grid-cols-3{% endif %} gap-8">
+            <!-- Airport Transfers -->
+            <div class="glass-card rounded-2xl p-8 hover:border-luxe-gold/40 hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between">
+                <div>
+                    <div class="w-14 h-14 bg-luxe-gold/10 border border-luxe-gold/20 rounded-xl flex items-center justify-center mb-6">
+                        <i class="fas fa-plane-departure text-xl text-luxe-gold"></i>
+                    </div>
+                    <h3 class="text-xl font-bold tracking-wide text-white font-display mb-4">Airport Transfers</h3>
+                    <p class="text-gray-400 text-sm leading-relaxed mb-6 font-light">
+                        Flat-rate VIP service with real-time flight tracking, airport meet & greet inside the terminal, and complete flight delay protection.
+                    </p>
+                </div>
+                <a href="{% site_url 'airport_transfer' %}" class="text-xs font-semibold tracking-wider uppercase text-luxe-gold hover:text-luxe-gold-bright transition-colors flex items-center space-x-2">
+                    <span>Learn More</span>
+                    <i class="fas fa-arrow-right text-[10px]"></i>
+                </a>
+            </div>
+
+            <!-- Hourly Chauffeur -->
+            <div class="glass-card rounded-2xl p-8 hover:border-luxe-gold/40 hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between">
+                <div>
+                    <div class="w-14 h-14 bg-luxe-gold/10 border border-luxe-gold/20 rounded-xl flex items-center justify-center mb-6">
+                        <i class="fas fa-clock text-xl text-luxe-gold"></i>
+                    </div>
+                    <h3 class="text-xl font-bold tracking-wide text-white font-display mb-4">Hourly Chauffeur</h3>
+                    <p class="text-gray-400 text-sm leading-relaxed mb-6 font-light">
+                        Premium dedicated service for executives, diplomatic personnel, and multi-stop corporate itineraries. Complete control with premium flex hours.
+                    </p>
+                </div>
+                <a href="{% site_url 'hourly_service' %}" class="text-xs font-semibold tracking-wider uppercase text-luxe-gold hover:text-luxe-gold-bright transition-colors flex items-center space-x-2">
+                    <span>Learn More</span>
+                    <i class="fas fa-arrow-right text-[10px]"></i>
+                </a>
+            </div>
+
+            <!-- Point-to-Point Transfers -->
+            <div class="glass-card rounded-2xl p-8 hover:border-luxe-gold/40 hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between">
+                <div>
+                    <div class="w-14 h-14 bg-luxe-gold/10 border border-luxe-gold/20 rounded-xl flex items-center justify-center mb-6">
+                        <i class="fas fa-route text-xl text-luxe-gold"></i>
+                    </div>
+                    <h3 class="text-xl font-bold tracking-wide text-white font-display mb-4">Point-to-Point</h3>
+                    <p class="text-gray-400 text-sm leading-relaxed mb-6 font-light">
+                        Direct premium transit between any two custom locations, featuring flat starting rates, multiple stop adjustments, and round-trip booking options.
+                    </p>
+                </div>
+                <a href="{% site_url 'booking_step1' %}?service_type=point_to_point" class="text-xs font-semibold tracking-wider uppercase text-luxe-gold hover:text-luxe-gold-bright transition-colors flex items-center space-x-2">
+                    <span>Book Now</span>
+                    <i class="fas fa-arrow-right text-[10px]"></i>
+                </a>
+            </div>
+
+            {% if site_slug == 'dr' %}
+            <!-- Luxury Car Rental -->
+            <div class="glass-card rounded-2xl p-8 hover:border-luxe-gold/40 hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between">
+                <div>
+                    <div class="w-14 h-14 bg-luxe-gold/10 border border-luxe-gold/20 rounded-xl flex items-center justify-center mb-6">
+                        <i class="fas fa-car text-xl text-luxe-gold"></i>
+                    </div>
+                    <h3 class="text-xl font-bold tracking-wide text-white font-display mb-4">Luxury Car Rental</h3>
+                    <p class="text-gray-400 text-sm leading-relaxed mb-6 font-light">
+                        Premium vehicle rentals in Dominican Republic. Choose from elite SUVs and sedans to experience maximum driving freedom and class.
+                    </p>
+                </div>
+                <a href="{% site_url 'luxury_rental' %}" class="text-xs font-semibold tracking-wider uppercase text-luxe-gold hover:text-luxe-gold-bright transition-colors flex items-center space-x-2">
+                    <span>Learn More</span>
+                    <i class="fas fa-arrow-right text-[10px]"></i>
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</section>
+
+<!-- Executive Fleet Preview -->
+<section class="py-24 bg-luxe-black">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-16 items-center">
+            <div class="lg:col-span-5 space-y-6">
+                <span class="text-xs uppercase font-bold tracking-widest text-luxe-gold">{% site_content 'fleet_title' 'Elite Fleet' %}</span>
+                <h2 class="text-3xl sm:text-4xl font-extrabold font-display text-white tracking-tight leading-tight">
+                    {% site_content 'fleet_subtitle' 'Executive SUV Elite Class' %}
+                </h2>
+                <div class="w-16 h-1 bg-luxe-gold rounded-full"></div>
+                <p class="text-gray-400 text-sm leading-relaxed font-light">
+                    Our luxury fleet features the pristine and robust <strong class="text-white">Cadillac Escalade</strong> and <strong class="text-white">Chevrolet Suburban</strong>. Optimized for up to 6 passengers, offering spacious luggage storage, top-tier black leather cabins, and fully integrated Wi-Fi networks.
+                </p>
+                
+                <div class="grid grid-cols-2 gap-4 py-4 text-xs font-medium uppercase tracking-wider text-gray-300">
+                    <div class="flex items-center space-x-3">
+                        <i class="fas fa-users text-luxe-gold"></i>
+                        <span>6 Passengers Max</span>
+                    </div>
+                    <div class="flex items-center space-x-3">
+                        <i class="fas fa-suitcase text-luxe-gold"></i>
+                        <span>6 Large Bags Max</span>
+                    </div>
+                    <div class="flex items-center space-x-3">
+                        <i class="fas fa-wifi text-luxe-gold"></i>
+                        <span>Premium Cabin Wi-Fi</span>
+                    </div>
+                    <div class="flex items-center space-x-3">
+                        <i class="fas fa-bottle-water text-luxe-gold"></i>
+                        <span>Complimentary Water</span>
+                    </div>
+                </div>
+
+                <a href="{% site_url 'fleet' %}" class="gold-btn inline-block px-8 py-3.5 rounded-full text-xs uppercase tracking-widest font-semibold shadow-xl">
+                    View Fleet Catalogue
+                </a>
+            </div>
+
+            <!-- Right Fleet Interactive Display -->
+            <div class="lg:col-span-7 relative group">
+                <div class="absolute -inset-1 bg-gradient-to-r from-luxe-gold/30 to-luxe-gold-bright/30 rounded-3xl blur opacity-30 group-hover:opacity-50 transition duration-1000"></div>
+                <div class="relative glass-card rounded-3xl overflow-hidden shadow-2xl">
+                    <img src="https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&q=80&w=1000" alt="Executive SUV Escalade" class="w-full h-[400px] object-cover group-hover:scale-105 transition-transform duration-700">
+                    <div class="absolute bottom-0 inset-x-0 p-6 bg-gradient-to-t from-black/90 to-transparent">
+                        <h4 class="text-lg font-bold font-display text-white uppercase tracking-wider mb-1">Cadillac Escalade ESV</h4>
+                        <p class="text-xs text-luxe-gold font-semibold uppercase tracking-widest">AeroLux Select Chauffeur standard</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Why Choose Us Section -->
+<section class="py-24 bg-luxe-dark-grey relative overflow-hidden">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Section Header -->
+        <div class="text-center max-w-3xl mx-auto mb-16 space-y-4">
+            <span class="text-xs uppercase font-bold tracking-widest text-luxe-gold">{% site_content 'about_section_tag' 'Why AeroLux Select' %}</span>
+            <h2 class="text-3xl sm:text-4xl font-extrabold font-display tracking-tight text-white">
+                {% site_content 'about_title' 'Uncompromising Professional Standards' %}
+            </h2>
+            <div class="w-20 h-1 bg-luxe-gold mx-auto rounded-full"></div>
+            {% if site_slug == 'dr' or current_site_slug == 'dr' %}
+            <p class="text-gray-400 font-light mt-4 text-sm max-w-2xl mx-auto">
+                {% site_content 'about_text' '' %}
+            </p>
+            {% endif %}
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+            <!-- Card 1 -->
+            <div class="glass-card rounded-2xl p-6 text-center hover:border-luxe-gold/30 transition-all duration-300">
+                <div class="w-12 h-12 bg-luxe-gold/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-hand-holding-dollar text-lg text-luxe-gold"></i>
+                </div>
+                <h4 class="text-sm font-bold uppercase tracking-wider text-white mb-2">Guaranteed Flat Rates</h4>
+                <p class="text-xs text-gray-400 leading-relaxed font-light">
+                    No hidden surge fees, no dynamic traffic penalties. You pay the exact quoted price at final reservation.
+                </p>
+            </div>
+
+            <!-- Card 2 -->
+            <div class="glass-card rounded-2xl p-6 text-center hover:border-luxe-gold/30 transition-all duration-300">
+                <div class="w-12 h-12 bg-luxe-gold/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-user-shield text-lg text-luxe-gold"></i>
+                </div>
+                <h4 class="text-sm font-bold uppercase tracking-wider text-white mb-2">Elite Security Drivers</h4>
+                <p class="text-xs text-gray-400 leading-relaxed font-light">
+                    Meticulously vetted, professional chauffeurs with extensive route optimization and defense-driving training.
+                </p>
+            </div>
+
+            <!-- Card 3 -->
+            <div class="glass-card rounded-2xl p-6 text-center hover:border-luxe-gold/30 transition-all duration-300">
+                <div class="w-12 h-12 bg-luxe-gold/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-comments text-lg text-luxe-gold"></i>
+                </div>
+                <h4 class="text-sm font-bold uppercase tracking-wider text-white mb-2">Direct 24/7 Dispatch</h4>
+                <p class="text-xs text-gray-400 leading-relaxed font-light">
+                    No complex automated phone loops. Instantly chat with real live support or your driver via WhatsApp 24/7.
+                </p>
+            </div>
+
+            <!-- Card 4 -->
+            <div class="glass-card rounded-2xl p-6 text-center hover:border-luxe-gold/30 transition-all duration-300">
+                <div class="w-12 h-12 bg-luxe-gold/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-gift text-lg text-luxe-gold"></i>
+                </div>
+                <h4 class="text-sm font-bold uppercase tracking-wider text-white mb-2">VIP Meet & Greet</h4>
+                <p class="text-xs text-gray-400 leading-relaxed font-light">
+                    Terminals contain fast-track airport customs escorts, porter luggage handling, and direct greeting signboards.
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Client Testimonials -->
+<section class="py-24 bg-luxe-black">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Section Header -->
+        <div class="text-center max-w-3xl mx-auto mb-16 space-y-4">
+            <span class="text-xs uppercase font-bold tracking-widest text-luxe-gold">{% site_content 'testimonials_section_tag' 'Client Endorsements' %}</span>
+            <h2 class="text-3xl sm:text-4xl font-extrabold font-display tracking-tight text-white">
+                {% site_content 'testimonials_title' 'Trusted by Elite Global Travelers' %}
+            </h2>
+            <div class="w-20 h-1 bg-luxe-gold mx-auto rounded-full"></div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {% for test in testimonials %}
+            <div class="glass-card rounded-2xl p-8 hover:border-luxe-gold/30 transition-all duration-300 relative">
+                <span class="absolute top-6 right-8 text-6xl text-luxe-gold/10 font-serif">ÔÇ£</span>
+                <div class="mb-4">
+                    {{ test.rating|star_rating }}
+                </div>
+                <p class="text-sm leading-relaxed text-gray-300 mb-6 font-light italic">
+                    "{{ test.content }}"
+                </p>
+                <div class="flex items-center space-x-3 pt-4 border-t border-gray-800">
+                    {% if test.image %}
+                    <img src="{{ test.image.url }}" alt="{{ test.author }}" class="w-10 h-10 rounded-full object-cover">
+                    {% else %}
+                    <div class="w-10 h-10 rounded-full bg-luxe-gold/20 flex items-center justify-center text-luxe-gold font-bold text-xs">
+                        {{ test.author|slice:":2"|upper }}
+                    </div>
+                    {% endif %}
+                    <div>
+                        <h4 class="text-xs font-bold uppercase tracking-wider text-white">{{ test.author }}</h4>
+                        <p class="text-[10px] text-gray-500 font-medium">{{ test.company|default:"Verified Client" }}</p>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <!-- Fallback Static Testimonials if Database is empty -->
+            <div class="glass-card rounded-2xl p-8 transition-all duration-300 relative">
+                <span class="absolute top-6 right-8 text-6xl text-luxe-gold/10 font-serif">ÔÇ£</span>
+                <div class="mb-4">
+                    <span class="text-luxe-gold">ÔÿàÔÿàÔÿàÔÿàÔÿà</span>
+                </div>
+                <p class="text-sm leading-relaxed text-gray-300 mb-6 font-light italic">
+                    "Absolute professionalism. The driver was waiting terminal-side with a tablet, carried my heavy luggage, and the Escalade was immaculate. Highest recommendation."
+                </p>
+                <div class="flex items-center space-x-3 pt-4 border-t border-gray-800">
+                    <div class="w-10 h-10 rounded-full bg-luxe-gold/20 flex items-center justify-center text-luxe-gold font-bold text-xs">
+                        JD
+                    </div>
+                    <div>
+                        <h4 class="text-xs font-bold uppercase tracking-wider text-white">Jonathan Davis</h4>
+                        <p class="text-[10px] text-gray-500 font-medium">Managing Director, Atlas Capital</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="glass-card rounded-2xl p-8 transition-all duration-300 relative">
+                <span class="absolute top-6 right-8 text-6xl text-luxe-gold/10 font-serif">ÔÇ£</span>
+                <div class="mb-4">
+                    <span class="text-luxe-gold">ÔÿàÔÿàÔÿàÔÿàÔÿà</span>
+                </div>
+                <p class="text-sm leading-relaxed text-gray-300 mb-6 font-light italic">
+                    "Booking our VIP transfer from PUJ to Punta Cana resort was flawless. Add-ons like the Terminal Fast-track saved us hours of custom wait lines. Extremely comfortable vehicle."
+                </p>
+                <div class="flex items-center space-x-3 pt-4 border-t border-gray-800">
+                    <div class="w-10 h-10 rounded-full bg-luxe-gold/20 flex items-center justify-center text-luxe-gold font-bold text-xs">
+                        SR
+                    </div>
+                    <div>
+                        <h4 class="text-xs font-bold uppercase tracking-wider text-white">Sarah Reynolds</h4>
+                        <p class="text-[10px] text-gray-500 font-medium">VIP Leisure Traveler</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="glass-card rounded-2xl p-8 transition-all duration-300 relative">
+                <span class="absolute top-6 right-8 text-6xl text-luxe-gold/10 font-serif">ÔÇ£</span>
+                <div class="mb-4">
+                    <span class="text-luxe-gold">ÔÿàÔÿàÔÿàÔÿàÔÿà</span>
+                </div>
+                <p class="text-sm leading-relaxed text-gray-300 mb-6 font-light italic">
+                    "Chauffeur hourly service was excellent. We used it for local corporate events in Manhattan. Impeccable route knowledge, perfect cabin environment, quiet and peaceful."
+                </p>
+                <div class="flex items-center space-x-3 pt-4 border-t border-gray-800">
+                    <div class="w-10 h-10 rounded-full bg-luxe-gold/20 flex items-center justify-center text-luxe-gold font-bold text-xs">
+                        MH
+                    </div>
+                    <div>
+                        <h4 class="text-xs font-bold uppercase tracking-wider text-white">Marcus Harris</h4>
+                        <p class="text-[10px] text-gray-500 font-medium">VP of Events, Nexus Tech</p>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://maps.googleapis.com/maps/api/js?key={{ site_settings.google_maps_api_key }}&libraries=places"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const radTransfer = document.getElementById('rad-transfer');
+        const radHourly = document.getElementById('rad-hourly');
+        const radP2P = document.getElementById('rad-p2p');
+        {% if site_slug == 'dr' %}
+        const radRental = document.getElementById('rad-rental');
+        const lblRental = document.getElementById('lbl-rental');
+        const iconRental = document.getElementById('icon-rental');
+        const spanRental = document.getElementById('span-rental');
+        {% else %}
+        const radRental = null;
+        const lblRental = null;
+        const iconRental = null;
+        const spanRental = null;
+        {% endif %}
+
+        const lblTransfer = document.getElementById('lbl-transfer');
+        const lblHourly = document.getElementById('lbl-hourly');
+        const lblP2P = document.getElementById('lbl-p2p');
+
+        const iconHourly = document.getElementById('icon-hourly');
+        const iconP2P = document.getElementById('icon-p2p');
+        const spanHourly = document.getElementById('span-hourly');
+        const spanP2P = document.getElementById('span-p2p');
+
+        const divAirportTransferWrapper = document.getElementById('div-airport-transfer-wrapper');
+        const divHourly = document.getElementById('div-hourly');
+        const divFlight = document.getElementById('div-flight');
+        const divCustomAddresses = document.getElementById('div-custom-addresses');
+        const divDropoffLocation = document.getElementById('div-dropoff-location');
+        const divStopsSection = document.getElementById('div-stops-section');
+        const divStopsCountWrapper = document.getElementById('div-stops-count-wrapper');
+        const divRoundTrip = document.getElementById('div-round-trip');
+        const divReturnFields = document.getElementById('div-return-fields');
+
+        const airportSelect = document.getElementById('airport_id');
+        const destinationAddress = document.getElementById('destination_address');
+        const pickupAddress = document.getElementById('pickup_address');
+        const dropoffAddress = document.getElementById('dropoff_address');
+        const roundTripCheckbox = document.getElementById('round_trip');
+        const returnDateInput = document.getElementById('return_date');
+        const returnTimeInput = document.getElementById('return_time');
+        const submitBtn = document.getElementById('submit-btn');
+        const geocodeStatus = document.getElementById('geocode-status');
+        const geocodeStatusText = document.getElementById('geocode-status-text');
+
+        // Form Validation logic
+        function checkValidation() {
+            let isValid = false;
+
+            if (radTransfer.checked) {
+                // Airport transfer: need airport + destination address
+                if (airportSelect.value && destinationAddress.value.trim() !== '') {
+                    isValid = true;
+                }
+            } else if (radHourly.checked) {
+                if (pickupAddress.value.trim() !== '') {
+                    isValid = true;
+                }
+            } else if (radP2P.checked) {
+                if (pickupAddress.value.trim() !== '' && dropoffAddress.value.trim() !== '') {
+                    isValid = true;
+                }
+            } else if (radRental && radRental.checked) {
+                if (pickupAddress.value.trim() !== '' && dropoffAddress.value.trim() !== '') {
+                    isValid = true;
+                }
+            }
+            
+            // Check round-trip coordinates (only for non-hourly services)
+            if (isValid && roundTripCheckbox.checked && !radHourly.checked) {
+                if (!returnDateInput.value || !returnTimeInput.value) {
+                    isValid = false;
+                }
+            }
+
+            if (isValid) {
+                submitBtn.disabled = false;
+                submitBtn.classList.remove('opacity-60', 'cursor-not-allowed');
+                submitBtn.classList.add('hover:scale-[1.01]', 'cursor-pointer');
+            } else {
+                submitBtn.disabled = true;
+                submitBtn.classList.add('opacity-60', 'cursor-not-allowed');
+                submitBtn.classList.remove('hover:scale-[1.01]', 'cursor-pointer');
+            }
+        }
+
+        // Service Type Visual Toggles
+        function updateServiceType() {
+            lblTransfer.className = "cursor-pointer text-center p-4 rounded-xl text-xs font-semibold uppercase tracking-wider transition-all duration-300 block select-none border border-transparent hover:bg-luxe-grey";
+            lblHourly.className = "cursor-pointer text-center p-4 rounded-xl text-xs font-semibold uppercase tracking-wider transition-all duration-300 block select-none border border-transparent hover:bg-luxe-grey";
+            lblP2P.className = "cursor-pointer text-center p-4 rounded-xl text-xs font-semibold uppercase tracking-wider transition-all duration-300 block select-none border border-transparent hover:bg-luxe-grey";
+            if (lblRental) {
+                lblRental.className = "cursor-pointer text-center p-4 rounded-xl text-xs font-semibold uppercase tracking-wider transition-all duration-300 block select-none border border-transparent hover:bg-luxe-grey";
+            }
+            
+            iconHourly.className = "fas fa-clock text-base text-gray-500 mb-2 block";
+            iconP2P.className = "fas fa-route text-base text-gray-500 mb-2 block";
+            if (iconRental) {
+                iconRental.className = "fas fa-car text-base text-gray-500 mb-2 block";
+            }
+            spanHourly.className = "block text-gray-400";
+            spanP2P.className = "block text-gray-400";
+            if (spanRental) {
+                spanRental.className = "block text-gray-400";
+            }
+
+            if (radTransfer.checked) {
+                lblTransfer.className = "cursor-pointer text-center p-4 rounded-xl text-xs font-semibold uppercase tracking-wider bg-luxe-gold/10 border border-luxe-gold/50 text-luxe-gold block select-none";
+                
+                divAirportTransferWrapper.classList.remove('hidden');
+                divFlight.classList.remove('hidden');
+                divHourly.classList.add('hidden');
+                divCustomAddresses.classList.add('hidden');
+                divStopsSection.classList.add('hidden');
+                divRoundTrip.classList.remove('hidden');
+                
+                airportSelect.required = true;
+                pickupAddress.required = false;
+                dropoffAddress.required = false;
+            } 
+            else if (radP2P.checked) {
+                lblP2P.className = "cursor-pointer text-center p-4 rounded-xl text-xs font-semibold uppercase tracking-wider bg-luxe-gold/10 border border-luxe-gold/50 text-luxe-gold block select-none";
+                iconP2P.className = "fas fa-route text-base text-luxe-gold mb-2 block";
+                spanP2P.className = "block text-white";
+
+                divAirportTransferWrapper.classList.add('hidden');
+                divFlight.classList.add('hidden');
+                divHourly.classList.add('hidden');
+                divCustomAddresses.classList.remove('hidden');
+                divDropoffLocation.classList.remove('hidden');
+                divStopsSection.classList.remove('hidden');
+                divStopsCountWrapper.classList.remove('hidden');
+                divRoundTrip.classList.remove('hidden');
+
+                airportSelect.required = false;
+                pickupAddress.required = true;
+                dropoffAddress.required = true;
+            }
+            else if (radHourly.checked) {
+                lblHourly.className = "cursor-pointer text-center p-4 rounded-xl text-xs font-semibold uppercase tracking-wider bg-luxe-gold/10 border border-luxe-gold/50 text-luxe-gold block select-none";
+                iconHourly.className = "fas fa-clock text-base text-luxe-gold mb-2 block";
+                spanHourly.className = "block text-white";
+
+                divAirportTransferWrapper.classList.add('hidden');
+                divFlight.classList.add('hidden');
+                divHourly.classList.remove('hidden');
+                divCustomAddresses.classList.remove('hidden');
+                divDropoffLocation.classList.add('hidden');
+                divStopsSection.classList.remove('hidden');
+                divStopsCountWrapper.classList.add('hidden');
+                // HIDE round-trip for hourly
+                divRoundTrip.classList.add('hidden');
+                roundTripCheckbox.checked = false;
+
+                airportSelect.required = false;
+                pickupAddress.required = true;
+                dropoffAddress.required = false;
+            }
+            else if (radRental && radRental.checked) {
+                lblRental.className = "cursor-pointer text-center p-4 rounded-xl text-xs font-semibold uppercase tracking-wider bg-luxe-gold/10 border border-luxe-gold/50 text-luxe-gold block select-none";
+                iconRental.className = "fas fa-car text-base text-luxe-gold mb-2 block";
+                spanRental.className = "block text-white";
+
+                divAirportTransferWrapper.classList.add('hidden');
+                divFlight.classList.add('hidden');
+                divHourly.classList.add('hidden');
+                divCustomAddresses.classList.remove('hidden');
+                divDropoffLocation.classList.remove('hidden');
+                divStopsSection.classList.add('hidden');
+                divRoundTrip.classList.remove('hidden');
+
+                airportSelect.required = false;
+                pickupAddress.required = true;
+                dropoffAddress.required = true;
+            }
+            toggleRoundTripFields();
+            checkValidation();
+            
+            // Refresh map layout if needed
+            if (bookingMap) {
+                setTimeout(() => {
+                    bookingMap.invalidateSize();
+                }, 200);
+            }
+        }
+
+        function toggleRoundTripFields() {
+            if (roundTripCheckbox.checked && !divRoundTrip.classList.contains('hidden')) {
+                divReturnFields.classList.remove('hidden');
+                returnDateInput.required = true;
+                returnTimeInput.required = true;
+            } else {
+                divReturnFields.classList.add('hidden');
+                returnDateInput.required = false;
+                returnTimeInput.required = false;
+            }
+            checkValidation();
+        }
+
+        // Attach Event Listeners to Radios
+        radTransfer.addEventListener('change', updateServiceType);
+        radHourly.addEventListener('change', updateServiceType);
+        radP2P.addEventListener('change', updateServiceType);
+        if (radRental) {
+            radRental.addEventListener('change', updateServiceType);
+        }
+        roundTripCheckbox.addEventListener('change', toggleRoundTripFields);
+        returnDateInput.addEventListener('change', checkValidation);
+        returnTimeInput.addEventListener('change', checkValidation);
+
+        // Validation listeners for airport transfer
+        airportSelect.addEventListener('change', () => {
+            // Move map to airport location
+            if (bookingMap && pickupMarker) {
+                const selectedOption = airportSelect.options[airportSelect.selectedIndex];
+                const lat = parseFloat(selectedOption.dataset.lat);
+                const lng = parseFloat(selectedOption.dataset.lng);
+                if (!isNaN(lat) && !isNaN(lng)) {
+                    const loc = { lat, lng };
+                    pickupMarker.setPosition(loc);
+                    bookingMap.panTo(loc);
+                    bookingMap.setZoom(11);
+                    document.getElementById('pickup_lat').value = lat;
+                    document.getElementById('pickup_lng').value = lng;
+                    calculateRoute();
+                }
+            }
+        });
+
+        // Geocoding for destination address (airport transfer)
+        let geocodeTimeout = null;
+        destinationAddress.addEventListener('input', () => {
+            checkValidation();
+            clearTimeout(geocodeTimeout);
+            const query = destinationAddress.value.trim();
+            if (query.length < 5) {
+                geocodeStatus.classList.add('hidden');
+                return;
+            }
+            geocodeTimeout = setTimeout(() => {
+                geocodeAddress(query, 'destination');
+            }, 800);
+        });
+
+        // Other change events to trigger validation
+        pickupAddress.addEventListener('input', checkValidation);
+        dropoffAddress.addEventListener('input', checkValidation);
+
+        // ÔöÇÔöÇ Direction Switch Logic ÔöÇÔöÇ
+        const btnSwitchDirection = document.getElementById('btn-switch-direction');
+        const transferDirectionInput = document.getElementById('transfer_direction');
+        const lblTransferStart = document.getElementById('lbl-transfer-start');
+        const lblTransferEnd = document.getElementById('lbl-transfer-end');
+        const iconTransferStart = document.getElementById('icon-transfer-start');
+        const iconTransferEnd = document.getElementById('icon-transfer-end');
+        const startWrapper = document.getElementById('transfer-start-wrapper');
+        const endWrapper = document.getElementById('transfer-end-wrapper');
+
+        if (btnSwitchDirection) {
+            btnSwitchDirection.addEventListener('click', () => {
+                const currentDir = transferDirectionInput.value;
+                if (currentDir === 'AIRPORT_TO_DEST') {
+                    // Switch to: Pickup Address ÔåÆ Airport
+                    transferDirectionInput.value = 'DEST_TO_AIRPORT';
+                    lblTransferStart.textContent = "Destination Airport";
+                    lblTransferEnd.textContent = "Pickup Address";
+                    iconTransferStart.className = "fas fa-plane-arrival text-sm";
+                    iconTransferEnd.className = "fas fa-map-pin text-sm";
+                    destinationAddress.placeholder = "Enter your pickup address...";
+                    startWrapper.style.order = "3";
+                    endWrapper.style.order = "1";
+                } else {
+                    // Switch back to: Airport ÔåÆ Destination Address
+                    transferDirectionInput.value = 'AIRPORT_TO_DEST';
+                    lblTransferStart.textContent = "Origin Airport";
+                    lblTransferEnd.textContent = "Drop-off Address";
+                    iconTransferStart.className = "fas fa-plane-departure text-sm";
+                    iconTransferEnd.className = "fas fa-map-pin text-sm";
+                    destinationAddress.placeholder = "Enter your destination address...";
+                    startWrapper.style.order = "1";
+                    endWrapper.style.order = "3";
+                }
+                
+                // Swap coordinate inputs values
+                const pLat = document.getElementById('pickup_lat').value;
+                const pLng = document.getElementById('pickup_lng').value;
+                document.getElementById('pickup_lat').value = document.getElementById('dropoff_lat').value;
+                document.getElementById('pickup_lng').value = document.getElementById('dropoff_lng').value;
+                document.getElementById('dropoff_lat').value = pLat;
+                document.getElementById('dropoff_lng').value = pLng;
+
+                if (pickupMarker && dropoffMarker) {
+                    const startPos = pickupMarker.getPosition();
+                    const endPos = dropoffMarker.getPosition();
+                    pickupMarker.setPosition(endPos);
+                    dropoffMarker.setPosition(startPos);
+                    calculateRoute();
+                }
+
+                checkValidation();
+            });
+        }
+
+        // ÔöÇÔöÇ Initialize Google Maps Dark Map ÔöÇÔöÇ
+        const mapElement = document.getElementById('booking-map');
+        let bookingMap;
+        let pickupMarker;
+        let dropoffMarker;
+        let directionsService;
+        let directionsRenderer;
+        let geocoder;
+
+        const darkMapStyle = [
+            { elementType: "geometry", stylers: [{ color: "#1a1a1a" }] },
+            { elementType: "labels.text.stroke", stylers: [{ color: "#1a1a1a" }] },
+            { elementType: "labels.text.fill", stylers: [{ color: "#746855" }] },
+            { featureType: "administrative.locality", elementType: "labels.text.fill", stylers: [{ color: "#d59563" }] },
+            { featureType: "poi", elementType: "labels.text.fill", stylers: [{ color: "#d59563" }] },
+            { featureType: "poi.park", elementType: "geometry", stylers: [{ color: "#121a16" }] },
+            { featureType: "poi.park", elementType: "labels.text.fill", stylers: [{ color: "#6b9a76" }] },
+            { featureType: "road", elementType: "geometry", stylers: [{ color: "#2d2d2d" }] },
+            { featureType: "road", elementType: "geometry.stroke", stylers: [{ color: "#1a1a1a" }] },
+            { featureType: "road", elementType: "labels.text.fill", stylers: [{ color: "#9ca5b3" }] },
+            { featureType: "road.highway", elementType: "geometry", stylers: [{ color: "#746855" }] },
+            { featureType: "road.highway", elementType: "geometry.stroke", stylers: [{ color: "#1f2835" }] },
+            { featureType: "road.highway", elementType: "labels.text.fill", stylers: [{ color: "#f3d19c" }] },
+            { featureType: "transit", elementType: "geometry", stylers: [{ color: "#222222" }] },
+            { featureType: "transit.station", elementType: "labels.text.fill", stylers: [{ color: "#d59563" }] },
+            { featureType: "water", elementType: "geometry", stylers: [{ color: "#0d0d0d" }] },
+            { featureType: "water", elementType: "labels.text.fill", stylers: [{ color: "#515c6d" }] },
+            { featureType: "water", elementType: "labels.text.stroke", stylers: [{ color: "#0d0d0d" }] }
+        ];
+
+        if (mapElement) {
+            {% if site_slug == 'dr' %}
+            const mapCenter = { lat: 18.7357, lng: -69.9509 };
+            {% else %}
+            const mapCenter = { lat: 40.7128, lng: -74.0060 };
+            {% endif %}
+
+            bookingMap = new google.maps.Map(mapElement, {
+                center: mapCenter,
+                zoom: 11,
+                styles: darkMapStyle,
+                disableDefaultUI: false,
+                zoomControl: true,
+                mapTypeControl: false,
+                streetViewControl: false,
+                fullscreenControl: false
+            });
+
+            directionsService = new google.maps.DirectionsService();
+            directionsRenderer = new google.maps.DirectionsRenderer({
+                map: bookingMap,
+                suppressMarkers: true,
+                polylineOptions: {
+                    strokeColor: "#C9A84C",
+                    strokeOpacity: 0.8,
+                    strokeWeight: 4
+                }
+            });
+
+            geocoder = new google.maps.Geocoder();
+
+            const goldIcon = {
+                path: google.maps.SymbolPath.CIRCLE,
+                fillColor: '#C9A84C',
+                fillOpacity: 1,
+                strokeColor: '#FFFFFF',
+                strokeWeight: 2,
+                scale: 8
+            };
+
+            const silverIcon = {
+                path: google.maps.SymbolPath.CIRCLE,
+                fillColor: '#FFFFFF',
+                fillOpacity: 1,
+                strokeColor: '#C9A84C',
+                strokeWeight: 2,
+                scale: 8
+            };
+
+            pickupMarker = new google.maps.Marker({
+                position: mapCenter,
+                map: bookingMap,
+                draggable: true,
+                icon: goldIcon,
+                title: "Pickup Point"
+            });
+
+            dropoffMarker = new google.maps.Marker({
+                position: { lat: mapCenter.lat + 0.03, lng: mapCenter.lng + 0.03 },
+                map: bookingMap,
+                draggable: true,
+                icon: silverIcon,
+                title: "Drop-off Point"
+            });
+
+            // Initialize places autocomplete
+            const autocompleteOptions = {
+                fields: ["address_components", "geometry", "formatted_address"],
+                types: ["address"]
+            };
+
+            const pickupAutocomplete = new google.maps.places.Autocomplete(pickupAddress, autocompleteOptions);
+            const dropoffAutocomplete = new google.maps.places.Autocomplete(dropoffAddress, autocompleteOptions);
+            const destAutocomplete = new google.maps.places.Autocomplete(destinationAddress, autocompleteOptions);
+
+            pickupAutocomplete.bindTo("bounds", bookingMap);
+            dropoffAutocomplete.bindTo("bounds", bookingMap);
+            destAutocomplete.bindTo("bounds", bookingMap);
+
+            function onPlaceChanged(autocomplete, type) {
+                const place = autocomplete.getPlace();
+                if (!place.geometry || !place.geometry.location) {
+                    return;
+                }
+
+                const loc = place.geometry.location;
+                if (type === 'pickup') {
+                    pickupMarker.setPosition(loc);
+                    document.getElementById('pickup_lat').value = loc.lat();
+                    document.getElementById('pickup_lng').value = loc.lng();
+                } else {
+                    dropoffMarker.setPosition(loc);
+                    document.getElementById('dropoff_lat').value = loc.lat();
+                    document.getElementById('dropoff_lng').value = loc.lng();
+                }
+
+                calculateRoute();
+            }
+
+            pickupAutocomplete.addListener("place_changed", () => onPlaceChanged(pickupAutocomplete, 'pickup'));
+            dropoffAutocomplete.addListener("place_changed", () => onPlaceChanged(dropoffAutocomplete, 'dropoff'));
+            destAutocomplete.addListener("place_changed", () => onPlaceChanged(destAutocomplete, 'dropoff'));
+
+            // Geocoding function
+            function geocodeAddress(query, type) {
+                if (!geocoder) return;
+                geocoder.geocode({ address: query }, (results, status) => {
+                    if (status === "OK" && results[0]) {
+                        const loc = results[0].geometry.location;
+                        if (type === 'destination') {
+                            dropoffMarker.setPosition(loc);
+                            geocodeStatus.classList.remove('hidden');
+                            geocodeStatusText.textContent = results[0].formatted_address.substring(0, 80) + '...';
+                            document.getElementById('dropoff_lat').value = loc.lat();
+                            document.getElementById('dropoff_lng').value = loc.lng();
+                        } else if (type === 'pickup') {
+                            pickupMarker.setPosition(loc);
+                            document.getElementById('pickup_lat').value = loc.lat();
+                            document.getElementById('pickup_lng').value = loc.lng();
+                        } else if (type === 'dropoff') {
+                            dropoffMarker.setPosition(loc);
+                            document.getElementById('dropoff_lat').value = loc.lat();
+                            document.getElementById('dropoff_lng').value = loc.lng();
+                        }
+                        
+                        calculateRoute();
+                        
+                        const bounds = new google.maps.LatLngBounds();
+                        bounds.extend(pickupMarker.getPosition());
+                        bounds.extend(dropoffMarker.getPosition());
+                        bookingMap.fitBounds(bounds, 40);
+                    } else {
+                        if (type === 'destination') {
+                            geocodeStatus.classList.remove('hidden');
+                            geocodeStatusText.textContent = 'Address not found ÔÇö please refine';
+                        }
+                    }
+                });
+            }
+
+            function reverseGeocode(latLng, inputElement) {
+                if (!geocoder) return;
+                geocoder.geocode({ location: latLng }, (results, status) => {
+                    if (status === "OK" && results[0]) {
+                        inputElement.value = results[0].formatted_address;
+                        inputElement.dispatchEvent(new Event('input'));
+                        checkValidation();
+                        calculateRoute();
+                    }
+                });
+            }
+
+            function calculateRoute() {
+                const start = pickupMarker.getPosition();
+                const end = dropoffMarker.getPosition();
+
+                if (!start || !end) return;
+
+                const request = {
+                    origin: start,
+                    destination: end,
+                    travelMode: google.maps.TravelMode.DRIVING
+                };
+
+                directionsService.route(request, (result, status) => {
+                    if (status === "OK") {
+                        directionsRenderer.setDirections(result);
+                        
+                        const route = result.routes[0];
+                        let totalDistanceMeters = 0;
+                        for (let i = 0; i < route.legs.length; i++) {
+                            totalDistanceMeters += route.legs[i].distance.value;
+                        }
+                        const distanceKm = totalDistanceMeters / 1000.0;
+                        
+                        document.getElementById('distance_km').value = distanceKm.toFixed(2);
+                        
+                        if (geocodeStatus && geocodeStatusText) {
+                            geocodeStatus.classList.remove('hidden');
+                            geocodeStatusText.textContent = `Route distance: ${distanceKm.toFixed(1)} km`;
+                        }
+                    } else {
+                        // Fallback using Haversine
+                        const d_km = haversineDistance(start.lat(), start.lng(), end.lat(), end.lng());
+                        document.getElementById('distance_km').value = d_km.toFixed(2);
+                        
+                        if (geocodeStatus && geocodeStatusText) {
+                            geocodeStatus.classList.remove('hidden');
+                            geocodeStatusText.textContent = `Direct line: ${d_km.toFixed(1)} km (route unavailable)`;
+                        }
+                    }
+                });
+            }
+
+            function haversineDistance(lat1, lon1, lat2, lon2) {
+                const R = 6371; // Earth radius in km
+                const dLat = (lat2 - lat1) * Math.PI / 180;
+                const dLon = (lon2 - lon1) * Math.PI / 180;
+                const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                          Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                          Math.sin(dLon / 2) * Math.sin(dLon / 2);
+                const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+                return R * c;
+            }
+
+            // Dragend events for markers
+            pickupMarker.addListener("dragend", () => {
+                const pos = pickupMarker.getPosition();
+                document.getElementById('pickup_lat').value = pos.lat();
+                document.getElementById('pickup_lng').value = pos.lng();
+                reverseGeocode(pos, pickupAddress);
+            });
+
+            dropoffMarker.addListener("dragend", () => {
+                const pos = dropoffMarker.getPosition();
+                document.getElementById('dropoff_lat').value = pos.lat();
+                document.getElementById('dropoff_lng').value = pos.lng();
+                if (radTransfer.checked) {
+                    reverseGeocode(pos, destinationAddress);
+                } else {
+                    reverseGeocode(pos, dropoffAddress);
+                }
+            });
+
+            // Map click listener
+            let activeInput = 'pickup';
+            pickupAddress.addEventListener('focus', () => activeInput = 'pickup');
+            dropoffAddress.addEventListener('focus', () => activeInput = 'dropoff');
+            destinationAddress.addEventListener('focus', () => activeInput = 'destination');
+
+            bookingMap.addListener("click", (e) => {
+                const loc = e.latLng;
+                if (radTransfer.checked) {
+                    dropoffMarker.setPosition(loc);
+                    document.getElementById('dropoff_lat').value = loc.lat();
+                    document.getElementById('dropoff_lng').value = loc.lng();
+                    reverseGeocode(loc, destinationAddress);
+                } else {
+                    if (activeInput === 'pickup') {
+                        pickupMarker.setPosition(loc);
+                        document.getElementById('pickup_lat').value = loc.lat();
+                        document.getElementById('pickup_lng').value = loc.lng();
+                        reverseGeocode(loc, pickupAddress);
+                        activeInput = 'dropoff';
+                    } else {
+                        dropoffMarker.setPosition(loc);
+                        document.getElementById('dropoff_lat').value = loc.lat();
+                        document.getElementById('dropoff_lng').value = loc.lng();
+                        reverseGeocode(loc, dropoffAddress);
+                        activeInput = 'pickup';
+                    }
+                }
+                calculateRoute();
+            });
+
+            let pickupGeoTimeout = null;
+            let dropoffGeoTimeout = null;
+
+            pickupAddress.addEventListener('input', () => {
+                clearTimeout(pickupGeoTimeout);
+                const query = pickupAddress.value.trim();
+                if (query.length >= 5) {
+                    pickupGeoTimeout = setTimeout(() => geocodeAddress(query, 'pickup'), 800);
+                }
+            });
+
+            dropoffAddress.addEventListener('input', () => {
+                clearTimeout(dropoffGeoTimeout);
+                const query = dropoffAddress.value.trim();
+                if (query.length >= 5) {
+                    dropoffGeoTimeout = setTimeout(() => geocodeAddress(query, 'dropoff'), 800);
+                }
+            });
+        }
+
+        // URL Search Params pre-selection
+        const urlParams = new URLSearchParams(window.location.search);
+        const serviceTypeParam = urlParams.get('service_type');
+        if (serviceTypeParam === 'luxury_rental' && radRental) {
+            radRental.checked = true;
+        } else if (serviceTypeParam === 'point_to_point') {
+            radP2P.checked = true;
+        } else if (serviceTypeParam === 'hourly') {
+            radHourly.checked = true;
+        } else if (serviceTypeParam === 'airport_transfer') {
+            radTransfer.checked = true;
+        }
+
+        // Initial setup
+        updateServiceType();
+
+        // 3D Parallax & Mouse Interactivity for Hero Image
+        const parallaxImg = document.getElementById('hero-parallax-img');
+        const heroSection = document.getElementById('hero-section');
+        if (parallaxImg && heroSection) {
+            let targetX = 0, targetY = 0, targetRotX = 0, targetRotY = 0;
+            let currentX = 0, currentY = 0, currentRotX = 0, currentRotY = 0;
+            
+            let time = 0;
+            let mouseX = 0, mouseY = 0;
+            let mouseActive = false;
+
+            heroSection.addEventListener('mousemove', (e) => {
+                const rect = heroSection.getBoundingClientRect();
+                mouseX = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+                mouseY = ((e.clientY - rect.top) / rect.height) * 2 - 1;
+                mouseActive = true;
+            }, { passive: true });
+
+            heroSection.addEventListener('mouseleave', () => {
+                mouseActive = false;
+            }, { passive: true });
+
+            function animate() {
+                time += 1;
+
+                const ambX = Math.sin(time * 0.008) * 15;
+                const ambY = Math.cos(time * 0.006) * 10;
+                const ambRotX = Math.sin(time * 0.005) * 0.8;
+                const ambRotY = Math.cos(time * 0.005) * 0.8;
+
+                if (mouseActive) {
+                    targetX = mouseX * -25 + ambX * 0.3;
+                    targetY = mouseY * -25 + ambY * 0.3;
+                    targetRotX = mouseY * 4.5 + ambRotX * 0.3;
+                    targetRotY = mouseX * -4.5 + ambRotY * 0.3;
+                } else {
+                    targetX = ambX;
+                    targetY = ambY;
+                    targetRotX = ambRotX;
+                    targetRotY = ambRotY;
+                }
+
+                const scrollOffset = window.pageYOffset * 0.3;
+                const finalTargetY = targetY + scrollOffset;
+
+                currentX += (targetX - currentX) * 0.08;
+                currentY += (finalTargetY - currentY) * 0.08;
+                currentRotX += (targetRotX - currentRotX) * 0.08;
+                currentRotY += (targetRotY - currentRotY) * 0.08;
+
+                parallaxImg.style.transform = `translate3d(${currentX}px, ${currentY}px, 0) rotateX(${currentRotX}deg) rotateY(${currentRotY}deg) scale(1.15)`;
+
+                requestAnimationFrame(animate);
+            }
+
+            requestAnimationFrame(animate);
+        }
+    });
+</script>
+{% endblock %}

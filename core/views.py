@@ -758,9 +758,6 @@ def booking_payment(request):
         base_price = booking_data.get('base_price', 0) or 0
         fare = float(base_price)
         service_type = booking_data.get('service_type', 'airport_transfer')
-        if service_type == 'hourly':
-            hours = int(booking_data.get('hours_requested', 3))
-            fare = fare * hours
         
         outbound_base = fare
         return_base = 0.0

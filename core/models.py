@@ -1588,3 +1588,35 @@ class EmailTemplate(models.Model):
 
     def __str__(self):
         return f"{self.get_email_type_display()} ({self.site.slug.upper()})"
+
+
+class WhatsAppTemplate(models.Model):
+    """
+    Customizable WhatsApp templates for different notification triggers.
+    """
+    site = models.ForeignKey(
+        Site,
+        on_delete=models.CASCADE,
+        related_name='whatsapp_templates',
+    )
+    trigger_type = models.CharField(
+        max_length=20,
+        choices=[
+            ('processing', 'Booking Processing'),
+            ('confirmed', 'Booking Confirmed'),
+            ('reminder_12h', '12h Pickup Reminder'),
+            ('cancelled', 'Booking Cancelled'),
+        ],
+    )
+    message_content = models.TextField(
+        help_text='WhatsApp message content. Placeholders: {customer_name}, {booking_reference}, {pickup_date}, {pickup_time}, {return_date}, {return_time}, {total_price}, {amount_paid}, {balance}, {pickup_address}, {dropoff_address}, {service_type}, {flight_number}'
+    )
+
+    class Meta:
+        verbose_name = 'WhatsApp Template'
+        verbose_name_plural = 'WhatsApp Templates'
+        unique_together = [['site', 'trigger_type']]
+
+    def __str__(self):
+        return f"{self.get_trigger_type_display()} ({self.site.slug.upper()})"
+
