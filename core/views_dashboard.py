@@ -199,6 +199,7 @@ def dashboard_bookings(request):
 def booking_detail(request, booking_id):
     """Detailed view of a single booking."""
     from core.models import Booking
+    from decimal import Decimal
     booking = get_object_or_404(Booking, id=booking_id)
 
     if request.method == 'POST':
@@ -208,8 +209,29 @@ def booking_detail(request, booking_id):
         booking.save()
         messages.success(request, 'Booking notes updated.')
 
+    # Financial breakdown calculations
+    base_price = booking.base_price
+    stops_fee = Decimal('0.00')
+    if booking.service_type == 'point_to_point':
+        stops_fee = Decimal('20.00') * Decimal(booking.number_of_stops)
+
+    outbound_addons_total = sum(a.price for a in booking.addons.all())
+    return_addons_total = sum(a.price for a in booking.addons_return.all())
+
+    outbound_total = base_price + stops_fee + outbound_addons_total
+    return_total = base_price + return_addons_total if booking.round_trip else Decimal('0.00')
+    balance = booking.total_price - booking.amount_paid
+
     context = {
         'booking': booking,
+        'outbound_base': base_price,
+        'return_base': base_price if booking.round_trip else Decimal('0.00'),
+        'stops_fee': stops_fee,
+        'outbound_addons_total': outbound_addons_total,
+        'return_addons_total': return_addons_total,
+        'outbound_total': outbound_total,
+        'return_total': return_total,
+        'balance': balance,
         'active_tab': 'bookings',
     }
     return render(request, 'dashboard/booking_detail.html', context)
@@ -226,6 +248,16 @@ def update_booking_status(request, booking_id, new_status):
         booking.status = new_status
         booking.save()
         messages.success(request, f'Booking #{booking.booking_reference} updated to {new_status}.')
+        
+        # Trigger dynamic emails on confirmation or cancellation
+        try:
+            from core.emails import send_booking_email
+            if new_status == 'CONFIRMED':
+                send_booking_email(booking, 'confirmed')
+            elif new_status == 'CANCELLED':
+                send_booking_email(booking, 'cancelled')
+        except Exception as email_err:
+            print(f"Error triggering dashboard status email: {str(email_err)}")
 
     return redirect('dashboard:bookings')
 
@@ -1086,3 +1118,107 @@ def admin_user_delete(request, pk):
         messages.success(request, f'Admin "{username}" deleted.')
 
     return redirect('dashboard:admin_users')
+
+
+@user_passes_test(is_admin, login_url='dashboard:login')
+def record_payment(request, booking_id):
+    """Logs a manual cash/other payment towards a booking."""
+    from core.models import Booking, BookingPayment
+    from decimal import Decimal
+    
+    booking = get_object_or_404(Booking, id=booking_id)
+    
+    if request.method == 'POST':
+        try:
+            amount = Decimal(request.POST.get('amount', '0.00'))
+        except (ValueError, TypeError):
+            amount = Decimal('0.00')
+            
+        notes = request.POST.get('notes', '').strip()
+        method = request.POST.get('payment_method', 'CASH')
+        
+        if amount <= 0:
+            messages.error(request, 'Please enter a valid positive payment amount.')
+        else:
+            BookingPayment.objects.create(
+                booking=booking,
+                amount=amount,
+                payment_method=method,
+                notes=notes
+            )
+            
+            # Sum all payments
+            total_paid = booking.payments.aggregate(Sum('amount'))['amount__sum'] or Decimal('0.00')
+            booking.amount_paid = total_paid
+            
+            # Update payment status
+            if booking.amount_paid >= booking.total_price:
+                booking.payment_status = 'paid'
+            elif booking.amount_paid > 0:
+                booking.payment_status = 'partially_paid'
+            else:
+                booking.payment_status = 'pending'
+                
+            booking.save()
+            messages.success(request, f'Manual payment of ${amount:.2f} recorded for booking #{booking.booking_reference}.')
+            
+    return redirect('dashboard:booking_detail', booking_id=booking.id)
+
+
+@user_passes_test(is_admin, login_url='dashboard:login')
+def email_template_editor(request):
+    """View to list, edit and seed customizable Brevo email templates."""
+    from core.models import Site, EmailTemplate
+    from core.emails import get_default_email_template
+    
+    site_slug = request.GET.get('site', 'nyc')
+    site = get_object_or_404(Site, slug=site_slug)
+    
+    email_type = request.GET.get('type', 'processing')
+    if email_type not in ['processing', 'confirmed', 'reminder_12h', 'cancelled']:
+        email_type = 'processing'
+        
+    template_obj = EmailTemplate.objects.filter(site=site, email_type=email_type).first()
+    
+    if not template_obj:
+        default_subj, default_html, default_text = get_default_email_template(email_type, site.name)
+        subject_val = default_subj
+        html_val = default_html
+        text_val = default_text
+    else:
+        subject_val = template_obj.subject
+        html_val = template_obj.html_content
+        text_val = template_obj.text_content
+        
+    if request.method == 'POST':
+        subject_val = request.POST.get('subject', '').strip()
+        html_val = request.POST.get('html_content', '').strip()
+        text_val = request.POST.get('text_content', '').strip()
+        
+        if not template_obj:
+            template_obj = EmailTemplate(
+                site=site,
+                email_type=email_type,
+                subject=subject_val,
+                html_content=html_val,
+                text_content=text_val
+            )
+        else:
+            template_obj.subject = subject_val
+            template_obj.html_content = html_val
+            template_obj.text_content = text_val
+            
+        template_obj.save()
+        messages.success(request, f'Email template "{email_type}" for {site.name} updated successfully.')
+        
+    context = {
+        'sites': Site.objects.filter(is_active=True),
+        'current_site': site,
+        'email_type': email_type,
+        'subject': subject_val,
+        'html_content': html_val,
+        'text_content': text_val,
+        'active_tab': 'settings',
+        'template_obj': template_obj,
+    }
+    return render(request, 'dashboard/email_templates.html', context)

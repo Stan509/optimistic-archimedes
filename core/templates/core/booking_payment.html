@@ -146,35 +146,49 @@
 
                     <!-- Line items breakdown -->
                     <div class="space-y-4 text-xs">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <h4 class="font-bold text-white uppercase tracking-wider">Base Chauffeur Fare</h4>
-                                <p class="text-[10px] text-gray-500 font-light mt-0.5">Luxury Chauffeur Service Rate</p>
+                        <!-- Outbound Leg -->
+                        <div class="space-y-2 pb-3 {% if booking_data.round_trip %}border-b border-gray-800{% endif %}">
+                            <h4 class="text-[10px] uppercase font-bold text-luxe-gold tracking-wider flex items-center justify-between">
+                                <span>Outbound Leg (Aller)</span>
+                                <span class="font-bold">{{ outbound_total|currency }}</span>
+                            </h4>
+                            <div class="flex justify-between items-center text-[11px] text-gray-300">
+                                <span class="font-light">Base Chauffeur Fare</span>
+                                <span>{{ outbound_base|currency }}</span>
                             </div>
-                            <span class="font-bold text-white">{{ base_price|currency }}</span>
-                        </div>
-
-                        <!-- Selected VIP Addons -->
-                        {% if selected_addons %}
-                        <div class="space-y-2.5 border-t border-gray-800 pt-3">
-                            <h4 class="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Select Add-Ons</h4>
+                            {% if stops_fee > 0 %}
+                            <div class="flex justify-between items-center text-[11px] text-gray-300">
+                                <span class="font-light">Point-to-Point Stops Fee</span>
+                                <span>{{ stops_fee|currency }}</span>
+                            </div>
+                            {% endif %}
                             {% for addon in selected_addons %}
                             <div class="flex justify-between items-center text-[11px] text-gray-300">
-                                <span class="font-light">{{ addon.name }}</span>
-                                <span class="font-semibold text-luxe-gold">+{{ addon.price|currency }}</span>
+                                <span class="font-light">{{ addon.name }} (VIP Add-On)</span>
+                                <span class="text-luxe-gold">+{{ addon.price|currency }}</span>
+                            </div>
+                            {% endfor %}
+                        </div>
+
+                        <!-- Return Leg -->
+                        {% if booking_data.round_trip %}
+                        <div class="space-y-2 pb-3 border-b border-gray-800">
+                            <h4 class="text-[10px] uppercase font-bold text-luxe-gold tracking-wider flex items-center justify-between">
+                                <span>Return Leg (Retour)</span>
+                                <span class="font-bold">{{ return_total|currency }}</span>
+                            </h4>
+                            <div class="flex justify-between items-center text-[11px] text-gray-300">
+                                <span class="font-light">Base Chauffeur Fare</span>
+                                <span>{{ return_base|currency }}</span>
+                            </div>
+                            {% for addon in selected_addons_return %}
+                            <div class="flex justify-between items-center text-[11px] text-gray-300">
+                                <span class="font-light">{{ addon.name }} (VIP Add-On)</span>
+                                <span class="text-luxe-gold">+{{ addon.price|currency }}</span>
                             </div>
                             {% endfor %}
                         </div>
                         {% endif %}
-
-                        <!-- Direct booking fee info -->
-                        <div class="flex justify-between items-center border-t border-gray-800 pt-3 text-[11px]">
-                            <div>
-                                <span class="font-bold text-white uppercase tracking-wider">Platform Booking Fees</span>
-                                <p class="text-[9px] text-green-500 font-light mt-0.5">Direct Booking Benefit</p>
-                            </div>
-                            <span class="font-bold text-green-500">$0.00</span>
-                        </div>
                     </div>
 
                     <!-- Grand Total block -->
@@ -183,6 +197,19 @@
                             <span>Grand Total</span>
                             <span class="text-xl text-luxe-gold font-display font-black">{{ total_price|currency }}</span>
                         </div>
+                        
+                        {% if booking_data.round_trip and booking_data.pay_separately %}
+                        <div class="mt-2 p-3 bg-luxe-gold/5 border border-luxe-gold/20 rounded-xl space-y-1 text-[11px]">
+                            <div class="flex justify-between font-bold text-white">
+                                <span>Due Now (Outbound):</span>
+                                <span>{{ outbound_total|currency }}</span>
+                            </div>
+                            <div class="flex justify-between font-light text-gray-400">
+                                <span>Due at Return pickup:</span>
+                                <span>{{ return_total|currency }}</span>
+                            </div>
+                        </div>
+                        {% endif %}
                         <span class="text-[9px] text-gray-600 block text-right font-light">All-inclusive USD Rates</span>
                     </div>
                 </div>

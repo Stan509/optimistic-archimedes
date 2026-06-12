@@ -104,15 +104,23 @@
                                     <div class="flex items-center h-5 mt-0.5">
                                         <input type="checkbox" name="addons" value="{{ addon.id }}" data-price="{{ addon.price }}" class="addon-checkbox h-4.5 w-4.5 rounded border-gray-800 text-luxe-gold focus:ring-luxe-gold bg-luxe-black cursor-pointer">
                                     </div>
-                                    <div class="ml-4 flex-grow flex items-center justify-between">
-                                        <div>
-                                            <h4 class="text-xs font-bold uppercase tracking-wider text-white group-hover:text-luxe-gold transition-colors flex items-center space-x-2">
-                                                <i class="{% if addon.icon %}{{ addon.icon }}{% else %}fas fa-star{% endif %} text-luxe-gold text-[10px]"></i>
-                                                <span>{{ addon.name }}</span>
-                                            </h4>
-                                            <p class="text-[11px] text-gray-500 font-light mt-0.5">{{ addon.description }}</p>
+                                    <div class="ml-4 flex-grow">
+                                        <div class="flex items-center justify-between">
+                                            <div>
+                                                <h4 class="text-xs font-bold uppercase tracking-wider text-white group-hover:text-luxe-gold transition-colors flex items-center space-x-2">
+                                                    <i class="{% if addon.icon %}{{ addon.icon }}{% else %}fas fa-star{% endif %} text-luxe-gold text-[10px]"></i>
+                                                    <span>{{ addon.name }}</span>
+                                                </h4>
+                                                <p class="text-[11px] text-gray-500 font-light mt-0.5">{{ addon.description }}</p>
+                                            </div>
+                                            <span class="text-xs font-bold text-luxe-gold whitespace-nowrap ml-4">+{{ addon.price|currency }}</span>
                                         </div>
-                                        <span class="text-xs font-bold text-luxe-gold whitespace-nowrap ml-4">+{{ addon.price|currency }}</span>
+                                        {% if booking_data.round_trip %}
+                                        <div class="mt-2.5 pt-2 border-t border-gray-800/40 flex items-center space-x-2 text-[10px] text-gray-400">
+                                            <input type="checkbox" name="addons_return" value="{{ addon.id }}" data-price="{{ addon.price }}" class="addon-return-checkbox h-3.5 w-3.5 rounded border-gray-800 text-luxe-gold focus:ring-luxe-gold bg-luxe-black cursor-pointer">
+                                            <span>Apply also to return leg (+{{ addon.price|currency }})</span>
+                                        </div>
+                                        {% endif %}
                                     </div>
                                 </label>
                                 {% empty %}
@@ -120,6 +128,27 @@
                                 {% endfor %}
                             </div>
                         </div>
+
+                        {% if booking_data.round_trip %}
+                        <!-- Payment Preference for Round-Trip -->
+                        <div class="bg-luxe-black/30 border border-gray-800 p-5 rounded-2xl space-y-4 my-6">
+                            <h3 class="text-xs font-bold uppercase tracking-widest text-luxe-gold flex items-center space-x-2">
+                                <i class="fas fa-credit-card text-xs"></i>
+                                <span>Payment Preference</span>
+                            </h3>
+                            <p class="text-[11px] text-gray-400 font-light">Choose how you would like to pay for your round-trip transfer:</p>
+                            <div class="space-y-3">
+                                <label class="flex items-center space-x-3 cursor-pointer select-none">
+                                    <input type="radio" name="pay_separately" value="off" checked class="h-4.5 w-4.5 text-luxe-gold focus:ring-luxe-gold bg-luxe-black border-gray-800 cursor-pointer">
+                                    <span class="text-xs text-white">Pay for both legs together (Aller-Retour complet)</span>
+                                </label>
+                                <label class="flex items-center space-x-3 cursor-pointer select-none">
+                                    <input type="radio" name="pay_separately" value="on" class="h-4.5 w-4.5 text-luxe-gold focus:ring-luxe-gold bg-luxe-black border-gray-800 cursor-pointer">
+                                    <span class="text-xs text-white">Pay outbound and return legs separately (Payer séparément)</span>
+                                </label>
+                            </div>
+                        </div>
+                        {% endif %}
 
                         <!-- Action buttons -->
                         <div class="flex items-center justify-between pt-6 border-t border-gray-800">
@@ -220,6 +249,7 @@
         const basePrice = parseFloat("{{ base_price|default:0 }}");
         
         const checkboxes = document.querySelectorAll('.addon-checkbox');
+        const returnCheckboxes = document.querySelectorAll('.addon-return-checkbox');
         const addonsDisplay = document.getElementById('addons-fare-display');
         const totalDisplay = document.getElementById('total-fare-display');
 
@@ -233,6 +263,12 @@
             checkboxes.forEach(checkbox => {
                 if (checkbox.checked) {
                     addonsTotal += parseFloat(checkbox.getAttribute('data-price')) || 0;
+                    
+                    // Sum return addon if it is checked
+                    const returnCb = document.querySelector(`.addon-return-checkbox[value="${checkbox.value}"]`);
+                    if (returnCb && returnCb.checked) {
+                        addonsTotal += parseFloat(returnCb.getAttribute('data-price')) || 0;
+                    }
                 }
             });
 
@@ -243,9 +279,32 @@
             totalDisplay.textContent = formatUSD(finalTotal);
         }
 
-        // Attach change listeners to all checkboxes
+        // Attach change listeners to all main checkboxes
         checkboxes.forEach(checkbox => {
-            checkbox.addEventListener('change', calculateLiveTotal);
+            checkbox.addEventListener('change', () => {
+                if (!checkbox.checked) {
+                    // Uncheck return checkbox if main is unchecked
+                    const returnCb = document.querySelector(`.addon-return-checkbox[value="${checkbox.value}"]`);
+                    if (returnCb) {
+                        returnCb.checked = false;
+                    }
+                }
+                calculateLiveTotal();
+            });
+        });
+
+        // Attach change listeners to all return checkboxes
+        returnCheckboxes.forEach(returnCb => {
+            returnCb.addEventListener('change', () => {
+                if (returnCb.checked) {
+                    // Automatically check main checkbox if return is checked
+                    const mainCb = document.querySelector(`.addon-checkbox[value="${returnCb.value}"]`);
+                    if (mainCb && !mainCb.checked) {
+                        mainCb.checked = true;
+                    }
+                }
+                calculateLiveTotal();
+            });
         });
 
         // Initialize total once on load

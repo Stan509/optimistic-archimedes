@@ -107,13 +107,32 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <div>
                     <span class="block text-xs text-luxury-muted uppercase tracking-wider">Service Type</span>
-                    <span class="inline-block mt-1 bg-gold-500/10 border border-gold-500/20 text-gold-400 px-3 py-1 rounded text-xs font-semibold">
+                    <span class="inline-block mt-1 bg-gold-500/10 border border-gold-500/20 text-gold-400 px-3 py-1 rounded text-xs font-semibold font-mono tracking-wider">
                         {{ booking.get_service_type_display }}
+                        {% if booking.round_trip %}
+                        &bull; ROUND-TRIP
+                        {% endif %}
                     </span>
                 </div>
                 <div>
-                    <span class="block text-xs text-luxury-muted uppercase tracking-wider">Pickup Date & Time</span>
+                    <span class="block text-xs text-luxury-muted uppercase tracking-wider">Outbound Pickup Date & Time</span>
                     <span class="block font-semibold text-white mt-1"><i class="fa-regular fa-clock mr-1.5 text-luxury-muted"></i>{{ booking.pickup_date }} at {{ booking.pickup_time }}</span>
+                </div>
+                {% if booking.round_trip %}
+                <div>
+                    <span class="block text-xs text-luxury-muted uppercase tracking-wider">Return Pickup Date & Time</span>
+                    <span class="block font-semibold text-gold-400 mt-1"><i class="fa-regular fa-clock mr-1.5 text-luxury-muted"></i>{{ booking.return_date }} at {{ booking.return_time }}</span>
+                </div>
+                {% endif %}
+                <div>
+                    <span class="block text-xs text-luxury-muted uppercase tracking-wider">Payment Split Preference</span>
+                    <span class="block font-semibold mt-1">
+                        {% if booking.pay_separately %}
+                        <span class="text-amber-400"><i class="fa-solid fa-arrows-split-up-and-left mr-1"></i>Pay Legs Separately</span>
+                        {% else %}
+                        <span class="text-white">Pay Together</span>
+                        {% endif %}
+                    </span>
                 </div>
 
                 {% if booking.service_type == 'AIRPORT_TRANSFER' %}
@@ -189,29 +208,50 @@
             </div>
 
             <!-- VIP Add-ons checklist -->
-            <div class="pt-4 border-t border-luxury-border">
-                <span class="block text-xs text-luxury-muted uppercase tracking-wider mb-3">Selected Premium Upsells</span>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    {% for addon in booking.addons.all %}
-                    <div class="flex items-center justify-between p-3 rounded-xl bg-luxury-black/40 border border-luxury-border text-xs">
-                        <div class="flex items-center space-x-2">
-                            <i class="{{ addon.icon|default:'fa-solid fa-crown' }} text-gold-400 text-sm"></i>
-                            <span class="font-medium text-white">{{ addon.name }}</span>
+            <div class="pt-4 border-t border-luxury-border space-y-4">
+                <div>
+                    <span class="block text-xs text-luxury-muted uppercase tracking-wider mb-2">Outbound Leg VIP Add-Ons (Aller)</span>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        {% for addon in booking.addons.all %}
+                        <div class="flex items-center justify-between p-3 rounded-xl bg-luxury-black/40 border border-luxury-border text-xs">
+                            <div class="flex items-center space-x-2">
+                                <i class="{{ addon.icon|default:'fa-solid fa-crown' }} text-gold-400 text-sm"></i>
+                                <span class="font-medium text-white">{{ addon.name }}</span>
+                            </div>
+                            <span class="font-bold text-gold-400">+${{ addon.price }}</span>
                         </div>
-                        <span class="font-bold text-gold-400">+${{ addon.price }}</span>
+                        {% empty %}
+                        <div class="sm:col-span-2 text-xs text-luxury-muted bg-luxury-black/10 p-3 rounded border border-luxury-border border-dashed text-center">
+                            No custom VIP services selected for outbound.
+                        </div>
+                        {% endfor %}
                     </div>
-                    {% empty %}
-                    <div class="sm:col-span-2 text-xs text-luxury-muted bg-luxury-black/10 p-3 rounded border border-luxury-border border-dashed text-center">
-                        No custom VIP services selected.
-                    </div>
-                    {% endfor %}
                 </div>
+
+                {% if booking.round_trip %}
+                <div>
+                    <span class="block text-xs text-luxury-muted uppercase tracking-wider mb-2">Return Leg VIP Add-Ons (Retour)</span>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        {% for addon in booking.addons_return.all %}
+                        <div class="flex items-center justify-between p-3 rounded-xl bg-luxury-black/40 border border-luxury-border text-xs">
+                            <div class="flex items-center space-x-2">
+                                <i class="{{ addon.icon|default:'fa-solid fa-crown' }} text-gold-400 text-sm"></i>
+                                <span class="font-medium text-white">{{ addon.name }}</span>
+                            </div>
+                            <span class="font-bold text-gold-400">+${{ addon.price }}</span>
+                        </div>
+                        {% empty %}
+                        <div class="sm:col-span-2 text-xs text-luxury-muted bg-luxury-black/10 p-3 rounded border border-luxury-border border-dashed text-center">
+                            No custom VIP services selected for return.
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
             </div>
         </div>
 
-    </div>
-
-    <!-- Right Column: Financial summary, Dispatch notes edit, Actions console -->
+    </div>    <!-- Right Column: Financial summary, Dispatch notes edit, Actions console -->
     <div class="space-y-8">
         
         <!-- Financial Summary Card -->
@@ -222,49 +262,132 @@
             
             <h3 class="font-serif font-semibold text-base border-b border-luxury-border pb-3 mb-4">Financial Ledger</h3>
             
-            <div class="space-y-3.5 text-sm">
-                <!-- Base route fee -->
-                <div class="flex justify-between items-center text-luxury-muted">
-                    <span>Base Chauffeur Rate</span>
-                    <span class="text-white font-medium">${{ booking.base_price|floatformat:2 }}</span>
-                </div>
-                <!-- Add-ons -->
-                <div class="flex justify-between items-center text-luxury-muted">
-                    <span>VIP Add-Ons total</span>
-                    <span class="text-gold-400 font-medium">+${{ booking.addons_total|floatformat:2 }}</span>
-                </div>
-                
-                <!-- External platform markup check -->
-                {% if booking.is_platform_booking %}
-                <div class="p-3 bg-gold-500/5 rounded-xl border border-gold-500/20 text-xs my-2.5">
-                    <div class="flex justify-between items-center text-gold-400 font-semibold mb-1">
-                        <span>Platform Commission</span>
-                        <span>{{ booking.platform_commission_rate|stringformat:".0%" }}</span>
+            <div class="space-y-4 text-xs">
+                <!-- Outbound Leg -->
+                <div class="bg-luxury-black/40 p-3 rounded-xl border border-luxury-border/60 space-y-2">
+                    <span class="block text-[10px] uppercase font-bold text-gold-400 tracking-wider">Outbound Leg (Aller)</span>
+                    <div class="flex justify-between items-center text-luxury-muted">
+                        <span>Base Rate:</span>
+                        <span class="text-white">${{ outbound_base|floatformat:2 }}</span>
                     </div>
-                    <p class="text-[10px] text-luxury-muted mb-2">Baked-in platform fee markup applied for {{ booking.booking_source }}.</p>
-                    <div class="flex justify-between items-center text-white">
-                        <span>Commission markup</span>
-                        <span class="font-mono">${{ booking.platform_fee|floatformat:2 }}</span>
+                    {% if stops_fee > 0 %}
+                    <div class="flex justify-between items-center text-luxury-muted">
+                        <span>Stops Fee:</span>
+                        <span class="text-white">+${{ stops_fee|floatformat:2 }}</span>
+                    </div>
+                    {% endif %}
+                    {% if outbound_addons_total > 0 %}
+                    <div class="flex justify-between items-center text-luxury-muted">
+                        <span>VIP Add-Ons:</span>
+                        <span class="text-white">+${{ outbound_addons_total|floatformat:2 }}</span>
+                    </div>
+                    {% endif %}
+                    <div class="flex justify-between items-center font-bold text-white pt-1 border-t border-luxury-border/30">
+                        <span>Subtotal Aller:</span>
+                        <span>${{ outbound_total|floatformat:2 }}</span>
+                    </div>
+                </div>
+
+                <!-- Return Leg (if round_trip) -->
+                {% if booking.round_trip %}
+                <div class="bg-luxury-black/40 p-3 rounded-xl border border-luxury-border/60 space-y-2">
+                    <span class="block text-[10px] uppercase font-bold text-gold-400 tracking-wider">Return Leg (Retour)</span>
+                    <div class="flex justify-between items-center text-luxury-muted">
+                        <span>Base Rate:</span>
+                        <span class="text-white">${{ return_base|floatformat:2 }}</span>
+                    </div>
+                    {% if return_addons_total > 0 %}
+                    <div class="flex justify-between items-center text-luxury-muted">
+                        <span>VIP Add-Ons:</span>
+                        <span class="text-white">+${{ return_addons_total|floatformat:2 }}</span>
+                    </div>
+                    {% endif %}
+                    <div class="flex justify-between items-center font-bold text-white pt-1 border-t border-luxury-border/30">
+                        <span>Subtotal Retour:</span>
+                        <span>${{ return_total|floatformat:2 }}</span>
                     </div>
                 </div>
                 {% endif %}
 
-                <!-- Border -->
-                <div class="border-t border-luxury-border pt-4"></div>
-                
-                <!-- Total price -->
-                <div class="flex justify-between items-baseline">
-                    <span class="text-xs uppercase tracking-wider text-luxury-muted font-bold">Total Price (USD)</span>
-                    <span class="text-3xl font-bold font-serif gold-text-gradient">${{ booking.total_price|floatformat:2 }}</span>
+                {% if booking.is_platform_booking %}
+                <div class="p-3 bg-gold-500/5 rounded-xl border border-gold-500/20 text-xs">
+                    <div class="flex justify-between items-center text-gold-400 font-semibold mb-1">
+                        <span>Platform Commission</span>
+                        <span>{{ booking.platform_commission_rate|stringformat:".0%" }}</span>
+                    </div>
+                    <div class="flex justify-between items-center text-white">
+                        <span>Commission markup</span>
+                        <span>+${{ booking.platform_fee|floatformat:2 }}</span>
+                    </div>
+                </div>
+                {% endif %}
+
+                <div class="border-t border-luxury-border pt-3">
+                    <div class="flex justify-between items-baseline">
+                        <span class="text-xs uppercase tracking-wider text-luxury-muted font-bold">Grand Total</span>
+                        <span class="text-2xl font-bold font-serif gold-text-gradient">${{ booking.total_price|floatformat:2 }}</span>
+                    </div>
+                    <div class="flex justify-between items-baseline mt-1">
+                        <span class="text-xs text-luxury-muted">Amount Paid:</span>
+                        <span class="text-sm font-semibold text-emerald-400">${{ booking.amount_paid|floatformat:2 }}</span>
+                    </div>
+                    <div class="flex justify-between items-baseline mt-1 border-t border-luxury-border/30 pt-1.5">
+                        <span class="text-xs font-bold text-white">Remaining Balance:</span>
+                        <span class="text-base font-bold {% if balance > 0 %}text-rose-400 animate-pulse{% else %}text-emerald-400{% endif %}">${{ balance|floatformat:2 }}</span>
+                    </div>
                 </div>
             </div>
 
-            <div class="mt-6 flex items-center justify-between text-xs pt-4 border-t border-luxury-border text-luxury-muted">
-                <span>Payment Status:</span>
+            <div class="mt-4 flex items-center justify-between text-xs pt-3 border-t border-luxury-border text-luxury-muted">
+                <span>Payment Method:</span>
                 <span class="font-bold text-white uppercase bg-luxury-black px-2.5 py-1 rounded border border-luxury-border">
-                    {{ booking.payment_method }} &bull; {{ booking.payment_status }}
+                    {{ booking.payment_method }} &bull; {{ booking.get_payment_status_display }}
                 </span>
             </div>
+        </div>
+
+        <!-- Grand Livre Ledger: Payment History -->
+        <div class="bg-luxury-card border border-luxury-border rounded-2xl p-6">
+            <h3 class="font-serif font-semibold text-base border-b border-luxury-border pb-3 mb-4">Payment History</h3>
+            
+            <div class="space-y-3">
+                {% for payment in booking.payments.all %}
+                <div class="p-3 bg-luxury-black/35 rounded-xl border border-luxury-border text-xs flex justify-between items-start">
+                    <div class="space-y-1">
+                        <div class="font-bold text-white">${{ payment.amount|floatformat:2 }}</div>
+                        <div class="text-[10px] text-luxury-muted uppercase">{{ payment.get_payment_method_display }}</div>
+                        {% if payment.notes %}
+                        <p class="text-[10px] text-luxury-muted italic mt-1 bg-luxury-black/20 p-1.5 rounded border border-luxury-border/40">"{{ payment.notes }}"</p>
+                        {% endif %}
+                    </div>
+                    <span class="text-[10px] font-mono text-luxury-muted">{{ payment.payment_date|date:"Y-m-d H:i" }}</span>
+                </div>
+                {% empty %}
+                <div class="text-center py-6 text-xs text-luxury-muted bg-luxury-black/10 rounded-xl border border-luxury-border border-dashed">
+                    No cash or manual payments logged for this booking.
+                </div>
+                {% endfor %}
+            </div>
+
+            {% if balance > 0 %}
+            <div class="mt-4 pt-4 border-t border-luxury-border">
+                <span class="block text-xs text-white font-semibold uppercase tracking-wider mb-2">Record Cash / Manual Payment</span>
+                <form method="POST" action="{% url 'dashboard:record_payment' booking.id %}" class="space-y-3">
+                    {% csrf_token %}
+                    <div class="grid grid-cols-3 gap-2">
+                        <div class="col-span-2">
+                            <input type="number" name="amount" step="0.01" min="0.01" max="{{ balance }}" value="{{ balance }}" required class="w-full bg-luxury-black border border-luxury-border rounded-xl px-3 py-2.5 text-xs text-white focus:border-gold-500/50 outline-none">
+                        </div>
+                        <div>
+                            <button type="submit" class="w-full gold-gradient text-luxury-black text-xs font-bold py-2.5 rounded-xl hover:opacity-90 transition-all shadow-md shadow-gold-500/10">
+                                Log Pay
+                            </button>
+                        </div>
+                    </div>
+                    <input type="text" name="notes" placeholder="Payment notes (e.g. Received cash at destination)" class="w-full bg-luxury-black border border-luxury-border rounded-xl px-3 py-2.5 text-[10px] text-white focus:border-gold-500/50 outline-none">
+                </form>
+            </div>
+            {% endif %}
         </div>
 
         <!-- Dispatch Notes Sheet (POST editor) -->
@@ -286,7 +409,7 @@
                 </div>
 
                 <button type="submit" class="w-full text-xs font-semibold text-gold-400 bg-gold-500/10 hover:bg-gold-500/20 border border-gold-500/25 hover:border-gold-400/40 rounded-xl py-2.5 transition-all">
-                    <i class="fa-solid fa-floppy-disk mr-1.5"></i>Update Operational Notes
+                    <i class="fa-solid fa-floppy-disk mr-1.5"></i>Update Notes
                 </button>
             </form>
         </div>
@@ -328,4 +451,5 @@
     </div>
 
 </div>
+{% block extra_js %}{% endblock %}
 {% endblock %}

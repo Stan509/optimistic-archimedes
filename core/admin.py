@@ -20,6 +20,8 @@ from core.models import (
     Testimonial,
     SiteSettings,
     ProfitReport,
+    BookingPayment,
+    EmailTemplate,
 )
 
 
@@ -434,3 +436,25 @@ class ProfitReportAdmin(admin.ModelAdmin):
             'fields': ('created_at',),
         }),
     )
+
+
+# ──────────────────────────────────────────────
+#  Booking Payment
+# ──────────────────────────────────────────────
+
+@admin.register(BookingPayment)
+class BookingPaymentAdmin(admin.ModelAdmin):
+    list_display = ('booking', 'amount', 'payment_date', 'payment_method')
+    list_filter = ('payment_method', 'payment_date')
+    search_fields = ('booking__booking_reference', 'booking__customer_name', 'notes')
+
+
+# ──────────────────────────────────────────────
+#  Email Template
+# ──────────────────────────────────────────────
+
+@admin.register(EmailTemplate)
+class EmailTemplateAdmin(admin.ModelAdmin):
+    list_display = ('site', 'email_type', 'subject')
+    list_filter = ('site', 'email_type')
+    search_fields = ('subject', 'html_content', 'text_content')

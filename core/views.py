@@ -543,7 +543,13 @@ def booking_step3(request):
         booking_data['customer_phone'] = request.POST.get('customer_phone', '')
         booking_data['customer_whatsapp'] = request.POST.get('customer_whatsapp', '')
         booking_data['customer_notes'] = request.POST.get('customer_notes', '')
-        booking_data['selected_addons'] = request.POST.getlist('addons', [])
+        try:
+            booking_data['selected_addons'] = [int(x) for x in request.POST.getlist('addons', [])]
+            booking_data['selected_addons_return'] = [int(x) for x in request.POST.getlist('addons_return', [])]
+        except ValueError:
+            booking_data['selected_addons'] = []
+            booking_data['selected_addons_return'] = []
+        booking_data['pay_separately'] = request.POST.get('pay_separately') == 'on'
         request.session['booking'] = booking_data
         return redirect(f'/{slug}/book/payment/')
 
@@ -694,12 +700,19 @@ def booking_payment(request):
             base_price = booking_data.get('base_price', 0) or 0
             booking.base_price = Decimal(str(base_price))
 
+            # Set pay_separately
+            booking.pay_separately = booking_data.get('pay_separately', False)
+
             # Calculate add-ons total
             addon_ids = booking_data.get('selected_addons', [])
+            addon_return_ids = booking_data.get('selected_addons_return', [])
             addons_total = Decimal('0.00')
             if addon_ids:
                 addons = PremiumAddOn.objects.filter(id__in=addon_ids)
-                addons_total = sum(a.price for a in addons)
+                addons_total += sum(a.price for a in addons)
+            if addon_return_ids:
+                addons_return = PremiumAddOn.objects.filter(id__in=addon_return_ids)
+                addons_total += sum(a.price for a in addons_return)
             booking.addons_total = addons_total
 
             booking.calculate_total()
@@ -711,58 +724,21 @@ def booking_payment(request):
             # Add selected add-ons
             if addon_ids:
                 booking.addons.set(addon_ids)
-                # Force reload from database to clear relation cache
-                booking = Booking.objects.get(pk=booking.pk)
-                # Recalculate total after addons are set
-                booking.calculate_total()
-                booking.save()
+            if addon_return_ids:
+                booking.addons_return.set(addon_return_ids)
 
-            # --- Round-Trip Split: Create return leg Booking ---
-            if booking.round_trip and booking.return_date and booking.return_time:
-                # Invert pickup/dropoff addresses and transfer directions
-                return_direction = 'DEST_TO_AIRPORT' if booking.transfer_direction == 'AIRPORT_TO_DEST' else 'AIRPORT_TO_DEST'
-                return_pickup_address = booking.dropoff_address
-                return_dropoff_address = booking.pickup_address
-
-                booking2 = Booking(
-                    site=booking.site,
-                    service_type=booking.service_type,
-                    transfer_direction=return_direction,
-                    meeting_point=booking.meeting_point,
-                    customer_name=booking.customer_name,
-                    customer_email=booking.customer_email,
-                    customer_phone=booking.customer_phone,
-                    customer_whatsapp=booking.customer_whatsapp,
-                    pickup_address=return_pickup_address,
-                    dropoff_address=return_dropoff_address,
-                    pickup_date=booking.return_date,
-                    pickup_time=booking.return_time,
-                    flight_number='',
-                    customer_notes=booking.customer_notes,
-                    booking_source=booking.booking_source,
-                    round_trip=False,
-                    return_date=None,
-                    return_time=None,
-                    number_of_stops=booking.number_of_stops,
-                    stop_addresses=booking.stop_addresses,
-                    passenger_count=booking.passenger_count,
-                    linked_booking=booking,
-                    airport=booking.airport,
-                    destination=booking.destination,
-                    vehicle=booking.vehicle,
-                    vehicle_category=booking.vehicle_category,
-                    payment_method=booking.payment_method,
-                    payment_status=booking.payment_status,
-                    stripe_payment_id=booking.stripe_payment_id,
-                    base_price=Decimal('0.00'),
-                    addons_total=Decimal('0.00'),
-                    platform_fee=Decimal('0.00'),
-                    total_price=Decimal('0.00'),
-                )
-                booking2.save()
-
-                if addon_ids:
-                    booking2.addons.set(addon_ids)
+            # Force reload from database to clear relation cache
+            booking = Booking.objects.get(pk=booking.pk)
+            # Recalculate total after addons are set
+            booking.calculate_total()
+            
+            if booking.payment_method == 'STRIPE':
+                booking.amount_paid = booking.total_price
+                booking.payment_status = 'PAID'
+            else:
+                booking.amount_paid = Decimal('0.00')
+                booking.payment_status = 'PENDING'
+            booking.save()
 
             # --- Trigger Automated Email Confirmations ---
             try:
@@ -785,29 +761,48 @@ def booking_payment(request):
         if service_type == 'hourly':
             hours = int(booking_data.get('hours_requested', 3))
             fare = fare * hours
-        else:
-            if booking_data.get('round_trip'):
-                fare = fare * 2.0
-            if service_type == 'point_to_point':
-                stops = int(booking_data.get('number_of_stops', 0))
-                fare = fare + (stops * 20.0)
+        
+        outbound_base = fare
+        return_base = 0.0
+        if service_type != 'hourly' and booking_data.get('round_trip'):
+            return_base = fare
+            
+        stops_fee = 0.0
+        if service_type == 'point_to_point':
+            stops = int(booking_data.get('number_of_stops', 0) or 0)
+            stops_fee = stops * 20.0
 
         # Calculate add-ons total
         addon_ids = booking_data.get('selected_addons', [])
-        addons_total = 0
+        outbound_addons_total = 0.0
         selected_addons = []
         if addon_ids:
             selected_addons = list(PremiumAddOn.objects.filter(id__in=addon_ids))
-            addons_total = sum(a.price for a in selected_addons)
+            outbound_addons_total = sum(float(a.price) for a in selected_addons)
 
-        total = fare + float(addons_total)
+        addon_return_ids = booking_data.get('selected_addons_return', [])
+        return_addons_total = 0.0
+        selected_addons_return = []
+        if addon_return_ids:
+            selected_addons_return = list(PremiumAddOn.objects.filter(id__in=addon_return_ids))
+            return_addons_total = sum(float(a.price) for a in selected_addons_return)
+
+        outbound_total = outbound_base + stops_fee + outbound_addons_total
+        return_total = return_base + return_addons_total if booking_data.get('round_trip') else 0.0
+        grand_total = outbound_total + return_total
 
         context = {
             'booking_data': booking_data,
-            'base_price': fare,
-            'addons_total': addons_total,
+            'outbound_base': outbound_base,
+            'return_base': return_base,
+            'stops_fee': stops_fee,
+            'outbound_addons_total': outbound_addons_total,
+            'return_addons_total': return_addons_total,
             'selected_addons': selected_addons,
-            'total_price': total,
+            'selected_addons_return': selected_addons_return,
+            'outbound_total': outbound_total,
+            'return_total': return_total,
+            'total_price': grand_total,
             'stripe_public_key': site_settings.stripe_public_key if site_settings else '',
             'stripe_enabled': site_settings.stripe_enabled if site_settings else False,
             'site_slug': slug,
@@ -826,15 +821,42 @@ def booking_success(request, reference):
 
     try:
         from core.models import Booking
+        from decimal import Decimal
         booking = get_object_or_404(Booking, booking_reference=reference)
-    except Exception:
-        booking = None
+        
+        # Financial breakdown calculations
+        base_price = booking.base_price
+        stops_fee = Decimal('0.00')
+        if booking.service_type == 'point_to_point':
+            stops_fee = Decimal('20.00') * Decimal(booking.number_of_stops)
 
-    context = {
-        'booking': booking,
-        'site_slug': slug,
-        'language': _get_language(request),
-    }
+        outbound_addons_total = sum(a.price for a in booking.addons.all())
+        return_addons_total = sum(a.price for a in booking.addons_return.all())
+
+        outbound_total = base_price + stops_fee + outbound_addons_total
+        return_total = base_price + return_addons_total if booking.round_trip else Decimal('0.00')
+        balance = booking.total_price - booking.amount_paid
+        
+        context = {
+            'booking': booking,
+            'outbound_base': base_price,
+            'return_base': base_price if booking.round_trip else Decimal('0.00'),
+            'stops_fee': stops_fee,
+            'outbound_addons_total': outbound_addons_total,
+            'return_addons_total': return_addons_total,
+            'outbound_total': outbound_total,
+            'return_total': return_total,
+            'balance': balance,
+            'site_slug': slug,
+            'language': _get_language(request),
+        }
+    except Exception:
+        context = {
+            'booking': None,
+            'site_slug': slug,
+            'language': _get_language(request),
+        }
+
     return render(request, 'core/booking_success.html', context)
 
 

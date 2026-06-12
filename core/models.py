@@ -63,6 +63,7 @@ class BookingStatus(models.TextChoices):
 
 class PaymentStatus(models.TextChoices):
     PENDING = 'pending', 'Pending'
+    PARTIALLY_PAID = 'partially_paid', 'Partially Paid'
     PAID = 'paid', 'Paid'
     REFUNDED = 'refunded', 'Refunded'
 
@@ -911,6 +912,12 @@ class Booking(models.Model):
         related_name='bookings',
         blank=True,
     )
+    addons_return = models.ManyToManyField(
+        PremiumAddOn,
+        related_name='return_bookings',
+        blank=True,
+        help_text='Add-ons selected specifically for the return leg.'
+    )
 
     # ── Pricing ──
     base_price = models.DecimalField(
@@ -937,6 +944,21 @@ class Booking(models.Model):
         decimal_places=2,
         default=Decimal('0.00'),
         validators=[MinValueValidator(Decimal('0.00'))],
+    )
+    pay_separately = models.BooleanField(
+        default=False,
+        help_text='Whether the customer requested to pay for outbound and return legs separately.'
+    )
+    amount_paid = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=Decimal('0.00'),
+        validators=[MinValueValidator(Decimal('0.00'))],
+        help_text='The amount currently paid by the customer.'
+    )
+    reminder_sent = models.BooleanField(
+        default=False,
+        help_text='Whether the 12-hour reminder email has been sent.'
     )
     currency = models.CharField(
         max_length=3,
@@ -1052,6 +1074,9 @@ class Booking(models.Model):
         if self.pk:
             self.addons_total = sum(
                 addon.price for addon in self.addons.all()
+            )
+            self.addons_total += sum(
+                addon.price for addon in self.addons_return.all()
             )
         else:
             self.addons_total = Decimal('0.00')
@@ -1493,3 +1518,73 @@ class ProfitReport(models.Model):
         super().clean()
         if self.month < 1 or self.month > 12:
             raise ValidationError({'month': 'Month must be between 1 and 12.'})
+
+
+class BookingPayment(models.Model):
+    """
+    Tracks manual cash/stripe payments logged for a booking to form a ledger history.
+    """
+    booking = models.ForeignKey(
+        'Booking',
+        on_delete=models.CASCADE,
+        related_name='payments',
+    )
+    amount = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        validators=[MinValueValidator(Decimal('0.01'))],
+    )
+    payment_date = models.DateTimeField(auto_now_add=True)
+    payment_method = models.CharField(
+        max_length=20,
+        choices=[
+            ('CASH', 'Cash on Delivery'),
+            ('STRIPE', 'Stripe Card'),
+            ('MANUAL', 'Manual Logged'),
+        ],
+        default='CASH',
+    )
+    notes = models.TextField(blank=True, default='')
+
+    class Meta:
+        verbose_name = 'Booking Payment'
+        verbose_name_plural = 'Booking Payments'
+        ordering = ['-payment_date']
+
+    def __str__(self):
+        return f"${self.amount} for {self.booking.booking_reference} on {self.payment_date.strftime('%Y-%m-%d %H:%M')}"
+
+
+class EmailTemplate(models.Model):
+    """
+    Customizable email templates (skeletons) for different notification triggers.
+    """
+    site = models.ForeignKey(
+        Site,
+        on_delete=models.CASCADE,
+        related_name='email_templates',
+    )
+    email_type = models.CharField(
+        max_length=20,
+        choices=[
+            ('processing', 'Booking Processing'),
+            ('confirmed', 'Booking Confirmed'),
+            ('reminder_12h', '12h Pickup Reminder'),
+            ('cancelled', 'Booking Cancelled'),
+        ],
+    )
+    subject = models.CharField(max_length=255)
+    html_content = models.TextField(
+        help_text='HTML template content. Placeholders: {customer_name}, {booking_reference}, {pickup_date}, {pickup_time}, {return_date}, {return_time}, {total_price}, {amount_paid}, {balance}, {pickup_address}, {dropoff_address}, {service_type}, {flight_number}'
+    )
+    text_content = models.TextField(
+        help_text='Plain text template content. Placeholders same as HTML.'
+    )
+
+    class Meta:
+        verbose_name = 'Email Template'
+        verbose_name_plural = 'Email Templates'
+        unique_together = [['site', 'email_type']]
+
+    def __str__(self):
+        return f"{self.get_email_type_display()} ({self.site.slug.upper()})"

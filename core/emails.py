@@ -4,13 +4,339 @@ from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
 from django.core.mail.backends.smtp import EmailBackend
 from decimal import Decimal
-from core.models import SiteSettings, ServiceType
+from core.models import SiteSettings, ServiceType, EmailTemplate
 
-def send_booking_emails(booking):
+def get_email_context(booking):
+    """Generates standard context variables for email templates."""
+    base_price = booking.base_price
+    stops_fee = Decimal('0.00')
+    if booking.service_type == 'point_to_point':
+        stops_fee = Decimal('20.00') * Decimal(booking.number_of_stops)
+        
+    outbound_addons_total = sum(addon.price for addon in booking.addons.all()) if booking.pk else Decimal('0.00')
+    return_addons_total = sum(addon.price for addon in booking.addons_return.all()) if booking.pk else Decimal('0.00')
+    
+    outbound_total = base_price + stops_fee + outbound_addons_total
+    return_total = base_price + return_addons_total if booking.round_trip else Decimal('0.00')
+    
+    balance = booking.total_price - booking.amount_paid
+    
+    return {
+        'customer_name': booking.customer_name,
+        'booking_reference': booking.booking_reference,
+        'pickup_date': str(booking.pickup_date),
+        'pickup_time': str(booking.pickup_time),
+        'return_date': str(booking.return_date) if booking.return_date else 'N/A',
+        'return_time': str(booking.return_time) if booking.return_time else 'N/A',
+        'total_price': f"${booking.total_price:.2f}",
+        'amount_paid': f"${booking.amount_paid:.2f}",
+        'balance': f"${balance:.2f}",
+        'outbound_total': f"${outbound_total:.2f}",
+        'return_total': f"${return_total:.2f}",
+        'pickup_address': booking.pickup_address or (booking.airport.name if booking.airport else 'N/A'),
+        'dropoff_address': booking.dropoff_address or (booking.destination.name if booking.destination else 'N/A'),
+        'service_type': booking.get_service_type_display(),
+        'flight_number': booking.flight_number or 'N/A',
+    }
+
+def format_template(text, context):
+    """Replaces placeholders in format {variable_name} with context values."""
+    if not text:
+        return ""
+    for k, v in context.items():
+        text = text.replace(f'{{{k}}}', str(v))
+    return text
+
+def get_default_email_template(email_type, company_name="AeroLux Select"):
+    """Returns default professional HTML and plain text skeletons for emails."""
+    
+    if email_type == 'processing':
+        subject = f"Reservation Received & Processing — {company_name}"
+        html_content = """<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Reservation Received</title>
+</head>
+<body style="background-color: #0A0A0A; color: #FFFFFF; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; padding: 20px; margin: 0;">
+    <div style="max-width: 600px; margin: 0 auto; background-color: #111; border: 1px solid #222; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.5);">
+        <div style="background-color: #0D0D0D; padding: 30px; text-align: center; border-bottom: 1px solid #C9A84C;">
+            <h1 style="color: #C9A84C; font-size: 24px; font-weight: bold; text-transform: uppercase; letter-spacing: 2px; margin: 0;">AEROLUX SELECT</h1>
+            <p style="color: #888; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; margin: 5px 0 0 0;">Under Review / En cours de traitement</p>
+        </div>
+        <div style="padding: 30px;">
+            <p style="font-size: 14px; line-height: 1.6; color: #ccc;">Dear {customer_name},</p>
+            <p style="font-size: 14px; line-height: 1.6; color: #ccc;">We have received your chauffeur booking request. Your reservation reference is <strong>{booking_reference}</strong>. Our dispatch command desk is currently reviewing the itinerary and vehicle availability.</p>
+            
+            <div style="background-color: #1a1a1a; padding: 20px; border-radius: 8px; margin: 25px 0; border: 1px solid #333;">
+                <h3 style="color: #C9A84C; margin-top: 0; font-size: 14px; uppercase; letter-spacing: 1px;">Itinerary Summary</h3>
+                <table style="width: 100%; font-size: 13px; color: #ccc; border-collapse: collapse;">
+                    <tr>
+                        <td style="padding: 6px 0; color: #888; width: 35%;">Service Type:</td>
+                        <td style="padding: 6px 0; color: #fff;">{service_type}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 6px 0; color: #888;">Pickup Date/Time:</td>
+                        <td style="padding: 6px 0; color: #fff;">{pickup_date} at {pickup_time}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 6px 0; color: #888;">Pickup Address:</td>
+                        <td style="padding: 6px 0; color: #fff;">{pickup_address}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 6px 0; color: #888;">Drop-off Address:</td>
+                        <td style="padding: 6px 0; color: #fff;">{dropoff_address}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 6px 0; color: #888;">Flight Number:</td>
+                        <td style="padding: 6px 0; color: #fff;">{flight_number}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 6px 0; color: #888;">Outbound Fare:</td>
+                        <td style="padding: 6px 0; color: #fff;">{outbound_total}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 6px 0; color: #888;">Return Fare:</td>
+                        <td style="padding: 6px 0; color: #fff;">{return_total}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 6px 0; color: #888; font-weight: bold; border-top: 1px solid #333;">Grand Total:</td>
+                        <td style="padding: 6px 0; color: #C9A84C; font-weight: bold; border-top: 1px solid #333;">{total_price}</td>
+                    </tr>
+                </table>
+            </div>
+
+            <p style="font-size: 14px; line-height: 1.6; color: #ccc;">A confirmation email will be sent once our dispatch team validates your trip. If you have chosen to pay cash on delivery, please have the correct amount ready for your chauffeur.</p>
+            <p style="font-size: 14px; line-height: 1.6; color: #ccc; margin-bottom: 0;">Kind regards,<br>AeroLux Select Command Desk</p>
+        </div>
+        <div style="background-color: #0D0D0D; padding: 20px; text-align: center; font-size: 11px; color: #666; border-top: 1px solid #222;">
+            &copy; AeroLux Select &bull; Luxury Chauffeur Logistics
+        </div>
+    </div>
+</body>
+</html>"""
+        text_content = """Dear {customer_name},
+
+We have received your reservation request {booking_reference} and it is currently being processed.
+
+Itinerary Summary:
+Service: {service_type}
+Pickup: {pickup_date} at {pickup_time}
+From: {pickup_address}
+To: {dropoff_address}
+Flight: {flight_number}
+Outbound total: {outbound_total}
+Return total: {return_total}
+Grand total: {total_price}
+
+We will send another confirmation email once validated.
+
+Best regards,
+AeroLux Select Desk"""
+
+    elif email_type == 'confirmed':
+        subject = f"Reservation Confirmed & Secured — {company_name} [{{booking_reference}}]"
+        html_content = """<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Reservation Confirmed</title>
+</head>
+<body style="background-color: #0A0A0A; color: #FFFFFF; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; padding: 20px; margin: 0;">
+    <div style="max-width: 600px; margin: 0 auto; background-color: #111; border: 1px solid #222; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.5);">
+        <div style="background-color: #0D0D0D; padding: 30px; text-align: center; border-bottom: 1px solid #C9A84C;">
+            <h1 style="color: #C9A84C; font-size: 24px; font-weight: bold; text-transform: uppercase; letter-spacing: 2px; margin: 0;">AEROLUX SELECT</h1>
+            <p style="color: #888; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; margin: 5px 0 0 0;">Reservation Confirmed & Secured</p>
+        </div>
+        <div style="padding: 30px;">
+            <p style="font-size: 14px; line-height: 1.6; color: #ccc;">Dear {customer_name},</p>
+            <p style="font-size: 14px; line-height: 1.6; color: #ccc;">We are pleased to inform you that your reservation <strong>{booking_reference}</strong> has been officially confirmed and a professional chauffeur has been allocated to your schedule.</p>
+            
+            <div style="background-color: #1a1a1a; padding: 20px; border-radius: 8px; margin: 25px 0; border: 1px solid #333;">
+                <h3 style="color: #C9A84C; margin-top: 0; font-size: 14px; uppercase; letter-spacing: 1px;">Trip Receipt & Ledger</h3>
+                <table style="width: 100%; font-size: 13px; color: #ccc; border-collapse: collapse;">
+                    <tr>
+                        <td style="padding: 6px 0; color: #888; width: 35%;">Pickup Date/Time:</td>
+                        <td style="padding: 6px 0; color: #fff;">{pickup_date} at {pickup_time}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 6px 0; color: #888;">Return Date/Time:</td>
+                        <td style="padding: 6px 0; color: #fff;">{return_date} at {return_time}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 6px 0; color: #888;">Pickup Location:</td>
+                        <td style="padding: 6px 0; color: #fff;">{pickup_address}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 6px 0; color: #888;">Drop-off Location:</td>
+                        <td style="padding: 6px 0; color: #fff;">{dropoff_address}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 6px 0; color: #888; font-weight: bold; border-top: 1px solid #333;">Total Fare:</td>
+                        <td style="padding: 6px 0; color: #fff; font-weight: bold; border-top: 1px solid #333;">{total_price}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 6px 0; color: #888; font-weight: bold;">Amount Paid:</td>
+                        <td style="padding: 6px 0; color: #fff; font-weight: bold;">{amount_paid}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 6px 0; color: #888; font-weight: bold; border-top: 1px solid #333;">Outstanding Balance:</td>
+                        <td style="padding: 6px 0; color: #C9A84C; font-weight: bold; border-top: 1px solid #333;">{balance}</td>
+                    </tr>
+                </table>
+            </div>
+
+            <p style="font-size: 14px; line-height: 1.6; color: #ccc;">Your chauffeur will contact you prior to pickup. For airport pickups, our dispatch tracks flights and coordinates coordinates automatically.</p>
+            <p style="font-size: 14px; line-height: 1.6; color: #ccc; margin-bottom: 0;">We look forward to welcoming you on board.<br>AeroLux Select Operations</p>
+        </div>
+        <div style="background-color: #0D0D0D; padding: 20px; text-align: center; font-size: 11px; color: #666; border-top: 1px solid #222;">
+            &copy; AeroLux Select &bull; Luxury Chauffeur Logistics
+        </div>
+    </div>
+</body>
+</html>"""
+        text_content = """Dear {customer_name},
+
+Your reservation {booking_reference} is confirmed!
+
+Ledger Details:
+Pickup: {pickup_date} at {pickup_time}
+Return: {return_date} at {return_time}
+From: {pickup_address}
+To: {dropoff_address}
+Total: {total_price}
+Paid: {amount_paid}
+Balance: {balance}
+
+Your chauffeur will coordinate prior to pickup.
+
+Best regards,
+AeroLux Select Desk"""
+
+    elif email_type == 'reminder_12h':
+        subject = f"Upcoming Service Reminder — {company_name} [{{booking_reference}}]"
+        html_content = """<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Chauffeur Service Reminder</title>
+</head>
+<body style="background-color: #0A0A0A; color: #FFFFFF; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; padding: 20px; margin: 0;">
+    <div style="max-width: 600px; margin: 0 auto; background-color: #111; border: 1px solid #222; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.5);">
+        <div style="background-color: #0D0D0D; padding: 30px; text-align: center; border-bottom: 1px solid #C9A84C;">
+            <h1 style="color: #C9A84C; font-size: 24px; font-weight: bold; text-transform: uppercase; letter-spacing: 2px; margin: 0;">AEROLUX SELECT</h1>
+            <p style="color: #888; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; margin: 5px 0 0 0;">Upcoming Chauffeur Service Reminder</p>
+        </div>
+        <div style="padding: 30px;">
+            <p style="font-size: 14px; line-height: 1.6; color: #ccc;">Dear {customer_name},</p>
+            <p style="font-size: 14px; line-height: 1.6; color: #ccc;">This is a friendly reminder that your scheduled private chauffeur transfer <strong>{booking_reference}</strong> is in approximately 12 hours.</p>
+            
+            <div style="background-color: #1a1a1a; padding: 20px; border-radius: 8px; margin: 25px 0; border: 1px solid #333;">
+                <h3 style="color: #C9A84C; margin-top: 0; font-size: 14px; uppercase; letter-spacing: 1px;">Upcoming Ride Details</h3>
+                <table style="width: 100%; font-size: 13px; color: #ccc; border-collapse: collapse;">
+                    <tr>
+                        <td style="padding: 6px 0; color: #888; width: 35%;">Pickup Date/Time:</td>
+                        <td style="padding: 6px 0; color: #fff;">{pickup_date} at {pickup_time}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 6px 0; color: #888;">Pickup Location:</td>
+                        <td style="padding: 6px 0; color: #fff;">{pickup_address}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 6px 0; color: #888;">Drop-off Location:</td>
+                        <td style="padding: 6px 0; color: #fff;">{dropoff_address}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 6px 0; color: #888;">Outstanding Balance:</td>
+                        <td style="padding: 6px 0; color: #C9A84C; font-weight: bold;">{balance}</td>
+                    </tr>
+                </table>
+            </div>
+
+            <p style="font-size: 14px; line-height: 1.6; color: #ccc;">Our team is tracking your itinerary. If there are any updates, please communicate them to our operations desk on WhatsApp as soon as possible.</p>
+            <p style="font-size: 14px; line-height: 1.6; color: #ccc; margin-bottom: 0;">Have a pleasant journey,<br>AeroLux Select Dispatch</p>
+        </div>
+        <div style="background-color: #0D0D0D; padding: 20px; text-align: center; font-size: 11px; color: #666; border-top: 1px solid #222;">
+            &copy; AeroLux Select &bull; Luxury Chauffeur Logistics
+        </div>
+    </div>
+</body>
+</html>"""
+        text_content = """Dear {customer_name},
+
+This is a reminder that your private transfer {booking_reference} is in approximately 12 hours.
+
+Pickup: {pickup_date} at {pickup_time}
+From: {pickup_address}
+To: {dropoff_address}
+Outstanding Balance: {balance}
+
+If you need any changes, please notify us immediately.
+
+Best regards,
+AeroLux Select Desk"""
+
+    elif email_type == 'cancelled':
+        subject = f"Reservation Cancelled — {company_name} [{{booking_reference}}]"
+        html_content = """<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Reservation Cancelled</title>
+</head>
+<body style="background-color: #0A0A0A; color: #FFFFFF; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; padding: 20px; margin: 0;">
+    <div style="max-width: 600px; margin: 0 auto; background-color: #111; border: 1px solid #222; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.5);">
+        <div style="background-color: #0D0D0D; padding: 30px; text-align: center; border-bottom: 1px solid #ea4335;">
+            <h1 style="color: #ea4335; font-size: 24px; font-weight: bold; text-transform: uppercase; letter-spacing: 2px; margin: 0;">AEROLUX SELECT</h1>
+            <p style="color: #888; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; margin: 5px 0 0 0;">Reservation Cancelled</p>
+        </div>
+        <div style="padding: 30px;">
+            <p style="font-size: 14px; line-height: 1.6; color: #ccc;">Dear {customer_name},</p>
+            <p style="font-size: 14px; line-height: 1.6; color: #ccc;">We confirm that your reservation <strong>{booking_reference}</strong> has been cancelled. If this is a mistake or you need to reschedule, please contact our support team immediately.</p>
+            
+            <div style="background-color: #1a1a1a; padding: 20px; border-radius: 8px; margin: 25px 0; border: 1px solid #333;">
+                <h3 style="color: #ea4335; margin-top: 0; font-size: 14px; uppercase; letter-spacing: 1px;">Cancelled Ride Summary</h3>
+                <table style="width: 100%; font-size: 13px; color: #ccc; border-collapse: collapse;">
+                    <tr>
+                        <td style="padding: 6px 0; color: #888; width: 35%;">Reference:</td>
+                        <td style="padding: 6px 0; color: #fff;">{booking_reference}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 6px 0; color: #888;">Pickup Date/Time:</td>
+                        <td style="padding: 6px 0; color: #fff;">{pickup_date} at {pickup_time}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 6px 0; color: #888;">Pickup Location:</td>
+                        <td style="padding: 6px 0; color: #fff;">{pickup_address}</td>
+                    </tr>
+                </table>
+            </div>
+
+            <p style="font-size: 14px; line-height: 1.6; color: #ccc;">If any prepayment was made via credit card, refunds are processed according to our cancellation policies.</p>
+            <p style="font-size: 14px; line-height: 1.6; color: #ccc; margin-bottom: 0;">Thank you,<br>AeroLux Select Desk</p>
+        </div>
+        <div style="background-color: #0D0D0D; padding: 20px; text-align: center; font-size: 11px; color: #666; border-top: 1px solid #222;">
+            &copy; AeroLux Select &bull; Luxury Chauffeur Logistics
+        </div>
+    </div>
+</body>
+</html>"""
+        text_content = """Dear {customer_name},
+
+We confirm that your reservation {booking_reference} has been cancelled.
+
+If you have questions, please contact us.
+
+Best regards,
+AeroLux Select Desk"""
+        
+    return subject, html_content, text_content
+
+
+def send_booking_email(booking, email_type):
     """
-    Sends two confirmation emails upon booking validation:
-    1. One to the Customer (customer_email).
-    2. One to the Dispatch team (dispatch_email).
+    Sends customized transactional emails using database templates or fallbacks via Brevo.
+    Supports email_types: 'processing', 'confirmed', 'reminder_12h', 'cancelled'
     """
     site = booking.site
     settings_obj = SiteSettings.get_settings(site)
@@ -22,189 +348,26 @@ def send_booking_emails(booking):
     # Sender address
     from_email = settings_obj.email_from or 'no-reply@aeroluxeselect.com'
     
-    # ── EMAIL HTML CONTENTS ──
-    # HTML template common parts
-    title_text = f"Booking Confirmation — {booking.booking_reference}"
-    
-    # Round-trip details string
-    rt_html = ""
-    if booking.round_trip:
-        rt_html = f"""
-        <tr>
-            <td style="padding: 10px; border-bottom: 1px solid #222; font-weight: bold; color: #C9A84C;">Return Leg</td>
-            <td style="padding: 10px; border-bottom: 1px solid #222; color: #fff;">{booking.return_date} at {booking.return_time}</td>
-        </tr>
-        """
-        
-    # Stops details string
-    stops_html = ""
-    if booking.number_of_stops > 0:
-        stops_html = f"""
-        <tr>
-            <td style="padding: 10px; border-bottom: 1px solid #222; font-weight: bold; color: #C9A84C;">Intermediate Stops</td>
-            <td style="padding: 10px; border-bottom: 1px solid #222; color: #fff;">{booking.number_of_stops} Stop(s)<br/><small style="color: #888;">{booking.stop_addresses}</small></td>
-        </tr>
-        """
-        
-    # Service specific coordinates
-    coords_html = ""
-    if booking.service_type == ServiceType.AIRPORT_TRANSFER:
-        direction = getattr(booking, 'transfer_direction', 'AIRPORT_TO_DEST')
-        if direction == 'DEST_TO_AIRPORT':
-            coords_html = f"""
-            <tr>
-                <td style="padding: 10px; border-bottom: 1px solid #222; font-weight: bold; color: #C9A84C;">Pickup Location (Hotel/Address)</td>
-                <td style="padding: 10px; border-bottom: 1px solid #222; color: #fff;">{booking.destination.name if booking.destination else 'N/A'}</td>
-            </tr>
-            <tr>
-                <td style="padding: 10px; border-bottom: 1px solid #222; font-weight: bold; color: #C9A84C;">Destination Airport</td>
-                <td style="padding: 10px; border-bottom: 1px solid #222; color: #fff;">{booking.airport.name if booking.airport else 'N/A'}</td>
-            </tr>
-            <tr>
-                <td style="padding: 10px; border-bottom: 1px solid #222; font-weight: bold; color: #C9A84C;">Flight Number</td>
-                <td style="padding: 10px; border-bottom: 1px solid #222; color: #fff;">{booking.flight_number or 'N/A'}</td>
-            </tr>
-            """
-        else:
-            coords_html = f"""
-            <tr>
-                <td style="padding: 10px; border-bottom: 1px solid #222; font-weight: bold; color: #C9A84C;">Origin Airport</td>
-                <td style="padding: 10px; border-bottom: 1px solid #222; color: #fff;">{booking.airport.name if booking.airport else 'N/A'}</td>
-            </tr>
-            <tr>
-                <td style="padding: 10px; border-bottom: 1px solid #222; font-weight: bold; color: #C9A84C;">Destination (Hotel/Address)</td>
-                <td style="padding: 10px; border-bottom: 1px solid #222; color: #fff;">{booking.destination.name if booking.destination else 'N/A'}</td>
-            </tr>
-            <tr>
-                <td style="padding: 10px; border-bottom: 1px solid #222; font-weight: bold; color: #C9A84C;">Flight Number</td>
-                <td style="padding: 10px; border-bottom: 1px solid #222; color: #fff;">{booking.flight_number or 'N/A'}</td>
-            </tr>
-            """
-    elif booking.service_type == ServiceType.HOURLY:
-        coords_html = f"""
-        <tr>
-            <td style="padding: 10px; border-bottom: 1px solid #222; font-weight: bold; color: #C9A84C;">Pick up Location</td>
-            <td style="padding: 10px; border-bottom: 1px solid #222; color: #fff;">{booking.pickup_address}</td>
-        </tr>
-        <tr>
-            <td style="padding: 10px; border-bottom: 1px solid #222; font-weight: bold; color: #C9A84C;">Hours Requested</td>
-            <td style="padding: 10px; border-bottom: 1px solid #222; color: #fff;">{booking.hours_requested} Hour(s) (Max 12)</td>
-        </tr>
-        """
-    elif booking.service_type == ServiceType.POINT_TO_POINT:
-        coords_html = f"""
-        <tr>
-            <td style="padding: 10px; border-bottom: 1px solid #222; font-weight: bold; color: #C9A84C;">Pick up Location</td>
-            <td style="padding: 10px; border-bottom: 1px solid #222; color: #fff;">{booking.pickup_address}</td>
-        </tr>
-        <tr>
-            <td style="padding: 10px; border-bottom: 1px solid #222; font-weight: bold; color: #C9A84C;">Drop-off Location</td>
-            <td style="padding: 10px; border-bottom: 1px solid #222; color: #fff;">{booking.dropoff_address}</td>
-        </tr>
-        """
+    # Load template from DB if exists, otherwise fallback to defaults
+    db_template = EmailTemplate.objects.filter(site=site, email_type=email_type).first()
+    if db_template:
+        subject_tpl = db_template.subject
+        html_tpl = db_template.html_content
+        text_tpl = db_template.text_content
+    else:
+        subject_tpl, html_tpl, text_tpl = get_default_email_template(email_type, settings_obj.company_name)
 
-    # Common HTML wrapper
-    html_template = f"""
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <meta charset="utf-8">
-        <title>{title_text}</title>
-    </head>
-    <body style="background-color: #0A0A0A; color: #FFFFFF; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; padding: 20px; margin: 0;">
-        <div style="max-w: 600px; margin: 0 auto; background-color: #111; border: 1px solid #222; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.5);">
-            <!-- Header -->
-            <div style="background-color: #0D0D0D; padding: 30px; text-align: center; border-bottom: 1px solid #C9A84C;">
-                <h1 style="color: #C9A84C; font-size: 24px; font-weight: bold; text-transform: uppercase; letter-spacing: 2px; margin: 0;">AEROLUX SELECT</h1>
-                <p style="color: #888; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; margin: 5px 0 0 0;">Chauffeur Service Confirmation</p>
-            </div>
-            
-            <!-- Body -->
-            <div style="padding: 30px;">
-                <h2 style="color: #fff; font-size: 18px; margin-top: 0; margin-bottom: 20px; font-weight: 600; text-align: center;">CONFIRMATION DETAILS</h2>
-                
-                <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 13px;">
-                    <tbody>
-                        <tr>
-                            <td style="padding: 10px; border-bottom: 1px solid #222; font-weight: bold; color: #C9A84C; width: 35%;">Booking Ref</td>
-                            <td style="padding: 10px; border-bottom: 1px solid #222; font-weight: bold; color: #fff;">{booking.booking_reference}</td>
-                        </tr>
-                        <tr>
-                            <td style="padding: 10px; border-bottom: 1px solid #222; font-weight: bold; color: #C9A84C;">Service Type</td>
-                            <td style="padding: 10px; border-bottom: 1px solid #222; text-transform: capitalize; color: #fff;">{booking.get_service_type_display()}</td>
-                        </tr>
-                        <tr>
-                            <td style="padding: 10px; border-bottom: 1px solid #222; font-weight: bold; color: #C9A84C;">Customer Name</td>
-                            <td style="padding: 10px; border-bottom: 1px solid #222; color: #fff;">{booking.customer_name}</td>
-                        </tr>
-                        <tr>
-                            <td style="padding: 10px; border-bottom: 1px solid #222; font-weight: bold; color: #C9A84C;">Customer Email</td>
-                            <td style="padding: 10px; border-bottom: 1px solid #222; color: #fff;">{booking.customer_email}</td>
-                        </tr>
-                        <tr>
-                            <td style="padding: 10px; border-bottom: 1px solid #222; font-weight: bold; color: #C9A84C;">Customer Phone</td>
-                            <td style="padding: 10px; border-bottom: 1px solid #222; color: #fff;">{booking.customer_phone}</td>
-                        </tr>
-                        <tr>
-                            <td style="padding: 10px; border-bottom: 1px solid #222; font-weight: bold; color: #C9A84C;">Pickup Date/Time</td>
-                            <td style="padding: 10px; border-bottom: 1px solid #222; color: #fff;">{booking.pickup_date} at {booking.pickup_time}</td>
-                        </tr>
-                        {coords_html}
-                        {rt_html}
-                        {stops_html}
-                        <tr>
-                            <td style="padding: 10px; border-bottom: 1px solid #222; font-weight: bold; color: #C9A84C;">Vehicle Class</td>
-                            <td style="padding: 10px; border-bottom: 1px solid #222; color: #fff;">{booking.vehicle_category.name if booking.vehicle_category else 'Luxury Class'}</td>
-                        </tr>
-                        <tr>
-                            <td style="padding: 10px; border-bottom: 1px solid #222; font-weight: bold; color: #C9A84C;">Payment Method</td>
-                            <td style="padding: 10px; border-bottom: 1px solid #222; color: #fff;">{booking.get_payment_method_display()} ({booking.get_payment_status_display()})</td>
-                        </tr>
-                        <tr>
-                            <td style="padding: 10px; border-bottom: 1px solid #222; font-weight: bold; color: #C9A84C;">Meeting Point</td>
-                            <td style="padding: 10px; border-bottom: 1px solid #222; color: #fff;">{booking.meeting_point or 'N/A'}</td>
-                        </tr>
-                        <tr>
-                            <td style="padding: 10px; border-bottom: 1px solid #222; font-weight: bold; color: #C9A84C;">Special Requests</td>
-                            <td style="padding: 10px; border-bottom: 1px solid #222; color: #fff;">{booking.customer_notes or 'None'}</td>
-                        </tr>
-                        <tr>
-                            <td style="padding: 10px; font-weight: bold; color: #C9A84C; font-size: 16px;">Total Price</td>
-                            <td style="padding: 10px; font-weight: bold; color: #C9A84C; font-size: 16px;">${booking.total_price:.2f} USD</td>
-                        </tr>
-                    </tbody>
-                </table>
-                
-                <div style="margin-top: 30px; text-align: center; font-size: 12px; color: #888; border-top: 1px solid #222; padding-top: 20px;">
-                    <p style="margin: 0 0 10px 0;">This is an automated operational alert regarding the reservation #{booking.booking_reference}.</p>
-                    <p style="margin: 0;">&copy; {booking.site.name} — Chauffeur Service Platform</p>
-                </div>
-            </div>
-        </div>
-    </body>
-    </html>
-    """
-    
-    # ── DISPATCH & CUSTOMER SPECIFIC SUBJECTS ──
-    subject_dispatch = f"[DISPATCH ALERT] New Booking Confirmation: {booking.booking_reference}"
-    subject_customer = f"Your AeroLux Select Booking Confirmation: {booking.booking_reference}"
-    
-    # Plain text alternative
-    text_content = f"""
-    AEROLUX SELECT - BOOKING CONFIRMATION
-    --------------------------------------
-    Booking Reference: {booking.booking_reference}
-    Service Type: {booking.get_service_type_display()}
-    Customer: {booking.customer_name} ({booking.customer_email} / {booking.customer_phone})
-    Pickup Date/Time: {booking.pickup_date} at {booking.pickup_time}
-    Meeting Point: {booking.meeting_point or 'N/A'}
-    Vehicle Class: {booking.vehicle_category.name if booking.vehicle_category else 'Luxury Class'}
-    Payment: {booking.get_payment_method_display()} ({booking.get_payment_status_display()})
-    Total Fare: ${booking.total_price:.2f} USD
-    """
-    
-    # Helper to send email to one recipient
-    def _send_email_to(to_email, subject):
+    # Context formatting
+    context = get_email_context(booking)
+    subject = format_template(subject_tpl, context)
+    html_content = format_template(html_tpl, context)
+    text_content = format_template(text_tpl, context)
+
+    # Subject prefix for dispatch alerts
+    subject_dispatch = f"[DISPATCH ALERT] {email_type.upper()}: {subject}"
+
+    # Helper to send to a specific recipient
+    def _send_to(to_email, sub):
         provider = settings_obj.email_provider.upper()
         
         # 1. SMTP Provider
@@ -218,15 +381,15 @@ def send_booking_emails(booking):
                     use_tls=settings_obj.email_use_tls,
                 )
             else:
-                backend = None  # Fallback to Django settings configuration
+                backend = None
                 
             email = EmailMultiAlternatives(
-                subject=subject,
+                subject=sub,
                 body=text_content,
                 from_email=from_email,
                 to=[to_email]
             )
-            email.attach_alternative(html_template, "text/html")
+            email.attach_alternative(html_content, "text/html")
             if backend:
                 email.connection = backend
             email.send()
@@ -235,7 +398,7 @@ def send_booking_emails(booking):
         elif provider == 'SENDGRID':
             api_key = settings_obj.email_api_key
             if not api_key:
-                raise ValueError("SendGrid API key not configured in SiteSettings")
+                raise ValueError("SendGrid API key not configured")
             
             headers = {
                 "Authorization": f"Bearer {api_key}",
@@ -243,11 +406,11 @@ def send_booking_emails(booking):
             }
             payload = {
                 "personalizations": [{"to": [{"email": to_email}]}],
-                "from": {"email": from_email, "name": "AeroLux Select"},
-                "subject": subject,
+                "from": {"email": from_email, "name": settings_obj.company_name},
+                "subject": sub,
                 "content": [
                     {"type": "text/plain", "value": text_content},
-                    {"type": "text/html", "value": html_template}
+                    {"type": "text/html", "value": html_content}
                 ]
             }
             response = requests.post("https://api.sendgrid.com/v3/mail/send", json=payload, headers=headers, timeout=10)
@@ -257,18 +420,18 @@ def send_booking_emails(booking):
         elif provider == 'RESEND':
             api_key = settings_obj.email_api_key
             if not api_key:
-                raise ValueError("Resend API key not configured in SiteSettings")
+                raise ValueError("Resend API key not configured")
             
             headers = {
                 "Authorization": f"Bearer {api_key}",
                 "Content-Type": "application/json"
             }
             payload = {
-                "from": f"AeroLux Select <{from_email}>",
+                "from": f"{settings_obj.company_name} <{from_email}>",
                 "to": [to_email],
-                "subject": subject,
+                "subject": sub,
                 "text": text_content,
-                "html": html_template
+                "html": html_content
             }
             response = requests.post("https://api.resend.com/emails", json=payload, headers=headers, timeout=10)
             response.raise_for_status()
@@ -278,15 +441,15 @@ def send_booking_emails(booking):
             api_key = settings_obj.email_api_key
             domain = settings_obj.email_domain
             if not api_key or not domain:
-                raise ValueError("Mailgun API key or Domain not configured in SiteSettings")
+                raise ValueError("Mailgun API key or Domain not configured")
             
             auth = ("api", api_key)
             payload = {
-                "from": f"AeroLux Select <{from_email}>",
+                "from": f"{settings_obj.company_name} <{from_email}>",
                 "to": to_email,
-                "subject": subject,
+                "subject": sub,
                 "text": text_content,
-                "html": html_template
+                "html": html_content
             }
             response = requests.post(
                 f"https://api.mailgun.net/v3/{domain}/messages",
@@ -300,17 +463,17 @@ def send_booking_emails(booking):
         elif provider == 'BREVO':
             api_key = settings_obj.email_api_key
             if not api_key:
-                raise ValueError("Brevo API key not configured in SiteSettings")
+                raise ValueError("Brevo API key not configured")
             
             headers = {
                 "api-key": api_key,
                 "Content-Type": "application/json"
             }
             payload = {
-                "sender": {"email": from_email, "name": "AeroLux Select"},
+                "sender": {"email": from_email, "name": settings_obj.company_name},
                 "to": [{"email": to_email}],
-                "subject": subject,
-                "htmlContent": html_template,
+                "subject": sub,
+                "htmlContent": html_content,
                 "textContent": text_content
             }
             response = requests.post(
@@ -324,14 +487,20 @@ def send_booking_emails(booking):
         else:
             raise ValueError(f"Unknown email provider: {provider}")
 
-    # Send Dispatch Alert
-    try:
-        _send_email_to(dispatch_to, subject_dispatch)
-    except Exception as e:
-        print(f"Error sending dispatch email: {str(e)}")
+    # Send Dispatch Alert (For processing and cancellation)
+    if email_type in ['processing', 'cancelled']:
+        try:
+            _send_to(dispatch_to, subject_dispatch)
+        except Exception as e:
+            print(f"Error sending dispatch email alert: {str(e)}")
         
-    # Send Customer Confirmation
+    # Send Customer Notification
     try:
-        _send_email_to(customer_to, subject_customer)
+        _send_to(customer_to, subject)
     except Exception as e:
-        print(f"Error sending customer confirmation email: {str(e)}")
+        print(f"Error sending customer notification email: {str(e)}")
+
+
+def send_booking_emails(booking):
+    """Legacy backward compatibility method. Maps to processing phase."""
+    send_booking_email(booking, 'processing')

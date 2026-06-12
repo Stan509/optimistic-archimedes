@@ -39,6 +39,10 @@
                 <i class="fa-solid fa-envelope text-sm"></i>
                 <span>Email Configuration</span>
             </a>
+            <a href="{% url 'dashboard:email_template_editor' %}?site={{ current_site.slug }}" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-luxury-muted hover:text-white hover:bg-luxury-black/35 font-medium text-xs transition-all">
+                <i class="fa-solid fa-envelope-open-text text-sm"></i>
+                <span>Customize Email Skeletons</span>
+            </a>
         </div>
 
         <div class="bg-luxury-card border border-luxury-border p-5 rounded-xl text-xs space-y-2.5">

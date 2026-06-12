@@ -19,6 +19,7 @@ urlpatterns = [
     # Bookings Management
     path('bookings/', views.dashboard_bookings, name='bookings'),
     path('bookings/<int:booking_id>/', views.booking_detail, name='booking_detail'),
+    path('bookings/<int:booking_id>/pay/', views.record_payment, name='record_payment'),
     path('bookings/<int:booking_id>/status/<str:new_status>/', views.update_booking_status, name='update_booking_status'),
 
     # Fleet Management
@@ -71,6 +72,7 @@ urlpatterns = [
 
     # Email Configuration
     path('settings/email/', views.email_settings, name='email_settings'),
+    path('settings/email/templates/', views.email_template_editor, name='email_template_editor'),
 
     # Admin User Management
     path('admins/', views.admin_users_list, name='admin_users'),

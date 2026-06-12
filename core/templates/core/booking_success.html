@@ -54,6 +54,12 @@
                             <span class="block text-[10px] text-gray-500 uppercase tracking-widest font-bold">Scheduled Pickup</span>
                             <span class="font-bold text-white">{{ booking.pickup_date }} at {{ booking.pickup_time }}</span>
                         </div>
+                        {% if booking.round_trip %}
+                        <div>
+                            <span class="block text-[10px] text-gray-500 uppercase tracking-widest font-bold">Scheduled Return Pickup</span>
+                            <span class="font-bold text-white">{{ booking.return_date }} at {{ booking.return_time }}</span>
+                        </div>
+                        {% endif %}
                         <div>
                             <span class="block text-[10px] text-gray-500 uppercase tracking-widest font-bold">Chauffeur Service</span>
                             <span class="font-bold text-white uppercase text-[10px] tracking-wider">
@@ -65,6 +71,9 @@
                                     Point-to-Point Transfer
                                 {% else %}
                                     {{ booking.get_service_type_display }}
+                                {% endif %}
+                                {% if booking.round_trip %}
+                                    (Round-Trip)
                                 {% endif %}
                             </span>
                         </div>
@@ -92,33 +101,82 @@
                         {% endif %}
                         <div>
                             <span class="block text-[10px] text-gray-500 uppercase tracking-widest font-bold">Payment Method</span>
-                            <span class="font-bold text-white uppercase text-[10px] tracking-wider">{{ booking.payment_method }}</span>
+                            <span class="font-bold text-white uppercase text-[10px] tracking-wider">{{ booking.get_payment_method_display }}</span>
                         </div>
+                        {% if booking.round_trip %}
+                        <div>
+                            <span class="block text-[10px] text-gray-500 uppercase tracking-widest font-bold">Payment Setup</span>
+                            <span class="font-bold text-white uppercase text-[10px] tracking-wider">
+                                {% if booking.pay_separately %}
+                                    Pay legs separately
+                                {% else %}
+                                    Pay legs together
+                                {% endif %}
+                            </span>
+                        </div>
+                        {% endif %}
                     </div>
                 </div>
 
                 <!-- Add-ons included -->
-                {% if booking.addons.all %}
-                <div class="bg-luxe-black/30 p-4 rounded-xl border border-gray-800 space-y-2">
-                    <span class="text-[9px] uppercase tracking-widest text-gray-500 font-bold block">Included Enhancements</span>
-                    <ul class="space-y-1.5 text-xs text-gray-300">
-                        {% for addon in booking.addons.all %}
-                        <li class="flex items-center space-x-2">
-                            <i class="fas fa-circle-check text-luxe-gold text-[10px]"></i>
-                            <span>{{ addon.name }}</span>
-                        </li>
-                        {% endfor %}
-                    </ul>
+                {% if booking.addons.all or booking.addons_return.all %}
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {% if booking.addons.all %}
+                    <div class="bg-luxe-black/30 p-4 rounded-xl border border-gray-800 space-y-2">
+                        <span class="text-[9px] uppercase tracking-widest text-gray-500 font-bold block">Outbound Enhancements</span>
+                        <ul class="space-y-1.5 text-xs text-gray-300">
+                            {% for addon in booking.addons.all %}
+                            <li class="flex items-center space-x-2">
+                                <i class="fas fa-circle-check text-luxe-gold text-[10px]"></i>
+                                <span>{{ addon.name }} (${{ addon.price }})</span>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% endif %}
+
+                    {% if booking.addons_return.all %}
+                    <div class="bg-luxe-black/30 p-4 rounded-xl border border-gray-800 space-y-2">
+                        <span class="text-[9px] uppercase tracking-widest text-gray-500 font-bold block">Return Enhancements</span>
+                        <ul class="space-y-1.5 text-xs text-gray-300">
+                            {% for addon in booking.addons_return.all %}
+                            <li class="flex items-center space-x-2">
+                                <i class="fas fa-circle-check text-luxe-gold text-[10px]"></i>
+                                <span>{{ addon.name }} (${{ addon.price }})</span>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% endif %}
+                </div>
+                {% endif %}
+
+                <!-- Detailed Split Pricing (If round trip) -->
+                {% if booking.round_trip %}
+                <div class="bg-luxe-black/35 p-4 rounded-xl border border-gray-800 text-xs space-y-3">
+                    <div class="flex justify-between items-center text-gray-400">
+                        <span>Outbound Leg Total:</span>
+                        <span class="text-white">${{ outbound_total|floatformat:2 }}</span>
+                    </div>
+                    <div class="flex justify-between items-center text-gray-400">
+                        <span>Return Leg Total:</span>
+                        <span class="text-white">${{ return_total|floatformat:2 }}</span>
+                    </div>
+                    {% if booking.pay_separately %}
+                    <div class="p-3 bg-amber-500/10 border border-amber-500/20 text-amber-400 rounded-lg text-[10px] leading-relaxed">
+                        <i class="fa-solid fa-circle-info mr-1"></i> You requested to pay outbound and return legs separately. Outstanding balance is split accordingly.
+                    </div>
+                    {% endif %}
                 </div>
                 {% endif %}
 
                 <!-- Grand Total price -->
                 <div class="border-t border-gray-850 pt-4 flex justify-between items-center bg-luxe-dark-grey p-4 rounded-xl">
                     <div>
-                        <span class="text-[10px] uppercase text-gray-500 font-bold tracking-widest block">Total Charged</span>
+                        <span class="text-[10px] uppercase text-gray-500 font-bold tracking-widest block">Total Price</span>
                         <span class="text-[9px] text-gray-600 block">All-inclusive USD Rates</span>
                     </div>
-                    <span class="text-xl font-extrabold text-luxe-gold font-display">{{ booking.total_price|currency }}</span>
+                    <span class="text-xl font-extrabold text-luxe-gold font-display">${{ booking.total_price|floatformat:2 }}</span>
                 </div>
             </div>
 

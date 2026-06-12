@@ -862,7 +862,7 @@ class RoundTripSplitTestCase(TestCase):
         )
 
     def test_round_trip_split_on_payment(self):
-        """A round-trip booking should split into two separate records during checkout."""
+        """A round-trip booking should be stored as a single booking record in the database."""
         client = Client()
         session = client.session
         session['booking'] = {
@@ -884,10 +884,12 @@ class RoundTripSplitTestCase(TestCase):
             'return_date': '2026-06-15',
             'return_time': '15:00',
             'selected_addons': [self.meet_greet.id],
+            'selected_addons_return': [self.meet_greet.id],
+            'pay_separately': True,
         }
         session.save()
 
-        # Submit valid payment to trigger creation of both legs
+        # Submit valid payment to trigger creation of the booking
         response = client.post(
             reverse('site_nyc:booking_payment'),
             {
@@ -898,39 +900,170 @@ class RoundTripSplitTestCase(TestCase):
         )
         self.assertEqual(response.status_code, 302)
 
-        # Check that we have exactly 2 bookings in the database
+        # Check that we have exactly 1 booking in the database
         bookings = Booking.objects.all().order_by('id')
-        self.assertEqual(bookings.count(), 2)
+        self.assertEqual(bookings.count(), 1)
 
-        outbound = bookings[0]
-        inbound = bookings[1]
+        booking = bookings[0]
 
-        # Verify outbound booking
-        self.assertEqual(outbound.customer_name, 'Alice Smith')
-        self.assertEqual(outbound.passenger_count, 4)
-        self.assertEqual(outbound.round_trip, True)
-        self.assertEqual(outbound.pickup_address, 'JFK Airport Terminal 4')
-        self.assertEqual(outbound.dropoff_address, 'Times Square Hotel')
-        self.assertEqual(outbound.transfer_direction, 'AIRPORT_TO_DEST')
-        self.assertEqual(outbound.base_price, Decimal('100.00'))
-        self.assertEqual(outbound.addons_total, Decimal('25.00'))
-        self.assertEqual(outbound.total_price, Decimal('225.00')) # (100 * 2) + 25
+        # Verify unified round-trip booking details
+        self.assertEqual(booking.customer_name, 'Alice Smith')
+        self.assertEqual(booking.passenger_count, 4)
+        self.assertEqual(booking.round_trip, True)
+        self.assertEqual(booking.pickup_address, 'JFK Airport Terminal 4')
+        self.assertEqual(booking.dropoff_address, 'Times Square Hotel')
+        self.assertEqual(booking.transfer_direction, 'AIRPORT_TO_DEST')
+        self.assertEqual(booking.base_price, Decimal('100.00'))
+        self.assertEqual(booking.addons_total, Decimal('50.00'))  # 25 outbound + 25 return
+        self.assertEqual(booking.total_price, Decimal('250.00'))  # (100 * 2) + 50
+        self.assertTrue(booking.pay_separately)
+        self.assertEqual(booking.return_date.strftime('%Y-%m-%d'), '2026-06-15')
+        self.assertEqual(booking.return_time.strftime('%H:%M'), '15:00')
 
-        # Verify inbound/return booking
-        self.assertEqual(inbound.customer_name, 'Alice Smith')
-        self.assertEqual(inbound.passenger_count, 4)
-        self.assertEqual(inbound.round_trip, False)
-        # Swapped addresses
-        self.assertEqual(inbound.pickup_address, 'Times Square Hotel')
-        self.assertEqual(inbound.dropoff_address, 'JFK Airport Terminal 4')
-        self.assertEqual(inbound.transfer_direction, 'DEST_TO_AIRPORT')
-        # Free fare
-        self.assertEqual(inbound.base_price, Decimal('0.00'))
-        self.assertEqual(inbound.total_price, Decimal('0.00'))
-        self.assertEqual(inbound.linked_booking, outbound)
+        # Add-ons should be set correctly on outbound and return legs
+        self.assertIn(self.meet_greet, booking.addons.all())
+        self.assertIn(self.meet_greet, booking.addons_return.all())
 
-        # Add-ons should be copied
-        self.assertIn(self.meet_greet, inbound.addons.all())
+
+class ManualPaymentsAndRemindersTestCase(TestCase):
+    def setUp(self):
+        import datetime
+        self.nyc = Site.objects.create(
+            slug='nyc',
+            name='New York City',
+            domain='aeroluxeselect-nyc.com',
+            is_active=True
+        )
+        self.site_settings = SiteSettings.objects.create(
+            site=self.nyc,
+            company_name='AeroLux Select',
+            email_provider='SMTP',
+            email_from='test@aeroluxeselect.com',
+            dispatch_email='dispatch@aeroluxeselect.com'
+        )
+        self.admin_user = User.objects.create_superuser(
+            username='admin',
+            email='admin@example.com',
+            password='password123'
+        )
+        self.jfk = Airport.objects.create(
+            site=self.nyc,
+            code='JFK',
+            name='JFK Airport',
+            is_active=True
+        )
+        self.exec_suv = VehicleCategory.objects.create(
+            slug='executive-suv',
+            name='Executive SUV',
+            is_active=True,
+            order=1
+        )
+        self.booking = Booking.objects.create(
+            site=self.nyc,
+            service_type='airport_transfer',
+            customer_name='Bob Jones',
+            customer_email='bob@example.com',
+            customer_phone='+12125550199',
+            airport=self.jfk,
+            pickup_date=date.today(),
+            pickup_time=time(12, 0),
+            vehicle_category=self.exec_suv,
+            base_price=Decimal('100.00'),
+            total_price=Decimal('100.00'),
+            payment_status='pending',
+            status='confirmed',
+            reminder_sent=False
+        )
+
+    def test_record_payment_ledger(self):
+        """Test recording a manual cash payment through the dashboard."""
+        client = Client()
+        client.login(username='admin', password='password123')
+
+        # 1. Post a partial payment
+        response = client.post(
+            reverse('dashboard:record_payment', kwargs={'booking_id': self.booking.id}),
+            {
+                'amount': '40.00',
+                'payment_method': 'CASH',
+                'notes': 'Partial cash payment'
+            },
+            HTTP_HOST='aeroluxeselect-nyc.com'
+        )
+        self.assertEqual(response.status_code, 302)
+        
+        self.booking.refresh_from_db()
+        self.assertEqual(self.booking.amount_paid, Decimal('40.00'))
+        self.assertEqual(self.booking.payment_status, 'partially_paid')
+        self.assertEqual(self.booking.payments.count(), 1)
+        self.assertEqual(self.booking.payments.first().amount, Decimal('40.00'))
+
+        # 2. Post the remaining payment
+        response = client.post(
+            reverse('dashboard:record_payment', kwargs={'booking_id': self.booking.id}),
+            {
+                'amount': '60.00',
+                'payment_method': 'CASH',
+                'notes': 'Final cash payment'
+            },
+            HTTP_HOST='aeroluxeselect-nyc.com'
+        )
+        self.assertEqual(response.status_code, 302)
+
+        self.booking.refresh_from_db()
+        self.assertEqual(self.booking.amount_paid, Decimal('100.00'))
+        self.assertEqual(self.booking.payment_status, 'paid')
+        self.assertEqual(self.booking.payments.count(), 2)
+
+    def test_send_reminders_command(self):
+        """Test that send_reminders command runs and marks bookings correctly."""
+        from django.core.management import call_command
+        from django.utils import timezone
+        import datetime
+        
+        # 1. Create a booking that is 14 hours away - should NOT get reminded
+        booking_far = Booking.objects.create(
+            site=self.nyc,
+            service_type='airport_transfer',
+            customer_name='Far Passenger',
+            customer_email='far@example.com',
+            customer_phone='+12125550199',
+            airport=self.jfk,
+            pickup_date=(timezone.now() + datetime.timedelta(hours=14)).date(),
+            pickup_time=(timezone.now() + datetime.timedelta(hours=14)).time(),
+            vehicle_category=self.exec_suv,
+            base_price=Decimal('100.00'),
+            total_price=Decimal('100.00'),
+            status='confirmed',
+            reminder_sent=False
+        )
+
+        # 2. Create a booking that is 8 hours away - should get reminded
+        booking_near = Booking.objects.create(
+            site=self.nyc,
+            service_type='airport_transfer',
+            customer_name='Near Passenger',
+            customer_email='near@example.com',
+            customer_phone='+12125550199',
+            airport=self.jfk,
+            pickup_date=(timezone.now() + datetime.timedelta(hours=8)).date(),
+            pickup_time=(timezone.now() + datetime.timedelta(hours=8)).time(),
+            vehicle_category=self.exec_suv,
+            base_price=Decimal('100.00'),
+            total_price=Decimal('100.00'),
+            status='confirmed',
+            reminder_sent=False
+        )
+
+        # 3. Call the management command
+        call_command('send_reminders')
+
+        # 4. Assert statuses
+        booking_far.refresh_from_db()
+        booking_near.refresh_from_db()
+
+        self.assertFalse(booking_far.reminder_sent)
+        self.assertTrue(booking_near.reminder_sent)
 
 
 
