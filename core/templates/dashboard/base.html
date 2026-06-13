@@ -192,6 +192,11 @@
                     <span class="font-medium text-sm">Profit Reports</span>
                 </a>
 
+                <a href="{% url 'dashboard:email_template_editor' %}" class="flex items-center space-x-3.5 px-4 py-3 rounded-lg text-luxury-muted hover:text-white hover:bg-luxury-card transition-all {% if active_tab == 'notifications' %}sidebar-active{% endif %}">
+                    <i class="fa-solid fa-envelope-open-text w-5 text-center text-lg"></i>
+                    <span class="font-medium text-sm">Message Templates (CRM)</span>
+                </a>
+
                 <a href="{% url 'dashboard:settings' %}" class="flex items-center space-x-3.5 px-4 py-3 rounded-lg text-luxury-muted hover:text-white hover:bg-luxury-card transition-all {% if active_tab == 'settings' %}sidebar-active{% endif %}">
                     <i class="fa-solid fa-gears w-5 text-center text-lg"></i>
                     <span class="font-medium text-sm">System Settings</span>

@@ -1270,6 +1270,6 @@ def email_template_editor(request):
         'whatsapp_message': whatsapp_message_val,
         'whatsapp_template_obj': whatsapp_template_obj,
         
-        'active_tab': 'settings',
+        'active_tab': 'notifications',
     }
     return render(request, 'dashboard/email_templates.html', context)

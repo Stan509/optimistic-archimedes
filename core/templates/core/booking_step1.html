@@ -527,7 +527,11 @@
             
             if (bookingMap) {
                 setTimeout(() => {
-                    bookingMap.invalidateSize();
+                    if (typeof bookingMap.invalidateSize === 'function') {
+                        bookingMap.invalidateSize();
+                    } else if (typeof google !== 'undefined' && google.maps && google.maps.event) {
+                        google.maps.event.trigger(bookingMap, 'resize');
+                    }
                 }, 200);
             }
         }
