@@ -203,6 +203,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # Multi-site configuration
 # Maps domain names to site slugs for production
 SITE_DOMAIN_MAP = {
+    'aeroluxselect.com': 'nyc',
+    'www.aeroluxselect.com': 'nyc',
     'aeroluxeselect-nyc.com': 'nyc',
     'www.aeroluxeselect-nyc.com': 'nyc',
     'aeroluxeselect-dr.com': 'dr',

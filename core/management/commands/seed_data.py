@@ -57,7 +57,7 @@ class Command(BaseCommand):
             slug='nyc',
             defaults={
                 'name': 'New York City',
-                'domain': 'aeroluxeselect-nyc.com',
+                'domain': 'aeroluxselect.com',
                 'tagline': 'Premium Airport Transfers & Luxury Car Service in NYC',
                 'hero_title': 'NYC Premium Car Service & Airport Transfers',
                 'hero_subtitle': 'Experience luxury transportation with flat rates, no surprises. JFK, LGA, EWR and beyond.',

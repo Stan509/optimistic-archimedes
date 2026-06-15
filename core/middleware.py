@@ -104,16 +104,30 @@ class SiteMiddleware(MiddlewareMixin):
     @classmethod
     def _get_site_by_domain(cls, domain):
         """Look up a site by domain, with in-memory caching."""
-        if domain in cls._domain_cache:
-            return cls._domain_cache[domain]
+        # Normalize: strip port (done in caller) and strip 'www.' prefix
+        domain_normalized = domain.lower()
+        if domain_normalized.startswith('www.'):
+            domain_normalized = domain_normalized[4:]
+
+        if domain_normalized in cls._domain_cache:
+            return cls._domain_cache[domain_normalized]
 
         from core.models import Site
         try:
-            site = Site.objects.get(domain=domain, is_active=True)
-            cls._domain_cache[domain] = site
+            # Try to look up by normalized domain (e.g. aeroluxselect.com)
+            site = Site.objects.get(domain=domain_normalized, is_active=True)
+            cls._domain_cache[domain_normalized] = site
             return site
         except Site.DoesNotExist:
-            cls._domain_cache[domain] = None
+            # Fallback: try lookup with original domain if different
+            if domain != domain_normalized:
+                try:
+                    site = Site.objects.get(domain=domain, is_active=True)
+                    cls._domain_cache[domain_normalized] = site
+                    return site
+                except Site.DoesNotExist:
+                    pass
+            cls._domain_cache[domain_normalized] = None
             return None
 
     @classmethod
