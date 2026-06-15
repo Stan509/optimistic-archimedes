@@ -840,6 +840,11 @@ class Booking(models.Model):
         default='',
         help_text='Specific instructions for chauffeur meeting point (e.g. Exit Gate B).'
     )
+    return_meeting_point = models.TextField(
+        blank=True,
+        default='',
+        help_text='Specific instructions for return leg chauffeur meeting point.'
+    )
     passenger_count = models.PositiveIntegerField(
         default=1,
         validators=[MinValueValidator(1), MaxValueValidator(50)],
@@ -920,6 +925,12 @@ class Booking(models.Model):
     )
 
     # ── Pricing ──
+    distance_km = models.DecimalField(
+        max_digits=8,
+        decimal_places=2,
+        default=Decimal('0.00'),
+        help_text="Calculated distance in kilometers."
+    )
     base_price = models.DecimalField(
         max_digits=10,
         decimal_places=2,
@@ -1033,6 +1044,16 @@ class Booking(models.Model):
         return f'{self.booking_reference} — {self.customer_name} ({self.get_status_display()})'
 
     def save(self, *args, **kwargs):
+        # Enforce status constraints relative to date bounds
+        from django.utils import timezone
+        today_date = timezone.now().date()
+        if self.status in ['in_progress', 'IN_PROGRESS', 'completed', 'COMPLETED']:
+            if self.pickup_date and self.pickup_date > today_date:
+                raise ValidationError("A booking cannot be in progress or completed if the pickup date has not arrived yet.")
+        if self.status in ['completed', 'COMPLETED'] and self.round_trip and self.return_date:
+            if self.return_date > today_date:
+                raise ValidationError("A round-trip booking cannot be completed if the return date has not arrived yet.")
+
         if not self.booking_reference:
             self.booking_reference = self.generate_reference()
         super().save(*args, **kwargs)
@@ -1113,6 +1134,28 @@ class Booking(models.Model):
         """True if the booking came from Viator, Expedia, or other external platform."""
         return self.booking_source != BookingSource.DIRECT
 
+    @property
+    def is_return_alert_active(self):
+        """
+        True if booking is a round trip, status is CONFIRMED or IN_PROGRESS,
+        and return date/time is within 12 hours from now and in the future.
+        """
+        if not self.round_trip or not self.return_date or not self.return_time:
+            return False
+        if self.status not in ['CONFIRMED', 'IN_PROGRESS', 'confirmed', 'in_progress']:
+            return False
+        try:
+            from datetime import datetime, timedelta
+            from django.utils import timezone
+            return_datetime = datetime.combine(self.return_date, self.return_time)
+            if timezone.is_aware(timezone.now()):
+                return_datetime = timezone.make_aware(return_datetime, timezone.get_current_timezone())
+            now = timezone.now()
+            time_diff = return_datetime - now
+            return timedelta(hours=0) <= time_diff <= timedelta(hours=12)
+        except Exception:
+            return False
+
     def clean(self):
         super().clean()
         # Hourly bookings must request at least 3 hours
@@ -1135,6 +1178,20 @@ class Booking(models.Model):
             if not self.return_date or not self.return_time:
                 raise ValidationError({
                     'return_date': 'Return date and time are required for round-trip bookings.'
+                })
+
+        # Enforce date constraints on status
+        from django.utils import timezone
+        today_date = timezone.now().date()
+        if self.status in ['in_progress', 'IN_PROGRESS', 'completed', 'COMPLETED']:
+            if self.pickup_date and self.pickup_date > today_date:
+                raise ValidationError({
+                    'status': 'A booking cannot be in progress or completed if the pickup date has not arrived yet.'
+                })
+        if self.status in ['completed', 'COMPLETED'] and self.round_trip and self.return_date:
+            if self.return_date > today_date:
+                raise ValidationError({
+                    'status': 'A round-trip booking cannot be completed if the return date has not arrived yet.'
                 })
 
 

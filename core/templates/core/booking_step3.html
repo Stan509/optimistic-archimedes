@@ -213,10 +213,28 @@
 
                     <!-- Pricing breakdown -->
                     <div class="space-y-3 text-xs border-b border-gray-800 pb-4">
+                        {% if booking_data.round_trip %}
+                        <div class="flex justify-between">
+                            <span class="text-gray-500">Outbound Base Fare</span>
+                            <span class="font-bold text-white">{{ base_price|currency }}</span>
+                        </div>
+                        <div class="flex justify-between border-b border-gray-800/40 pb-2">
+                            <span class="text-gray-500">Return Base Fare</span>
+                            <span class="font-bold text-white">{{ base_price|currency }}</span>
+                        </div>
+                        {% else %}
                         <div class="flex justify-between">
                             <span class="text-gray-500">Base Fare</span>
                             <span class="font-bold text-white" id="base-fare-display">{{ base_price|currency }}</span>
                         </div>
+                        {% endif %}
+
+                        {% if booking_data.service_type == 'hourly' %}
+                        <div class="text-[10px] text-gray-400 pl-2 font-mono">
+                            ({{ hourly_rate|currency }}/hr &times; {{ hours_requested|floatformat:0 }} hrs)
+                        </div>
+                        {% endif %}
+
                         <div class="flex justify-between">
                             <span class="text-gray-500">VIP Add-Ons</span>
                             <span class="font-bold text-luxe-gold" id="addons-fare-display">$0.00</span>
@@ -247,6 +265,7 @@
     document.addEventListener('DOMContentLoaded', () => {
         // Base price value from backend context
         const basePrice = parseFloat("{{ base_price|default:0 }}");
+        const isRoundTrip = {% if booking_data.round_trip %}true{% else %}false{% endif %};
         
         const checkboxes = document.querySelectorAll('.addon-checkbox');
         const returnCheckboxes = document.querySelectorAll('.addon-return-checkbox');
@@ -272,7 +291,7 @@
                 }
             });
 
-            const finalTotal = basePrice + addonsTotal;
+            const finalTotal = (isRoundTrip ? basePrice * 2 : basePrice) + addonsTotal;
 
             // Update displays
             addonsDisplay.textContent = formatUSD(addonsTotal);

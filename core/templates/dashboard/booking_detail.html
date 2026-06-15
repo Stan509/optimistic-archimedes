@@ -4,6 +4,23 @@
 {% block dashboard_header %}Reservation Dispatch Sheet{% endblock %}
 
 {% block content %}
+{% if booking.is_return_alert_active %}
+<div class="mb-6 bg-rose-500/10 border border-rose-500/30 p-5 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-lg shadow-rose-500/5 animate-pulse">
+    <div class="flex items-start space-x-3.5">
+        <div class="w-12 h-12 shrink-0 rounded-xl bg-rose-500/20 flex items-center justify-center text-rose-400">
+            <i class="fa-solid fa-triangle-exclamation text-xl"></i>
+        </div>
+        <div>
+            <h4 class="text-sm font-bold text-white uppercase tracking-wider">🚨 Action Required: Return Leg Approaching</h4>
+            <p class="text-xs text-rose-300/80 mt-1">The return leg of this round-trip booking is scheduled within the next 12 hours (on {{ booking.return_date }} at {{ booking.return_time }}). Confirm chauffeur assignment immediately.</p>
+        </div>
+    </div>
+    <span class="px-3 py-1.5 self-start sm:self-center rounded-lg bg-rose-500/20 text-rose-400 font-mono text-[10px] font-bold uppercase tracking-wider border border-rose-500/30">
+        RETURN ALERT
+    </span>
+</div>
+{% endif %}
+
 <!-- Header Bar with Quick Navigation and Booking Reference status -->
 <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-luxury-card border border-luxury-border p-6 rounded-2xl">
     <div class="flex items-center space-x-4">
@@ -157,14 +174,6 @@
                         </div>
                     </div>
                 </div>
-                <div>
-                    <span class="block text-xs text-luxury-muted uppercase tracking-wider">Flight Number</span>
-                    {% if booking.flight_number %}
-                    <span class="block font-mono font-bold text-white mt-1"><i class="fa-solid fa-plane mr-1.5 text-luxury-muted"></i>{{ booking.flight_number|upper }}</span>
-                    {% else %}
-                    <span class="block text-xs text-luxury-muted italic mt-1">Not provided</span>
-                    {% endif %}
-                </div>
                 {% endif %}
 
                 {% if booking.service_type == 'HOURLY' %}
@@ -186,6 +195,59 @@
             </div>
         </div>
 
+        <!-- Section 2.5: Guest Logistics & Special Instructions -->
+        <div class="bg-luxury-card border border-luxury-border rounded-2xl p-6 space-y-4">
+            <div class="flex items-center space-x-2.5 border-b border-luxury-border pb-3">
+                <i class="fa-solid fa-plane-arrival text-gold-400 text-lg"></i>
+                <h3 class="font-serif font-semibold text-base">Client Inputs & Logistics</h3>
+            </div>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div>
+                    <span class="block text-xs text-luxury-muted uppercase tracking-wider">Flight Voyage Number</span>
+                    {% if booking.flight_number %}
+                    <span class="block font-mono font-bold text-white mt-1">
+                        <i class="fa-solid fa-plane mr-1.5 text-luxury-muted"></i>{{ booking.flight_number|upper }}
+                    </span>
+                    {% else %}
+                    <span class="block text-xs text-luxury-muted italic mt-1">None provided</span>
+                    {% endif %}
+                </div>
+                
+                <div>
+                    <span class="block text-xs text-luxury-muted uppercase tracking-wider">Client Special Notes</span>
+                    <p class="text-xs text-white mt-1 bg-luxury-black/20 p-2.5 rounded border border-luxury-border italic">
+                        "{{ booking.customer_notes|default:'No specific request notes written by customer.' }}"
+                    </p>
+                </div>
+                
+                <div class="sm:col-span-2">
+                    <span class="block text-xs text-luxury-muted uppercase tracking-wider mb-2">Chauffeur Meeting Point Details</span>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div class="bg-luxury-black/40 border border-luxury-border p-3.5 rounded-xl">
+                            <span class="block text-[10px] font-bold uppercase tracking-wider text-gold-400 mb-1">Outbound Meeting Point</span>
+                            {% if booking.meeting_point %}
+                            <p class="text-xs text-white">{{ booking.meeting_point }}</p>
+                            {% else %}
+                            <p class="text-xs text-luxury-muted italic">No specific instruction (Standard terminal pickup or address pickup)</p>
+                            {% endif %}
+                        </div>
+                        
+                        {% if booking.round_trip %}
+                        <div class="bg-luxury-black/40 border border-luxury-border p-3.5 rounded-xl">
+                            <span class="block text-[10px] font-bold uppercase tracking-wider text-sky-400 mb-1">Return Meeting Point</span>
+                            {% if booking.return_meeting_point %}
+                            <p class="text-xs text-white">{{ booking.return_meeting_point }}</p>
+                            {% else %}
+                            <p class="text-xs text-luxury-muted italic">No specific instruction (Standard terminal pickup or address pickup)</p>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Section 3: Chauffeur vehicle & Premium Add-ons choice -->
         <div class="bg-luxury-card border border-luxury-border rounded-2xl p-6 space-y-4">
             <div class="flex items-center space-x-2.5 border-b border-luxury-border pb-3">
@@ -193,17 +255,11 @@
                 <h3 class="font-serif font-semibold text-base">Vehicle Class & VIP Add-ons</h3>
             </div>
             
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <div class="grid grid-cols-1 gap-6">
                 <div>
                     <span class="block text-xs text-luxury-muted uppercase tracking-wider">Requested Vehicle Category</span>
                     <span class="block font-semibold text-white mt-1 text-base">{{ booking.vehicle_category.name }}</span>
                     <span class="block text-xs text-luxury-muted mt-0.5">Capacity: {{ booking.vehicle_category.passengers_capacity }} Pax / {{ booking.vehicle_category.luggage_capacity }} Bags</span>
-                </div>
-                <div>
-                    <span class="block text-xs text-luxury-muted uppercase tracking-wider">Client Booking Notes</span>
-                    <p class="text-xs text-luxury-muted mt-1 bg-luxury-black/20 p-2.5 rounded border border-luxury-border italic">
-                        "{{ booking.customer_notes|default:'No specific request notes written by customer.' }}"
-                    </p>
                 </div>
             </div>
 
@@ -270,6 +326,12 @@
                         <span>Base Rate:</span>
                         <span class="text-white">${{ outbound_base|floatformat:2 }}</span>
                     </div>
+                    {% if booking.service_type == 'HOURLY' %}
+                    <div class="flex justify-between items-center text-[10px] text-gold-400/80 -mt-1 pl-2">
+                        <span>Hourly calculation:</span>
+                        <span>${{ booking.hourly_rate }}/hr &times; {{ booking.hours_requested }} hrs</span>
+                    </div>
+                    {% endif %}
                     {% if stops_fee > 0 %}
                     <div class="flex justify-between items-center text-luxury-muted">
                         <span>Stops Fee:</span>

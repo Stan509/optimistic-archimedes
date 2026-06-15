@@ -34,31 +34,47 @@
             </div>
         </div>
 
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between pt-4 border-t border-luxury-border gap-4">
+        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between pt-4 border-t border-luxury-border gap-4">
             <!-- Status Pill Filter Buttons -->
-            <div class="flex flex-wrap gap-2">
-                <a href="?q={{ query }}&site={{ site_filter }}&service={{ service_filter }}&status=" class="px-3.5 py-1.5 rounded-full text-xs font-semibold border transition-all {% if not status_filter %}gold-gradient text-luxury-black border-transparent{% else %}bg-luxury-black border-luxury-border text-luxury-muted hover:text-white{% endif %}">
-                    All Statuses
-                </a>
-                <a href="?q={{ query }}&site={{ site_filter }}&service={{ service_filter }}&status=PENDING" class="px-3.5 py-1.5 rounded-full text-xs font-semibold border transition-all {% if status_filter == 'PENDING' %}bg-amber-500/20 border-amber-500/40 text-amber-400{% else %}bg-luxury-black border-luxury-border text-luxury-muted hover:text-white{% endif %}">
-                    Pending
-                </a>
-                <a href="?q={{ query }}&site={{ site_filter }}&service={{ service_filter }}&status=CONFIRMED" class="px-3.5 py-1.5 rounded-full text-xs font-semibold border transition-all {% if status_filter == 'CONFIRMED' %}bg-emerald-500/20 border-emerald-500/40 text-emerald-400{% else %}bg-luxury-black border-luxury-border text-luxury-muted hover:text-white{% endif %}">
-                    Confirmed
-                </a>
-                <a href="?q={{ query }}&site={{ site_filter }}&service={{ service_filter }}&status=IN_PROGRESS" class="px-3.5 py-1.5 rounded-full text-xs font-semibold border transition-all {% if status_filter == 'IN_PROGRESS' %}bg-sky-500/20 border-sky-500/40 text-sky-400{% else %}bg-luxury-black border-luxury-border text-luxury-muted hover:text-white{% endif %}">
-                    In Progress
-                </a>
-                <a href="?q={{ query }}&site={{ site_filter }}&service={{ service_filter }}&status=COMPLETED" class="px-3.5 py-1.5 rounded-full text-xs font-semibold border transition-all {% if status_filter == 'COMPLETED' %}bg-zinc-800 border-zinc-700 text-white{% else %}bg-luxury-black border-luxury-border text-luxury-muted hover:text-white{% endif %}">
-                    Completed
-                </a>
-                <a href="?q={{ query }}&site={{ site_filter }}&service={{ service_filter }}&status=CANCELLED" class="px-3.5 py-1.5 rounded-full text-xs font-semibold border transition-all {% if status_filter == 'CANCELLED' %}bg-rose-500/20 border-rose-500/40 text-rose-400{% else %}bg-luxury-black border-luxury-border text-luxury-muted hover:text-white{% endif %}">
-                    Cancelled
-                </a>
+            <div class="space-y-3 flex-1">
+                <div class="flex flex-wrap items-center gap-2">
+                    <span class="text-xs font-semibold text-luxury-muted mr-1">Status:</span>
+                    <a href="?q={{ query }}&site={{ site_filter }}&service={{ service_filter }}&round_trip={{ round_trip_filter }}&status=" class="px-3.5 py-1.5 rounded-full text-xs font-semibold border transition-all {% if not status_filter %}gold-gradient text-luxury-black border-transparent{% else %}bg-luxury-black border-luxury-border text-luxury-muted hover:text-white{% endif %}">
+                        All Statuses
+                    </a>
+                    <a href="?q={{ query }}&site={{ site_filter }}&service={{ service_filter }}&round_trip={{ round_trip_filter }}&status=PENDING" class="px-3.5 py-1.5 rounded-full text-xs font-semibold border transition-all {% if status_filter == 'PENDING' %}bg-amber-500/20 border-amber-500/40 text-amber-400{% else %}bg-luxury-black border-luxury-border text-luxury-muted hover:text-white{% endif %}">
+                        Pending
+                    </a>
+                    <a href="?q={{ query }}&site={{ site_filter }}&service={{ service_filter }}&round_trip={{ round_trip_filter }}&status=CONFIRMED" class="px-3.5 py-1.5 rounded-full text-xs font-semibold border transition-all {% if status_filter == 'CONFIRMED' %}bg-emerald-500/20 border-emerald-500/40 text-emerald-400{% else %}bg-luxury-black border-luxury-border text-luxury-muted hover:text-white{% endif %}">
+                        Confirmed
+                    </a>
+                    <a href="?q={{ query }}&site={{ site_filter }}&service={{ service_filter }}&round_trip={{ round_trip_filter }}&status=IN_PROGRESS" class="px-3.5 py-1.5 rounded-full text-xs font-semibold border transition-all {% if status_filter == 'IN_PROGRESS' %}bg-sky-500/20 border-sky-500/40 text-sky-400{% else %}bg-luxury-black border-luxury-border text-luxury-muted hover:text-white{% endif %}">
+                        In Progress
+                    </a>
+                    <a href="?q={{ query }}&site={{ site_filter }}&service={{ service_filter }}&round_trip={{ round_trip_filter }}&status=COMPLETED" class="px-3.5 py-1.5 rounded-full text-xs font-semibold border transition-all {% if status_filter == 'COMPLETED' %}bg-zinc-800 border-zinc-700 text-white{% else %}bg-luxury-black border-luxury-border text-luxury-muted hover:text-white{% endif %}">
+                        Completed
+                    </a>
+                    <a href="?q={{ query }}&site={{ site_filter }}&service={{ service_filter }}&round_trip={{ round_trip_filter }}&status=CANCELLED" class="px-3.5 py-1.5 rounded-full text-xs font-semibold border transition-all {% if status_filter == 'CANCELLED' %}bg-rose-500/20 border-rose-500/40 text-rose-400{% else %}bg-luxury-black border-luxury-border text-luxury-muted hover:text-white{% endif %}">
+                        Cancelled
+                    </a>
+                </div>
+
+                <div class="flex flex-wrap items-center gap-2">
+                    <span class="text-xs font-semibold text-luxury-muted mr-1">Routing:</span>
+                    <a href="?q={{ query }}&site={{ site_filter }}&service={{ service_filter }}&status={{ status_filter }}&round_trip=" class="px-3.5 py-1.5 rounded-full text-xs font-semibold border transition-all {% if not round_trip_filter %}gold-gradient text-luxury-black border-transparent{% else %}bg-luxury-black border-luxury-border text-luxury-muted hover:text-white{% endif %}">
+                        All Bookings
+                    </a>
+                    <a href="?q={{ query }}&site={{ site_filter }}&service={{ service_filter }}&status={{ status_filter }}&round_trip=all" class="px-3.5 py-1.5 rounded-full text-xs font-semibold border transition-all {% if round_trip_filter == 'all' %}bg-purple-500/20 border-purple-500/40 text-purple-400{% else %}bg-luxury-black border-luxury-border text-luxury-muted hover:text-white{% endif %}">
+                        All Round-Trips
+                    </a>
+                    <a href="?q={{ query }}&site={{ site_filter }}&service={{ service_filter }}&status={{ status_filter }}&round_trip=active" class="px-3.5 py-1.5 rounded-full text-xs font-semibold border transition-all {% if round_trip_filter == 'active' %}bg-sky-500/20 border-sky-500/40 text-sky-400{% else %}bg-luxury-black border-luxury-border text-luxury-muted hover:text-white{% endif %}">
+                        Active Round-Trips (Pending Return)
+                    </a>
+                </div>
             </div>
 
             <!-- Submit and Clear Row -->
-            <div class="flex items-center space-x-3">
+            <div class="flex items-center space-x-3 self-end lg:self-center">
                 <a href="?" class="text-xs font-semibold text-luxury-muted hover:text-white transition-colors py-2.5 px-4 rounded-xl hover:bg-luxury-black/30 border border-transparent">
                     Reset
                 </a>
@@ -68,9 +84,12 @@
             </div>
         </div>
         
-        <!-- Pass status via form hidden if they used a pill -->
+        <!-- Pass status/round_trip via form hidden if they used a pill -->
         {% if status_filter %}
         <input type="hidden" name="status" value="{{ status_filter }}">
+        {% endif %}
+        {% if round_trip_filter %}
+        <input type="hidden" name="round_trip" value="{{ round_trip_filter }}">
         {% endif %}
     </form>
 </div>
@@ -124,9 +143,29 @@
                     <td class="py-4 px-6">
                         <span class="block text-xs font-semibold text-white">{{ b.pickup_date }}</span>
                         <span class="block text-[10px] text-luxury-muted"><i class="fa-regular fa-clock mr-1 text-[9px]"></i>{{ b.pickup_time }}</span>
+                        {% if b.round_trip %}
+                        <div class="mt-1.5 pt-1.5 border-t border-luxury-border/30">
+                            <span class="block text-[10px] font-semibold text-sky-400">Return: {{ b.return_date }}</span>
+                            <span class="block text-[9px] text-luxury-muted"><i class="fa-regular fa-clock mr-1 text-[8px]"></i>{{ b.return_time }}</span>
+                            {% if b.is_return_alert_active %}
+                            <span class="inline-flex items-center space-x-1 px-1.5 py-0.5 mt-0.5 rounded text-[8px] font-bold bg-rose-500/10 border border-rose-500/20 text-rose-400 animate-pulse">
+                                <i class="fa-solid fa-triangle-exclamation"></i>
+                                <span>RETURN DUE</span>
+                            </span>
+                            {% endif %}
+                        </div>
+                        {% endif %}
                     </td>
                     <td class="py-4 px-6">
+                        {% if b.round_trip %}
+                        <div class="flex flex-col">
+                            <span class="font-bold text-white">${{ b.total_price|floatformat:2 }}</span>
+                            <span class="text-[9px] text-luxury-muted">Outbound Base: ${{ b.base_price|floatformat:2 }}</span>
+                            <span class="text-[9px] text-luxury-muted">Return Base: ${{ b.base_price|floatformat:2 }}</span>
+                        </div>
+                        {% else %}
                         <span class="font-bold text-white">${{ b.total_price|floatformat:2 }}</span>
+                        {% endif %}
                     </td>
                     <td class="py-4 px-6">
                         <span class="inline-flex items-center space-x-1 px-2.5 py-1 rounded-full text-[10px] font-bold border 

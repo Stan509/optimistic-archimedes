@@ -172,6 +172,155 @@
     </div>
 </div>
 
+{% if pending_bookings %}
+<!-- Pending Requests Dashboard Console -->
+<div class="bg-luxury-card border border-luxury-border rounded-2xl overflow-hidden mb-8 shadow-xl">
+    <div class="p-6 border-b border-luxury-border flex justify-between items-center bg-amber-500/5">
+        <div>
+            <h3 class="font-serif font-semibold text-lg tracking-wide text-amber-400 flex items-center gap-2">
+                <i class="fa-solid fa-hourglass-half animate-pulse text-sm"></i>
+                <span>Pending Reservations Awaiting Dispatch Approval</span>
+            </h3>
+            <p class="text-xs text-luxury-muted mt-0.5">Please confirm or cancel these client booking requests immediately.</p>
+        </div>
+        <span class="px-2.5 py-1 rounded bg-amber-500/10 border border-amber-500/20 text-xs font-bold text-amber-400">
+            {{ pending_bookings|length }} PENDING
+        </span>
+    </div>
+    
+    <div class="overflow-x-auto">
+        <table class="w-full text-left text-sm whitespace-nowrap">
+            <thead>
+                <tr class="bg-luxury-black/30 text-luxury-muted text-xs uppercase tracking-wider border-b border-luxury-border">
+                    <th class="py-4 px-6">Reference</th>
+                    <th class="py-4 px-6">Customer</th>
+                    <th class="py-4 px-6">Route / Service</th>
+                    <th class="py-4 px-6">Date / Time</th>
+                    <th class="py-4 px-6 text-center">Quick Actions</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-luxury-border">
+                {% for b in pending_bookings %}
+                <tr class="hover:bg-luxury-black/20 transition-colors">
+                    <td class="py-4 px-6">
+                        <a href="{% url 'dashboard:booking_detail' b.id %}" class="block font-mono text-gold-400 font-semibold hover:underline">{{ b.booking_reference }}</a>
+                        <span class="block text-[10px] text-luxury-muted">{{ b.get_service_type_display }}</span>
+                    </td>
+                    <td class="py-4 px-6">
+                        <span class="block font-semibold text-white">{{ b.customer_name }}</span>
+                        <span class="block text-xs text-luxury-muted">{{ b.customer_email }}</span>
+                    </td>
+                    <td class="py-4 px-6">
+                        <div class="flex items-center space-x-2">
+                            <span class="text-xs font-bold px-2 py-0.5 rounded bg-luxury-black border border-luxury-border">
+                                {{ b.site.slug|upper }}
+                            </span>
+                            <span class="text-xs text-white">
+                                {% if b.airport %}
+                                    {{ b.airport.code }} &rarr; {{ b.destination.name|default:b.dropoff_address|truncatechars:20 }}
+                                {% else %}
+                                    Chauffeur Services
+                                {% endif %}
+                            </span>
+                        </div>
+                    </td>
+                    <td class="py-4 px-6">
+                        <span class="block text-xs font-semibold text-white">{{ b.pickup_date }}</span>
+                        <span class="block text-[10px] text-luxury-muted">{{ b.pickup_time }}</span>
+                    </td>
+                    <td class="py-4 px-6 text-center space-x-2">
+                        <a href="{% url 'dashboard:update_booking_status' b.id 'CONFIRMED' %}" class="inline-block px-3 py-1.5 rounded-lg text-xs font-bold bg-emerald-500/10 border border-emerald-500/25 text-emerald-400 hover:bg-emerald-500/20 transition-all text-center">
+                            Confirm
+                        </a>
+                        <a href="{% url 'dashboard:update_booking_status' b.id 'CANCELLED' %}" class="inline-block px-3 py-1.5 rounded-lg text-xs font-bold bg-rose-500/10 border border-rose-500/25 text-rose-400 hover:bg-rose-500/20 transition-all text-center">
+                            Cancel
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
+
+<!-- Active Round-Trip Operational Progress Tracker -->
+<div class="bg-luxury-card border border-luxury-border rounded-2xl overflow-hidden mb-8 shadow-xl">
+    <div class="p-6 border-b border-luxury-border flex justify-between items-center bg-sky-500/5">
+        <div>
+            <h3 class="font-serif font-semibold text-lg tracking-wide text-sky-400 flex items-center gap-2">
+                <i class="fa-solid fa-arrows-spin text-sm"></i>
+                <span>Active Round-Trip Contracts Progress Center</span>
+            </h3>
+            <p class="text-xs text-luxury-muted mt-0.5">Track remaining days on active client contracts until return leg execution.</p>
+        </div>
+        <span class="px-2.5 py-1 rounded bg-sky-500/10 border border-sky-500/20 text-xs font-bold text-sky-400">
+            {{ active_round_trips|length }} CONTRACTS
+        </span>
+    </div>
+
+    <div class="overflow-x-auto">
+        <table class="w-full text-left text-sm whitespace-nowrap">
+            <thead>
+                <tr class="bg-luxury-black/30 text-luxury-muted text-xs uppercase tracking-wider border-b border-luxury-border">
+                    <th class="py-4 px-6">Reference</th>
+                    <th class="py-4 px-6">Customer</th>
+                    <th class="py-4 px-6">Outbound Trip</th>
+                    <th class="py-4 px-6">Return Leg Date</th>
+                    <th class="py-4 px-6">Status / Time to Return</th>
+                    <th class="py-4 px-6 text-right">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-luxury-border">
+                {% for b in active_round_trips %}
+                <tr class="hover:bg-luxury-black/20 transition-colors">
+                    <td class="py-4 px-6">
+                        <span class="block font-mono text-gold-400 font-semibold">{{ b.booking_reference }}</span>
+                        <span class="block text-[10px] text-luxury-muted">{{ b.get_service_type_display }}</span>
+                    </td>
+                    <td class="py-4 px-6">
+                        <span class="block font-semibold text-white">{{ b.customer_name }}</span>
+                        <span class="block text-[10px] text-luxury-muted">{{ b.customer_phone }}</span>
+                    </td>
+                    <td class="py-4 px-6 text-luxury-muted text-xs">
+                        {{ b.pickup_date }} (Done/Active)
+                    </td>
+                    <td class="py-4 px-6">
+                        <span class="block text-xs font-bold text-white">{{ b.return_date }}</span>
+                        <span class="block text-[10px] text-luxury-muted"><i class="fa-regular fa-clock mr-1 text-[9px]"></i>{{ b.return_time }}</span>
+                    </td>
+                    <td class="py-4 px-6">
+                        {% if b.is_return_alert_active %}
+                        <span class="inline-flex items-center space-x-1 px-2.5 py-1 rounded-full text-[10px] font-bold bg-rose-500/10 border border-rose-500/20 text-rose-400 animate-pulse">
+                            <i class="fa-solid fa-triangle-exclamation"></i>
+                            <span>🚨 RETURN DUE IN &lt; 12 HOURS</span>
+                        </span>
+                        {% else %}
+                        <span class="inline-flex items-center space-x-1 px-2.5 py-1 rounded-full text-[10px] font-semibold bg-sky-500/10 border border-sky-500/20 text-sky-400">
+                            <i class="fa-solid fa-hourglass"></i>
+                            <span>Active Leg - Return Pending</span>
+                        </span>
+                        {% endif %}
+                    </td>
+                    <td class="py-4 px-6 text-right">
+                        <a href="{% url 'dashboard:booking_detail' b.id %}" class="inline-block text-xs font-semibold text-gold-400 hover:text-white transition-colors bg-luxury-card border border-luxury-border px-3 py-1 rounded hover:border-gold-400/40">
+                            Dispatch Sheet
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="text-center py-10 text-luxury-muted text-xs bg-luxury-black/10">
+                        <i class="fa-solid fa-circle-info text-2xl text-luxury-border mb-2 block"></i>
+                        No active round-trip contracts currently in progress.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
 <!-- Recent Bookings Log -->
 <div class="bg-luxury-card border border-luxury-border rounded-2xl overflow-hidden">
     <div class="p-6 border-b border-luxury-border flex justify-between items-center">

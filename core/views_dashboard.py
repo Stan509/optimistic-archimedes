@@ -127,6 +127,16 @@ def dashboard_index(request):
     # Recent bookings
     recent_bookings = bookings.order_by('-created_at')[:10]
 
+    # Pending bookings
+    pending_bookings = bookings.filter(status='PENDING').order_by('-created_at')
+
+    # Active round trips whose return leg has not passed yet
+    active_round_trips = bookings.filter(
+        round_trip=True,
+        status__in=['CONFIRMED', 'IN_PROGRESS'],
+        return_date__gte=today
+    ).order_by('return_date', 'return_time')
+
     # Site stats
     sites = Site.objects.filter(is_active=True)
 
@@ -141,6 +151,8 @@ def dashboard_index(request):
         'chart_data_nyc': json.dumps(chart_data_nyc),
         'chart_data_dr': json.dumps(chart_data_dr),
         'recent_bookings': recent_bookings,
+        'pending_bookings': pending_bookings,
+        'active_round_trips': active_round_trips,
         'sites': sites,
         'site_filter': site_filter,
         'period': period,
@@ -162,10 +174,20 @@ def dashboard_bookings(request):
     status_filter = request.GET.get('status', '')
     site_filter = request.GET.get('site', '')
     service_filter = request.GET.get('service', '')
+    round_trip_filter = request.GET.get('round_trip', '')
 
     bookings = Booking.objects.all().select_related(
         'site', 'airport', 'destination', 'vehicle_category'
     )
+
+    if round_trip_filter == 'active':
+        bookings = bookings.filter(
+            round_trip=True,
+            status__in=['CONFIRMED', 'IN_PROGRESS'],
+            return_date__gte=date.today()
+        )
+    elif round_trip_filter == 'all':
+        bookings = bookings.filter(round_trip=True)
 
     if query:
         bookings = bookings.filter(
@@ -190,6 +212,7 @@ def dashboard_bookings(request):
         'status_filter': status_filter,
         'site_filter': site_filter,
         'service_filter': service_filter,
+        'round_trip_filter': round_trip_filter,
         'active_tab': 'bookings',
     }
     return render(request, 'dashboard/bookings.html', context)
@@ -261,8 +284,34 @@ def update_booking_status(request, booking_id, new_status):
 
     valid_statuses = ['PENDING', 'CONFIRMED', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED']
     if new_status in valid_statuses:
+        # Check date constraints
+        today = date.today()
+        if new_status in ['IN_PROGRESS', 'COMPLETED'] and booking.pickup_date > today:
+            messages.error(request, f"Cannot update booking #{booking.booking_reference} to {new_status} because the pickup date has not arrived yet.")
+            return redirect('dashboard:bookings')
+
+        if new_status == 'COMPLETED' and booking.round_trip and booking.return_date and booking.return_date > today:
+            messages.error(request, f"Cannot update booking #{booking.booking_reference} to COMPLETED because the return date ({booking.return_date}) has not arrived yet.")
+            return redirect('dashboard:bookings')
+
         booking.status = new_status
         booking.save()
+        
+        # Enforce status synchronization for linked booking legs
+        if new_status in ['CONFIRMED', 'CANCELLED']:
+            if booking.linked_booking:
+                try:
+                    booking.linked_booking.status = new_status
+                    booking.linked_booking.save()
+                except Exception:
+                    pass
+            for return_b in booking.return_bookings.all():
+                try:
+                    return_b.status = new_status
+                    return_b.save()
+                except Exception:
+                    pass
+
         messages.success(request, f'Booking #{booking.booking_reference} updated to {new_status}.')
         
         # Trigger dynamic emails on confirmation or cancellation

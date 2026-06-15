@@ -156,6 +156,11 @@
                                 <span class="font-light">Base Chauffeur Fare</span>
                                 <span>{{ outbound_base|currency }}</span>
                             </div>
+                            {% if booking_data.service_type == 'hourly' %}
+                            <div class="text-[10px] text-gray-400 pl-2 font-mono">
+                                ({{ hourly_rate|currency }}/hr &times; {{ booking_data.hours_requested }} hrs)
+                            </div>
+                            {% endif %}
                             {% if stops_fee > 0 %}
                             <div class="flex justify-between items-center text-[11px] text-gray-300">
                                 <span class="font-light">Point-to-Point Stops Fee</span>

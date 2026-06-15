@@ -219,6 +219,38 @@ def _haversine_distance(lat1, lon1, lat2, lon2):
     return R * c
 
 
+def _get_google_driving_distance(origin_lat, origin_lng, dest_lat, dest_lng, api_key):
+    """
+    Get actual driving distance in kilometers between two GPS coordinates using Google Directions API.
+    """
+    import urllib.request
+    import urllib.parse
+    import json
+
+    if not api_key:
+        return None
+
+    try:
+        origin = f"{origin_lat},{origin_lng}"
+        destination = f"{dest_lat},{dest_lng}"
+        url = f"https://maps.googleapis.com/maps/api/directions/json?origin={urllib.parse.quote(origin)}&destination={urllib.parse.quote(destination)}&key={api_key}"
+        
+        req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+        with urllib.request.urlopen(req, timeout=5) as response:
+            data = json.loads(response.read().decode())
+            
+        if data.get('status') == 'OK':
+            routes = data.get('routes', [])
+            if routes:
+                legs = routes[0].get('legs', [])
+                if legs:
+                    distance_meters = legs[0].get('distance', {}).get('value', 0)
+                    return distance_meters / 1000.0
+    except Exception:
+        pass
+    return None
+
+
 def _get_airport_transfer_price_for_category(site, slug, category, booking_data):
     """Get calculated price for airport transfer for a vehicle category based on distance."""
     from core.models import AirportCategoryPrice, Airport, SiteSettings
@@ -247,7 +279,7 @@ def _get_airport_transfer_price_for_category(site, slug, category, booking_data)
     except (ValueError, TypeError):
         distance_km = 0.0
 
-    # Fallback to haversine if distance is not passed
+    # Fallback to driving distance or haversine if distance is not passed
     if distance_km <= 0.0:
         p_lat = booking_data.get('pickup_lat')
         p_lng = booking_data.get('pickup_lng')
@@ -269,10 +301,20 @@ def _get_airport_transfer_price_for_category(site, slug, category, booking_data)
                 pass
 
         if address_lat and address_lng and airport_lat and airport_lng:
-            miles = _haversine_distance(airport_lat, airport_lng, address_lat, address_lng)
-            distance_km = miles * 1.60934
+            site_settings = SiteSettings.get_settings(site)
+            api_key = site_settings.google_maps_api_key if site_settings else ''
+            google_dist = _get_google_driving_distance(airport_lat, airport_lng, address_lat, address_lng, api_key)
+            if google_dist is not None:
+                distance_km = google_dist
+            else:
+                miles = _haversine_distance(airport_lat, airport_lng, address_lat, address_lng)
+                distance_km = miles * 1.60934
+            
+            # Save computed distance back to booking_data to persist in session
+            booking_data['distance_km'] = str(round(distance_km, 2))
         else:
             distance_km = 20.0
+            booking_data['distance_km'] = str(distance_km)
 
     if distance_km <= base_km:
         fare = base_price
@@ -343,8 +385,18 @@ def _get_category_price(site, slug, category, booking_data):
             d_lat = booking_data.get('dropoff_lat')
             d_lng = booking_data.get('dropoff_lng')
             if km <= 0.0 and p_lat and p_lng and d_lat and d_lng:
-                miles = _haversine_distance(p_lat, p_lng, d_lat, d_lng)
-                km = miles * 1.60934
+                from core.models import SiteSettings
+                site_settings = SiteSettings.get_settings(site)
+                api_key = site_settings.google_maps_api_key if site_settings else ''
+                google_dist = _get_google_driving_distance(p_lat, p_lng, d_lat, d_lng, api_key)
+                if google_dist is not None:
+                    km = google_dist
+                else:
+                    miles = _haversine_distance(p_lat, p_lng, d_lat, d_lng)
+                    km = miles * 1.60934
+                
+                # Save computed distance back to booking_data to persist in session
+                booking_data['distance_km'] = str(round(km, 2))
             
             threshold = rule.km_threshold or 25
             if km > threshold:
@@ -419,6 +471,7 @@ def booking_step1(request):
             'destination_address': request.POST.get('destination_address', ''),
             'transfer_direction': request.POST.get('transfer_direction', 'AIRPORT_TO_DEST'),
             'meeting_point': request.POST.get('meeting_point', ''),
+            'return_meeting_point': request.POST.get('return_meeting_point', ''),
             'pickup_address': request.POST.get('pickup_address', ''),
             'dropoff_address': request.POST.get('dropoff_address', ''),
             'pickup_date': request.POST.get('pickup_date'),
@@ -486,6 +539,9 @@ def booking_step2(request):
                 category_prices[cat.id] = price
             except Exception:
                 category_prices[cat.id] = None
+
+        # Persist modified booking_data (with any calculated distance) to session
+        request.session['booking'] = booking_data
 
     except Exception as e:
         categories = []
@@ -557,11 +613,18 @@ def booking_step3(request):
     base_price = booking_data.get('base_price', 0) or 0
     fare = float(base_price)
 
+    hourly_rate = 0.0
+    hours_requested = float(booking_data.get('hours_requested', 3.0))
+    if booking_data.get('service_type') == 'hourly' and hours_requested > 0:
+        hourly_rate = fare / hours_requested
+
     context = {
         'addons': addons,
         'category': category,
         'booking_data': booking_data,
         'base_price': fare,
+        'hourly_rate': hourly_rate,
+        'hours_requested': hours_requested,
         'site_slug': slug,
         'language': _get_language(request),
     }
@@ -634,11 +697,18 @@ def booking_payment(request):
                     return redirect(f'/{slug}/book/payment/')
 
             # Create the booking
+            from decimal import Decimal
+            try:
+                db_distance = Decimal(str(booking_data.get('distance_km', 0.0) or 0.0))
+            except Exception:
+                db_distance = Decimal('0.00')
+
             booking = Booking(
                 site=site,
                 service_type=booking_data.get('service_type', 'airport_transfer'),
                 transfer_direction=booking_data.get('transfer_direction', 'AIRPORT_TO_DEST'),
                 meeting_point=booking_data.get('meeting_point', ''),
+                return_meeting_point=booking_data.get('return_meeting_point', ''),
                 customer_name=booking_data['customer_name'],
                 customer_email=booking_data['customer_email'],
                 customer_phone=booking_data['customer_phone'],
@@ -656,6 +726,7 @@ def booking_payment(request):
                 number_of_stops=booking_data.get('number_of_stops', 0),
                 stop_addresses=booking_data.get('stop_addresses', ''),
                 passenger_count=booking_data.get('passenger_count', 1),
+                distance_km=db_distance,
             )
 
             # Set foreign keys
@@ -788,6 +859,11 @@ def booking_payment(request):
         return_total = return_base + return_addons_total if booking_data.get('round_trip') else 0.0
         grand_total = outbound_total + return_total
 
+        hourly_rate = 0.0
+        hours_requested = float(booking_data.get('hours_requested', 3.0))
+        if service_type == 'hourly' and hours_requested > 0:
+            hourly_rate = outbound_base / hours_requested
+
         context = {
             'booking_data': booking_data,
             'outbound_base': outbound_base,
@@ -800,6 +876,8 @@ def booking_payment(request):
             'outbound_total': outbound_total,
             'return_total': return_total,
             'total_price': grand_total,
+            'hourly_rate': hourly_rate,
+            'hours_requested': hours_requested,
             'stripe_public_key': site_settings.stripe_public_key if site_settings else '',
             'stripe_enabled': site_settings.stripe_enabled if site_settings else False,
             'site_slug': slug,
@@ -997,6 +1075,7 @@ def api_pricing(request):
                 'hourly_rate': hourly_rate,
                 'hours': hours,
                 'service_type': service_type,
+                'distance_km': booking_data.get('distance_km'),
             })
 
         return JsonResponse({'pricing': pricing})

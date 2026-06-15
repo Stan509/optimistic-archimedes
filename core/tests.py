@@ -3,6 +3,8 @@ from django.conf import settings
 from django.urls import reverse
 from decimal import Decimal
 from datetime import date, time
+import datetime
+from django.utils import timezone
 from core.models import (
     Site, Airport, Destination, VehicleCategory, Vehicle,
     PremiumAddOn, PricingRule, Booking, SiteSettings, SiteContent
@@ -1122,6 +1124,295 @@ class ManualPaymentsAndRemindersTestCase(TestCase):
         self.assertIn('processing', links)
         self.assertIn('confirmed', links)
         self.assertTrue(links['confirmed'].startswith('https://wa.me/12125550199'))
+
+
+class ChauffeurSystemRefinementTestCase(TestCase):
+    def setUp(self):
+        from django.contrib.auth.models import User
+        self.nyc = Site.objects.create(
+            slug='nyc',
+            name='New York City',
+            domain='aeroluxeselect-nyc.com',
+            is_active=True
+        )
+        self.jfk = Airport.objects.create(
+            site=self.nyc,
+            code='JFK',
+            name='John F. Kennedy International Airport',
+            is_active=True
+        )
+        self.midtown = Destination.objects.create(
+            airport=self.jfk,
+            name='Manhattan — Midtown',
+            is_active=True
+        )
+        self.exec_suv = VehicleCategory.objects.create(
+            slug='executive-suv',
+            name='Executive SUV',
+            is_active=True,
+            order=1
+        )
+        self.admin_user = User.objects.create_superuser(
+            username='admin',
+            email='admin@example.com',
+            password='password123'
+        )
+
+    def test_return_meeting_point_saving(self):
+        """Test that return_meeting_point is successfully saved to the Booking model."""
+        booking = Booking.objects.create(
+            site=self.nyc,
+            service_type='airport_transfer',
+            customer_name='John Doe',
+            customer_email='john@example.com',
+            customer_phone='+12125550199',
+            airport=self.jfk,
+            destination=self.midtown,
+            pickup_date=date.today(),
+            pickup_time=time(12, 0),
+            round_trip=True,
+            return_date=date.today(),
+            return_time=time(18, 0),
+            meeting_point='At terminal 4 arrival lobby',
+            return_meeting_point='In hotel lobby under the clock',
+            vehicle_category=self.exec_suv,
+            base_price=Decimal('100.00'),
+            booking_source='DIRECT'
+        )
+        self.assertEqual(booking.return_meeting_point, 'In hotel lobby under the clock')
+
+    def test_is_return_alert_active(self):
+        """Test is_return_alert_active returns True only when within 12h of return leg and status is active."""
+        # 1. More than 12 hours away
+        future_return = date.today() + datetime.timedelta(days=2)
+        booking = Booking.objects.create(
+            site=self.nyc,
+            service_type='airport_transfer',
+            customer_name='John Doe',
+            customer_email='john@example.com',
+            customer_phone='+12125550199',
+            airport=self.jfk,
+            destination=self.midtown,
+            pickup_date=date.today(),
+            pickup_time=time(12, 0),
+            round_trip=True,
+            return_date=future_return,
+            return_time=time(18, 0),
+            vehicle_category=self.exec_suv,
+            base_price=Decimal('100.00'),
+            status='CONFIRMED'
+        )
+        self.assertFalse(booking.is_return_alert_active)
+
+        # 2. Within 12 hours away, status CONFIRMED
+        booking.return_date = date.today()
+        # Set return time to 3 hours from now
+        now_dt = timezone.localtime(timezone.now())
+        alert_time = (now_dt + datetime.timedelta(hours=3))
+        booking.return_date = alert_time.date()
+        booking.return_time = alert_time.time()
+        booking.save()
+        self.assertTrue(booking.is_return_alert_active)
+
+        # 3. Within 12 hours away, status CANCELLED (should be False)
+        booking.status = 'CANCELLED'
+        booking.save()
+        self.assertFalse(booking.is_return_alert_active)
+
+    def test_status_update_date_restrictions(self):
+        """Test that update_booking_status view blocks future status transitions."""
+        client = Client()
+        client.login(username='admin', password='password123')
+
+        future_date = date.today() + datetime.timedelta(days=2)
+        booking = Booking.objects.create(
+            site=self.nyc,
+            service_type='airport_transfer',
+            customer_name='Future Guest',
+            customer_email='future@example.com',
+            customer_phone='+12125550199',
+            airport=self.jfk,
+            destination=self.midtown,
+            pickup_date=future_date,
+            pickup_time=time(12, 0),
+            vehicle_category=self.exec_suv,
+            base_price=Decimal('100.00'),
+            status='CONFIRMED'
+        )
+
+        # Attempt to set IN_PROGRESS (should fail and redirect with error)
+        response = client.get(
+            reverse('dashboard:update_booking_status', kwargs={'booking_id': booking.id, 'new_status': 'IN_PROGRESS'}),
+            HTTP_HOST='aeroluxeselect-nyc.com'
+        )
+        self.assertEqual(response.status_code, 302)
+        booking.refresh_from_db()
+        self.assertEqual(booking.status, 'CONFIRMED')
+
+        # Create a booking with today's pickup but future return
+        booking2 = Booking.objects.create(
+            site=self.nyc,
+            service_type='airport_transfer',
+            customer_name='Today Guest',
+            customer_email='today@example.com',
+            customer_phone='+12125550199',
+            airport=self.jfk,
+            destination=self.midtown,
+            pickup_date=date.today(),
+            pickup_time=time(12, 0),
+            round_trip=True,
+            return_date=future_date,
+            return_time=time(12, 0),
+            vehicle_category=self.exec_suv,
+            base_price=Decimal('100.00'),
+            status='IN_PROGRESS'
+        )
+
+        # Attempt to set COMPLETED (should fail due to future return date)
+        response2 = client.get(
+            reverse('dashboard:update_booking_status', kwargs={'booking_id': booking2.id, 'new_status': 'COMPLETED'}),
+            HTTP_HOST='aeroluxeselect-nyc.com'
+        )
+        self.assertEqual(response2.status_code, 302)
+        booking2.refresh_from_db()
+        self.assertEqual(booking2.status, 'IN_PROGRESS')
+
+    def test_linked_bookings_status_synchronization(self):
+        """Test status synchronization automatically confirms or cancels linked legs."""
+        client = Client()
+        client.login(username='admin', password='password123')
+
+        outbound = Booking.objects.create(
+            site=self.nyc,
+            service_type='airport_transfer',
+            customer_name='Linked Legs',
+            customer_email='linked@example.com',
+            customer_phone='+12125550199',
+            airport=self.jfk,
+            destination=self.midtown,
+            pickup_date=date.today(),
+            pickup_time=time(12, 0),
+            vehicle_category=self.exec_suv,
+            base_price=Decimal('100.00'),
+            status='PENDING'
+        )
+        return_leg = Booking.objects.create(
+            site=self.nyc,
+            service_type='airport_transfer',
+            customer_name='Linked Legs',
+            customer_email='linked@example.com',
+            customer_phone='+12125550199',
+            airport=self.jfk,
+            destination=self.midtown,
+            pickup_date=date.today(),
+            pickup_time=time(18, 0),
+            vehicle_category=self.exec_suv,
+            base_price=Decimal('100.00'),
+            status='PENDING',
+            linked_booking=outbound
+        )
+        outbound.return_bookings.add(return_leg)
+
+        # Confirm outbound via view
+        response = client.get(
+            reverse('dashboard:update_booking_status', kwargs={'booking_id': outbound.id, 'new_status': 'CONFIRMED'}),
+            HTTP_HOST='aeroluxeselect-nyc.com'
+        )
+        self.assertEqual(response.status_code, 302)
+        
+        # Verify both are now CONFIRMED
+        outbound.refresh_from_db()
+        return_leg.refresh_from_db()
+        self.assertEqual(outbound.status, 'CONFIRMED')
+        self.assertEqual(return_leg.status, 'CONFIRMED')
+
+
+from unittest.mock import patch, MagicMock
+import json
+
+class DistanceCalculationAndStorageTestCase(TestCase):
+    def setUp(self):
+        from core.models import Site, Airport, Destination, VehicleCategory
+        self.nyc = Site.objects.create(name='New York City', slug='nyc', domain='aeroluxeselect-nyc.com')
+        self.jfk = Airport.objects.create(site=self.nyc, code='JFK', name='JFK Airport', city='New York', latitude=40.6413, longitude=-73.7781)
+        self.midtown = Destination.objects.create(airport=self.jfk, name='Midtown', address='Manhattan, NY', latitude=40.7549, longitude=-73.9840)
+        self.exec_suv = VehicleCategory.objects.create(slug='executive-suv', name='Executive SUV', is_active=True, order=1)
+
+    @patch('urllib.request.urlopen')
+    def test_google_directions_distance_calculation(self, mock_urlopen):
+        # Mock Google Directions API response
+        mock_response = MagicMock()
+        mock_response.read.return_value = json.dumps({
+            'status': 'OK',
+            'routes': [{
+                'legs': [{
+                    'distance': {'value': 28500}  # 28.5 km
+                }]
+            }]
+        }).encode('utf-8')
+        mock_urlopen.return_value.__enter__.return_value = mock_response
+
+        from core.views import _get_google_driving_distance
+        dist = _get_google_driving_distance(40.6413, -73.7781, 40.7549, -73.9840, 'mock_key')
+        self.assertEqual(dist, 28.5)
+
+    @patch('urllib.request.urlopen')
+    def test_airport_transfer_pricing_fetches_google_distance(self, mock_urlopen):
+        # Mock Google Directions API response
+        mock_response = MagicMock()
+        mock_response.read.return_value = json.dumps({
+            'status': 'OK',
+            'routes': [{
+                'legs': [{
+                    'distance': {'value': 30000}  # 30.0 km
+                }]
+            }]
+        }).encode('utf-8')
+        mock_urlopen.return_value.__enter__.return_value = mock_response
+
+        # Set google maps key
+        from core.models import SiteSettings
+        settings = SiteSettings.get_settings(self.nyc)
+        settings.google_maps_api_key = 'mock_key'
+        settings.save()
+
+        from core.views import _get_airport_transfer_price_for_category
+        booking_data = {
+            'airport_id': self.jfk.id,
+            'pickup_lat': 40.6413,
+            'pickup_lng': -73.7781,
+            'dropoff_lat': 40.7549,
+            'dropoff_lng': -73.9840,
+            'transfer_direction': 'AIRPORT_TO_DEST',
+            'distance_km': '' # trigger fallback
+        }
+
+        # Call price function
+        price = _get_airport_transfer_price_for_category(self.nyc, 'nyc', self.exec_suv, booking_data)
+        
+        # Verify distance was written to booking_data and used
+        self.assertEqual(booking_data['distance_km'], '30.0')
+
+    def test_booking_saves_distance_km_in_db(self):
+        # Create a booking with distance_km explicitly passed
+        booking = Booking.objects.create(
+            site=self.nyc,
+            service_type='airport_transfer',
+            customer_name='John Doe',
+            customer_email='john@example.com',
+            customer_phone='+12125550199',
+            airport=self.jfk,
+            destination=self.midtown,
+            pickup_date=date.today(),
+            pickup_time=time(12, 0),
+            vehicle_category=self.exec_suv,
+            base_price=Decimal('100.00'),
+            distance_km=Decimal('28.50'),
+            booking_source='DIRECT'
+        )
+        self.assertEqual(booking.distance_km, Decimal('28.50'))
+
+
 
 
 

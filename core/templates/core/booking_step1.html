@@ -82,7 +82,7 @@
                 </div>
 
                 <!-- Interactive Dark Map -->
-                <div class="relative w-full h-[280px] bg-luxe-black border border-gray-800 rounded-2xl overflow-hidden shadow-inner group mb-2">
+                <div class="relative w-full h-[450px] bg-luxe-black border border-gray-800 rounded-2xl overflow-hidden shadow-inner group mb-2">
                     <div id="booking-map" class="w-full h-full z-0"></div>
                     <div class="absolute top-4 left-4 z-[1000] bg-luxe-black/90 px-3 py-1.5 rounded-lg border border-gray-800 backdrop-blur-md">
                         <span class="text-[9px] uppercase font-bold tracking-widest text-luxe-gold flex items-center gap-1.5">
@@ -247,44 +247,44 @@
                 </div>
 
                 <!-- Date, Time, Passengers and Flight details -->
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                    <div>
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
+                    <div class="md:col-span-4">
                         <label for="pickup_date" class="block text-xs uppercase tracking-widest font-bold text-gray-400 mb-2">Pickup Date</label>
                         <div class="relative">
-                            <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-luxe-gold">
+                            <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-luxe-gold">
                                 <i class="fas fa-calendar-days text-sm"></i>
                             </span>
-                            <input type="date" name="pickup_date" id="pickup_date" required min="{{ today }}" value="{{ today }}" class="block w-full pl-11 pr-4 py-4 bg-luxe-black/80 rounded-xl border border-gray-800 focus:border-luxe-gold text-sm text-white focus:outline-none focus:ring-1 focus:ring-luxe-gold">
+                            <input type="date" name="pickup_date" id="pickup_date" required min="{{ today }}" value="{{ today }}" class="block w-full pl-9 pr-2 py-4 bg-luxe-black/80 rounded-xl border border-gray-800 focus:border-luxe-gold text-sm text-white focus:outline-none focus:ring-1 focus:ring-luxe-gold">
                         </div>
                     </div>
                     
-                    <div>
+                    <div class="md:col-span-3">
                         <label for="pickup_time" class="block text-xs uppercase tracking-widest font-bold text-gray-400 mb-2">Pickup Time</label>
                         <div class="relative">
-                            <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-luxe-gold">
+                            <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-luxe-gold">
                                 <i class="fas fa-clock text-sm"></i>
                             </span>
-                            <input type="time" name="pickup_time" id="pickup_time" required value="12:00" class="block w-full pl-11 pr-4 py-4 bg-luxe-black/80 rounded-xl border border-gray-800 focus:border-luxe-gold text-sm text-white focus:outline-none focus:ring-1 focus:ring-luxe-gold">
+                            <input type="time" name="pickup_time" id="pickup_time" required value="12:00" class="block w-full pl-9 pr-2 py-4 bg-luxe-black/80 rounded-xl border border-gray-800 focus:border-luxe-gold text-sm text-white focus:outline-none focus:ring-1 focus:ring-luxe-gold">
                         </div>
                     </div>
 
-                    <div>
+                    <div class="md:col-span-2">
                         <label for="passenger_count" class="block text-xs uppercase tracking-widest font-bold text-gray-400 mb-2">Passengers</label>
                         <div class="relative">
-                            <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-luxe-gold">
+                            <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-luxe-gold">
                                 <i class="fas fa-users text-sm"></i>
                             </span>
-                            <input type="number" name="passenger_count" id="passenger_count" required min="1" max="14" value="1" class="block w-full pl-11 pr-4 py-4 bg-luxe-black/80 rounded-xl border border-gray-800 focus:border-luxe-gold text-sm text-white focus:outline-none focus:ring-1 focus:ring-luxe-gold">
+                            <input type="number" name="passenger_count" id="passenger_count" required min="1" max="14" value="1" class="block w-full pl-9 pr-2 py-4 bg-luxe-black/80 rounded-xl border border-gray-800 focus:border-luxe-gold text-sm text-white focus:outline-none focus:ring-1 focus:ring-luxe-gold">
                         </div>
                     </div>
 
-                    <div id="div-flight">
+                    <div id="div-flight" class="md:col-span-3">
                         <label for="flight_number" class="block text-xs uppercase tracking-widest font-bold text-gray-400 mb-2">Flight Number</label>
                         <div class="relative">
-                            <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-luxe-gold">
+                            <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-luxe-gold">
                                 <i class="fas fa-plane text-sm"></i>
                             </span>
-                            <input type="text" name="flight_number" id="flight_number" placeholder="e.g. AA1234" class="block w-full pl-11 pr-4 py-4 bg-luxe-black/80 rounded-xl border border-gray-800 focus:border-luxe-gold text-sm text-white focus:outline-none focus:ring-1 focus:ring-luxe-gold uppercase">
+                            <input type="text" name="flight_number" id="flight_number" placeholder="e.g. AA1234" class="block w-full pl-9 pr-2 py-4 bg-luxe-black/80 rounded-xl border border-gray-800 focus:border-luxe-gold text-sm text-white focus:outline-none focus:ring-1 focus:ring-luxe-gold uppercase">
                         </div>
                     </div>
                 </div>
@@ -303,19 +303,19 @@
                         <div>
                             <label for="return_date" class="block text-xs uppercase tracking-widest font-bold text-gray-400 mb-2">Return Date</label>
                             <div class="relative">
-                                <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-luxe-gold">
+                                <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-luxe-gold">
                                     <i class="fas fa-calendar-days text-sm"></i>
                                 </span>
-                                <input type="date" name="return_date" id="return_date" min="{{ today }}" class="block w-full pl-11 pr-4 py-4 bg-luxe-black/80 rounded-xl border border-gray-800 focus:border-luxe-gold text-sm text-white focus:outline-none focus:ring-1 focus:ring-luxe-gold font-light">
+                                <input type="date" name="return_date" id="return_date" min="{{ today }}" class="block w-full pl-9 pr-2 py-4 bg-luxe-black/80 rounded-xl border border-gray-800 focus:border-luxe-gold text-sm text-white focus:outline-none focus:ring-1 focus:ring-luxe-gold font-light">
                             </div>
                         </div>
                         <div>
                             <label for="return_time" class="block text-xs uppercase tracking-widest font-bold text-gray-400 mb-2">Return Time</label>
                             <div class="relative">
-                                <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-luxe-gold">
+                                <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-luxe-gold">
                                     <i class="fas fa-clock text-sm"></i>
                                 </span>
-                                <input type="time" name="return_time" id="return_time" class="block w-full pl-11 pr-4 py-4 bg-luxe-black/80 rounded-xl border border-gray-800 focus:border-luxe-gold text-sm text-white focus:outline-none focus:ring-1 focus:ring-luxe-gold font-light">
+                                <input type="time" name="return_time" id="return_time" class="block w-full pl-9 pr-2 py-4 bg-luxe-black/80 rounded-xl border border-gray-800 focus:border-luxe-gold text-sm text-white focus:outline-none focus:ring-1 focus:ring-luxe-gold font-light">
                             </div>
                         </div>
                     </div>
@@ -333,6 +333,18 @@
                         <input type="text" name="meeting_point" id="meeting_point" placeholder="e.g. Terminal B exit gate 4, or hotel lobby entrance" class="block w-full pl-11 pr-4 py-4 bg-luxe-black/80 rounded-xl border border-gray-800 focus:border-luxe-gold text-sm text-white focus:outline-none focus:ring-1 focus:ring-luxe-gold font-light">
                     </div>
                     <p class="text-[10px] text-gray-500 font-light">Specify coordinates or instructions on where to meet the private chauffeur upon pickup.</p>
+                </div>
+
+                <!-- Return Meeting Point Field (Visible for round trip bookings) -->
+                <div id="div-return-meeting-point" class="py-4 border-t border-gray-800 space-y-2 hidden">
+                    <label for="return_meeting_point" class="block text-xs uppercase tracking-widest font-bold text-gray-400">Return Meeting Point (Lieu de rencontre retour)</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-luxe-gold">
+                            <i class="fas fa-handshake-simple text-sm"></i>
+                        </span>
+                        <input type="text" name="return_meeting_point" id="return_meeting_point" placeholder="e.g. Hotel lobby entrance, or Terminal B exit gate 4" class="block w-full pl-11 pr-4 py-4 bg-luxe-black/80 rounded-xl border border-gray-800 focus:border-luxe-gold text-sm text-white focus:outline-none focus:ring-1 focus:ring-luxe-gold font-light">
+                    </div>
+                    <p class="text-[10px] text-gray-500 font-light">Specify instructions on where to meet the private chauffeur for the return leg.</p>
                 </div>
 
                 <!-- Submit Button -->
@@ -537,16 +549,48 @@
         }
 
         function toggleRoundTripFields() {
+            const divReturnMeetingPoint = document.getElementById('div-return-meeting-point');
             if (roundTripCheckbox.checked && !divRoundTrip.classList.contains('hidden')) {
                 divReturnFields.classList.remove('hidden');
+                if (divReturnMeetingPoint) divReturnMeetingPoint.classList.remove('hidden');
                 returnDateInput.required = true;
                 returnTimeInput.required = true;
             } else {
                 divReturnFields.classList.add('hidden');
+                if (divReturnMeetingPoint) divReturnMeetingPoint.classList.add('hidden');
                 returnDateInput.required = false;
                 returnTimeInput.required = false;
             }
             checkValidation();
+        }
+
+        function updateDynamicMeetingPoint() {
+            const meetingPointInput = document.getElementById('meeting_point');
+            const returnMeetingPointInput = document.getElementById('return_meeting_point');
+            if (!meetingPointInput) return;
+
+            if (radTransfer.checked && airportSelect.value) {
+                const selectedOption = airportSelect.options[airportSelect.selectedIndex];
+                const airportName = selectedOption.text.trim();
+                const direction = transferDirectionInput ? transferDirectionInput.value : 'AIRPORT_TO_DEST';
+
+                if (direction === 'AIRPORT_TO_DEST') {
+                    meetingPointInput.value = airportName + " - Meet chauffeur at arrival exit / baggage claim with name signboard";
+                    if (returnMeetingPointInput) {
+                        returnMeetingPointInput.value = "";
+                    }
+                } else {
+                    meetingPointInput.value = "";
+                    if (returnMeetingPointInput) {
+                        returnMeetingPointInput.value = airportName + " - Meet chauffeur at arrival exit / baggage claim with name signboard";
+                    }
+                }
+            } else {
+                meetingPointInput.value = "";
+                if (returnMeetingPointInput) {
+                    returnMeetingPointInput.value = "";
+                }
+            }
         }
 
         radTransfer.addEventListener('change', updateServiceType);
@@ -574,6 +618,7 @@
                     calculateRoute();
                 }
             }
+            updateDynamicMeetingPoint();
         });
 
         let geocodeTimeout = null;
@@ -640,6 +685,7 @@
                     calculateRoute();
                 }
 
+                updateDynamicMeetingPoint();
                 checkValidation();
             });
         }

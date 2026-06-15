@@ -76,6 +76,11 @@
                                     (Round-Trip)
                                 {% endif %}
                             </span>
+                            {% if booking.service_type == 'hourly' %}
+                            <span class="block text-[10px] text-gray-400 font-mono mt-0.5">
+                                (${{ booking.hourly_rate|floatformat:2 }}/hr &times; {{ booking.hours_requested|floatformat:0 }} hrs)
+                            </span>
+                            {% endif %}
                         </div>
                     </div>
 
@@ -113,6 +118,18 @@
                                     Pay legs together
                                 {% endif %}
                             </span>
+                        </div>
+                        {% endif %}
+                        {% if booking.meeting_point %}
+                        <div>
+                            <span class="block text-[10px] text-gray-500 uppercase tracking-widest font-bold">Outbound Meeting Point</span>
+                            <span class="font-bold text-white">{{ booking.meeting_point }}</span>
+                        </div>
+                        {% endif %}
+                        {% if booking.round_trip and booking.return_meeting_point %}
+                        <div>
+                            <span class="block text-[10px] text-gray-500 uppercase tracking-widest font-bold">Return Meeting Point</span>
+                            <span class="font-bold text-white">{{ booking.return_meeting_point }}</span>
                         </div>
                         {% endif %}
                     </div>
