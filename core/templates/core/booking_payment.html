@@ -2,7 +2,7 @@
 {% load static %}
 {% load site_tags %}
 
-{% block title %}Book Chauffeur — Step 4: Secure Checkout | AeroLux Select{% endblock %}
+{% block title %}Book Chauffeur  -  Step 4: Secure Checkout | AeroLux Select{% endblock %}
 
 {% block content %}
 <section class="py-16 bg-luxe-black min-h-[85vh]">
@@ -152,6 +152,10 @@
                                 <span>Outbound Leg (Aller)</span>
                                 <span class="font-bold">{{ outbound_total|currency }}</span>
                             </h4>
+                            <div class="flex justify-between items-center text-[11px] text-gray-400">
+                                <span class="font-light">Pickup Date & Time</span>
+                                <span class="font-semibold text-white">{{ booking_data.pickup_date }} at {{ booking_data.pickup_time }}</span>
+                            </div>
                             <div class="flex justify-between items-center text-[11px] text-gray-300">
                                 <span class="font-light">Base Chauffeur Fare</span>
                                 <span>{{ outbound_base|currency }}</span>
@@ -182,6 +186,10 @@
                                 <span>Return Leg (Retour)</span>
                                 <span class="font-bold">{{ return_total|currency }}</span>
                             </h4>
+                            <div class="flex justify-between items-center text-[11px] text-gray-400">
+                                <span class="font-light">Return Date & Time</span>
+                                <span class="font-semibold text-luxe-gold">{{ booking_data.return_date }} at {{ booking_data.return_time }}</span>
+                            </div>
                             <div class="flex justify-between items-center text-[11px] text-gray-300">
                                 <span class="font-light">Base Chauffeur Fare</span>
                                 <span>{{ return_base|currency }}</span>

@@ -1,6 +1,6 @@
 {% extends 'dashboard/base.html' %}
 
-{% block title %}{% if price_obj %}Edit{% else %}New{% endif %} Airport Price — AeroLux Select{% endblock %}
+{% block title %}{% if price_obj %}Edit{% else %}New{% endif %} Airport Price  -  AeroLux Select{% endblock %}
 {% block dashboard_header %}{% if price_obj %}Edit Airport Price{% else %}New Airport Price{% endif %}{% endblock %}
 
 {% block content %}
@@ -23,7 +23,7 @@
                     <option value="">Select Airport</option>
                     {% for airport in airports %}
                     <option value="{{ airport.id }}" {% if price_obj and price_obj.airport_id == airport.id %}selected{% endif %}>
-                        [{{ airport.site.slug|upper }}] {{ airport.code }} — {{ airport.name }} ({{ airport.city }})
+                        [{{ airport.site.slug|upper }}] {{ airport.code }}  -  {{ airport.name }} ({{ airport.city }})
                     </option>
                     {% endfor %}
                 </select>

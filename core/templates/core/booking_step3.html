@@ -2,7 +2,7 @@
 {% load static %}
 {% load site_tags %}
 
-{% block title %}Book Chauffeur — Step 3: Passenger Details | AeroLux Select{% endblock %}
+{% block title %}Book Chauffeur  -  Step 3: Passenger Details | AeroLux Select{% endblock %}
 
 {% block content %}
 <section class="py-16 bg-luxe-black min-h-[85vh]">
@@ -196,15 +196,25 @@
                             <span class="font-bold text-white uppercase text-[10px] tracking-wider">{{ category.name }}</span>
                         </div>
                         <div class="flex justify-between">
-                            <span class="text-gray-500">Scheduled Date</span>
+                            <span class="text-gray-500">Pickup Date</span>
                             <span class="font-bold text-white">{{ booking_data.pickup_date }}</span>
                         </div>
                         <div class="flex justify-between">
-                            <span class="text-gray-500">Scheduled Time</span>
+                            <span class="text-gray-500">Pickup Time</span>
                             <span class="font-bold text-white">{{ booking_data.pickup_time }}</span>
                         </div>
-                        {% if booking_data.flight_number %}
+                        {% if booking_data.round_trip %}
+                        <div class="flex justify-between border-t border-gray-800/40 pt-2 mt-2">
+                            <span class="text-gray-500">Return Date</span>
+                            <span class="font-bold text-luxe-gold">{{ booking_data.return_date }}</span>
+                        </div>
                         <div class="flex justify-between">
+                            <span class="text-gray-500">Return Time</span>
+                            <span class="font-bold text-luxe-gold">{{ booking_data.return_time }}</span>
+                        </div>
+                        {% endif %}
+                        {% if booking_data.flight_number %}
+                        <div class="flex justify-between border-t border-gray-800/40 pt-2 mt-2">
                             <span class="text-gray-500">Flight Code</span>
                             <span class="font-bold text-white uppercase">{{ booking_data.flight_number }}</span>
                         </div>

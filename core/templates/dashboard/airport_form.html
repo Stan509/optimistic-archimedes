@@ -1,7 +1,7 @@
 {% extends 'dashboard/base.html' %}
 
 {% block title %}
-    {% if airport %}Edit {{ airport.code }}{% else %}New Airport{% endif %} — AeroLux Select
+    {% if airport %}Edit {{ airport.code }}{% else %}New Airport{% endif %}  -  AeroLux Select
 {% endblock %}
 
 {% block dashboard_header %}
@@ -18,7 +18,7 @@
         </a>
         <div>
             <h2 class="text-xl font-bold font-serif tracking-wide gold-text-gradient">
-                {% if airport %}Update "{{ airport.code }} — {{ airport.name }}"{% else %}Register New Airport Hub{% endif %}
+                {% if airport %}Update "{{ airport.code }}  -  {{ airport.name }}"{% else %}Register New Airport Hub{% endif %}
             </h2>
             <p class="text-xs text-luxury-muted mt-1">Configure flight hubs, coordinates, and brand coverage details.</p>
         </div>

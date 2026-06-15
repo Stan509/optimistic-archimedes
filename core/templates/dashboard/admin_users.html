@@ -1,6 +1,6 @@
 {% extends "dashboard/base.html" %}
 
-{% block title %}Admin Users — AeroLux Select{% endblock %}
+{% block title %}Admin Users  -  AeroLux Select{% endblock %}
 {% block dashboard_header %}Admin Users{% endblock %}
 
 {% block content %}
@@ -40,7 +40,7 @@
                             <span class="font-semibold">{{ admin.username }}</span>
                         </div>
                     </td>
-                    <td class="px-6 py-4 text-luxury-muted">{{ admin.email|default:"—" }}</td>
+                    <td class="px-6 py-4 text-luxury-muted">{{ admin.email|default:" - " }}</td>
                     <td class="px-6 py-4">
                         {% if admin.is_superuser %}
                         <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-gold-500/15 text-gold-400 border border-gold-500/25">

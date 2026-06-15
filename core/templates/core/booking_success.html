@@ -2,7 +2,7 @@
 {% load static %}
 {% load site_tags %}
 
-{% block title %}Reservation Confirmed — ALS-{{ booking.booking_reference }} | AeroLux Select{% endblock %}
+{% block title %}Reservation Confirmed  -  ALS-{{ booking.booking_reference }} | AeroLux Select{% endblock %}
 
 {% block content %}
 <section class="py-20 bg-luxe-black min-h-[90vh] flex items-center">
@@ -102,7 +102,7 @@
                         {% if booking.airport %}
                         <div>
                             <span class="block text-[10px] text-gray-500 uppercase tracking-widest font-bold">Origin Terminal</span>
-                            <span class="font-bold text-white">{{ booking.airport.code }} — {{ booking.airport.name }}</span>
+                            <span class="font-bold text-white">{{ booking.airport.code }}  -  {{ booking.airport.name }}</span>
                         </div>
                         {% endif %}
                         {% if booking.destination %}
