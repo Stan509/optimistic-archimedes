@@ -255,9 +255,10 @@ class DynamicPricingAndCommissionTestCase(TestCase):
             booking_source='DIRECT'
         )
         total = booking.calculate_total()
-        # total_price = (base_price * 2.0) + (stops * 20.0) + addons + platform_fee
-        # total_price = (80 * 2) + (2 * 20) = 160 + 40 = 200
-        self.assertEqual(total, Decimal('200.00'))
+        # With the new design, round-trip doubling on a single booking record is disabled.
+        # Doubling is handled by creating two separate bookings.
+        # Thus, a single leg fare is base_price (80) + (2 * 20) = 120
+        self.assertEqual(total, Decimal('120.00'))
 
 
 class BookingFlowViewsTestCase(TestCase):
@@ -902,29 +903,43 @@ class RoundTripSplitTestCase(TestCase):
         )
         self.assertEqual(response.status_code, 302)
 
-        # Check that we have exactly 1 booking in the database
+        # Check that we have exactly 2 bookings in the database (split round trip)
         bookings = Booking.objects.all().order_by('id')
-        self.assertEqual(bookings.count(), 1)
+        self.assertEqual(bookings.count(), 2)
 
-        booking = bookings[0]
+        booking_outbound = bookings[0]
+        booking_return = bookings[1]
 
-        # Verify unified round-trip booking details
-        self.assertEqual(booking.customer_name, 'Alice Smith')
-        self.assertEqual(booking.passenger_count, 4)
-        self.assertEqual(booking.round_trip, True)
-        self.assertEqual(booking.pickup_address, 'JFK Airport Terminal 4')
-        self.assertEqual(booking.dropoff_address, 'Times Square Hotel')
-        self.assertEqual(booking.transfer_direction, 'AIRPORT_TO_DEST')
-        self.assertEqual(booking.base_price, Decimal('100.00'))
-        self.assertEqual(booking.addons_total, Decimal('50.00'))  # 25 outbound + 25 return
-        self.assertEqual(booking.total_price, Decimal('250.00'))  # (100 * 2) + 50
-        self.assertTrue(booking.pay_separately)
-        self.assertEqual(booking.return_date.strftime('%Y-%m-%d'), '2026-06-15')
-        self.assertEqual(booking.return_time.strftime('%H:%M'), '15:00')
+        # Verify linked bookings
+        self.assertEqual(booking_outbound.linked_booking, booking_return)
+        self.assertEqual(booking_return.linked_booking, booking_outbound)
 
-        # Add-ons should be set correctly on outbound and return legs
-        self.assertIn(self.meet_greet, booking.addons.all())
-        self.assertIn(self.meet_greet, booking.addons_return.all())
+        # Verify outbound leg details
+        self.assertEqual(booking_outbound.customer_name, 'Alice Smith')
+        self.assertEqual(booking_outbound.passenger_count, 4)
+        self.assertEqual(booking_outbound.round_trip, True)
+        self.assertEqual(booking_outbound.pickup_address, 'JFK Airport Terminal 4')
+        self.assertEqual(booking_outbound.dropoff_address, 'Times Square Hotel')
+        self.assertEqual(booking_outbound.transfer_direction, 'AIRPORT_TO_DEST')
+        self.assertEqual(booking_outbound.base_price, Decimal('100.00'))
+        self.assertEqual(booking_outbound.addons_total, Decimal('25.00'))  # only outbound addon
+        self.assertEqual(booking_outbound.total_price, Decimal('125.00'))  # 100 + 25
+        self.assertTrue(booking_outbound.pay_separately)
+        self.assertEqual(booking_outbound.return_date.strftime('%Y-%m-%d'), '2026-06-15')
+        self.assertEqual(booking_outbound.return_time.strftime('%H:%M'), '15:00')
+        self.assertIn(self.meet_greet, booking_outbound.addons.all())
+
+        # Verify return leg details
+        self.assertEqual(booking_return.customer_name, 'Alice Smith')
+        self.assertEqual(booking_return.passenger_count, 4)
+        self.assertEqual(booking_return.round_trip, True)
+        self.assertEqual(booking_return.pickup_address, 'Times Square Hotel')
+        self.assertEqual(booking_return.dropoff_address, 'JFK Airport Terminal 4')
+        self.assertEqual(booking_return.transfer_direction, 'DEST_TO_AIRPORT')
+        self.assertEqual(booking_return.base_price, Decimal('100.00'))
+        self.assertEqual(booking_return.addons_total, Decimal('25.00'))  # only return addon
+        self.assertEqual(booking_return.total_price, Decimal('125.00'))  # 100 + 25
+        self.assertIn(self.meet_greet, booking_return.addons.all())
 
 
 class ManualPaymentsAndRemindersTestCase(TestCase):

@@ -158,7 +158,7 @@
                             </div>
                             {% if booking_data.service_type == 'hourly' %}
                             <div class="text-[10px] text-gray-400 pl-2 font-mono">
-                                ({{ hourly_rate|currency }}/hr &times; {{ booking_data.hours_requested }} hrs)
+                                ({{ booking_data.hours_requested }} Hours)
                             </div>
                             {% endif %}
                             {% if stops_fee > 0 %}

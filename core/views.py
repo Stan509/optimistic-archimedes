@@ -703,126 +703,275 @@ def booking_payment(request):
             except Exception:
                 db_distance = Decimal('0.00')
 
-            booking = Booking(
-                site=site,
-                service_type=booking_data.get('service_type', 'airport_transfer'),
-                transfer_direction=booking_data.get('transfer_direction', 'AIRPORT_TO_DEST'),
-                meeting_point=booking_data.get('meeting_point', ''),
-                return_meeting_point=booking_data.get('return_meeting_point', ''),
-                customer_name=booking_data['customer_name'],
-                customer_email=booking_data['customer_email'],
-                customer_phone=booking_data['customer_phone'],
-                customer_whatsapp=booking_data.get('customer_whatsapp', ''),
-                pickup_address=booking_data.get('pickup_address', ''),
-                dropoff_address=booking_data.get('destination_address', '') or booking_data.get('dropoff_address', ''),
-                pickup_date=booking_data.get('pickup_date'),
-                pickup_time=booking_data.get('pickup_time'),
-                flight_number=booking_data.get('flight_number', ''),
-                customer_notes=booking_data.get('customer_notes', ''),
-                booking_source='DIRECT',
-                round_trip=booking_data.get('round_trip', False),
-                return_date=booking_data.get('return_date') or None,
-                return_time=booking_data.get('return_time') or None,
-                number_of_stops=booking_data.get('number_of_stops', 0),
-                stop_addresses=booking_data.get('stop_addresses', ''),
-                passenger_count=booking_data.get('passenger_count', 1),
-                distance_km=db_distance,
-            )
+            payment_method = request.POST.get('payment_method', 'STRIPE')
 
-            # Set foreign keys
-            airport_id = booking_data.get('airport_id')
-            if airport_id:
-                booking.airport_id = int(airport_id)
+            # Calculate individual values
+            base_price = Decimal(str(booking_data.get('base_price', 0) or 0))
+            stops = int(booking_data.get('number_of_stops', 0) or 0)
+            stops_fee = Decimal('20.00') * stops if booking_data.get('service_type') == 'point_to_point' else Decimal('0.00')
 
-            dest_id = booking_data.get('destination_id')
-            if dest_id:
-                booking.destination_id = int(dest_id)
-
-            # Set vehicle (individual) and category
-            vehicle_id = booking_data.get('vehicle_id')
-            if vehicle_id:
-                booking.vehicle_id = int(vehicle_id)
-            cat_id = booking_data.get('vehicle_category_id')
-            if cat_id:
-                booking.vehicle_category_id = int(cat_id)
-
-            # Set hourly fields
-            from decimal import Decimal
-            if booking_data.get('service_type') == 'hourly':
-                booking.hours_requested = int(booking_data.get('hours_requested', 3))
-                from core.models import PricingRule
-                rule = PricingRule.objects.filter(
-                    site=site,
-                    vehicle_id=vehicle_id,
-                    service_type='hourly',
-                    is_active=True
-                ).first()
-                if not rule and cat_id:
-                    rule = PricingRule.objects.filter(
-                        site=site,
-                        vehicle_category_id=cat_id,
-                        service_type='hourly',
-                        is_active=True,
-                        vehicle__isnull=True,
-                    ).first()
-                booking.hourly_rate = Decimal(str(rule.base_price if rule else settings.HOURLY_RATE_RANGE['min']))
-
-            # Set pricing
-            base_price = booking_data.get('base_price', 0) or 0
-            booking.base_price = Decimal(str(base_price))
-
-            # Set pay_separately
-            booking.pay_separately = booking_data.get('pay_separately', False)
-
-            # Calculate add-ons total
             addon_ids = booking_data.get('selected_addons', [])
             addon_return_ids = booking_data.get('selected_addons_return', [])
-            addons_total = Decimal('0.00')
-            if addon_ids:
-                addons = PremiumAddOn.objects.filter(id__in=addon_ids)
-                addons_total += sum(a.price for a in addons)
-            if addon_return_ids:
-                addons_return = PremiumAddOn.objects.filter(id__in=addon_return_ids)
-                addons_total += sum(a.price for a in addons_return)
-            booking.addons_total = addons_total
 
-            booking.calculate_total()
-            booking.payment_method = request.POST.get('payment_method', 'STRIPE')
+            is_round_trip = booking_data.get('round_trip', False)
 
-            # Save to get PK
-            booking.save()
+            if is_round_trip:
+                # 1. Create Outbound Booking (Aller)
+                booking_outbound = Booking(
+                    site=site,
+                    service_type=booking_data.get('service_type', 'airport_transfer'),
+                    transfer_direction=booking_data.get('transfer_direction', 'AIRPORT_TO_DEST'),
+                    meeting_point=booking_data.get('meeting_point', ''),
+                    return_meeting_point=booking_data.get('return_meeting_point', ''),
+                    customer_name=booking_data['customer_name'],
+                    customer_email=booking_data['customer_email'],
+                    customer_phone=booking_data['customer_phone'],
+                    customer_whatsapp=booking_data.get('customer_whatsapp', ''),
+                    pickup_address=booking_data.get('pickup_address', ''),
+                    dropoff_address=booking_data.get('destination_address', '') or booking_data.get('dropoff_address', ''),
+                    pickup_date=booking_data.get('pickup_date'),
+                    pickup_time=booking_data.get('pickup_time'),
+                    flight_number=booking_data.get('flight_number', ''),
+                    customer_notes=booking_data.get('customer_notes', ''),
+                    booking_source='DIRECT',
+                    round_trip=True,
+                    return_date=booking_data.get('return_date') or None,
+                    return_time=booking_data.get('return_time') or None,
+                    number_of_stops=stops,
+                    stop_addresses=booking_data.get('stop_addresses', ''),
+                    passenger_count=booking_data.get('passenger_count', 1),
+                    distance_km=db_distance,
+                    base_price=base_price,
+                    pay_separately=booking_data.get('pay_separately', False),
+                    payment_method=payment_method,
+                )
+                
+                airport_id = booking_data.get('airport_id')
+                if airport_id:
+                    booking_outbound.airport_id = int(airport_id)
+                dest_id = booking_data.get('destination_id')
+                if dest_id:
+                    booking_outbound.destination_id = int(dest_id)
+                cat_id = booking_data.get('vehicle_category_id')
+                if cat_id:
+                    booking_outbound.vehicle_category_id = int(cat_id)
+                vehicle_id = booking_data.get('vehicle_id')
+                if vehicle_id:
+                    booking_outbound.vehicle_id = int(vehicle_id)
 
-            # Add selected add-ons
-            if addon_ids:
-                booking.addons.set(addon_ids)
-            if addon_return_ids:
-                booking.addons_return.set(addon_return_ids)
+                # Set outbound addons total (outbound leg only has addon_ids)
+                outbound_addons_total = Decimal('0.00')
+                if addon_ids:
+                    addons = PremiumAddOn.objects.filter(id__in=addon_ids)
+                    outbound_addons_total = sum(a.price for a in addons)
+                booking_outbound.addons_total = outbound_addons_total
+                
+                # Outbound total is calculated
+                booking_outbound.calculate_total()
+                booking_outbound.save()
+                
+                if addon_ids:
+                    booking_outbound.addons.set(addon_ids)
+                    
+                # 2. Create Return Booking (Retour)
+                # Reverse addresses for return leg
+                return_pickup_address = booking_outbound.dropoff_address
+                return_dropoff_address = booking_outbound.pickup_address
+                
+                # Invert direction if airport transfer
+                outbound_dir = booking_data.get('transfer_direction', 'AIRPORT_TO_DEST')
+                return_dir = 'DEST_TO_AIRPORT' if outbound_dir == 'AIRPORT_TO_DEST' else 'AIRPORT_TO_DEST'
 
-            # Force reload from database to clear relation cache
-            booking = Booking.objects.get(pk=booking.pk)
-            # Recalculate total after addons are set
-            booking.calculate_total()
-            
-            if booking.payment_method == 'STRIPE':
-                booking.amount_paid = booking.total_price
-                booking.payment_status = 'PAID'
+                booking_return = Booking(
+                    site=site,
+                    service_type=booking_data.get('service_type', 'airport_transfer'),
+                    transfer_direction=return_dir,
+                    meeting_point=booking_data.get('return_meeting_point', ''),
+                    return_meeting_point=booking_data.get('meeting_point', ''),
+                    customer_name=booking_data['customer_name'],
+                    customer_email=booking_data['customer_email'],
+                    customer_phone=booking_data['customer_phone'],
+                    customer_whatsapp=booking_data.get('customer_whatsapp', ''),
+                    pickup_address=return_pickup_address,
+                    dropoff_address=return_dropoff_address,
+                    pickup_date=booking_data.get('return_date'),
+                    pickup_time=booking_data.get('return_time'),
+                    flight_number='',
+                    customer_notes=booking_data.get('customer_notes', ''),
+                    booking_source='DIRECT',
+                    round_trip=True,
+                    return_date=booking_data.get('pickup_date') or None,
+                    return_time=booking_data.get('pickup_time') or None,
+                    number_of_stops=0,
+                    passenger_count=booking_data.get('passenger_count', 1),
+                    distance_km=db_distance,
+                    base_price=base_price,
+                    pay_separately=booking_data.get('pay_separately', False),
+                    payment_method=payment_method,
+                    linked_booking=booking_outbound,
+                )
+
+                if airport_id:
+                    booking_return.airport_id = int(airport_id)
+                if dest_id:
+                    booking_return.destination_id = int(dest_id)
+                if cat_id:
+                    booking_return.vehicle_category_id = int(cat_id)
+                if vehicle_id:
+                    booking_return.vehicle_id = int(vehicle_id)
+
+                # Set return addons total (return leg only has addon_return_ids)
+                return_addons_total = Decimal('0.00')
+                if addon_return_ids:
+                    addons_return = PremiumAddOn.objects.filter(id__in=addon_return_ids)
+                    return_addons_total = sum(a.price for a in addons_return)
+                booking_return.addons_total = return_addons_total
+                
+                # Return total is calculated
+                booking_return.calculate_total()
+                booking_return.save()
+                
+                if addon_return_ids:
+                    booking_return.addons.set(addon_return_ids)
+                
+                # Link outbound to return
+                booking_outbound.linked_booking = booking_return
+                booking_outbound.save(update_fields=['linked_booking'])
+                
+                # Force reload to get updated fields and calculate totals with addons
+                booking_outbound = Booking.objects.get(pk=booking_outbound.pk)
+                booking_outbound.calculate_total()
+                booking_outbound.save(update_fields=['addons_total', 'total_price'])
+                
+                booking_return = Booking.objects.get(pk=booking_return.pk)
+                booking_return.calculate_total()
+                booking_return.save(update_fields=['addons_total', 'total_price'])
+                
+                # Set payment status
+                if payment_method == 'STRIPE':
+                    booking_outbound.amount_paid = booking_outbound.total_price
+                    booking_outbound.payment_status = 'PAID'
+                    booking_outbound.save(update_fields=['amount_paid', 'payment_status'])
+                    
+                    booking_return.amount_paid = booking_return.total_price
+                    booking_return.payment_status = 'PAID'
+                    booking_return.save(update_fields=['amount_paid', 'payment_status'])
+                else:
+                    booking_outbound.amount_paid = Decimal('0.00')
+                    booking_outbound.payment_status = 'PENDING'
+                    booking_outbound.save(update_fields=['amount_paid', 'payment_status'])
+                    
+                    booking_return.amount_paid = Decimal('0.00')
+                    booking_return.payment_status = 'PENDING'
+                    booking_return.save(update_fields=['amount_paid', 'payment_status'])
+
+                # --- Trigger Automated Email Confirmations for BOTH ---
+                try:
+                    from core.emails import send_booking_emails
+                    send_booking_emails(booking_outbound)
+                    send_booking_emails(booking_return)
+                except Exception as email_err:
+                    print(f"Error triggering emails: {str(email_err)}")
+
+                # Clear session
+                if 'booking' in request.session:
+                    del request.session['booking']
+
+                return redirect(f'/{slug}/book/success/{booking_outbound.booking_reference}/')
+
             else:
-                booking.amount_paid = Decimal('0.00')
-                booking.payment_status = 'PENDING'
-            booking.save()
+                # 3. Create Single Booking (One-way)
+                booking = Booking(
+                    site=site,
+                    service_type=booking_data.get('service_type', 'airport_transfer'),
+                    transfer_direction=booking_data.get('transfer_direction', 'AIRPORT_TO_DEST'),
+                    meeting_point=booking_data.get('meeting_point', ''),
+                    customer_name=booking_data['customer_name'],
+                    customer_email=booking_data['customer_email'],
+                    customer_phone=booking_data['customer_phone'],
+                    customer_whatsapp=booking_data.get('customer_whatsapp', ''),
+                    pickup_address=booking_data.get('pickup_address', ''),
+                    dropoff_address=booking_data.get('destination_address', '') or booking_data.get('dropoff_address', ''),
+                    pickup_date=booking_data.get('pickup_date'),
+                    pickup_time=booking_data.get('pickup_time'),
+                    flight_number=booking_data.get('flight_number', ''),
+                    customer_notes=booking_data.get('customer_notes', ''),
+                    booking_source='DIRECT',
+                    round_trip=False,
+                    number_of_stops=stops,
+                    stop_addresses=booking_data.get('stop_addresses', ''),
+                    passenger_count=booking_data.get('passenger_count', 1),
+                    distance_km=db_distance,
+                    base_price=base_price,
+                    payment_method=payment_method,
+                )
 
-            # --- Trigger Automated Email Confirmations ---
-            try:
-                from core.emails import send_booking_emails
-                send_booking_emails(booking)
-            except Exception as email_err:
-                print(f"Error triggering emails: {str(email_err)}")
+                airport_id = booking_data.get('airport_id')
+                if airport_id:
+                    booking.airport_id = int(airport_id)
+                dest_id = booking_data.get('destination_id')
+                if dest_id:
+                    booking.destination_id = int(dest_id)
+                cat_id = booking_data.get('vehicle_category_id')
+                if cat_id:
+                    booking.vehicle_category_id = int(cat_id)
+                vehicle_id = booking_data.get('vehicle_id')
+                if vehicle_id:
+                    booking.vehicle_id = int(vehicle_id)
 
-            # Clear booking session
-            if 'booking' in request.session:
-                del request.session['booking']
+                if booking_data.get('service_type') == 'hourly':
+                    booking.hours_requested = int(booking_data.get('hours_requested', 3))
+                    from core.models import PricingRule
+                    rule = PricingRule.objects.filter(
+                        site=site,
+                        vehicle_id=vehicle_id,
+                        service_type='hourly',
+                        is_active=True
+                    ).first()
+                    if not rule and cat_id:
+                        rule = PricingRule.objects.filter(
+                            site=site,
+                            vehicle_category_id=cat_id,
+                            service_type='hourly',
+                            is_active=True,
+                            vehicle__isnull=True,
+                        ).first()
+                    booking.hourly_rate = Decimal(str(rule.base_price if rule else settings.HOURLY_RATE_RANGE['min']))
 
-            return redirect(f'/{slug}/book/success/{booking.booking_reference}/')
+                # Addons total
+                addons_total = Decimal('0.00')
+                if addon_ids:
+                    addons = PremiumAddOn.objects.filter(id__in=addon_ids)
+                    addons_total = sum(a.price for a in addons)
+                booking.addons_total = addons_total
+
+                booking.calculate_total()
+                booking.save()
+
+                if addon_ids:
+                    booking.addons.set(addon_ids)
+
+                booking = Booking.objects.get(pk=booking.pk)
+                booking.calculate_total()
+
+                if payment_method == 'STRIPE':
+                    booking.amount_paid = booking.total_price
+                    booking.payment_status = 'PAID'
+                else:
+                    booking.amount_paid = Decimal('0.00')
+                    booking.payment_status = 'PENDING'
+                booking.save()
+
+                try:
+                    from core.emails import send_booking_emails
+                    send_booking_emails(booking)
+                except Exception as email_err:
+                    print(f"Error triggering emails: {str(email_err)}")
+
+                if 'booking' in request.session:
+                    del request.session['booking']
+
+                return redirect(f'/{slug}/book/success/{booking.booking_reference}/')
 
         # GET — Show payment form
         site_settings = SiteSettings.get_settings(site)
@@ -906,21 +1055,33 @@ def booking_success(request, reference):
             stops_fee = Decimal('20.00') * Decimal(booking.number_of_stops)
 
         outbound_addons_total = sum(a.price for a in booking.addons.all())
-        return_addons_total = sum(a.price for a in booking.addons_return.all())
-
         outbound_total = base_price + stops_fee + outbound_addons_total
-        return_total = base_price + return_addons_total if booking.round_trip else Decimal('0.00')
-        balance = booking.total_price - booking.amount_paid
+        
+        # Check for linked return booking
+        return_booking = booking.linked_booking
+        return_total = Decimal('0.00')
+        return_addons_total = Decimal('0.00')
+        
+        if return_booking:
+            return_addons_total = sum(a.price for a in return_booking.addons.all())
+            return_total = return_booking.base_price + return_addons_total
+            total_price = outbound_total + return_total
+            balance = grand_total_balance = (outbound_total + return_total) - (booking.amount_paid + return_booking.amount_paid)
+        else:
+            total_price = booking.total_price
+            balance = booking.total_price - booking.amount_paid
         
         context = {
             'booking': booking,
+            'return_booking': return_booking,
             'outbound_base': base_price,
-            'return_base': base_price if booking.round_trip else Decimal('0.00'),
+            'return_base': return_booking.base_price if return_booking else Decimal('0.00'),
             'stops_fee': stops_fee,
             'outbound_addons_total': outbound_addons_total,
             'return_addons_total': return_addons_total,
             'outbound_total': outbound_total,
             'return_total': return_total,
+            'total_price': total_price,
             'balance': balance,
             'site_slug': slug,
             'language': _get_language(request),

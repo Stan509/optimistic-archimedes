@@ -231,7 +231,7 @@
 
                         {% if booking_data.service_type == 'hourly' %}
                         <div class="text-[10px] text-gray-400 pl-2 font-mono">
-                            ({{ hourly_rate|currency }}/hr &times; {{ hours_requested|floatformat:0 }} hrs)
+                            ({{ hours_requested|floatformat:0 }} Hours)
                         </div>
                         {% endif %}
 

@@ -54,11 +54,11 @@ class ServiceType(models.TextChoices):
 
 
 class BookingStatus(models.TextChoices):
-    PENDING = 'pending', 'Pending'
-    CONFIRMED = 'confirmed', 'Confirmed'
-    IN_PROGRESS = 'in_progress', 'In Progress'
-    COMPLETED = 'completed', 'Completed'
-    CANCELLED = 'cancelled', 'Cancelled'
+    PENDING = 'PENDING', 'Pending'
+    CONFIRMED = 'CONFIRMED', 'Confirmed'
+    IN_PROGRESS = 'IN_PROGRESS', 'In Progress'
+    COMPLETED = 'COMPLETED', 'Completed'
+    CANCELLED = 'CANCELLED', 'Cancelled'
 
 
 class PaymentStatus(models.TextChoices):
@@ -1058,6 +1058,19 @@ class Booking(models.Model):
             self.booking_reference = self.generate_reference()
         super().save(*args, **kwargs)
 
+        # Enforce status synchronization for linked booking legs (recursion-safe)
+        if not getattr(self, '_saving_sync', False):
+            if self.linked_booking and self.linked_booking.status != self.status:
+                linked = self.linked_booking
+                linked._saving_sync = True
+                linked.status = self.status
+                linked.save()
+            for return_b in self.return_bookings.all():
+                if return_b.status != self.status:
+                    return_b._saving_sync = True
+                    return_b.status = self.status
+                    return_b.save()
+
     # ── Business logic ──
 
     @staticmethod
@@ -1111,9 +1124,9 @@ class Booking(models.Model):
         # --- Total ---
         fare = self.base_price
         
-        # Round trip doubles base fare
-        if (self.service_type in [ServiceType.AIRPORT_TRANSFER, ServiceType.POINT_TO_POINT, ServiceType.LUXURY_RENTAL]) and self.round_trip:
-            fare = fare * Decimal('2.00')
+        # Round trip doubling is disabled since round trips now create two separate bookings
+        # if (self.service_type in [ServiceType.AIRPORT_TRANSFER, ServiceType.POINT_TO_POINT, ServiceType.LUXURY_RENTAL]) and self.round_trip:
+        #     fare = fare * Decimal('2.00')
             
         # Point to Point stops fee
         stops_fee = Decimal('0.00')
