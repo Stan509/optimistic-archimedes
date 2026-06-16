@@ -206,8 +206,11 @@ def dashboard_bookings(request):
     if service_filter:
         bookings = bookings.filter(service_type=service_filter)
 
+    # Sort by pickup date (closest to furthest), then by pickup time
+    bookings = bookings.order_by('pickup_date', 'pickup_time')
+
     context = {
-        'bookings': bookings.order_by('-created_at'),
+        'bookings': bookings,
         'query': query,
         'status_filter': status_filter,
         'site_filter': site_filter,
@@ -296,8 +299,9 @@ def update_booking_status(request, booking_id, new_status):
 
         booking.status = new_status
         booking.save()
-        
-        # Enforce status synchronization for linked booking legs
+
+        # Enforce status synchronization for linked booking legs only for CONFIRMED and CANCELLED
+        # This allows completing one leg while keeping the other leg pending
         if new_status in ['CONFIRMED', 'CANCELLED']:
             if booking.linked_booking:
                 try:

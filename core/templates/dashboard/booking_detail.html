@@ -5,7 +5,7 @@
 
 {% block content %}
 {% if booking.is_return_alert_active %}
-<div class="mb-6 bg-rose-500/10 border border-rose-500/30 p-5 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-lg shadow-rose-500/5 animate-pulse">
+<div class="mb-6 bg-rose-500/10 border border-rose-500/30 p-5 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-lg shadow-rose-500/5">
     <div class="flex items-start space-x-3.5">
         <div class="w-12 h-12 shrink-0 rounded-xl bg-rose-500/20 flex items-center justify-center text-rose-400">
             <i class="fa-solid fa-triangle-exclamation text-xl"></i>
@@ -116,9 +116,15 @@
 
         <!-- Section 2: Trip & Route Details -->
         <div class="bg-luxury-card border border-luxury-border rounded-2xl p-6 space-y-4">
-            <div class="flex items-center space-x-2.5 border-b border-luxury-border pb-3">
-                <i class="fa-solid fa-map-location-dot text-gold-400 text-lg"></i>
-                <h3 class="font-serif font-semibold text-base">Transfer Route & Schedule</h3>
+            <div class="flex items-center justify-between border-b border-luxury-border pb-3">
+                <div class="flex items-center space-x-2.5">
+                    <i class="fa-solid fa-map-location-dot text-gold-400 text-lg"></i>
+                    <h3 class="font-serif font-semibold text-base">Transfer Route & Schedule</h3>
+                </div>
+                <button onclick="copyBookingDetails()" class="flex items-center space-x-2 px-3 py-2 rounded-lg bg-gold-500/10 border border-gold-500/25 text-gold-400 text-xs font-semibold hover:bg-gold-500/20 transition-all">
+                    <i class="fa-solid fa-copy"></i>
+                    <span>Copy Details</span>
+                </button>
             </div>
             
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
@@ -547,5 +553,38 @@
     </div>
 
 </div>
-{% block extra_js %}{% endblock %}
+{% block extra_js %}
+<script>
+function copyBookingDetails() {
+    const booking = {
+        type: "{{ booking.get_service_type_display }}{% if booking.round_trip %} (Round-Trip){% endif %}",
+        customer: "{{ booking.customer_name }}",
+        pickup: "{{ booking.pickup_address|default:booking.airport.name }}",
+        dropoff: "{{ booking.dropoff_address|default:booking.destination.name }}",
+        flightNumber: "{{ booking.flight_number|default:'N/A' }}",
+        pickupDate: "{{ booking.pickup_date }} at {{ booking.pickup_time }}",
+        pickupLocation: "{{ booking.meeting_point|default:'Standard pickup' }}",
+        vehicle: "{{ booking.vehicle_category.name }}",
+        addons: "{% for addon in booking.addons.all %}{{ addon.name }}{% if not forloop.last %}, {% endif %}{% empty %}None{% endfor %}"
+    };
+
+    const details = `Booking Type: ${booking.type}
+Customer: ${booking.customer}
+Pickup: ${booking.pickup}
+Dropoff: ${booking.dropoff}
+Flight Number: ${booking.flightNumber}
+Pickup Date: ${booking.pickupDate}
+Pickup Location: ${booking.pickupLocation}
+Vehicle: ${booking.vehicle}
+VIP Add-ons: ${booking.addons}`;
+
+    navigator.clipboard.writeText(details).then(() => {
+        alert('Booking details copied to clipboard!');
+    }).catch(err => {
+        console.error('Failed to copy: ', err);
+        alert('Failed to copy booking details');
+    });
+}
+</script>
+{% endblock %}
 {% endblock %}
