@@ -559,12 +559,12 @@ function copyBookingDetails() {
     const booking = {
         type: "{{ booking.get_service_type_display }}{% if booking.round_trip %} (Round-Trip){% endif %}",
         customer: "{{ booking.customer_name }}",
-        pickup: "{{ booking.pickup_address|default:booking.airport.name }}",
-        dropoff: "{{ booking.dropoff_address|default:booking.destination.name }}",
+        pickup: "{{ booking.pickup_address|default:booking.airport.name|default:'N/A' }}",
+        dropoff: "{{ booking.dropoff_address|default:booking.destination.name|default:'N/A' }}",
         flightNumber: "{{ booking.flight_number|default:'N/A' }}",
         pickupDate: "{{ booking.pickup_date }} at {{ booking.pickup_time }}",
         pickupLocation: "{{ booking.meeting_point|default:'Standard pickup' }}",
-        vehicle: "{{ booking.vehicle_category.name }}",
+        vehicle: "{{ booking.vehicle_category.name|default:'N/A' }}",
         addons: "{% for addon in booking.addons.all %}{{ addon.name }}{% if not forloop.last %}, {% endif %}{% empty %}None{% endfor %}"
     };
 

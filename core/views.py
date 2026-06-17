@@ -494,16 +494,20 @@ def booking_step1(request):
         return redirect(f'/{slug}/book/vehicle/')
 
     try:
-        from core.models import Airport
+        from core.models import Airport, SiteSettings
         airports = Airport.objects.filter(site=site, is_active=True) if site else Airport.objects.none()
+        site_settings = SiteSettings.get_settings(site) if site else None
     except Exception:
         airports = []
+        site_settings = None
 
     context = {
         'airports': airports,
         'site_slug': slug,
         'today': date.today().strftime('%Y-%m-%d'),
         'language': _get_language(request),
+        'site_settings': site_settings,
+        'booking_data': request.session.get('booking', {}),
     }
     return render(request, 'core/booking_step1.html', context)
 
