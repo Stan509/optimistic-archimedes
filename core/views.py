@@ -1270,6 +1270,203 @@ from django.http import HttpResponse
 from django.views.decorators.http import require_GET
 
 @require_GET
+def api_google_maps_key(request):
+    """Return the Google Maps API key for the current site."""
+    from core.models import SiteSettings
+    site, slug = _get_site_or_404(request)
+    
+    try:
+        site_settings = SiteSettings.get_settings(site)
+        api_key = site_settings.google_maps_api_key if site_settings else ''
+    except Exception:
+        api_key = ''
+    
+    return JsonResponse({'api_key': api_key})
+
+
+@require_GET
+def api_address_autocomplete(request):
+    """
+    Autocomplete addresses using Google Places API.
+    Query params: input (search text), location (optional: lat,lng), radius (optional: meters)
+    """
+    from core.models import SiteSettings
+    site, slug = _get_site_or_404(request)
+    
+    try:
+        site_settings = SiteSettings.get_settings(site)
+        api_key = site_settings.google_maps_api_key if site_settings else ''
+    except Exception:
+        api_key = ''
+    
+    if not api_key:
+        return JsonResponse({'predictions': [], 'error': 'Google Maps API key not configured'}, status=400)
+    
+    input_text = request.GET.get('input', '').strip()
+    if not input_text or len(input_text) < 2:
+        return JsonResponse({'predictions': []})
+    
+    try:
+        import urllib.request
+        import urllib.parse
+        import json
+        
+        # Build Google Places Autocomplete API URL
+        url = f"https://maps.googleapis.com/maps/api/place/autocomplete/json"
+        params = {
+            'input': input_text,
+            'key': api_key,
+            'language': request.GET.get('language', 'en'),
+        }
+        
+        # Add location bias if provided
+        location = request.GET.get('location', '')  # format: "lat,lng"
+        if location:
+            params['location'] = location
+        
+        radius = request.GET.get('radius', '')
+        if radius:
+            params['radius'] = radius
+        
+        query_string = urllib.parse.urlencode(params)
+        full_url = f"{url}?{query_string}"
+        
+        req = urllib.request.Request(full_url, headers={'User-Agent': 'Mozilla/5.0'})
+        with urllib.request.urlopen(req, timeout=5) as response:
+            data = json.loads(response.read().decode())
+        
+        predictions = []
+        if data.get('status') == 'OK':
+            for prediction in data.get('predictions', []):
+                predictions.append({
+                    'place_id': prediction.get('place_id'),
+                    'description': prediction.get('description'),
+                    'main_text': prediction.get('structured_formatting', {}).get('main_text'),
+                    'secondary_text': prediction.get('structured_formatting', {}).get('secondary_text'),
+                })
+        
+        return JsonResponse({'predictions': predictions})
+    
+    except Exception as e:
+        return JsonResponse({'predictions': [], 'error': str(e)}, status=500)
+
+
+@require_GET
+def api_place_details(request):
+    """
+    Get place details (coordinates, address) using Google Places API.
+    Query params: place_id (required)
+    """
+    from core.models import SiteSettings
+    site, slug = _get_site_or_404(request)
+    
+    try:
+        site_settings = SiteSettings.get_settings(site)
+        api_key = site_settings.google_maps_api_key if site_settings else ''
+    except Exception:
+        api_key = ''
+    
+    if not api_key:
+        return JsonResponse({'error': 'Google Maps API key not configured'}, status=400)
+    
+    place_id = request.GET.get('place_id', '').strip()
+    if not place_id:
+        return JsonResponse({'error': 'place_id is required'}, status=400)
+    
+    try:
+        import urllib.request
+        import urllib.parse
+        import json
+        
+        url = f"https://maps.googleapis.com/maps/api/place/details/json"
+        params = {
+            'place_id': place_id,
+            'key': api_key,
+            'fields': 'geometry,formatted_address,address_components',
+        }
+        
+        query_string = urllib.parse.urlencode(params)
+        full_url = f"{url}?{query_string}"
+        
+        req = urllib.request.Request(full_url, headers={'User-Agent': 'Mozilla/5.0'})
+        with urllib.request.urlopen(req, timeout=5) as response:
+            data = json.loads(response.read().decode())
+        
+        if data.get('status') == 'OK':
+            result = data.get('result', {})
+            geometry = result.get('geometry', {})
+            location = geometry.get('location', {})
+            
+            return JsonResponse({
+                'address': result.get('formatted_address'),
+                'latitude': location.get('lat'),
+                'longitude': location.get('lng'),
+                'place_id': place_id,
+            })
+        else:
+            return JsonResponse({'error': data.get('status', 'UNKNOWN_ERROR')}, status=400)
+    
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+@require_GET
+def api_calculate_distance(request):
+    """
+    Calculate distance between two addresses using Google Directions API.
+    Query params: origin_lat, origin_lng, destination_lat, destination_lng
+    Returns distance in kilometers.
+    """
+    from core.models import SiteSettings
+    site, slug = _get_site_or_404(request)
+    
+    try:
+        origin_lat = float(request.GET.get('origin_lat', 0))
+        origin_lng = float(request.GET.get('origin_lng', 0))
+        dest_lat = float(request.GET.get('destination_lat', 0))
+        dest_lng = float(request.GET.get('destination_lng', 0))
+    except (ValueError, TypeError):
+        return JsonResponse({'error': 'Invalid coordinates'}, status=400)
+    
+    if not all([origin_lat, origin_lng, dest_lat, dest_lng]):
+        return JsonResponse({'error': 'All coordinates are required'}, status=400)
+    
+    try:
+        site_settings = SiteSettings.get_settings(site)
+        api_key = site_settings.google_maps_api_key if site_settings else ''
+    except Exception:
+        api_key = ''
+    
+    if not api_key:
+        # Fallback to haversine distance if no API key
+        miles = _haversine_distance(origin_lat, origin_lng, dest_lat, dest_lng)
+        distance_km = miles * 1.60934
+        return JsonResponse({
+            'distance_km': round(distance_km, 2),
+            'distance_meters': int(distance_km * 1000),
+            'method': 'haversine',
+        })
+    
+    # Try Google Directions API first
+    google_dist = _get_google_driving_distance(origin_lat, origin_lng, dest_lat, dest_lng, api_key)
+    if google_dist is not None:
+        return JsonResponse({
+            'distance_km': round(google_dist, 2),
+            'distance_meters': int(google_dist * 1000),
+            'method': 'google_directions',
+        })
+    
+    # Fallback to haversine
+    miles = _haversine_distance(origin_lat, origin_lng, dest_lat, dest_lng)
+    distance_km = miles * 1.60934
+    return JsonResponse({
+        'distance_km': round(distance_km, 2),
+        'distance_meters': int(distance_km * 1000),
+        'method': 'haversine',
+    })
+
+
+@require_GET
 def service_worker(request):
     """Serve the PWA Service Worker."""
     sw_code = """
