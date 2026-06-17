@@ -44,6 +44,9 @@ urlpatterns = [
 
     # Language switch
     path('set-language/<str:lang>/', views.set_language, name='set_language'),
+    
+    # Site switch (region switching)
+    path('set-site/<str:slug>/', views.set_site, name='set_site'),
 
     # PWA service worker
     path('sw.js', views.service_worker, name='service_worker'),

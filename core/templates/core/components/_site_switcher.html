@@ -16,7 +16,7 @@
         
         <div class="space-y-3">
             {% for site in available_sites %}
-            <a href="{% if site.slug == 'nyc' %}/nyc/{% else %}/dr/{% endif %}" class="flex items-center justify-between p-3 rounded-xl {% if current_site.slug == site.slug %}bg-luxe-gold/10 border border-luxe-gold/50 text-luxe-gold{% else %}bg-luxe-black/40 hover:bg-luxe-grey/60 border border-transparent text-gray-300 hover:text-white{% endif %} transition-all duration-300 group">
+            <a href="{% url 'core:set_site' slug=site.slug %}" class="flex items-center justify-between p-3 rounded-xl {% if current_site.slug == site.slug %}bg-luxe-gold/10 border border-luxe-gold/50 text-luxe-gold{% else %}bg-luxe-black/40 hover:bg-luxe-grey/60 border border-transparent text-gray-300 hover:text-white{% endif %} transition-all duration-300 group">
                 <div class="flex items-center space-x-3">
                     <div class="w-8 h-8 rounded-lg bg-luxe-grey flex items-center justify-center border border-luxe-gold/20">
                         {% if site.slug == 'nyc' %}

@@ -1266,6 +1266,40 @@ def set_language(request, lang):
     return redirect(referer)
 
 
+def set_site(request, slug):
+    """
+    Switch to a different site and persist selection in session.
+    This allows users to switch between NYC and DR sites.
+    """
+    from core.models import Site
+    
+    # Verify the site exists and is active
+    try:
+        site = Site.objects.get(slug=slug, is_active=True)
+    except Site.DoesNotExist:
+        return redirect('/')
+    
+    # Store site selection in session
+    request.session['current_site_slug'] = slug
+    
+    # Clear middleware cache to force site re-detection
+    from core.middleware import SiteMiddleware
+    SiteMiddleware.clear_cache()
+    
+    # Redirect back to referrer or home
+    referer = request.META.get('HTTP_REFERER', f'/')
+    if referer.startswith('http'):
+        # Extract path from full URL
+        from urllib.parse import urlparse
+        referer = urlparse(referer).path
+    
+    # Ensure the referer starts with the site slug
+    if not referer.startswith(f'/{slug}/'):
+        referer = f'/{slug}/'
+    
+    return redirect(referer)
+
+
 from django.http import HttpResponse
 from django.views.decorators.http import require_GET
 
