@@ -161,22 +161,50 @@
                 {% if booking.service_type == 'AIRPORT_TRANSFER' %}
                 <div>
                     <span class="block text-xs text-luxury-muted uppercase tracking-wider">Origin Airport</span>
-                    <span class="block font-semibold text-white mt-1">{{ booking.airport.name }} ({{ booking.airport.code }})</span>
+                    <span class="block font-semibold text-white mt-1">
+                        {% if booking.airport %}
+                            {{ booking.airport.name }} ({{ booking.airport.code }})
+                        {% else %}
+                            N/A
+                        {% endif %}
+                    </span>
                 </div>
                 <div>
                     <span class="block text-xs text-luxury-muted uppercase tracking-wider">Destination</span>
-                    <span class="block font-semibold text-white mt-1">{{ booking.destination.name|default:booking.dropoff_address }}</span>
+                    <span class="block font-semibold text-white mt-1">
+                        {% if booking.destination %}
+                            {{ booking.destination.name }}
+                        {% else %}
+                            {{ booking.dropoff_address|default:'N/A' }}
+                        {% endif %}
+                    </span>
                 </div>
                 <div class="sm:col-span-2">
                     <span class="block text-xs text-luxury-muted uppercase tracking-wider">Full Route Addresses</span>
                     <div class="mt-2 space-y-2 text-xs">
                         <div class="flex items-start space-x-2 bg-luxury-black/40 border border-luxury-border p-3 rounded-lg">
                             <span class="text-gold-400 font-bold w-12 shrink-0">Pickup:</span>
-                            <span class="text-white">{{ booking.pickup_address|default:booking.airport.name }}</span>
+                            <span class="text-white">
+                                {% if booking.pickup_address %}
+                                    {{ booking.pickup_address }}
+                                {% elif booking.airport %}
+                                    {{ booking.airport.name }}
+                                {% else %}
+                                    N/A
+                                {% endif %}
+                            </span>
                         </div>
                         <div class="flex items-start space-x-2 bg-luxury-black/40 border border-luxury-border p-3 rounded-lg">
                             <span class="text-gold-400 font-bold w-12 shrink-0">Dropoff:</span>
-                            <span class="text-white">{{ booking.dropoff_address|default:booking.destination.name }}</span>
+                            <span class="text-white">
+                                {% if booking.dropoff_address %}
+                                    {{ booking.dropoff_address }}
+                                {% elif booking.destination %}
+                                    {{ booking.destination.name }}
+                                {% else %}
+                                    N/A
+                                {% endif %}
+                            </span>
                         </div>
                     </div>
                 </div>
@@ -264,8 +292,20 @@
             <div class="grid grid-cols-1 gap-6">
                 <div>
                     <span class="block text-xs text-luxury-muted uppercase tracking-wider">Requested Vehicle Category</span>
-                    <span class="block font-semibold text-white mt-1 text-base">{{ booking.vehicle_category.name }}</span>
-                    <span class="block text-xs text-luxury-muted mt-0.5">Capacity: {{ booking.vehicle_category.passengers_capacity }} Pax / {{ booking.vehicle_category.luggage_capacity }} Bags</span>
+                    <span class="block font-semibold text-white mt-1 text-base">
+                        {% if booking.vehicle_category %}
+                            {{ booking.vehicle_category.name }}
+                        {% else %}
+                            N/A
+                        {% endif %}
+                    </span>
+                    <span class="block text-xs text-luxury-muted mt-0.5">
+                        {% if booking.vehicle_category %}
+                            Capacity: {{ booking.vehicle_category.passengers_capacity }} Pax / {{ booking.vehicle_category.luggage_capacity }} Bags
+                        {% else %}
+                            Capacity information unavailable.
+                        {% endif %}
+                    </span>
                 </div>
             </div>
 
@@ -559,12 +599,12 @@ function copyBookingDetails() {
     const booking = {
         type: "{{ booking.get_service_type_display }}{% if booking.round_trip %} (Round-Trip){% endif %}",
         customer: "{{ booking.customer_name }}",
-        pickup: "{{ booking.pickup_address|default:booking.airport.name|default:'N/A' }}",
-        dropoff: "{{ booking.dropoff_address|default:booking.destination.name|default:'N/A' }}",
+        pickup: "{% if booking.pickup_address %}{{ booking.pickup_address }}{% elif booking.airport %}{{ booking.airport.name }}{% else %}N/A{% endif %}",
+        dropoff: "{% if booking.dropoff_address %}{{ booking.dropoff_address }}{% elif booking.destination %}{{ booking.destination.name }}{% else %}N/A{% endif %}",
         flightNumber: "{{ booking.flight_number|default:'N/A' }}",
         pickupDate: "{{ booking.pickup_date }} at {{ booking.pickup_time }}",
         pickupLocation: "{{ booking.meeting_point|default:'Standard pickup' }}",
-        vehicle: "{{ booking.vehicle_category.name|default:'N/A' }}",
+        vehicle: "{% if booking.vehicle_category %}{{ booking.vehicle_category.name }}{% else %}N/A{% endif %}",
         addons: "{% for addon in booking.addons.all %}{{ addon.name }}{% if not forloop.last %}, {% endif %}{% empty %}None{% endfor %}"
     };
 
