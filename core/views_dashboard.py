@@ -226,7 +226,14 @@ def booking_detail(request, booking_id):
     """Detailed view of a single booking."""
     from core.models import Booking
     from decimal import Decimal
-    booking = get_object_or_404(Booking, id=booking_id)
+    import logging
+    logger = logging.getLogger(__name__)
+
+    try:
+        booking = get_object_or_404(Booking, id=booking_id)
+    except Exception as e:
+        logger.error(f"Error fetching booking {booking_id}: {e}")
+        raise
 
     if request.method == 'POST':
         # Update internal notes
@@ -236,17 +243,27 @@ def booking_detail(request, booking_id):
         messages.success(request, 'Booking notes updated.')
 
     # Financial breakdown calculations
-    base_price = booking.base_price
-    stops_fee = Decimal('0.00')
-    if booking.service_type == 'point_to_point':
-        stops_fee = Decimal('20.00') * Decimal(booking.number_of_stops)
+    try:
+        base_price = booking.base_price or Decimal('0.00')
+        stops_fee = Decimal('0.00')
+        if booking.service_type == 'point_to_point':
+            stops_fee = Decimal('20.00') * Decimal(booking.number_of_stops or 0)
 
-    outbound_addons_total = sum(a.price for a in booking.addons.all())
-    return_addons_total = sum(a.price for a in booking.addons_return.all())
+        outbound_addons_total = sum(a.price for a in booking.addons.all())
+        return_addons_total = sum(a.price for a in booking.addons_return.all())
 
-    outbound_total = base_price + stops_fee + outbound_addons_total
-    return_total = base_price + return_addons_total if booking.round_trip else Decimal('0.00')
-    balance = booking.total_price - booking.amount_paid
+        outbound_total = base_price + stops_fee + outbound_addons_total
+        return_total = base_price + return_addons_total if booking.round_trip else Decimal('0.00')
+        balance = booking.total_price - booking.amount_paid
+    except Exception as e:
+        logger.error(f"Error calculating financial breakdown for booking {booking_id}: {e}")
+        base_price = Decimal('0.00')
+        stops_fee = Decimal('0.00')
+        outbound_addons_total = Decimal('0.00')
+        return_addons_total = Decimal('0.00')
+        outbound_total = Decimal('0.00')
+        return_total = Decimal('0.00')
+        balance = Decimal('0.00')
 
     # WhatsApp links generation
     from urllib.parse import quote
@@ -260,6 +277,7 @@ def booking_detail(request, booking_id):
             msg_text = get_formatted_whatsapp_message(booking, t_type)
             whatsapp_links[t_type] = f"https://wa.me/{phone_digits}?text={quote(msg_text)}"
         except Exception as e:
+            logger.error(f"Error generating WhatsApp link for booking {booking_id}, type {t_type}: {e}")
             whatsapp_links[t_type] = "#"
 
     context = {
