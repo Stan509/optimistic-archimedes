@@ -31,7 +31,7 @@
             <div class="flex items-center space-x-2">
                 <span class="font-mono text-xl font-bold tracking-wider text-gold-400">{{ booking.booking_reference }}</span>
                 <span class="px-2.5 py-0.5 text-[10px] font-bold uppercase rounded bg-luxury-black border border-luxury-border text-white">
-                    {{ booking.site.name|upper }}
+                    {{ booking.site.name|upper|default:'NYC' }}
                 </span>
             </div>
             <p class="text-xs text-luxury-muted mt-1">Booked on {{ booking.created_at }} &bull; Source: <strong class="text-white">{{ booking.booking_source }}</strong></p>

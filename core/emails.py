@@ -540,13 +540,13 @@ def get_formatted_whatsapp_message(booking, trigger_type):
     """
     from core.models import WhatsAppTemplate
     site = booking.site
-    company_name = site.name
-    
+    company_name = site.name if site else 'AeroLux Select'
+
     template = WhatsAppTemplate.objects.filter(site=site, trigger_type=trigger_type).first()
     if not template:
         template_text = get_default_whatsapp_template(trigger_type, company_name)
     else:
         template_text = template.message_content
-        
+
     context = get_email_context(booking)
     return format_template(template_text, context)
