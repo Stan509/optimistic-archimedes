@@ -67,23 +67,23 @@ class SiteMiddleware(MiddlewareMixin):
 
         site = None
 
-        # 1. Domain-based detection (production)
-        host = request.get_host().split(':')[0]  # strip port
-        site = self._get_site_by_domain(host)
+        # 1. URL prefix detection (HIGHEST PRIORITY - allows /dr/ to override domain)
+        path = request.path_info.strip('/')
+        first_segment = path.split('/')[0] if path else ''
+        slug = self.URL_PREFIX_MAP.get(first_segment)
+        if slug:
+            site = self._get_site_by_slug(slug)
 
-        # 2. URL prefix detection (development)
-        if site is None:
-            path = request.path_info.strip('/')
-            first_segment = path.split('/')[0] if path else ''
-            slug = self.URL_PREFIX_MAP.get(first_segment)
-            if slug:
-                site = self._get_site_by_slug(slug)
-
-        # 3. Session override
+        # 2. Session override (second priority)
         if site is None:
             session_slug = request.session.get('current_site_slug')
             if session_slug:
                 site = self._get_site_by_slug(session_slug)
+
+        # 3. Domain-based detection (production, lower priority than prefix)
+        if site is None:
+            host = request.get_host().split(':')[0]  # strip port
+            site = self._get_site_by_domain(host)
 
         # 4. Default fallback
         if site is None:
