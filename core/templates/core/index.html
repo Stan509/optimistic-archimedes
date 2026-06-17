@@ -1320,7 +1320,9 @@
 
 {% block extra_js %}
 
-<script src="https://maps.googleapis.com/maps/api/js?key={{ site_settings.google_maps_api_key }}&libraries=places"></script>
+{% if site_settings and site_settings.google_maps_api_key %}
+<script src="https://maps.googleapis.com/maps/api/js?key={{ site_settings.google_maps_api_key|urlencode }}&libraries=places"></script>
+{% endif %}
 
 <script>
 

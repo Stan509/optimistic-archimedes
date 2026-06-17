@@ -1371,6 +1371,69 @@ class DistanceCalculationAndStorageTestCase(TestCase):
         dist = _get_google_driving_distance(40.6413, -73.7781, 40.7549, -73.9840, 'mock_key')
         self.assertEqual(dist, 28.5)
 
+    def test_booking_page_uses_single_real_maps_loader(self):
+        settings_obj = SiteSettings.get_settings(self.nyc)
+        settings_obj.google_maps_api_key = 'AIzaTestKey'
+        settings_obj.save()
+
+        response = self.client.get('/nyc/book/')
+        self.assertEqual(response.status_code, 200)
+        html = response.content.decode()
+
+        self.assertIn('https://maps.googleapis.com/maps/api/js?key=AIzaTestKey', html)
+        self.assertNotIn('AIzaSyDummyKey', html)
+        self.assertNotIn('core/js/booking-maps.js', html)
+
+    @patch('urllib.request.urlopen')
+    def test_address_autocomplete_api_returns_predictions(self, mock_urlopen):
+        settings_obj = SiteSettings.get_settings(self.nyc)
+        settings_obj.google_maps_api_key = 'mock_key'
+        settings_obj.save()
+
+        mock_response = MagicMock()
+        mock_response.read.return_value = json.dumps({
+            'status': 'OK',
+            'predictions': [{
+                'place_id': 'place_123',
+                'description': 'The Plaza Hotel, 5th Avenue, New York, NY',
+                'structured_formatting': {
+                    'main_text': 'The Plaza Hotel',
+                    'secondary_text': '5th Avenue, New York, NY',
+                },
+            }]
+        }).encode('utf-8')
+        mock_urlopen.return_value.__enter__.return_value = mock_response
+
+        response = self.client.get('/nyc/api/address-autocomplete/?input=Plaza')
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertEqual(data['predictions'][0]['place_id'], 'place_123')
+        self.assertEqual(data['predictions'][0]['description'], 'The Plaza Hotel, 5th Avenue, New York, NY')
+
+    @patch('urllib.request.urlopen')
+    def test_place_details_api_returns_coordinates(self, mock_urlopen):
+        settings_obj = SiteSettings.get_settings(self.nyc)
+        settings_obj.google_maps_api_key = 'mock_key'
+        settings_obj.save()
+
+        mock_response = MagicMock()
+        mock_response.read.return_value = json.dumps({
+            'status': 'OK',
+            'result': {
+                'formatted_address': 'The Plaza Hotel, New York, NY',
+                'geometry': {
+                    'location': {'lat': 40.7645, 'lng': -73.9743}
+                },
+            }
+        }).encode('utf-8')
+        mock_urlopen.return_value.__enter__.return_value = mock_response
+
+        response = self.client.get('/nyc/api/place-details/?place_id=place_123')
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertEqual(data['latitude'], 40.7645)
+        self.assertEqual(data['longitude'], -73.9743)
+
     @patch('urllib.request.urlopen')
     def test_airport_transfer_pricing_fetches_google_distance(self, mock_urlopen):
         # Mock Google Directions API response

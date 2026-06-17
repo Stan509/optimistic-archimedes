@@ -9,11 +9,57 @@ let directionsRenderer = null;
 let pickupAutocomplete = null;
 let dropoffAutocomplete = null;
 let googleMapsApiKey = null;
+const SITE_PREFIXES = new Set(['nyc', 'dr']);
+
+function getSitePrefix() {
+    const firstSegment = window.location.pathname.split('/').filter(Boolean)[0];
+    if (SITE_PREFIXES.has(firstSegment)) {
+        return `/${firstSegment}`;
+    }
+    return '';
+}
+
+function buildSiteApiUrl(path, params = {}) {
+    const prefix = window.AEROLUX_API_PREFIX || getSitePrefix();
+    const url = new URL(`${prefix}${path}`, window.location.origin);
+    Object.entries(params).forEach(([key, value]) => {
+        if (value !== undefined && value !== null && value !== '') {
+            url.searchParams.set(key, value);
+        }
+    });
+    return url.toString();
+}
+
+function getNumberFieldValue(id) {
+    const element = document.getElementById(id);
+    if (!element) return NaN;
+    return parseFloat(element.value);
+}
+
+function setFieldValue(id, value) {
+    const element = document.getElementById(id);
+    if (element) {
+        element.value = value;
+    }
+}
+
+function hasValidCoordinates(...values) {
+    return values.every(value => Number.isFinite(value));
+}
 
 // Initialize Google Maps
 function initializeGoogleMaps() {
+    if (window.google && google.maps && google.maps.places) {
+        initializeMapAndAutocomplete();
+        return;
+    }
+
+    if (document.querySelector('script[data-aerolux-google-maps="true"]')) {
+        return;
+    }
+
     // Fetch API key from backend
-    fetch('/api/google-maps-key/')
+    fetch(buildSiteApiUrl('/api/google-maps-key/'))
         .then(response => response.json())
         .then(data => {
             googleMapsApiKey = data.api_key;
@@ -26,8 +72,14 @@ function initializeGoogleMaps() {
 
 // Load Google Maps libraries
 function loadGoogleMapsLibraries() {
+    if (window.google && google.maps && google.maps.places) {
+        initializeMapAndAutocomplete();
+        return;
+    }
+
     const script = document.createElement('script');
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${googleMapsApiKey}&libraries=places,routes`;
+    script.dataset.aeroluxGoogleMaps = 'true';
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(googleMapsApiKey)}&libraries=places`;
     script.async = true;
     script.defer = true;
     script.onload = initializeMapAndAutocomplete;
@@ -37,92 +89,87 @@ function loadGoogleMapsLibraries() {
 // Initialize map and autocomplete
 function initializeMapAndAutocomplete() {
     const mapElement = document.getElementById('booking-map');
-    if (!mapElement) return;
 
-    // Initialize map
-    const defaultCenter = { lat: 40.7128, lng: -74.0060 }; // NYC default
-    map = new google.maps.Map(mapElement, {
-        zoom: 12,
-        center: defaultCenter,
-        styles: getDarkMapStyles(),
-        controlSize: 28,
-        mapTypeControl: false,
-        fullscreenControl: true,
-        streetViewControl: false,
-    });
+    if (mapElement && !map) {
+        const defaultCenter = getSitePrefix() === '/dr'
+            ? { lat: 18.7357, lng: -69.9509 }
+            : { lat: 40.7128, lng: -74.0060 };
 
-    directionsService = new google.maps.DirectionsService();
-    directionsRenderer = new google.maps.DirectionsRenderer({
-        map: map,
-        suppressPolylines: false,
-        polylineOptions: {
-            strokeColor: '#C9A84C',
-            strokeWeight: 3,
-            strokeOpacity: 0.8,
-        },
-    });
-
-    // Setup autocomplete for pickup address
-    const pickupAddressInput = document.getElementById('pickup_address');
-    if (pickupAddressInput) {
-        pickupAutocomplete = new google.maps.places.Autocomplete(pickupAddressInput, {
-            componentRestrictions: { country: ['us', 'do'] }, // USA and Dominican Republic
-            types: ['address'],
-            fields: ['place_id', 'geometry', 'formatted_address', 'name'],
+        map = new google.maps.Map(mapElement, {
+            zoom: 12,
+            center: defaultCenter,
+            styles: getDarkMapStyles(),
+            controlSize: 28,
+            mapTypeControl: false,
+            fullscreenControl: true,
+            streetViewControl: false,
         });
 
-        pickupAutocomplete.addListener('place_changed', function() {
-            const place = pickupAutocomplete.getPlace();
-            if (place.geometry) {
-                const lat = place.geometry.location.lat();
-                const lng = place.geometry.location.lng();
-                document.getElementById('pickup_lat').value = lat;
-                document.getElementById('pickup_lng').value = lng;
-                pickupAddressInput.value = place.formatted_address;
-                updateMap();
-                calculateDistance();
-            }
-        });
-
-        // Autocomplete suggestions on input
-        pickupAddressInput.addEventListener('input', function() {
-            if (this.value.length >= 2) {
-                fetchAddressSuggestions(this.value, 'pickup', this);
-            }
+        directionsService = new google.maps.DirectionsService();
+        directionsRenderer = new google.maps.DirectionsRenderer({
+            map: map,
+            suppressPolylines: false,
+            polylineOptions: {
+                strokeColor: '#C9A84C',
+                strokeWeight: 3,
+                strokeOpacity: 0.8,
+            },
         });
     }
 
-    // Setup autocomplete for dropoff address
-    const dropoffAddressInput = document.getElementById('dropoff_address');
-    const destinationAddressInput = document.getElementById('destination_address');
-    const activeDropoffInput = dropoffAddressInput || destinationAddressInput;
+    const attachAutocomplete = (inputElement, type) => {
+        if (!inputElement || inputElement.dataset.mapsAutocompleteReady === 'true') {
+            return null;
+        }
 
-    if (activeDropoffInput) {
-        dropoffAutocomplete = new google.maps.places.Autocomplete(activeDropoffInput, {
+        inputElement.dataset.mapsAutocompleteReady = 'true';
+        const autocomplete = new google.maps.places.Autocomplete(inputElement, {
             componentRestrictions: { country: ['us', 'do'] },
             types: ['address'],
             fields: ['place_id', 'geometry', 'formatted_address', 'name'],
         });
 
-        dropoffAutocomplete.addListener('place_changed', function() {
-            const place = dropoffAutocomplete.getPlace();
-            if (place.geometry) {
+        autocomplete.addListener('place_changed', function() {
+            const place = autocomplete.getPlace();
+            if (place.geometry && place.geometry.location) {
                 const lat = place.geometry.location.lat();
                 const lng = place.geometry.location.lng();
-                document.getElementById('dropoff_lat').value = lat;
-                document.getElementById('dropoff_lng').value = lng;
-                activeDropoffInput.value = place.formatted_address;
+                if (type === 'pickup') {
+                    setFieldValue('pickup_lat', lat);
+                    setFieldValue('pickup_lng', lng);
+                } else {
+                    setFieldValue('dropoff_lat', lat);
+                    setFieldValue('dropoff_lng', lng);
+                }
+                inputElement.value = place.formatted_address || place.name || inputElement.value;
                 updateMap();
                 calculateDistance();
             }
         });
 
-        activeDropoffInput.addEventListener('input', function() {
-            if (this.value.length >= 2) {
-                fetchAddressSuggestions(this.value, 'dropoff', this);
+        let suggestionTimeout = null;
+        inputElement.addEventListener('input', function() {
+            clearTimeout(suggestionTimeout);
+            if (this.value.trim().length >= 2) {
+                suggestionTimeout = setTimeout(() => {
+                    fetchAddressSuggestions(this.value, type, this);
+                }, 250);
             }
         });
-    }
+
+        return autocomplete;
+    };
+
+    // Setup autocomplete for pickup address
+    const pickupAddressInput = document.getElementById('pickup_address');
+    pickupAutocomplete = attachAutocomplete(pickupAddressInput, 'pickup');
+
+    // Setup autocomplete for destination fields. Airport transfers use
+    // destination_address while point-to-point uses dropoff_address.
+    const dropoffAddressInput = document.getElementById('dropoff_address');
+    const destinationAddressInput = document.getElementById('destination_address');
+    dropoffAutocomplete = attachAutocomplete(dropoffAddressInput, 'dropoff');
+    attachAutocomplete(destinationAddressInput, 'dropoff');
 
     // Handle airport selection
     const airportSelect = document.getElementById('airport_id');
@@ -132,9 +179,12 @@ function initializeMapAndAutocomplete() {
                 const selectedOption = this.options[this.selectedIndex];
                 const lat = parseFloat(selectedOption.dataset.lat);
                 const lng = parseFloat(selectedOption.dataset.lng);
-                document.getElementById('pickup_lat').value = lat;
-                document.getElementById('pickup_lng').value = lng;
-                map.setCenter({ lat, lng });
+                if (!Number.isFinite(lat) || !Number.isFinite(lng)) return;
+                setFieldValue('pickup_lat', lat);
+                setFieldValue('pickup_lng', lng);
+                if (map) {
+                    map.setCenter({ lat, lng });
+                }
                 updateMap();
                 calculateDistance();
             }
@@ -144,14 +194,19 @@ function initializeMapAndAutocomplete() {
 
 // Update map with markers and directions
 function updateMap() {
-    const pickupLat = parseFloat(document.getElementById('pickup_lat').value);
-    const pickupLng = parseFloat(document.getElementById('pickup_lng').value);
-    const dropoffLat = parseFloat(document.getElementById('dropoff_lat').value);
-    const dropoffLng = parseFloat(document.getElementById('dropoff_lng').value);
+    const pickupLat = getNumberFieldValue('pickup_lat');
+    const pickupLng = getNumberFieldValue('pickup_lng');
+    const dropoffLat = getNumberFieldValue('dropoff_lat');
+    const dropoffLng = getNumberFieldValue('dropoff_lng');
 
-    if (pickupLat && pickupLng && dropoffLat && dropoffLng) {
+    if (hasValidCoordinates(pickupLat, pickupLng, dropoffLat, dropoffLng)) {
         const origin = { lat: pickupLat, lng: pickupLng };
         const destination = { lat: dropoffLat, lng: dropoffLng };
+
+        if (!directionsService || !directionsRenderer) {
+            calculateHaversineDistance(pickupLat, pickupLng, dropoffLat, dropoffLng);
+            return;
+        }
 
         directionsService.route({
             origin: origin,
@@ -165,7 +220,7 @@ function updateMap() {
                 const route = result.routes[0];
                 if (route && route.legs[0]) {
                     const distance = route.legs[0].distance.value / 1000; // Convert to km
-                    document.getElementById('distance_km').value = distance.toFixed(2);
+                    setFieldValue('distance_km', distance.toFixed(2));
                     displayDistance(distance);
                 }
             } else {
@@ -175,11 +230,13 @@ function updateMap() {
         });
 
         // Zoom to fit both points
-        const bounds = new google.maps.LatLngBounds();
-        bounds.extend({ lat: pickupLat, lng: pickupLng });
-        bounds.extend({ lat: dropoffLat, lng: dropoffLng });
-        map.fitBounds(bounds);
-    } else if (pickupLat && pickupLng) {
+        if (map) {
+            const bounds = new google.maps.LatLngBounds();
+            bounds.extend({ lat: pickupLat, lng: pickupLng });
+            bounds.extend({ lat: dropoffLat, lng: dropoffLng });
+            map.fitBounds(bounds);
+        }
+    } else if (hasValidCoordinates(pickupLat, pickupLng) && map) {
         map.setCenter({ lat: pickupLat, lng: pickupLng });
         map.setZoom(15);
     }
@@ -187,18 +244,23 @@ function updateMap() {
 
 // Calculate distance via API
 function calculateDistance() {
-    const pickupLat = parseFloat(document.getElementById('pickup_lat').value);
-    const pickupLng = parseFloat(document.getElementById('pickup_lng').value);
-    const dropoffLat = parseFloat(document.getElementById('dropoff_lat').value);
-    const dropoffLng = parseFloat(document.getElementById('dropoff_lng').value);
+    const pickupLat = getNumberFieldValue('pickup_lat');
+    const pickupLng = getNumberFieldValue('pickup_lng');
+    const dropoffLat = getNumberFieldValue('dropoff_lat');
+    const dropoffLng = getNumberFieldValue('dropoff_lng');
 
-    if (!pickupLat || !pickupLng || !dropoffLat || !dropoffLng) return;
+    if (!hasValidCoordinates(pickupLat, pickupLng, dropoffLat, dropoffLng)) return;
 
-    fetch(`/api/calculate-distance/?origin_lat=${pickupLat}&origin_lng=${pickupLng}&destination_lat=${dropoffLat}&destination_lng=${dropoffLng}`)
+    fetch(buildSiteApiUrl('/api/calculate-distance/', {
+        origin_lat: pickupLat,
+        origin_lng: pickupLng,
+        destination_lat: dropoffLat,
+        destination_lng: dropoffLng,
+    }))
         .then(response => response.json())
         .then(data => {
             if (data.distance_km) {
-                document.getElementById('distance_km').value = data.distance_km;
+                setFieldValue('distance_km', data.distance_km);
                 displayDistance(data.distance_km);
             }
         })
@@ -215,26 +277,35 @@ function calculateHaversineDistance(lat1, lng1, lat2, lng2) {
               Math.sin(dLng / 2) * Math.sin(dLng / 2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     const distance = R * c;
-    document.getElementById('distance_km').value = distance.toFixed(2);
+    setFieldValue('distance_km', distance.toFixed(2));
     displayDistance(distance);
 }
 
 // Display distance info to user
 function displayDistance(distance) {
+    const numericDistance = Number(distance);
+    if (!Number.isFinite(numericDistance)) return;
+
     const distanceDisplay = document.getElementById('distance-display');
     if (distanceDisplay) {
-        distanceDisplay.textContent = `Distance: ${distance.toFixed(2)} km`;
+        distanceDisplay.textContent = `Distance: ${numericDistance.toFixed(2)} km`;
         distanceDisplay.classList.remove('hidden');
     }
 
     // Trigger pricing recalculation
     const event = new Event('change');
-    document.getElementById('booking-step1-form').dispatchEvent(event);
+    const form = document.getElementById('booking-step1-form');
+    if (form) {
+        form.dispatchEvent(event);
+    }
 }
 
 // Fetch address suggestions from Google Places API
 function fetchAddressSuggestions(input, type, inputElement) {
-    fetch(`/api/address-autocomplete/?input=${encodeURIComponent(input)}&language=en`)
+    fetch(buildSiteApiUrl('/api/address-autocomplete/', {
+        input,
+        language: document.documentElement.lang || 'en',
+    }))
         .then(response => response.json())
         .then(data => {
             if (data.predictions && data.predictions.length > 0) {
@@ -247,10 +318,11 @@ function fetchAddressSuggestions(input, type, inputElement) {
 // Display address suggestions
 function showSuggestions(predictions, type, inputElement) {
     // Create suggestions dropdown
-    let dropdown = document.getElementById(`suggestions-${type}`);
+    const dropdownId = `suggestions-${type}-${inputElement.id || 'field'}`;
+    let dropdown = document.getElementById(dropdownId);
     if (!dropdown) {
         dropdown = document.createElement('ul');
-        dropdown.id = `suggestions-${type}`;
+        dropdown.id = dropdownId;
         dropdown.className = 'absolute z-[9999] bg-luxe-black border border-gray-800 rounded-xl mt-1 w-full max-h-48 overflow-y-auto shadow-lg';
         inputElement.parentElement.appendChild(dropdown);
     } else {
@@ -264,6 +336,7 @@ function showSuggestions(predictions, type, inputElement) {
         li.addEventListener('click', () => {
             inputElement.value = prediction.description;
             dropdown.innerHTML = '';
+            dropdown.classList.add('hidden');
             // Fetch place details to get coordinates
             fetchPlaceDetails(prediction.place_id, type);
         });
@@ -276,16 +349,18 @@ function showSuggestions(predictions, type, inputElement) {
 
 // Fetch place details (coordinates)
 function fetchPlaceDetails(placeId, type) {
-    fetch(`/api/place-details/?place_id=${encodeURIComponent(placeId)}`)
+    fetch(buildSiteApiUrl('/api/place-details/', { place_id: placeId }))
         .then(response => response.json())
         .then(data => {
-            if (data.latitude && data.longitude) {
+            const latitude = Number(data.latitude);
+            const longitude = Number(data.longitude);
+            if (Number.isFinite(latitude) && Number.isFinite(longitude)) {
                 if (type === 'pickup') {
-                    document.getElementById('pickup_lat').value = data.latitude;
-                    document.getElementById('pickup_lng').value = data.longitude;
+                    setFieldValue('pickup_lat', latitude);
+                    setFieldValue('pickup_lng', longitude);
                 } else if (type === 'dropoff') {
-                    document.getElementById('dropoff_lat').value = data.latitude;
-                    document.getElementById('dropoff_lng').value = data.longitude;
+                    setFieldValue('dropoff_lat', latitude);
+                    setFieldValue('dropoff_lng', longitude);
                 }
                 updateMap();
                 calculateDistance();

@@ -347,9 +347,7 @@
 {% endblock %}
 {% block extra_js %}
 {% if site_settings and site_settings.google_maps_api_key %}
-<script src="https://maps.googleapis.com/maps/api/js?key={{ site_settings.google_maps_api_key }}&libraries=places"></script>
-{% else %}
-<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDummyKey&libraries=places"></script>
+<script src="https://maps.googleapis.com/maps/api/js?key={{ site_settings.google_maps_api_key|urlencode }}&libraries=places"></script>
 {% endif %}
 <script>
     document.addEventListener('DOMContentLoaded', () => {
@@ -979,6 +977,4 @@
     });
 </script>
 
-<!-- Google Maps integration for address autocomplete and distance calculation -->
-<script src="{% static 'core/js/booking-maps.js' %}"></script>
 {% endblock %}
