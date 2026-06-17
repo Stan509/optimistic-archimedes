@@ -346,7 +346,11 @@
 </section>
 {% endblock %}
 {% block extra_js %}
+{% if site_settings and site_settings.google_maps_api_key %}
 <script src="https://maps.googleapis.com/maps/api/js?key={{ site_settings.google_maps_api_key }}&libraries=places"></script>
+{% else %}
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDummyKey&libraries=places"></script>
+{% endif %}
 <script>
     document.addEventListener('DOMContentLoaded', () => {
         const radTransfer = document.getElementById('rad-transfer');
