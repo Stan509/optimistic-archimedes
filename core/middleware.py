@@ -94,6 +94,11 @@ class SiteMiddleware(MiddlewareMixin):
         request.current_site_slug = site.slug if site else 'nyc'
         set_current_site(site)
 
+        # Debug logging for site detection
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.info(f"Site detection: host={host}, path={request.path_info}, first_segment={first_segment if 'first_segment' in locals() else 'N/A'}, resolved_site={site.slug if site else 'None'}")
+
     def process_response(self, request, response):
         """Clean up thread-local after the response is sent."""
         set_current_site(None)
