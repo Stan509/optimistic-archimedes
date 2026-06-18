@@ -529,12 +529,6 @@
             }
             toggleRoundTripFields();
             checkValidation();
-            
-            if (typeof bookingMap !== 'undefined' && bookingMap && typeof bookingMap.invalidateSize === 'function') {
-                setTimeout(() => {
-                    bookingMap.invalidateSize();
-                }, 200);
-            }
         }
         function toggleRoundTripFields() {
             const divReturnMeetingPoint = document.getElementById('div-return-meeting-point');
@@ -629,23 +623,7 @@
         syncRoundTripUI();
         returnDateInput.addEventListener('change', checkValidation);
         returnTimeInput.addEventListener('change', checkValidation);
-        airportSelect.addEventListener('change', () => {
-            if (bookingMap && pickupMarker) {
-                const selectedOption = airportSelect.options[airportSelect.selectedIndex];
-                const lat = parseFloat(selectedOption.dataset.lat);
-                const lng = parseFloat(selectedOption.dataset.lng);
-                if (!isNaN(lat) && !isNaN(lng)) {
-                    const loc = { lat, lng };
-                    pickupMarker.setPosition(loc);
-                    bookingMap.panTo(loc);
-                    bookingMap.setZoom(11);
-                    document.getElementById('pickup_lat').value = lat;
-                    document.getElementById('pickup_lng').value = lng;
-                    calculateRoute();
-                }
-            }
-            updateDynamicMeetingPoint();
-        });
+        // Airport selection is handled by booking-leaflet.js
         destinationAddress.addEventListener('input', () => {
             checkValidation();
             const status = document.getElementById('geocode-status');
