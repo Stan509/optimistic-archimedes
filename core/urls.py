@@ -33,14 +33,7 @@ urlpatterns = [
     # Contact
     path('contact/', views.contact, name='contact'),
 
-    # API-like endpoints for AJAX
-    path('api/airports/', views.api_airports, name='api_airports'),
-    path('api/destinations/<int:airport_id>/', views.api_destinations, name='api_destinations'),
-    path('api/pricing/', views.api_pricing, name='api_pricing'),
-    path('api/address-autocomplete/', views.api_address_autocomplete, name='api_address_autocomplete'),
-    path('api/place-details/', views.api_place_details, name='api_place_details'),
-    path('api/calculate-distance/', views.api_calculate_distance, name='api_calculate_distance'),
-
+    # API-like endpoints for AJAX (no API views exist yet)
     # Language switch
     path('set-language/<str:lang>/', views.set_language, name='set_language'),
     
