@@ -32,16 +32,8 @@ def _get_language(request):
 
 
 def _get_effective_google_maps_api_key(site):
-    """Return the site's dashboard Google Maps key or the code/runtime fallback."""
-    if not site:
-        return ''
-
-    try:
-        from core.models import SiteSettings
-        site_settings = SiteSettings.get_settings(site)
-        return site_settings.effective_google_maps_api_key if site_settings else ''
-    except Exception:
-        return ''
+    """Return empty string - using OpenStreetMap instead of Google Maps."""
+    return ''
 
 
 # =========================================================================
@@ -232,38 +224,6 @@ def _haversine_distance(lat1, lon1, lat2, lon2):
     return R * c
 
 
-def _get_google_driving_distance(origin_lat, origin_lng, dest_lat, dest_lng, api_key):
-    """
-    Get actual driving distance in kilometers between two GPS coordinates using Google Directions API.
-    """
-    import urllib.request
-    import urllib.parse
-    import json
-
-    if not api_key:
-        return None
-
-    try:
-        origin = f"{origin_lat},{origin_lng}"
-        destination = f"{dest_lat},{dest_lng}"
-        url = f"https://maps.googleapis.com/maps/api/directions/json?origin={urllib.parse.quote(origin)}&destination={urllib.parse.quote(destination)}&key={api_key}"
-        
-        req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
-        with urllib.request.urlopen(req, timeout=5) as response:
-            data = json.loads(response.read().decode())
-            
-        if data.get('status') == 'OK':
-            routes = data.get('routes', [])
-            if routes:
-                legs = routes[0].get('legs', [])
-                if legs:
-                    distance_meters = legs[0].get('distance', {}).get('value', 0)
-                    return distance_meters / 1000.0
-    except Exception:
-        pass
-    return None
-
-
 def _get_airport_transfer_price_for_category(site, slug, category, booking_data):
     """Get calculated price for airport transfer for a vehicle category based on distance."""
     from core.models import AirportCategoryPrice, Airport, SiteSettings
@@ -314,14 +274,9 @@ def _get_airport_transfer_price_for_category(site, slug, category, booking_data)
                 pass
 
         if address_lat and address_lng and airport_lat and airport_lng:
-            api_key = _get_effective_google_maps_api_key(site)
-            google_dist = _get_google_driving_distance(airport_lat, airport_lng, address_lat, address_lng, api_key)
-            if google_dist is not None:
-                distance_km = google_dist
-            else:
-                miles = _haversine_distance(airport_lat, airport_lng, address_lat, address_lng)
-                distance_km = miles * 1.60934
-            
+            miles = _haversine_distance(airport_lat, airport_lng, address_lat, address_lng)
+            distance_km = miles * 1.60934
+
             # Save computed distance back to booking_data to persist in session
             booking_data['distance_km'] = str(round(distance_km, 2))
         else:
@@ -397,14 +352,9 @@ def _get_category_price(site, slug, category, booking_data):
             d_lat = booking_data.get('dropoff_lat')
             d_lng = booking_data.get('dropoff_lng')
             if km <= 0.0 and p_lat and p_lng and d_lat and d_lng:
-                api_key = _get_effective_google_maps_api_key(site)
-                google_dist = _get_google_driving_distance(p_lat, p_lng, d_lat, d_lng, api_key)
-                if google_dist is not None:
-                    km = google_dist
-                else:
-                    miles = _haversine_distance(p_lat, p_lng, d_lat, d_lng)
-                    km = miles * 1.60934
-                
+                miles = _haversine_distance(p_lat, p_lng, d_lat, d_lng)
+                km = miles * 1.60934
+
                 # Save computed distance back to booking_data to persist in session
                 booking_data['distance_km'] = str(round(km, 2))
             
@@ -504,19 +454,16 @@ def booking_step1(request):
         return redirect(f'/{slug}/book/vehicle/')
 
     try:
-        from core.models import Airport, SiteSettings
+        from core.models import Airport
         airports = Airport.objects.filter(site=site, is_active=True) if site else Airport.objects.none()
-        site_settings = SiteSettings.get_settings(site) if site else None
     except Exception:
         airports = []
-        site_settings = None
 
     context = {
         'airports': airports,
         'site_slug': slug,
         'today': date.today().strftime('%Y-%m-%d'),
         'language': _get_language(request),
-        'site_settings': site_settings,
         'booking_data': request.session.get('booking', {}),
     }
     return render(request, 'core/booking_step1.html', context)
@@ -1314,135 +1261,9 @@ from django.http import HttpResponse
 from django.views.decorators.http import require_GET
 
 @require_GET
-def api_google_maps_key(request):
-    """Return the Google Maps API key for the current site."""
-    site, slug = _get_site_or_404(request)
-    
-    api_key = _get_effective_google_maps_api_key(site)
-    
-    return JsonResponse({'api_key': api_key})
-
-
-@require_GET
-def api_address_autocomplete(request):
-    """
-    Autocomplete addresses using Google Places API.
-    Query params: input (search text), location (optional: lat,lng), radius (optional: meters)
-    """
-    site, slug = _get_site_or_404(request)
-    
-    api_key = _get_effective_google_maps_api_key(site)
-    
-    if not api_key:
-        return JsonResponse({'predictions': [], 'error': 'Google Maps API key not configured'}, status=400)
-    
-    input_text = request.GET.get('input', '').strip()
-    if not input_text or len(input_text) < 2:
-        return JsonResponse({'predictions': []})
-    
-    try:
-        import urllib.request
-        import urllib.parse
-        import json
-        
-        # Build Google Places Autocomplete API URL
-        url = f"https://maps.googleapis.com/maps/api/place/autocomplete/json"
-        params = {
-            'input': input_text,
-            'key': api_key,
-            'language': request.GET.get('language', 'en'),
-        }
-        
-        # Add location bias if provided
-        location = request.GET.get('location', '')  # format: "lat,lng"
-        if location:
-            params['location'] = location
-        
-        radius = request.GET.get('radius', '')
-        if radius:
-            params['radius'] = radius
-        
-        query_string = urllib.parse.urlencode(params)
-        full_url = f"{url}?{query_string}"
-        
-        req = urllib.request.Request(full_url, headers={'User-Agent': 'Mozilla/5.0'})
-        with urllib.request.urlopen(req, timeout=5) as response:
-            data = json.loads(response.read().decode())
-        
-        predictions = []
-        if data.get('status') == 'OK':
-            for prediction in data.get('predictions', []):
-                predictions.append({
-                    'place_id': prediction.get('place_id'),
-                    'description': prediction.get('description'),
-                    'main_text': prediction.get('structured_formatting', {}).get('main_text'),
-                    'secondary_text': prediction.get('structured_formatting', {}).get('secondary_text'),
-                })
-        
-        return JsonResponse({'predictions': predictions})
-    
-    except Exception as e:
-        return JsonResponse({'predictions': [], 'error': str(e)}, status=500)
-
-
-@require_GET
-def api_place_details(request):
-    """
-    Get place details (coordinates, address) using Google Places API.
-    Query params: place_id (required)
-    """
-    site, slug = _get_site_or_404(request)
-    
-    api_key = _get_effective_google_maps_api_key(site)
-    
-    if not api_key:
-        return JsonResponse({'error': 'Google Maps API key not configured'}, status=400)
-    
-    place_id = request.GET.get('place_id', '').strip()
-    if not place_id:
-        return JsonResponse({'error': 'place_id is required'}, status=400)
-    
-    try:
-        import urllib.request
-        import urllib.parse
-        import json
-        
-        url = f"https://maps.googleapis.com/maps/api/place/details/json"
-        params = {
-            'place_id': place_id,
-            'key': api_key,
-            'fields': 'geometry,formatted_address,address_components',
-        }
-        
-        query_string = urllib.parse.urlencode(params)
-        full_url = f"{url}?{query_string}"
-        
-        req = urllib.request.Request(full_url, headers={'User-Agent': 'Mozilla/5.0'})
-        with urllib.request.urlopen(req, timeout=5) as response:
-            data = json.loads(response.read().decode())
-        
-        if data.get('status') == 'OK':
-            result = data.get('result', {})
-            geometry = result.get('geometry', {})
-            location = geometry.get('location', {})
-            
-            return JsonResponse({
-                'address': result.get('formatted_address'),
-                'latitude': location.get('lat'),
-                'longitude': location.get('lng'),
-                'place_id': place_id,
-            })
-        else:
-            return JsonResponse({'error': data.get('status', 'UNKNOWN_ERROR')}, status=400)
-    
-    except Exception as e:
-        return JsonResponse({'error': str(e)}, status=500)
-
-
-@require_GET
 def api_calculate_distance(request):
     """
-    Calculate distance between two addresses using Google Directions API.
+    Calculate distance between two addresses using OSRM (Open Source Routing Machine).
     Query params: origin_lat, origin_lng, destination_lat, destination_lng
     Returns distance in kilometers.
     """
@@ -1459,28 +1280,32 @@ def api_calculate_distance(request):
     if not all([origin_lat, origin_lng, dest_lat, dest_lng]):
         return JsonResponse({'error': 'All coordinates are required'}, status=400)
     
-    api_key = _get_effective_google_maps_api_key(site)
+    # Try OSRM API first (free, no API key required)
+    try:
+        import urllib.request
+        import json
+        
+        url = f"https://router.project-osrm.org/route/v1/driving/{origin_lng},{origin_lat};{dest_lng},{dest_lat}"
+        params = {'overview': 'false'}
+        query_string = '&'.join(f"{k}={v}" for k, v in params.items())
+        full_url = f"{url}?{query_string}"
+        
+        req = urllib.request.Request(full_url, headers={'User-Agent': 'Mozilla/5.0'})
+        with urllib.request.urlopen(req, timeout=5) as response:
+            data = json.loads(response.read().decode())
+        
+        if data.get('code') == 'Ok' and data.get('routes'):
+            distance_meters = data['routes'][0]['distance']
+            distance_km = distance_meters / 1000
+            return JsonResponse({
+                'distance_km': round(distance_km, 2),
+                'distance_meters': int(distance_meters),
+                'method': 'osrm',
+            })
+    except Exception:
+        pass
     
-    if not api_key:
-        # Fallback to haversine distance if no API key
-        miles = _haversine_distance(origin_lat, origin_lng, dest_lat, dest_lng)
-        distance_km = miles * 1.60934
-        return JsonResponse({
-            'distance_km': round(distance_km, 2),
-            'distance_meters': int(distance_km * 1000),
-            'method': 'haversine',
-        })
-    
-    # Try Google Directions API first
-    google_dist = _get_google_driving_distance(origin_lat, origin_lng, dest_lat, dest_lng, api_key)
-    if google_dist is not None:
-        return JsonResponse({
-            'distance_km': round(google_dist, 2),
-            'distance_meters': int(google_dist * 1000),
-            'method': 'google_directions',
-        })
-    
-    # Fallback to haversine
+    # Fallback to haversine distance
     miles = _haversine_distance(origin_lat, origin_lng, dest_lat, dest_lng)
     distance_km = miles * 1.60934
     return JsonResponse({

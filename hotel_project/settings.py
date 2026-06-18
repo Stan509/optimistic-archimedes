@@ -222,25 +222,6 @@ SITE_LANGUAGES = {
     'dr': ['en', 'es'],
 }
 
-# Google Maps fallback keys used when the dashboard/database value is empty.
-# These values are code/runtime settings, so migrations cannot reset them.
-# You can either set GOOGLE_MAPS_API_KEY for both sites or site-specific keys.
-# Get a free API key: https://console.cloud.google.com/apis/credentials
-# Free tier: 28,000 map loads/month
-GOOGLE_MAPS_API_KEY = os.environ.get(
-    'GOOGLE_MAPS_API_KEY',
-    'AIzaSyDGzQAO3E1ndantjsimVvdIRmYsrwRtY34',
-)
-GOOGLE_MAPS_API_KEYS = {
-    'nyc': os.environ.get('GOOGLE_MAPS_API_KEY_NYC', GOOGLE_MAPS_API_KEY),
-    'dr': os.environ.get('GOOGLE_MAPS_API_KEY_DR', GOOGLE_MAPS_API_KEY),
-}
-
-# If no Google Maps key is available, the site falls back to Leaflet.js
-# (OpenStreetMap) which is free and requires no API key.
-# Leaflet is used automatically when GOOGLE_MAPS_API_KEY is empty.
-USE_LEAFLET_FALLBACK = True
-
 
 # ==========================================================================
 # GOOGLE reCAPTCHA CONFIGURATION (Free anti-bot protection)
@@ -306,8 +287,4 @@ DEVELOPER_PHONE = '829 509 84 12'
 COMPANY_NAME = 'AeroLux Select'
 
 # ==========================================================================
-# GOOGLE MAPS API CONFIGURATION (Configurable from dashboard)
 # ==========================================================================
-# This is a fallback value - actual key is stored in SiteSettings model
-# For production, set GOOGLE_MAPS_API_KEY environment variable
-GOOGLE_MAPS_API_KEY = os.environ.get('GOOGLE_MAPS_API_KEY', '')

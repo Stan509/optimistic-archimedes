@@ -189,16 +189,6 @@
         };
     }
 
-    function searchGooglePlaces(query) {
-        return fetch(buildSiteApiUrl('/api/address-autocomplete/', {
-            input: query,
-            language: document.documentElement.lang || 'en',
-        }))
-            .then(response => response.ok ? response.json() : null)
-            .then(data => (data?.predictions || []).map(normalizePrediction))
-            .catch(() => []);
-    }
-
     function searchOpenStreetMap(query) {
         const url = new URL('https://nominatim.openstreetmap.org/search');
         url.searchParams.set('format', 'jsonv2');
@@ -254,20 +244,7 @@
         const target = markerTargetForInput(inputType);
         if (Number.isFinite(suggestion.lat) && Number.isFinite(suggestion.lng)) {
             setCoordinates(target, suggestion.lat, suggestion.lng);
-            return;
         }
-
-        if (!suggestion.placeId) return;
-        fetch(buildSiteApiUrl('/api/place-details/', { place_id: suggestion.placeId }))
-            .then(response => response.ok ? response.json() : null)
-            .then(data => {
-                const lat = Number(data?.latitude);
-                const lng = Number(data?.longitude);
-                if (Number.isFinite(lat) && Number.isFinite(lng)) {
-                    setCoordinates(target, lat, lng);
-                }
-            })
-            .catch(() => {});
     }
 
     function attachAddressInput(inputElement, inputType) {
@@ -287,9 +264,6 @@
             }
             timeout = setTimeout(async () => {
                 let suggestions = await searchOpenStreetMap(query);
-                if (!suggestions.length) {
-                    suggestions = await searchGooglePlaces(query);
-                }
                 showSuggestions(inputElement, inputType, suggestions);
             }, 250);
         });
@@ -397,8 +371,7 @@
         });
 
         window.geocodeAddress = function(query, inputType) {
-            searchGooglePlaces(query)
-                .then(suggestions => suggestions.length ? suggestions : searchOpenStreetMap(query))
+            searchOpenStreetMap(query)
                 .then(suggestions => {
                     if (suggestions.length) {
                         selectSuggestion(suggestions[0], inputType);
