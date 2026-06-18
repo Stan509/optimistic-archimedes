@@ -1502,6 +1502,27 @@ class SiteSettings(models.Model):
         verbose_name = 'Site Settings'
         verbose_name_plural = 'Site Settings'
 
+    @property
+    def effective_google_maps_api_key(self):
+        """
+        Return the dashboard key when configured, otherwise the code/runtime
+        fallback from Django settings. Because the fallback is not stored in the
+        database, migrations cannot clear it.
+        """
+        dashboard_key = (self.google_maps_api_key or '').strip()
+        if dashboard_key:
+            return dashboard_key
+
+        from django.conf import settings
+
+        site_slug = self.site.slug if self.site_id and self.site else ''
+        site_keys = getattr(settings, 'GOOGLE_MAPS_API_KEYS', {}) or {}
+        site_key = (site_keys.get(site_slug) or '').strip()
+        if site_key:
+            return site_key
+
+        return (getattr(settings, 'GOOGLE_MAPS_API_KEY', '') or '').strip()
+
     def __str__(self):
         return f'Settings for {self.site.name}'
 

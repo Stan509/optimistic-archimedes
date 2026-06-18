@@ -217,6 +217,36 @@
         })();
     </script>
 
+    <!-- ================================================================== -->
+    <!-- GOOGLE TAG MANAGER (GTM) – Empty if no container ID configured      -->
+    <!-- ================================================================== -->
+    {% if gtm_container_id %}
+    <script async src="https://www.googletagmanager.com/gtm.js?id={{ gtm_container_id }}"></script>
+    {% endif %}
+
+    <!-- ================================================================== -->
+    <!-- GOOGLE ANALYTICS 4 (GA4) – Empty if no measurement ID configured    -->
+    <!-- ================================================================== -->
+    {% if google_analytics_id %}
+    <script async src="https://www.googletagmanager.com/gtag/js?id={{ google_analytics_id }}"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', '{{ google_analytics_id }}', {
+            'site_slug': '{{ current_site_slug }}',
+            {% if current_site %}site_name: '{{ current_site.name|escapejs }}',{% endif %}
+        });
+    </script>
+    {% endif %}
+
+    <!-- ================================================================== -->
+    <!-- GOOGLE reCAPTCHA v3 – Globally loaded for form protection            -->
+    <!-- ================================================================== -->
+    {% if recaptcha_site_key %}
+    <script src="https://www.google.com/recaptcha/api.js?render={{ recaptcha_site_key }}"></script>
+    {% endif %}
+
     <!-- Favicon & PWA Icons/Manifest -->
     <link rel="icon" type="image/x-icon" href="{% static 'core/images/favicon.ico' %}">
     <link rel="manifest" href="{% static 'core/manifest.json' %}">

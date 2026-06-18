@@ -31,6 +31,19 @@ def _get_language(request):
     return request.session.get('language', 'en')
 
 
+def _get_effective_google_maps_api_key(site):
+    """Return the site's dashboard Google Maps key or the code/runtime fallback."""
+    if not site:
+        return ''
+
+    try:
+        from core.models import SiteSettings
+        site_settings = SiteSettings.get_settings(site)
+        return site_settings.effective_google_maps_api_key if site_settings else ''
+    except Exception:
+        return ''
+
+
 # =========================================================================
 # HOME PAGE
 # =========================================================================
@@ -301,8 +314,7 @@ def _get_airport_transfer_price_for_category(site, slug, category, booking_data)
                 pass
 
         if address_lat and address_lng and airport_lat and airport_lng:
-            site_settings = SiteSettings.get_settings(site)
-            api_key = site_settings.google_maps_api_key if site_settings else ''
+            api_key = _get_effective_google_maps_api_key(site)
             google_dist = _get_google_driving_distance(airport_lat, airport_lng, address_lat, address_lng, api_key)
             if google_dist is not None:
                 distance_km = google_dist
@@ -385,9 +397,7 @@ def _get_category_price(site, slug, category, booking_data):
             d_lat = booking_data.get('dropoff_lat')
             d_lng = booking_data.get('dropoff_lng')
             if km <= 0.0 and p_lat and p_lng and d_lat and d_lng:
-                from core.models import SiteSettings
-                site_settings = SiteSettings.get_settings(site)
-                api_key = site_settings.google_maps_api_key if site_settings else ''
+                api_key = _get_effective_google_maps_api_key(site)
                 google_dist = _get_google_driving_distance(p_lat, p_lng, d_lat, d_lng, api_key)
                 if google_dist is not None:
                     km = google_dist
@@ -1306,14 +1316,9 @@ from django.views.decorators.http import require_GET
 @require_GET
 def api_google_maps_key(request):
     """Return the Google Maps API key for the current site."""
-    from core.models import SiteSettings
     site, slug = _get_site_or_404(request)
     
-    try:
-        site_settings = SiteSettings.get_settings(site)
-        api_key = site_settings.google_maps_api_key if site_settings else ''
-    except Exception:
-        api_key = ''
+    api_key = _get_effective_google_maps_api_key(site)
     
     return JsonResponse({'api_key': api_key})
 
@@ -1324,14 +1329,9 @@ def api_address_autocomplete(request):
     Autocomplete addresses using Google Places API.
     Query params: input (search text), location (optional: lat,lng), radius (optional: meters)
     """
-    from core.models import SiteSettings
     site, slug = _get_site_or_404(request)
     
-    try:
-        site_settings = SiteSettings.get_settings(site)
-        api_key = site_settings.google_maps_api_key if site_settings else ''
-    except Exception:
-        api_key = ''
+    api_key = _get_effective_google_maps_api_key(site)
     
     if not api_key:
         return JsonResponse({'predictions': [], 'error': 'Google Maps API key not configured'}, status=400)
@@ -1391,14 +1391,9 @@ def api_place_details(request):
     Get place details (coordinates, address) using Google Places API.
     Query params: place_id (required)
     """
-    from core.models import SiteSettings
     site, slug = _get_site_or_404(request)
     
-    try:
-        site_settings = SiteSettings.get_settings(site)
-        api_key = site_settings.google_maps_api_key if site_settings else ''
-    except Exception:
-        api_key = ''
+    api_key = _get_effective_google_maps_api_key(site)
     
     if not api_key:
         return JsonResponse({'error': 'Google Maps API key not configured'}, status=400)
@@ -1451,7 +1446,6 @@ def api_calculate_distance(request):
     Query params: origin_lat, origin_lng, destination_lat, destination_lng
     Returns distance in kilometers.
     """
-    from core.models import SiteSettings
     site, slug = _get_site_or_404(request)
     
     try:
@@ -1465,11 +1459,7 @@ def api_calculate_distance(request):
     if not all([origin_lat, origin_lng, dest_lat, dest_lng]):
         return JsonResponse({'error': 'All coordinates are required'}, status=400)
     
-    try:
-        site_settings = SiteSettings.get_settings(site)
-        api_key = site_settings.google_maps_api_key if site_settings else ''
-    except Exception:
-        api_key = ''
+    api_key = _get_effective_google_maps_api_key(site)
     
     if not api_key:
         # Fallback to haversine distance if no API key

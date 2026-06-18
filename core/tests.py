@@ -1,5 +1,6 @@
 from django.test import TestCase, Client
 from django.conf import settings
+from django.test import override_settings
 from django.urls import reverse
 from decimal import Decimal
 from datetime import date, time
@@ -1383,6 +1384,26 @@ class DistanceCalculationAndStorageTestCase(TestCase):
         self.assertIn('https://maps.googleapis.com/maps/api/js?key=AIzaTestKey', html)
         self.assertNotIn('AIzaSyDummyKey', html)
         self.assertNotIn('core/js/booking-maps.js', html)
+
+    @override_settings(
+        GOOGLE_MAPS_API_KEY='fallback_maps_key',
+        GOOGLE_MAPS_API_KEYS={'nyc': 'fallback_maps_key', 'dr': 'fallback_maps_key'},
+    )
+    def test_booking_page_and_api_use_settings_maps_key_fallback(self):
+        settings_obj = SiteSettings.get_settings(self.nyc)
+        settings_obj.google_maps_api_key = ''
+        settings_obj.save()
+
+        response = self.client.get('/nyc/book/')
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(
+            'https://maps.googleapis.com/maps/api/js?key=fallback_maps_key',
+            response.content.decode(),
+        )
+
+        api_response = self.client.get('/nyc/api/google-maps-key/')
+        self.assertEqual(api_response.status_code, 200)
+        self.assertEqual(api_response.json()['api_key'], 'fallback_maps_key')
 
     @patch('urllib.request.urlopen')
     def test_address_autocomplete_api_returns_predictions(self, mock_urlopen):
