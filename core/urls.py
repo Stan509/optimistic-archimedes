@@ -37,7 +37,6 @@ urlpatterns = [
     path('api/airports/', views.api_airports, name='api_airports'),
     path('api/destinations/<int:airport_id>/', views.api_destinations, name='api_destinations'),
     path('api/pricing/', views.api_pricing, name='api_pricing'),
-    path('api/google-maps-key/', views.api_google_maps_key, name='api_google_maps_key'),
     path('api/address-autocomplete/', views.api_address_autocomplete, name='api_address_autocomplete'),
     path('api/place-details/', views.api_place_details, name='api_place_details'),
     path('api/calculate-distance/', views.api_calculate_distance, name='api_calculate_distance'),
