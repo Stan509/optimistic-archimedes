@@ -1372,7 +1372,7 @@ class DistanceCalculationAndStorageTestCase(TestCase):
         dist = _get_google_driving_distance(40.6413, -73.7781, 40.7549, -73.9840, 'mock_key')
         self.assertEqual(dist, 28.5)
 
-    def test_booking_page_uses_single_real_maps_loader(self):
+    def test_booking_page_uses_leaflet_loader_instead_of_google_maps_js(self):
         settings_obj = SiteSettings.get_settings(self.nyc)
         settings_obj.google_maps_api_key = 'AIzaTestKey'
         settings_obj.save()
@@ -1381,7 +1381,9 @@ class DistanceCalculationAndStorageTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         html = response.content.decode()
 
-        self.assertIn('https://maps.googleapis.com/maps/api/js?key=AIzaTestKey', html)
+        self.assertIn('https://unpkg.com/leaflet@1.9.4/dist/leaflet.js', html)
+        self.assertIn('core/js/booking-leaflet.js', html)
+        self.assertNotIn('https://maps.googleapis.com/maps/api/js', html)
         self.assertNotIn('AIzaSyDummyKey', html)
         self.assertNotIn('core/js/booking-maps.js', html)
 
@@ -1396,10 +1398,7 @@ class DistanceCalculationAndStorageTestCase(TestCase):
 
         response = self.client.get('/nyc/book/')
         self.assertEqual(response.status_code, 200)
-        self.assertIn(
-            'https://maps.googleapis.com/maps/api/js?key=fallback_maps_key',
-            response.content.decode(),
-        )
+        self.assertIn('core/js/booking-leaflet.js', response.content.decode())
 
         api_response = self.client.get('/nyc/api/google-maps-key/')
         self.assertEqual(api_response.status_code, 200)

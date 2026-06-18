@@ -12,6 +12,8 @@
 
 {% block extra_css %}
 
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+
 <style>
 
     #booking-map {
@@ -19,6 +21,44 @@
         background: #0A0A0A !important;
 
         font-family: 'Outfit', sans-serif;
+
+    }
+
+    #booking-map .leaflet-control-attribution {
+
+        background: rgba(10, 10, 10, 0.75);
+
+        color: #9ca3af;
+
+    }
+
+    .aerolux-leaflet-marker span {
+
+        display: block;
+
+        width: 18px;
+
+        height: 18px;
+
+        border-radius: 9999px;
+
+        border: 2px solid #ffffff;
+
+        box-shadow: 0 0 18px rgba(201, 168, 76, 0.65);
+
+    }
+
+    .aerolux-leaflet-marker.pickup span {
+
+        background: #C9A84C;
+
+    }
+
+    .aerolux-leaflet-marker.dropoff span {
+
+        background: #ffffff;
+
+        border-color: #C9A84C;
 
     }
 
@@ -1320,11 +1360,8 @@
 
 {% block extra_js %}
 
-{% with maps_key=site_settings.effective_google_maps_api_key|default:google_maps_api_key %}
-{% if maps_key %}
-<script src="https://maps.googleapis.com/maps/api/js?key={{ maps_key|urlencode }}&libraries=places"></script>
-{% endif %}
-{% endwith %}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="{% static 'core/js/booking-leaflet.js' %}"></script>
 
 <script>
 
