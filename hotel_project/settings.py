@@ -304,3 +304,10 @@ HOURLY_RATE_RANGE = {
 DEVELOPER_NAME = 'GABOOM'
 DEVELOPER_PHONE = '829 509 84 12'
 COMPANY_NAME = 'AeroLux Select'
+
+# ==========================================================================
+# GOOGLE MAPS API CONFIGURATION (Configurable from dashboard)
+# ==========================================================================
+# This is a fallback value - actual key is stored in SiteSettings model
+# For production, set GOOGLE_MAPS_API_KEY environment variable
+GOOGLE_MAPS_API_KEY = os.environ.get('GOOGLE_MAPS_API_KEY', '')
