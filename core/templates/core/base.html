@@ -339,6 +339,16 @@
                     </div>
                     {% endif %}
 
+                    <!-- Site Switcher (NYC / DR) Desktop -->
+                    <div class="bg-theme-card border border-luxe-gold/30 rounded-full flex items-center p-0.5 shadow-[0_0_5px_rgba(212,175,55,0.2)]">
+                        <a href="{% site_url 'set_site' slug='nyc' %}" class="px-3 py-1 text-xs font-bold uppercase rounded-full transition-all {% if current_site_slug == 'nyc' %}bg-luxe-gold text-luxe-black{% else %}text-theme-text/80 hover:text-luxe-gold{% endif %}">
+                            NYC
+                        </a>
+                        <a href="{% site_url 'set_site' slug='dr' %}" class="px-3 py-1 text-xs font-bold uppercase rounded-full transition-all {% if current_site_slug == 'dr' %}bg-luxe-gold text-luxe-black{% else %}text-theme-text/80 hover:text-luxe-gold{% endif %}">
+                            DR
+                        </a>
+                    </div>
+
                     <!-- Theme Toggle Button -->
                     <button id="theme-toggle" onclick="toggleTheme()" class="w-9 h-9 rounded-full bg-theme-card border border-luxe-gold/20 flex items-center justify-center text-luxe-gold hover:bg-luxe-gold/10 transition-all" title="Toggle Light/Dark mode">
                         <i class="fas fa-moon text-sm theme-icon-moon"></i>
@@ -401,8 +411,6 @@
         {% block content %}{% endblock %}
     </main>
 
-    <!-- Floating Site Switcher Component -->
-    {% site_switcher %}
 
     <!-- Mobile Bottom Navigation Bar -->
     <nav class="mobile-bottom-nav fixed bottom-0 left-0 right-0 z-50 md:hidden safe-area-bottom">
