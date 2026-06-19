@@ -327,13 +327,60 @@ class BookingAdmin(admin.ModelAdmin):
     )
 
     def save_model(self, request, obj, form, change):
-        """Recalculate totals when saving via admin."""
+        """
+        Recalculate totals when saving via admin.
+        Automatically sends email + WhatsApp notifications on status changes.
+        """
+        # Capture old status before save
+        old_status = None
+        if obj.pk:
+            try:
+                old_status = Booking.objects.get(pk=obj.pk).status
+            except Booking.DoesNotExist:
+                pass
+
         super().save_model(request, obj, form, change)
         # Recalculate after save so M2M addons are committed
         obj.calculate_total()
         obj.save()
 
+        # ── Send notifications on status changes ──
+        new_status = obj.status
+        if old_status != new_status:
+            from core.emails import send_booking_email
+            from core.whatsapp import send_whatsapp
 
+            # Map Booking status -> email_type
+            status_to_type = {
+                'PENDING': 'processing',
+                'CONFIRMED': 'confirmed',
+                'COMPLETED': 'completed',
+                'CANCELLED': 'cancelled',
+            }
+
+            email_type = status_to_type.get(new_status)
+            if email_type:
+                try:
+                    send_booking_email(obj, email_type)
+                    self.message_user(
+                        request,
+                        f'Email "{email_type}" sent to {obj.customer_email}.',
+                    )
+                except Exception as e:
+                    self.message_user(
+                        request,
+                        f'Email "{email_type}" failed: {str(e)}',
+                        level='WARNING',
+                    )
+
+                try:
+                    send_whatsapp(obj, email_type)
+                except Exception as e:
+                    self.message_user(
+                        request,
+                        f'WhatsApp notification failed: {str(e)}',
+                        level='WARNING',
+                    )
 # ──────────────────────────────────────────────
 #  Site Content (CMS)
 # ──────────────────────────────────────────────

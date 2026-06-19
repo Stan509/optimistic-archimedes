@@ -1054,6 +1054,19 @@ def booking_success(request, reference):
             'language': _get_language(request),
         }
 
+    # ── Send "processing" notification (email + WhatsApp) ──
+    if booking and booking.pk:
+        try:
+            from core.emails import send_booking_email
+            from core.whatsapp import send_whatsapp
+            send_booking_email(booking, 'processing')
+            send_whatsapp(booking, 'processing')
+        except Exception as e:
+            import logging
+            logging.getLogger(__name__).warning(
+                f"Processing notification failed for {booking.booking_reference}: {e}"
+            )
+
     return render(request, 'core/booking_success.html', context)
 
 
