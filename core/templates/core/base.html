@@ -341,8 +341,8 @@
 
                     <!-- Theme Toggle Button -->
                     <button id="theme-toggle" onclick="toggleTheme()" class="w-9 h-9 rounded-full bg-theme-card border border-luxe-gold/20 flex items-center justify-center text-luxe-gold hover:bg-luxe-gold/10 transition-all" title="Toggle Light/Dark mode">
-                        <i class="fas fa-moon text-sm" id="theme-icon-moon"></i>
-                        <i class="fas fa-sun text-sm hidden" id="theme-icon-sun"></i>
+                        <i class="fas fa-moon text-sm theme-icon-moon"></i>
+                        <i class="fas fa-sun text-sm hidden theme-icon-sun"></i>
                     </button>
 
                     <!-- Book Chauffeur Button -->
@@ -351,13 +351,29 @@
                     </a>
                 </div>
 
-                <!-- Mobile: only lang toggle (nav is in bottom bar) -->
-                <div class="flex items-center md:hidden space-x-3">
+                <!-- Mobile navbar controls -->
+                <div class="flex items-center md:hidden space-x-2">
+                    <!-- Site Switcher (NYC / DR) -->
+                    <div class="bg-theme-card border border-luxe-gold/30 rounded-full flex items-center p-0.5 shadow-[0_0_5px_rgba(212,175,55,0.2)]">
+                        <a href="{% url 'set_site' slug='nyc' %}" class="px-2 py-0.5 text-[10px] font-bold uppercase rounded-full transition-all {% if current_site_slug == 'nyc' %}bg-luxe-gold text-luxe-black{% else %}text-theme-text/80 hover:text-luxe-gold{% endif %}">
+                            NYC
+                        </a>
+                        <a href="{% url 'set_site' slug='dr' %}" class="px-2 py-0.5 text-[10px] font-bold uppercase rounded-full transition-all {% if current_site_slug == 'dr' %}bg-luxe-gold text-luxe-black{% else %}text-theme-text/80 hover:text-luxe-gold{% endif %}">
+                            DR
+                        </a>
+                    </div>
+
                     {% if current_site_slug == 'dr' %}
-                    <a href="{% if language == 'en' %}{% site_url 'set_language' lang='es' %}{% else %}{% site_url 'set_language' lang='en' %}{% endif %}" class="text-xs border border-luxe-gold/30 rounded px-2 py-1 text-luxe-gold hover:bg-luxe-gold hover:text-luxe-black transition-all">
+                    <a href="{% if language == 'en' %}{% site_url 'set_language' lang='es' %}{% else %}{% site_url 'set_language' lang='en' %}{% endif %}" class="text-xs border border-luxe-gold/30 rounded px-1.5 py-0.5 text-luxe-gold hover:bg-luxe-gold hover:text-luxe-black transition-all">
                         {{ language|upper }}
                     </a>
                     {% endif %}
+
+                    <!-- Theme Toggle -->
+                    <button onclick="toggleTheme()" class="w-7 h-7 rounded-full bg-theme-card border border-luxe-gold/30 flex items-center justify-center text-luxe-gold shadow-[0_0_5px_rgba(212,175,55,0.2)]">
+                        <i class="fas fa-moon text-[10px] theme-icon-moon"></i>
+                        <i class="fas fa-sun text-[10px] hidden theme-icon-sun"></i>
+                    </button>
                 </div>
             </div>
         </div>
@@ -563,32 +579,26 @@
                 window.__applyThemeVariables(next);
             }
             // Update icon visibility
-            var moon = document.getElementById('theme-icon-moon');
-            var sun = document.getElementById('theme-icon-sun');
-            if (moon && sun) {
-                if (next === 'light') {
-                    moon.classList.add('hidden');
-                    sun.classList.remove('hidden');
-                } else {
-                    moon.classList.remove('hidden');
-                    sun.classList.add('hidden');
-                }
-            }
+            document.querySelectorAll('.theme-icon-moon').forEach(el => {
+                if (next === 'light') el.classList.add('hidden');
+                else el.classList.remove('hidden');
+            });
+            document.querySelectorAll('.theme-icon-sun').forEach(el => {
+                if (next === 'light') el.classList.remove('hidden');
+                else el.classList.add('hidden');
+            });
         };
         // Sync toggle icon on page load
         (function() {
             var saved = localStorage.getItem('aerolux_theme') || 'dark';
-            var moon = document.getElementById('theme-icon-moon');
-            var sun = document.getElementById('theme-icon-sun');
-            if (moon && sun) {
-                if (saved === 'light') {
-                    moon.classList.add('hidden');
-                    sun.classList.remove('hidden');
-                } else {
-                    moon.classList.remove('hidden');
-                    sun.classList.add('hidden');
-                }
-            }
+            document.querySelectorAll('.theme-icon-moon').forEach(el => {
+                if (saved === 'light') el.classList.add('hidden');
+                else el.classList.remove('hidden');
+            });
+            document.querySelectorAll('.theme-icon-sun').forEach(el => {
+                if (saved === 'light') el.classList.remove('hidden');
+                else el.classList.add('hidden');
+            });
         })();
     </script>
     {% block extra_js %}{% endblock %}
