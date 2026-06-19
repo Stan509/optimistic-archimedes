@@ -134,7 +134,7 @@
 
             
 
-            <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight font-display text-theme-text leading-tight">
+            <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight font-display text-white leading-tight">
 
                 {% site_content 'hero_title' current_site.hero_title|default:"AeroLux Select" %}
 
@@ -142,7 +142,7 @@
 
             
 
-            <p class="text-lg text-theme-text/80 max-w-xl mx-auto lg:mx-0 leading-relaxed font-light">
+            <p class="text-lg text-white/80 max-w-xl mx-auto lg:mx-0 leading-relaxed font-light">
 
                 {% site_content 'hero_subtitle' current_site.hero_subtitle|default:"Experience ultimate luxury and security." %}
 
@@ -288,7 +288,7 @@
 
                                     </span>
 
-                                    <select name="airport_id" id="airport_id" class="block w-full pl-11 pr-10 py-4 bg-theme-bg/80 rounded-xl border border-theme-border focus:border-luxe-gold text-sm text-theme-text focus:outline-none focus:ring-1 focus:ring-luxe-gold appearance-none">
+                                    <select name="airport_id" id="airport_id" class="block w-full pl-11 pr-10 py-4 bg-theme-bg/80 rounded-xl border border-theme-border focus:border-luxe-gold text-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-luxe-gold appearance-none">
 
                                         <option value="" disabled selected>Select Airport...</option>
 
@@ -340,7 +340,7 @@
 
                                     </span>
 
-                                    <input type="text" name="destination_address" id="destination_address" placeholder="Enter your destination address..." class="block w-full pl-11 pr-4 py-4 bg-theme-bg/80 rounded-xl border border-theme-border focus:border-luxe-gold text-sm text-theme-text focus:outline-none focus:ring-1 focus:ring-luxe-gold font-light" autocomplete="off">
+                                    <input type="text" name="destination_address" id="destination_address" placeholder="Enter your destination address..." class="block w-full pl-11 pr-4 py-4 bg-theme-bg/80 rounded-xl border border-theme-border focus:border-luxe-gold text-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-luxe-gold font-light" autocomplete="off">
 
                                 </div>
 
@@ -376,7 +376,7 @@
 
                                 </span>
 
-                                <input type="number" name="hours_requested" id="hours_requested" min="3" max="12" value="3" class="block w-full pl-11 pr-4 py-4 bg-theme-bg/80 rounded-xl border border-theme-border focus:border-luxe-gold text-sm text-theme-text focus:outline-none focus:ring-1 focus:ring-luxe-gold">
+                                <input type="number" name="hours_requested" id="hours_requested" min="3" max="12" value="3" class="block w-full pl-11 pr-4 py-4 bg-theme-bg/80 rounded-xl border border-theme-border focus:border-luxe-gold text-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-luxe-gold">
 
                             </div>
 
@@ -454,7 +454,7 @@
 
                                 </span>
 
-                                <input type="text" name="pickup_address" id="pickup_address" placeholder="Enter starting address..." class="block w-full pl-10 pr-4 py-3.5 bg-theme-bg/90 rounded-xl border border-theme-border focus:border-luxe-gold text-xs text-theme-text focus:outline-none focus:ring-1 focus:ring-luxe-gold font-light transition-all duration-300">
+                                <input type="text" name="pickup_address" id="pickup_address" placeholder="Enter starting address..." class="block w-full pl-10 pr-4 py-3.5 bg-theme-bg/90 rounded-xl border border-theme-border focus:border-luxe-gold text-xs text-gray-900 focus:outline-none focus:ring-1 focus:ring-luxe-gold font-light transition-all duration-300">
 
                             </div>
 
@@ -516,7 +516,7 @@
 
                                 </span>
 
-                                <input type="text" name="dropoff_address" id="dropoff_address" placeholder="Enter destination address..." class="block w-full pl-10 pr-4 py-3.5 bg-theme-bg/90 rounded-xl border border-theme-border focus:border-luxe-gold text-xs text-theme-text focus:outline-none focus:ring-1 focus:ring-luxe-gold font-light transition-all duration-300">
+                                <input type="text" name="dropoff_address" id="dropoff_address" placeholder="Enter destination address..." class="block w-full pl-10 pr-4 py-3.5 bg-theme-bg/90 rounded-xl border border-theme-border focus:border-luxe-gold text-xs text-gray-900 focus:outline-none focus:ring-1 focus:ring-luxe-gold font-light transition-all duration-300">
 
                             </div>
 
@@ -536,7 +536,7 @@
 
                                 <span class="text-[10px] text-theme-text/60 font-semibold uppercase">Quantity:</span>
 
-                                <input type="number" name="number_of_stops" id="number_of_stops" min="0" value="0" class="w-16 bg-theme-bg border border-theme-border rounded px-2 py-1 text-xs text-theme-text focus:border-luxe-gold outline-none">
+                                <input type="number" name="number_of_stops" id="number_of_stops" min="0" value="0" class="w-16 bg-theme-bg border border-theme-border rounded px-2 py-1 text-xs text-gray-900 focus:border-luxe-gold outline-none">
 
                                 <span class="text-[10px] text-luxe-gold font-bold">($20/stop for Point-to-Point)</span>
 
@@ -548,7 +548,7 @@
 
                             <label for="stop_addresses" class="block text-[10px] uppercase text-theme-text/60 font-bold mb-1">Stop Addresses</label>
 
-                            <textarea name="stop_addresses" id="stop_addresses" rows="2" placeholder="List address details for each stop..." class="block w-full px-4 py-3 bg-theme-bg rounded-lg border border-theme-border focus:border-luxe-gold text-xs text-theme-text focus:outline-none focus:ring-1 focus:ring-luxe-gold font-light"></textarea>
+                            <textarea name="stop_addresses" id="stop_addresses" rows="2" placeholder="List address details for each stop..." class="block w-full px-4 py-3 bg-theme-bg rounded-lg border border-theme-border focus:border-luxe-gold text-xs text-gray-900 focus:outline-none focus:ring-1 focus:ring-luxe-gold font-light"></textarea>
 
                         </div>
 
@@ -570,7 +570,7 @@
 
                                 </span>
 
-                                <input type="date" name="pickup_date" id="pickup_date" required min="{{ today }}" value="{{ today }}" class="block w-full pl-11 pr-4 py-4 bg-theme-bg/80 rounded-xl border border-theme-border focus:border-luxe-gold text-sm text-theme-text focus:outline-none focus:ring-1 focus:ring-luxe-gold">
+                                <input type="date" name="pickup_date" id="pickup_date" required min="{{ today }}" value="{{ today }}" class="block w-full pl-11 pr-4 py-4 bg-theme-bg/80 rounded-xl border border-theme-border focus:border-luxe-gold text-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-luxe-gold">
 
                             </div>
 
@@ -590,7 +590,7 @@
 
                                 </span>
 
-                                <input type="time" name="pickup_time" id="pickup_time" required value="12:00" class="block w-full pl-11 pr-4 py-4 bg-theme-bg/80 rounded-xl border border-theme-border focus:border-luxe-gold text-sm text-theme-text focus:outline-none focus:ring-1 focus:ring-luxe-gold">
+                                <input type="time" name="pickup_time" id="pickup_time" required value="12:00" class="block w-full pl-11 pr-4 py-4 bg-theme-bg/80 rounded-xl border border-theme-border focus:border-luxe-gold text-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-luxe-gold">
 
                             </div>
 
@@ -614,7 +614,7 @@
 
                                 </span>
 
-                                <input type="number" name="passenger_count" id="passenger_count" required min="1" max="14" value="1" class="block w-full pl-11 pr-4 py-4 bg-theme-bg/80 rounded-xl border border-theme-border focus:border-luxe-gold text-sm text-theme-text focus:outline-none focus:ring-1 focus:ring-luxe-gold">
+                                <input type="number" name="passenger_count" id="passenger_count" required min="1" max="14" value="1" class="block w-full pl-11 pr-4 py-4 bg-theme-bg/80 rounded-xl border border-theme-border focus:border-luxe-gold text-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-luxe-gold">
 
                             </div>
 
@@ -634,7 +634,7 @@
 
                                 </span>
 
-                                <input type="text" name="flight_number" id="flight_number" placeholder="e.g. AA1234" class="block w-full pl-11 pr-4 py-4 bg-theme-bg/80 rounded-xl border border-theme-border focus:border-luxe-gold text-sm text-theme-text focus:outline-none focus:ring-1 focus:ring-luxe-gold uppercase">
+                                <input type="text" name="flight_number" id="flight_number" placeholder="e.g. AA1234" class="block w-full pl-11 pr-4 py-4 bg-theme-bg/80 rounded-xl border border-theme-border focus:border-luxe-gold text-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-luxe-gold uppercase">
 
                             </div>
 
@@ -694,7 +694,7 @@
 
                                     </span>
 
-                                    <input type="date" name="return_date" id="return_date" min="{{ today }}" class="block w-full pl-11 pr-4 py-4 bg-theme-bg/80 rounded-xl border border-theme-border focus:border-luxe-gold text-sm text-theme-text focus:outline-none focus:ring-1 focus:ring-luxe-gold font-light">
+                                    <input type="date" name="return_date" id="return_date" min="{{ today }}" class="block w-full pl-11 pr-4 py-4 bg-theme-bg/80 rounded-xl border border-theme-border focus:border-luxe-gold text-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-luxe-gold font-light">
 
                                 </div>
 
@@ -712,7 +712,7 @@
 
                                     </span>
 
-                                    <input type="time" name="return_time" id="return_time" class="block w-full pl-11 pr-4 py-4 bg-theme-bg/80 rounded-xl border border-theme-border focus:border-luxe-gold text-sm text-theme-text focus:outline-none focus:ring-1 focus:ring-luxe-gold font-light">
+                                    <input type="time" name="return_time" id="return_time" class="block w-full pl-11 pr-4 py-4 bg-theme-bg/80 rounded-xl border border-theme-border focus:border-luxe-gold text-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-luxe-gold font-light">
 
                                 </div>
 
@@ -736,7 +736,7 @@
 
                             </span>
 
-                            <input type="text" name="meeting_point" id="meeting_point" placeholder="e.g. Terminal B exit gate 4, or hotel lobby entrance" class="block w-full pl-11 pr-4 py-4 bg-theme-bg/80 rounded-xl border border-theme-border focus:border-luxe-gold text-sm text-theme-text focus:outline-none focus:ring-1 focus:ring-luxe-gold font-light font-sans">
+                            <input type="text" name="meeting_point" id="meeting_point" placeholder="e.g. Terminal B exit gate 4, or hotel lobby entrance" class="block w-full pl-11 pr-4 py-4 bg-theme-bg/80 rounded-xl border border-theme-border focus:border-luxe-gold text-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-luxe-gold font-light font-sans">
 
                         </div>
 
