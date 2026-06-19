@@ -201,15 +201,15 @@
 
                         <label class="block text-xs uppercase tracking-widest font-bold text-theme-text/90 mb-3">Service Type</label>
 
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3 bg-theme-bg p-1.5 rounded-2xl border border-theme-border">
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3 bg-transparent p-1.5 rounded-2xl">
 
                         <label class="cursor-pointer text-center p-4 rounded-xl text-xs font-semibold uppercase tracking-wider transition-all duration-300 block select-none border border-transparent" id="lbl-transfer">
 
                             <input type="radio" name="service_type" value="airport_transfer" checked class="sr-only" id="rad-transfer">
 
-                            <i class="fas fa-plane-departure text-base text-luxe-gold mb-2 block"></i>
+                            <i class="fas fa-plane-departure text-base text-theme-text/95 mb-2 block" id="icon-transfer"></i>
 
-                            <span class="block">Airport Transfer</span>
+                            <span class="block text-theme-text/90" id="span-transfer">Airport Transfer</span>
 
                         </label>
 
@@ -1390,6 +1390,10 @@
 
         const spanHourly = document.getElementById('span-hourly');
 
+        const iconTransfer = document.getElementById('icon-transfer');
+
+        const spanTransfer = document.getElementById('span-transfer');
+
         const spanP2P = document.getElementById('span-p2p');
 
         const divAirportTransferWrapper = document.getElementById('div-airport-transfer-wrapper');
@@ -1544,11 +1548,18 @@
 
             }
 
+            if (iconTransfer) {
+                iconTransfer.className = "fas fa-plane-departure text-base text-theme-text/95 mb-2 block";
+                spanTransfer.className = "block text-theme-text/90";
+            }
+
             if (radTransfer.checked) {
-
-                lblTransfer.className = "cursor-pointer text-center p-4 rounded-xl text-xs font-semibold uppercase tracking-wider bg-luxe-gold/10 border border-luxe-gold/50 text-luxe-gold block select-none";
-
+                lblTransfer.className = "cursor-pointer text-center p-4 rounded-xl text-xs font-semibold uppercase tracking-wider gold-btn block select-none";
                 
+                if (iconTransfer) {
+                    iconTransfer.className = "fas fa-plane-departure text-base text-current mb-2 block";
+                    spanTransfer.className = "block font-bold text-current";
+                }
 
                 divAirportTransferWrapper.classList.remove('hidden');
 
@@ -1573,12 +1584,11 @@
             } 
 
             else if (radP2P.checked) {
+                lblP2P.className = "cursor-pointer text-center p-4 rounded-xl text-xs font-semibold uppercase tracking-wider gold-btn block select-none";
 
-                lblP2P.className = "cursor-pointer text-center p-4 rounded-xl text-xs font-semibold uppercase tracking-wider bg-luxe-gold/10 border border-luxe-gold/50 text-luxe-gold block select-none";
+                iconP2P.className = "fas fa-route text-base text-current mb-2 block";
 
-                iconP2P.className = "fas fa-route text-base text-luxe-gold mb-2 block";
-
-                spanP2P.className = "block text-theme-text";
+                spanP2P.className = "block font-bold text-current";
 
                 divAirportTransferWrapper.classList.add('hidden');
 
@@ -1605,12 +1615,11 @@
             }
 
             else if (radHourly.checked) {
+                lblHourly.className = "cursor-pointer text-center p-4 rounded-xl text-xs font-semibold uppercase tracking-wider gold-btn block select-none";
 
-                lblHourly.className = "cursor-pointer text-center p-4 rounded-xl text-xs font-semibold uppercase tracking-wider bg-luxe-gold/10 border border-luxe-gold/50 text-luxe-gold block select-none";
+                iconHourly.className = "fas fa-clock text-base text-current mb-2 block";
 
-                iconHourly.className = "fas fa-clock text-base text-luxe-gold mb-2 block";
-
-                spanHourly.className = "block text-theme-text";
+                spanHourly.className = "block font-bold text-current";
 
                 divAirportTransferWrapper.classList.add('hidden');
 
@@ -1641,12 +1650,11 @@
             }
 
             else if (radRental && radRental.checked) {
+                lblRental.className = "cursor-pointer text-center p-4 rounded-xl text-xs font-semibold uppercase tracking-wider gold-btn block select-none";
 
-                lblRental.className = "cursor-pointer text-center p-4 rounded-xl text-xs font-semibold uppercase tracking-wider bg-luxe-gold/10 border border-luxe-gold/50 text-luxe-gold block select-none";
+                iconRental.className = "fas fa-car text-base text-current mb-2 block";
 
-                iconRental.className = "fas fa-car text-base text-luxe-gold mb-2 block";
-
-                spanRental.className = "block text-theme-text";
+                spanRental.className = "block font-bold text-current";
 
                 divAirportTransferWrapper.classList.add('hidden');
 
