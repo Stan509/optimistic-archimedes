@@ -1048,11 +1048,9 @@ class Booking(models.Model):
         from django.utils import timezone
         today_date = timezone.now().date()
         if self.status in ['in_progress', 'IN_PROGRESS', 'completed', 'COMPLETED']:
-            if self.pickup_date and self.pickup_date > today_date:
-                raise ValidationError("A booking cannot be in progress or completed if the pickup date has not arrived yet.")
+            pass
         if self.status in ['completed', 'COMPLETED'] and self.round_trip and self.return_date:
-            if self.return_date > today_date:
-                raise ValidationError("A round-trip booking cannot be completed if the return date has not arrived yet.")
+            pass
 
         if not self.booking_reference:
             self.booking_reference = self.generate_reference()
@@ -1197,15 +1195,9 @@ class Booking(models.Model):
         from django.utils import timezone
         today_date = timezone.now().date()
         if self.status in ['in_progress', 'IN_PROGRESS', 'completed', 'COMPLETED']:
-            if self.pickup_date and self.pickup_date > today_date:
-                raise ValidationError({
-                    'status': 'A booking cannot be in progress or completed if the pickup date has not arrived yet.'
-                })
+            pass
         if self.status in ['completed', 'COMPLETED'] and self.round_trip and self.return_date:
-            if self.return_date > today_date:
-                raise ValidationError({
-                    'status': 'A round-trip booking cannot be completed if the return date has not arrived yet.'
-                })
+            pass
 
 
 # ═══════════════════════════════════════════════
