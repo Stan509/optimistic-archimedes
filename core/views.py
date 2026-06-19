@@ -695,7 +695,7 @@ def booking_payment(request):
                     flight_number=booking_data.get('flight_number', ''),
                     customer_notes=booking_data.get('customer_notes', ''),
                     booking_source='DIRECT',
-                    round_trip=True,
+                    round_trip=False, # Forced False to decouple round trips
                     return_date=booking_data.get('return_date') or None,
                     return_time=booking_data.get('return_time') or None,
                     number_of_stops=stops,
@@ -760,7 +760,7 @@ def booking_payment(request):
                     flight_number='',
                     customer_notes=booking_data.get('customer_notes', ''),
                     booking_source='DIRECT',
-                    round_trip=True,
+                    round_trip=False, # Forced False to decouple round trips
                     return_date=booking_data.get('pickup_date') or None,
                     return_time=booking_data.get('pickup_time') or None,
                     number_of_stops=0,
@@ -769,7 +769,6 @@ def booking_payment(request):
                     base_price=base_price,
                     pay_separately=booking_data.get('pay_separately', False),
                     payment_method=payment_method,
-                    linked_booking=booking_outbound,
                 )
 
                 if airport_id:
@@ -795,9 +794,9 @@ def booking_payment(request):
                 if addon_return_ids:
                     booking_return.addons.set(addon_return_ids)
                 
-                # Link outbound to return
-                booking_outbound.linked_booking = booking_return
-                booking_outbound.save(update_fields=['linked_booking'])
+                # DO NOT Link outbound to return
+                booking_outbound.round_trip = False # Treat as separate one-way
+                booking_outbound.save(update_fields=['round_trip'])
                 
                 # Force reload to get updated fields and calculate totals with addons
                 booking_outbound = Booking.objects.get(pk=booking_outbound.pk)
