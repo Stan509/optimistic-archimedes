@@ -23,7 +23,7 @@
         <h1 class="text-4xl sm:text-5xl font-extrabold font-display text-theme-text mt-1">
             {{ category.name }} <span class="gold-gradient-text">Specifications</span>
         </h1>
-        <p class="text-theme-text/70 text-sm max-w-xl mt-4 leading-relaxed font-medium">
+        <p class="text-theme-text/90 text-sm max-w-xl mt-4 leading-relaxed font-medium">
             Thoroughly inspect the design, interactive features, capacities, and active cabin features of our premium {{ category.name }} class.
         </p>
     </div>
@@ -68,21 +68,21 @@
                     <h2 class="text-2xl font-bold font-display text-theme-text">Capacity & Comfort Specs</h2>
                     <div class="w-full h-[1px] bg-gray-800"></div>
                     
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm text-theme-text/80">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm text-theme-text/95">
                         <div class="flex items-center justify-between p-4 bg-theme-card rounded-xl border border-theme-border">
-                            <span class="text-xs text-theme-text/60 uppercase font-semibold">Max Passenger Count</span>
+                            <span class="text-xs text-theme-text/95 uppercase font-semibold">Max Passenger Count</span>
                             <span class="font-bold text-theme-text">{{ category.passengers_capacity }} Adults</span>
                         </div>
                         <div class="flex items-center justify-between p-4 bg-theme-card rounded-xl border border-theme-border">
-                            <span class="text-xs text-theme-text/60 uppercase font-semibold">Luggage Capacity</span>
+                            <span class="text-xs text-theme-text/95 uppercase font-semibold">Luggage Capacity</span>
                             <span class="font-bold text-theme-text">{{ category.luggage_capacity }} Bags</span>
                         </div>
                         <div class="flex items-center justify-between p-4 bg-theme-card rounded-xl border border-theme-border">
-                            <span class="text-xs text-theme-text/60 uppercase font-semibold">Wi-Fi Internet Access</span>
+                            <span class="text-xs text-theme-text/95 uppercase font-semibold">Wi-Fi Internet Access</span>
                             <span class="font-bold text-luxe-gold">4G Premium Cabin</span>
                         </div>
                         <div class="flex items-center justify-between p-4 bg-theme-card rounded-xl border border-theme-border">
-                            <span class="text-xs text-theme-text/60 uppercase font-semibold">Interior Cabin Color</span>
+                            <span class="text-xs text-theme-text/95 uppercase font-semibold">Interior Cabin Color</span>
                             <span class="font-bold text-theme-text">Obsidian Black Leather</span>
                         </div>
                     </div>
@@ -108,12 +108,12 @@
                                 <h4 class="text-sm font-bold text-theme-text">{{ vehicle.name }}</h4>
                                 <p class="text-[10px] text-luxe-gold uppercase tracking-wider font-semibold">Multiplier: x{{ vehicle.price_multiplier }}</p>
                                 {% if vehicle.model_year %}
-                                <p class="text-[10px] text-theme-text/60 font-medium">Model Year: {{ vehicle.model_year }}</p>
+                                <p class="text-[10px] text-theme-text/95 font-medium">Model Year: {{ vehicle.model_year }}</p>
                                 {% endif %}
                             </div>
                         </div>
                         {% empty %}
-                        <p class="text-xs text-theme-text/60 italic col-span-2">No individual vehicles are configured active in this hub.</p>
+                        <p class="text-xs text-theme-text/95 italic col-span-2">No individual vehicles are configured active in this hub.</p>
                         {% endfor %}
                     </div>
                 </div>
@@ -126,10 +126,10 @@
                     <div class="absolute top-0 left-0 w-full h-1 bg-luxe-gold"></div>
                     <span class="text-[9px] uppercase font-bold tracking-widest text-luxe-gold">Instant Dispatch</span>
                     <h3 class="text-lg font-bold font-display text-theme-text uppercase tracking-wider">Book {{ category.name }}</h3>
-                    <p class="text-xs text-theme-text/70 font-medium leading-relaxed">
+                    <p class="text-xs text-theme-text/90 font-medium leading-relaxed">
                         Ready to experience the ultimate standard of black-car comfort? Secure this vehicle category for your upcoming transfers.
                     </p>
-                    <div class="border-t border-theme-border pt-4 text-xs text-theme-text/60">
+                    <div class="border-t border-theme-border pt-4 text-xs text-theme-text/95">
                         <span class="font-bold text-theme-text">Hub availability:</span>
                         <p class="text-[10px] text-green-500 font-semibold mt-1">Guaranteed dispatched within region</p>
                     </div>

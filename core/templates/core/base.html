@@ -56,13 +56,13 @@
         <style>
             :root {
                 --theme-bg-dark: #070708;
-                --theme-bg-light: #FFFFFF;
+                --theme-bg-light: #EEF2F6;
                 --theme-text-dark: #FFFFFF;
-                --theme-text-light: #0A192F;
+                --theme-text-light: #000B18;
                 --theme-card-dark: #111113;
-                --theme-card-light: #F8FAFC;
+                --theme-card-light: #FFFFFF;
                 --theme-border-dark: rgba(201, 168, 76, 0.18);
-                --theme-border-light: rgba(10, 25, 47, 0.15);
+                --theme-border-light: rgba(0, 11, 24, 0.2);
                 --theme-primary: #C9A84C;
                 --theme-primary-hover: #DFBA5B;
                 --theme-font-sans: 'Outfit', sans-serif;
@@ -79,13 +79,13 @@
         <style>
             :root {
                 --theme-bg-dark: #090F0D;
-                --theme-bg-light: #FFFFFF;
+                --theme-bg-light: #EEF2F6;
                 --theme-text-dark: #F5F7F6;
-                --theme-text-light: #001F3F;
+                --theme-text-light: #000B18;
                 --theme-card-dark: #121A16;
-                --theme-card-light: #F4F7F6;
+                --theme-card-light: #FFFFFF;
                 --theme-border-dark: rgba(223, 186, 91, 0.2);
-                --theme-border-light: rgba(0, 31, 63, 0.15);
+                --theme-border-light: rgba(0, 11, 24, 0.2);
                 --theme-primary: #DFBA5B;
                 --theme-primary-hover: #C9A84C;
                 --theme-font-sans: 'Playfair Display', serif;
@@ -144,9 +144,9 @@
             border: 1px solid var(--theme-border-dark);
         }
         .light .glass-card {
-            background: rgba(255, 255, 255, 0.85);
-            border: 1px solid var(--theme-border-light);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.04);
+            background: rgba(255, 255, 255, 0.95);
+            border: 2px solid rgba(0, 31, 63, 0.6);
+            box-shadow: 0 0 30px rgba(0, 31, 63, 0.45);
         }
         .glass-card-hover:hover {
             border: 1px solid var(--theme-primary);
@@ -277,11 +277,11 @@
     <!-- Premium Navigation Bar -->
     <header class="fixed top-0 left-0 right-0 z-50 glass-nav transition-all duration-300" id="main-header">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between h-24">
+            <div class="flex items-center justify-between h-32">
                 <!-- Brand Logo & Name — Bigger logo -->
                 <div class="flex-shrink-0 flex items-center">
-                    <a href="{% site_url 'index' %}" class="flex items-center space-x-3 group">
-                        <img src="{% static 'core/images/logo.png' %}" alt="{{ current_site.name }}" class="h-20 w-auto object-contain md:h-24 py-1">
+                    <a href="{% site_url 'index' %}" class="flex items-center space-x-3 group pr-10">
+                        <img src="{% static 'core/images/logo.png' %}" alt="{{ current_site.name }}" class="h-28 w-auto object-cover md:h-32 py-1 transform scale-[1.8] origin-left">
                     </a>
                 </div>
 
@@ -301,7 +301,7 @@
                         <button class="flex items-center space-x-2 text-sm font-medium tracking-wider uppercase hover:text-luxe-gold transition-colors duration-300 focus:outline-none py-2">
                             <i class="fas fa-globe text-luxe-gold"></i>
                             <span>{{ language|upper }}</span>
-                            <i class="fas fa-chevron-down text-[10px] text-theme-text/70 group-hover:text-luxe-gold"></i>
+                            <i class="fas fa-chevron-down text-[10px] text-theme-text/90 group-hover:text-luxe-gold"></i>
                         </button>
                         <div class="absolute right-0 mt-1 w-28 rounded-md bg-theme-card border border-luxe-gold/20 shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50 overflow-hidden">
                             <div class="py-1">
@@ -351,7 +351,7 @@
                     <i class="fas {% if message.tags == 'success' %}fa-circle-check{% elif message.tags == 'warning' %}fa-circle-exclamation{% else %}fa-circle-info{% endif %} text-lg"></i>
                     <p class="text-sm font-medium">{{ message }}</p>
                 </div>
-                <button class="text-theme-text/70 hover:text-theme-text focus:outline-none" onclick="this.parentElement.remove()">
+                <button class="text-theme-text/90 hover:text-theme-text focus:outline-none" onclick="this.parentElement.remove()">
                     <i class="fas fa-xmark"></i>
                 </button>
             </div>
@@ -368,11 +368,11 @@
     <!-- Mobile Bottom Navigation Bar -->
     <nav class="mobile-bottom-nav fixed bottom-0 left-0 right-0 z-50 md:hidden safe-area-bottom">
         <div class="flex items-center justify-around h-16 px-1">
-            <a href="{% site_url 'index' %}" class="flex flex-col items-center justify-center w-full py-1 text-theme-text/60 hover:text-luxe-gold active" id="bnav-home">
+            <a href="{% site_url 'index' %}" class="flex flex-col items-center justify-center w-full py-1 text-theme-text/95 hover:text-luxe-gold active" id="bnav-home">
                 <i class="fas fa-home text-lg mb-0.5"></i>
                 <span class="text-[10px] font-semibold uppercase tracking-wider">Home</span>
             </a>
-            <a href="{% site_url 'services' %}" class="flex flex-col items-center justify-center w-full py-1 text-theme-text/60 hover:text-luxe-gold" id="bnav-services">
+            <a href="{% site_url 'services' %}" class="flex flex-col items-center justify-center w-full py-1 text-theme-text/95 hover:text-luxe-gold" id="bnav-services">
                 <i class="fas fa-concierge-bell text-lg mb-0.5"></i>
                 <span class="text-[10px] font-semibold uppercase tracking-wider">Services</span>
             </a>
@@ -382,11 +382,11 @@
                 </div>
                 <span class="text-[10px] font-bold uppercase tracking-wider text-luxe-gold mt-0.5">Book</span>
             </a>
-            <a href="{% site_url 'fleet' %}" class="flex flex-col items-center justify-center w-full py-1 text-theme-text/60 hover:text-luxe-gold" id="bnav-fleet">
+            <a href="{% site_url 'fleet' %}" class="flex flex-col items-center justify-center w-full py-1 text-theme-text/95 hover:text-luxe-gold" id="bnav-fleet">
                 <i class="fas fa-car text-lg mb-0.5"></i>
                 <span class="text-[10px] font-semibold uppercase tracking-wider">Fleet</span>
             </a>
-            <a href="{% site_url 'contact' %}" class="flex flex-col items-center justify-center w-full py-1 text-theme-text/60 hover:text-luxe-gold" id="bnav-contact">
+            <a href="{% site_url 'contact' %}" class="flex flex-col items-center justify-center w-full py-1 text-theme-text/95 hover:text-luxe-gold" id="bnav-contact">
                 <i class="fas fa-envelope text-lg mb-0.5"></i>
                 <span class="text-[10px] font-semibold uppercase tracking-wider">Contact</span>
             </a>
@@ -394,7 +394,7 @@
     </nav>
 
     <!-- Premium Footer with Developer Credit -->
-    <footer class="bg-theme-bg border-t border-luxe-gold/10 text-theme-text/70 pt-16 pb-8 md:pb-8 pb-24">
+    <footer class="bg-theme-bg border-t border-luxe-gold/10 text-theme-text/90 pt-16 pb-8 md:pb-8 pb-24">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
                 <!-- Brand Profile -->
@@ -402,21 +402,21 @@
                     <h3 class="text-xl font-semibold tracking-wider font-display text-theme-text gold-gradient-text uppercase">
                         AeroLux Select
                     </h3>
-                    <p class="text-sm leading-relaxed text-theme-text/70">
+                    <p class="text-sm leading-relaxed text-theme-text/90">
                         {% site_content 'footer_about' 'Premium airport transfers and private chauffeur services customized for high-profile business clients and elite travelers. Operating in NYC and the Dominican Republic.' %}
                     </p>
                     <div class="flex space-x-4 pt-2">
                         {% if site_settings.social_instagram %}
-                            <a href="{{ site_settings.social_instagram }}" class="text-theme-text/70 hover:text-luxe-gold text-lg transition-colors"><i class="fab fa-instagram"></i></a>
+                            <a href="{{ site_settings.social_instagram }}" class="text-theme-text/90 hover:text-luxe-gold text-lg transition-colors"><i class="fab fa-instagram"></i></a>
                         {% endif %}
                         {% if site_settings.social_facebook %}
-                            <a href="{{ site_settings.social_facebook }}" class="text-theme-text/70 hover:text-luxe-gold text-lg transition-colors"><i class="fab fa-facebook-f"></i></a>
+                            <a href="{{ site_settings.social_facebook }}" class="text-theme-text/90 hover:text-luxe-gold text-lg transition-colors"><i class="fab fa-facebook-f"></i></a>
                         {% endif %}
                         {% if site_settings.social_twitter %}
-                            <a href="{{ site_settings.social_twitter }}" class="text-theme-text/70 hover:text-luxe-gold text-lg transition-colors"><i class="fab fa-x-twitter"></i></a>
+                            <a href="{{ site_settings.social_twitter }}" class="text-theme-text/90 hover:text-luxe-gold text-lg transition-colors"><i class="fab fa-x-twitter"></i></a>
                         {% endif %}
                         {% if site_settings.social_tiktok %}
-                            <a href="{{ site_settings.social_tiktok }}" class="text-theme-text/70 hover:text-luxe-gold text-lg transition-colors"><i class="fab fa-tiktok"></i></a>
+                            <a href="{{ site_settings.social_tiktok }}" class="text-theme-text/90 hover:text-luxe-gold text-lg transition-colors"><i class="fab fa-tiktok"></i></a>
                         {% endif %}
                     </div>
                 </div>
@@ -484,7 +484,7 @@
             <!-- Developer Credit and Bottom line -->
             <div class="border-t border-theme-border pt-8 mt-12 flex flex-col md:flex-row items-center justify-between text-xs">
                 <p>&copy; {% now "Y" %} AeroLux Select. All rights reserved.</p>
-                <div class="mt-4 md:mt-0 flex items-center space-x-2 text-theme-text/60">
+                <div class="mt-4 md:mt-0 flex items-center space-x-2 text-theme-text/95">
                     <span>|</span>
                     <!-- REQUIRED DEVELOPER CREDIT -->
                     <a href="tel:8295098412" class="hover:text-luxe-gold transition-colors font-medium">

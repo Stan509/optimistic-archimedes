@@ -10,9 +10,9 @@
         
         <!-- Premium Multi-step Progress Indicator -->
         <div class="mb-12">
-            <div class="flex justify-between items-center text-xs uppercase tracking-wider text-theme-text/60 font-semibold mb-3">
-                <span class="text-theme-text/70">1. Trip Routing</span>
-                <span class="text-theme-text/70">2. Select Vehicle</span>
+            <div class="flex justify-between items-center text-xs uppercase tracking-wider text-theme-text/95 font-semibold mb-3">
+                <span class="text-theme-text/90">1. Trip Routing</span>
+                <span class="text-theme-text/90">2. Select Vehicle</span>
                 <span class="text-luxe-gold">3. Passenger Details</span>
                 <span>4. Payment & Checkout</span>
             </div>
@@ -44,9 +44,9 @@
                             
                             <div class="space-y-3">
                                 <div>
-                                    <label for="customer_name" class="block text-xs text-theme-text/70 mb-1">Full Name</label>
+                                    <label for="customer_name" class="block text-xs text-theme-text/90 mb-1">Full Name</label>
                                     <div class="relative">
-                                        <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-theme-text/60">
+                                        <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-theme-text/95">
                                             <i class="fas fa-user text-xs"></i>
                                         </span>
                                         <input type="text" name="customer_name" id="customer_name" required value="{{ booking_data.customer_name|default:'' }}" class="block w-full pl-9 pr-4 py-3 bg-theme-bg rounded-lg border border-theme-border focus:border-luxe-gold text-sm text-theme-text focus:outline-none focus:ring-1 focus:ring-luxe-gold">
@@ -55,18 +55,18 @@
 
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
-                                        <label for="customer_email" class="block text-xs text-theme-text/70 mb-1">Email Address</label>
+                                        <label for="customer_email" class="block text-xs text-theme-text/90 mb-1">Email Address</label>
                                         <div class="relative">
-                                            <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-theme-text/60">
+                                            <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-theme-text/95">
                                                 <i class="fas fa-envelope text-xs"></i>
                                             </span>
                                             <input type="email" name="customer_email" id="customer_email" required value="{{ booking_data.customer_email|default:'' }}" class="block w-full pl-9 pr-4 py-3 bg-theme-bg rounded-lg border border-theme-border focus:border-luxe-gold text-sm text-theme-text focus:outline-none focus:ring-1 focus:ring-luxe-gold">
                                         </div>
                                     </div>
                                     <div>
-                                        <label for="customer_phone" class="block text-xs text-theme-text/70 mb-1">Phone Number</label>
+                                        <label for="customer_phone" class="block text-xs text-theme-text/90 mb-1">Phone Number</label>
                                         <div class="relative">
-                                            <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-theme-text/60">
+                                            <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-theme-text/95">
                                                 <i class="fas fa-phone text-xs"></i>
                                             </span>
                                             <input type="tel" name="customer_phone" id="customer_phone" required placeholder="e.g. +1 555-0199" value="{{ booking_data.customer_phone|default:'' }}" class="block w-full pl-9 pr-4 py-3 bg-theme-bg rounded-lg border border-theme-border focus:border-luxe-gold text-sm text-theme-text focus:outline-none focus:ring-1 focus:ring-luxe-gold">
@@ -75,7 +75,7 @@
                                 </div>
 
                                 <div>
-                                    <label for="customer_whatsapp" class="block text-xs text-theme-text/70 mb-1">WhatsApp Number (For flight updates & driver contact)</label>
+                                    <label for="customer_whatsapp" class="block text-xs text-theme-text/90 mb-1">WhatsApp Number (For flight updates & driver contact)</label>
                                     <div class="relative">
                                         <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-green-500">
                                             <i class="fab fa-whatsapp text-xs font-bold"></i>
@@ -85,7 +85,7 @@
                                 </div>
 
                                 <div>
-                                    <label for="customer_notes" class="block text-xs text-theme-text/70 mb-1">Special Notes or Requests (Optional)</label>
+                                    <label for="customer_notes" class="block text-xs text-theme-text/90 mb-1">Special Notes or Requests (Optional)</label>
                                     <textarea name="customer_notes" id="customer_notes" rows="3" placeholder="e.g. Need child booster seat, dietary request, specific gate meeting instructions..." class="block w-full px-4 py-3 bg-theme-bg rounded-lg border border-theme-border focus:border-luxe-gold text-sm text-theme-text focus:outline-none focus:ring-1 focus:ring-luxe-gold">{{ booking_data.customer_notes|default:'' }}</textarea>
                                 </div>
                             </div>
@@ -94,7 +94,7 @@
                         <!-- VIP Add-ons block -->
                         <div class="space-y-4">
                             <h3 class="text-xs uppercase tracking-widest font-bold text-theme-text border-b border-theme-border pb-2">Premium Add-Ons & Enhancements</h3>
-                            <p class="text-[11px] text-theme-text/60 font-medium leading-relaxed">
+                            <p class="text-[11px] text-theme-text/95 font-medium leading-relaxed">
                                 Select from our customizable premium services to maximize convenience. Added fees are calculated live in the itinerary summary.
                             </p>
                             
@@ -111,12 +111,12 @@
                                                     <i class="{% if addon.icon %}{{ addon.icon }}{% else %}fas fa-star{% endif %} text-luxe-gold text-[10px]"></i>
                                                     <span>{{ addon.name }}</span>
                                                 </h4>
-                                                <p class="text-[11px] text-theme-text/60 font-medium mt-0.5">{{ addon.description }}</p>
+                                                <p class="text-[11px] text-theme-text/95 font-medium mt-0.5">{{ addon.description }}</p>
                                             </div>
                                             <span class="text-xs font-bold text-luxe-gold whitespace-nowrap ml-4">+{{ addon.price|currency }}</span>
                                         </div>
                                         {% if booking_data.round_trip %}
-                                        <div class="mt-2.5 pt-2 border-t border-theme-border/40 flex items-center space-x-2 text-[10px] text-theme-text/70">
+                                        <div class="mt-2.5 pt-2 border-t border-theme-border/40 flex items-center space-x-2 text-[10px] text-theme-text/90">
                                             <input type="checkbox" name="addons_return" value="{{ addon.id }}" data-price="{{ addon.price }}" class="addon-return-checkbox h-3.5 w-3.5 rounded border-theme-border text-luxe-gold focus:ring-luxe-gold bg-theme-bg cursor-pointer">
                                             <span>Apply also to return leg (+{{ addon.price|currency }})</span>
                                         </div>
@@ -124,7 +124,7 @@
                                     </div>
                                 </label>
                                 {% empty %}
-                                <p class="text-xs text-theme-text/60 italic">No add-ons available for dynamic reservation.</p>
+                                <p class="text-xs text-theme-text/95 italic">No add-ons available for dynamic reservation.</p>
                                 {% endfor %}
                             </div>
                         </div>
@@ -136,7 +136,7 @@
                                 <i class="fas fa-credit-card text-xs"></i>
                                 <span>Payment Preference</span>
                             </h3>
-                            <p class="text-[11px] text-theme-text/70 font-medium">Choose how you would like to pay for your round-trip transfer:</p>
+                            <p class="text-[11px] text-theme-text/90 font-medium">Choose how you would like to pay for your round-trip transfer:</p>
                             <div class="space-y-3">
                                 <label class="flex items-center space-x-3 cursor-pointer select-none">
                                     <input type="radio" name="pay_separately" value="off" checked class="h-4.5 w-4.5 text-luxe-gold focus:ring-luxe-gold bg-theme-bg border-theme-border cursor-pointer">
@@ -152,7 +152,7 @@
 
                         <!-- Action buttons -->
                         <div class="flex items-center justify-between pt-6 border-t border-theme-border">
-                            <a href="{% site_url 'booking_step2' %}" class="inline-flex items-center space-x-2 text-xs uppercase font-semibold text-theme-text/70 hover:text-theme-text transition-colors">
+                            <a href="{% site_url 'booking_step2' %}" class="inline-flex items-center space-x-2 text-xs uppercase font-semibold text-theme-text/90 hover:text-theme-text transition-colors">
                                 <i class="fas fa-chevron-left text-[10px]"></i>
                                 <span>Back to Vehicles</span>
                             </a>
@@ -177,7 +177,7 @@
                     <!-- Service Details summary -->
                     <div class="space-y-3 text-xs border-b border-theme-border pb-4">
                         <div class="flex justify-between">
-                            <span class="text-theme-text/60">Service Type</span>
+                            <span class="text-theme-text/95">Service Type</span>
                             <span class="font-bold text-theme-text uppercase text-[10px] tracking-wider">
                                 {% if booking_data.service_type == 'airport_transfer' %}
                                     Airport Transfer
@@ -192,30 +192,30 @@
                         </div>
 
                         <div class="flex justify-between">
-                            <span class="text-theme-text/60">Category</span>
+                            <span class="text-theme-text/95">Category</span>
                             <span class="font-bold text-theme-text uppercase text-[10px] tracking-wider">{{ category.name }}</span>
                         </div>
                         <div class="flex justify-between">
-                            <span class="text-theme-text/60">Pickup Date</span>
+                            <span class="text-theme-text/95">Pickup Date</span>
                             <span class="font-bold text-theme-text">{{ booking_data.pickup_date }}</span>
                         </div>
                         <div class="flex justify-between">
-                            <span class="text-theme-text/60">Pickup Time</span>
+                            <span class="text-theme-text/95">Pickup Time</span>
                             <span class="font-bold text-theme-text">{{ booking_data.pickup_time }}</span>
                         </div>
                         {% if booking_data.round_trip %}
                         <div class="flex justify-between border-t border-theme-border/40 pt-2 mt-2">
-                            <span class="text-theme-text/60">Return Date</span>
+                            <span class="text-theme-text/95">Return Date</span>
                             <span class="font-bold text-luxe-gold">{{ booking_data.return_date }}</span>
                         </div>
                         <div class="flex justify-between">
-                            <span class="text-theme-text/60">Return Time</span>
+                            <span class="text-theme-text/95">Return Time</span>
                             <span class="font-bold text-luxe-gold">{{ booking_data.return_time }}</span>
                         </div>
                         {% endif %}
                         {% if booking_data.flight_number %}
                         <div class="flex justify-between border-t border-theme-border/40 pt-2 mt-2">
-                            <span class="text-theme-text/60">Flight Code</span>
+                            <span class="text-theme-text/95">Flight Code</span>
                             <span class="font-bold text-theme-text uppercase">{{ booking_data.flight_number }}</span>
                         </div>
                         {% endif %}
@@ -225,28 +225,28 @@
                     <div class="space-y-3 text-xs border-b border-theme-border pb-4">
                         {% if booking_data.round_trip %}
                         <div class="flex justify-between">
-                            <span class="text-theme-text/60">Outbound Base Fare</span>
+                            <span class="text-theme-text/95">Outbound Base Fare</span>
                             <span class="font-bold text-theme-text">{{ base_price|currency }}</span>
                         </div>
                         <div class="flex justify-between border-b border-theme-border/40 pb-2">
-                            <span class="text-theme-text/60">Return Base Fare</span>
+                            <span class="text-theme-text/95">Return Base Fare</span>
                             <span class="font-bold text-theme-text">{{ base_price|currency }}</span>
                         </div>
                         {% else %}
                         <div class="flex justify-between">
-                            <span class="text-theme-text/60">Base Fare</span>
+                            <span class="text-theme-text/95">Base Fare</span>
                             <span class="font-bold text-theme-text" id="base-fare-display">{{ base_price|currency }}</span>
                         </div>
                         {% endif %}
 
                         {% if booking_data.service_type == 'hourly' %}
-                        <div class="text-[10px] text-theme-text/70 pl-2 font-mono">
+                        <div class="text-[10px] text-theme-text/90 pl-2 font-mono">
                             ({{ hours_requested|floatformat:0 }} Hours)
                         </div>
                         {% endif %}
 
                         <div class="flex justify-between">
-                            <span class="text-theme-text/60">VIP Add-Ons</span>
+                            <span class="text-theme-text/95">VIP Add-Ons</span>
                             <span class="font-bold text-luxe-gold" id="addons-fare-display">$0.00</span>
                         </div>
                     </div>
@@ -258,7 +258,7 @@
                     </div>
 
                     <!-- Meta info security -->
-                    <p class="text-[9px] text-theme-text/60 leading-normal text-center">
+                    <p class="text-[9px] text-theme-text/95 leading-normal text-center">
                         <i class="fas fa-lock text-[8px] mr-1 text-luxe-gold"></i>
                         Vetted security logistics with guaranteed flat rates. Checkout processes are fully SSL encrypted.
                     </p>

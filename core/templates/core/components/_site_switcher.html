@@ -9,14 +9,14 @@
     <div id="site-switcher-menu" class="hidden absolute bottom-16 right-0 w-80 rounded-2xl glass-card border border-luxe-gold/20 p-5 shadow-2xl animate-fade-in duration-300">
         <div class="flex items-center justify-between pb-3 border-b border-luxe-gold/10 mb-4">
             <span class="text-xs uppercase font-bold tracking-widest text-luxe-gold">Select Luxury Hub</span>
-            <button id="site-switcher-close" class="text-theme-text/70 hover:text-theme-text transition-colors">
+            <button id="site-switcher-close" class="text-theme-text/90 hover:text-theme-text transition-colors">
                 <i class="fas fa-xmark text-sm"></i>
             </button>
         </div>
         
         <div class="space-y-3">
             {% for site in available_sites %}
-            <a href="{% url 'core:set_site' slug=site.slug %}" class="flex items-center justify-between p-3 rounded-xl {% if current_site.slug == site.slug %}bg-luxe-gold/10 border border-luxe-gold/50 text-luxe-gold{% else %}bg-theme-bg/40 hover:bg-theme-card/60 border border-transparent text-theme-text/80 hover:text-theme-text{% endif %} transition-all duration-300 group">
+            <a href="{% url 'core:set_site' slug=site.slug %}" class="flex items-center justify-between p-3 rounded-xl {% if current_site.slug == site.slug %}bg-luxe-gold/10 border border-luxe-gold/50 text-luxe-gold{% else %}bg-theme-bg/40 hover:bg-theme-card/60 border border-transparent text-theme-text/95 hover:text-theme-text{% endif %} transition-all duration-300 group">
                 <div class="flex items-center space-x-3">
                     <div class="w-8 h-8 rounded-lg bg-theme-card flex items-center justify-center border border-luxe-gold/20">
                         {% if site.slug == 'nyc' %}
@@ -29,7 +29,7 @@
                         <h4 class="text-xs uppercase tracking-wider font-semibold group-hover:text-luxe-gold transition-colors">
                             {{ site.name }}
                         </h4>
-                        <p class="text-[10px] text-theme-text/60 font-medium">{{ site.tagline|truncatechars:35 }}</p>
+                        <p class="text-[10px] text-theme-text/95 font-medium">{{ site.tagline|truncatechars:35 }}</p>
                     </div>
                 </div>
                 <div class="flex items-center space-x-2">
@@ -50,19 +50,19 @@
                     </div>
                     <div>
                         <h4 class="text-xs uppercase tracking-wider font-semibold">New York Metro</h4>
-                        <p class="text-[10px] text-theme-text/60 font-medium">NYC Premium Car & Airport Transfers</p>
+                        <p class="text-[10px] text-theme-text/95 font-medium">NYC Premium Car & Airport Transfers</p>
                     </div>
                 </div>
                 <i class="fas fa-check text-xs text-luxe-gold"></i>
             </a>
-            <a href="/dr/" class="flex items-center justify-between p-3 rounded-xl bg-theme-bg/40 hover:bg-theme-card/60 border border-transparent text-theme-text/80 hover:text-theme-text transition-all duration-300">
+            <a href="/dr/" class="flex items-center justify-between p-3 rounded-xl bg-theme-bg/40 hover:bg-theme-card/60 border border-transparent text-theme-text/95 hover:text-theme-text transition-all duration-300">
                 <div class="flex items-center space-x-3">
                     <div class="w-8 h-8 rounded-lg bg-theme-card flex items-center justify-center border border-luxe-gold/20">
                         <i class="fas fa-umbrella-beach text-sm text-luxe-gold"></i>
                     </div>
                     <div>
                         <h4 class="text-xs uppercase tracking-wider font-semibold">Dominican Republic</h4>
-                        <p class="text-[10px] text-theme-text/60 font-medium">VIP Transfers & Luxury Chauffeur</p>
+                        <p class="text-[10px] text-theme-text/95 font-medium">VIP Transfers & Luxury Chauffeur</p>
                     </div>
                 </div>
                 <i class="fas fa-chevron-right text-[10px] text-gray-600"></i>
