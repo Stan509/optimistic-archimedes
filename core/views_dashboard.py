@@ -254,7 +254,10 @@ def booking_detail(request, booking_id):
 
         outbound_total = base_price + stops_fee + outbound_addons_total
         return_total = base_price + return_addons_total if booking.round_trip else Decimal('0.00')
-        balance = booking.total_price - booking.amount_paid
+        
+        total_price = booking.total_price or Decimal('0.00')
+        amount_paid = booking.amount_paid or Decimal('0.00')
+        balance = total_price - amount_paid
     except Exception as e:
         logger.error(f"Error calculating financial breakdown for booking {booking_id}: {e}")
         base_price = Decimal('0.00')
@@ -304,15 +307,7 @@ def update_booking_status(request, booking_id, new_status):
 
     valid_statuses = ['PENDING', 'CONFIRMED', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED']
     if new_status in valid_statuses:
-        # Check date constraints
-        today = date.today()
-        if new_status in ['IN_PROGRESS', 'COMPLETED'] and booking.pickup_date > today:
-            messages.error(request, f"Cannot update booking #{booking.booking_reference} to {new_status} because the pickup date has not arrived yet.")
-            return redirect('dashboard:bookings')
-
-        if new_status == 'COMPLETED' and booking.round_trip and booking.return_date and booking.return_date > today:
-            messages.error(request, f"Cannot update booking #{booking.booking_reference} to COMPLETED because the return date ({booking.return_date}) has not arrived yet.")
-            return redirect('dashboard:bookings')
+        # Date constraints removed as per user request to allow early confirmation/completion
 
         booking.status = new_status
         booking.save()

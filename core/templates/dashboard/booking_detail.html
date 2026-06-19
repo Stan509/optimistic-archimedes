@@ -121,10 +121,16 @@
                     <i class="fa-solid fa-map-location-dot text-gold-400 text-lg"></i>
                     <h3 class="font-serif font-semibold text-base">Transfer Route & Schedule</h3>
                 </div>
-                <button onclick="copyBookingDetails()" class="flex items-center space-x-2 px-3 py-2 rounded-lg bg-gold-500/10 border border-gold-500/25 text-gold-400 text-xs font-semibold hover:bg-gold-500/20 transition-all">
-                    <i class="fa-solid fa-copy"></i>
-                    <span>Copy Details</span>
-                </button>
+                <div class="flex items-center space-x-2">
+                    <button onclick="shareOnWhatsApp()" class="flex items-center space-x-2 px-3 py-2 rounded-lg bg-emerald-500/10 border border-emerald-500/25 text-emerald-400 text-xs font-semibold hover:bg-emerald-500/20 transition-all">
+                        <i class="fa-brands fa-whatsapp"></i>
+                        <span>Share on WhatsApp</span>
+                    </button>
+                    <button onclick="copyBookingDetails()" class="flex items-center space-x-2 px-3 py-2 rounded-lg bg-gold-500/10 border border-gold-500/25 text-gold-400 text-xs font-semibold hover:bg-gold-500/20 transition-all">
+                        <i class="fa-solid fa-copy"></i>
+                        <span>Copy Details</span>
+                    </button>
+                </div>
             </div>
             
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
@@ -596,34 +602,64 @@
 {% block extra_js %}
 <script>
 function copyBookingDetails() {
-    const booking = {
-        type: "{{ booking.get_service_type_display }}{% if booking.round_trip %} (Round-Trip){% endif %}",
-        customer: "{{ booking.customer_name }}",
-        pickup: "{% if booking.pickup_address %}{{ booking.pickup_address }}{% elif booking.airport %}{{ booking.airport.name }}{% else %}N/A{% endif %}",
-        dropoff: "{% if booking.dropoff_address %}{{ booking.dropoff_address }}{% elif booking.destination %}{{ booking.destination.name }}{% else %}N/A{% endif %}",
-        flightNumber: "{{ booking.flight_number|default:'N/A' }}",
-        pickupDate: "{{ booking.pickup_date }} at {{ booking.pickup_time }}",
-        pickupLocation: "{{ booking.meeting_point|default:'Standard pickup' }}",
-        vehicle: "{% if booking.vehicle_category %}{{ booking.vehicle_category.name }}{% else %}N/A{% endif %}",
-        addons: "{% for addon in booking.addons.all %}{{ addon.name }}{% if not forloop.last %}, {% endif %}{% empty %}None{% endfor %}"
-    };
-
-    const details = `Booking Type: ${booking.type}
-Customer: ${booking.customer}
-Pickup: ${booking.pickup}
-Dropoff: ${booking.dropoff}
-Flight Number: ${booking.flightNumber}
-Pickup Date: ${booking.pickupDate}
-Pickup Location: ${booking.pickupLocation}
-Vehicle: ${booking.vehicle}
-VIP Add-ons: ${booking.addons}`;
-
+    const details = generateShareText(false);
     navigator.clipboard.writeText(details).then(() => {
         alert('Booking details copied to clipboard!');
     }).catch(err => {
         console.error('Failed to copy: ', err);
         alert('Failed to copy booking details');
     });
+}
+
+function shareOnWhatsApp() {
+    const details = generateShareText(true);
+    const url = `https://wa.me/?text=${encodeURIComponent(details)}`;
+    window.open(url, '_blank');
+}
+
+function generateShareText(isWhatsApp) {
+    const bold = isWhatsApp ? '*' : '';
+    const booking = {
+        type: "{{ booking.get_service_type_display }}{% if booking.round_trip %} (Round-Trip){% endif %}",
+        customer: "{{ booking.customer_name }}",
+        phone: "{{ booking.customer_phone }}",
+        email: "{{ booking.customer_email }}",
+        pickup: "{% if booking.pickup_address %}{{ booking.pickup_address }}{% elif booking.airport %}{{ booking.airport.name }}{% else %}N/A{% endif %}",
+        dropoff: "{% if booking.dropoff_address %}{{ booking.dropoff_address }}{% elif booking.destination %}{{ booking.destination.name }}{% else %}N/A{% endif %}",
+        flightNumber: "{{ booking.flight_number|default:'N/A' }}",
+        pickupDate: "{{ booking.pickup_date }} at {{ booking.pickup_time }}",
+        pickupLocation: "{{ booking.meeting_point|default:'Standard pickup' }}",
+        {% if booking.round_trip %}
+        returnDate: "{{ booking.return_date }} at {{ booking.return_time }}",
+        returnLocation: "{{ booking.return_meeting_point|default:'Standard pickup' }}",
+        {% endif %}
+        vehicle: "{% if booking.vehicle_category %}{{ booking.vehicle_category.name }}{% else %}N/A{% endif %}",
+        addons: "{% for addon in booking.addons.all %}{{ addon.name }}{% if not forloop.last %}, {% endif %}{% empty %}None{% endfor %}"
+    };
+
+    let details = `${bold}Booking Reference:${bold} {{ booking.booking_reference }}
+${bold}Booking Type:${bold} ${booking.type}
+${bold}Customer:${bold} ${booking.customer}
+${bold}Phone:${bold} ${booking.phone}
+${bold}Email:${bold} ${booking.email}
+${bold}Pickup Address:${bold} ${booking.pickup}
+${bold}Dropoff Address:${bold} ${booking.dropoff}
+${bold}Flight Number:${bold} ${booking.flightNumber}
+${bold}Outbound Pickup:${bold} ${booking.pickupDate}
+${bold}Outbound Meeting Point:${bold} ${booking.pickupLocation}`;
+
+    {% if booking.round_trip %}
+    details += `\n${bold}Return Pickup:${bold} ${booking.returnDate}
+${bold}Return Meeting Point:${bold} ${booking.returnLocation}`;
+    {% endif %}
+
+    details += `\n${bold}Vehicle:${bold} ${booking.vehicle}
+${bold}VIP Add-ons:${bold} ${booking.addons}
+${bold}Total Price:${bold} ${{ booking.total_price|floatformat:2 }}
+${bold}Amount Paid:${bold} ${{ booking.amount_paid|floatformat:2 }}
+${bold}Balance:${bold} ${{ balance|floatformat:2 }}`;
+
+    return details;
 }
 </script>
 {% endblock %}
