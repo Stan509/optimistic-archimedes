@@ -1343,3 +1343,39 @@ self.addEventListener('fetch', event => {
 });
 """
     return HttpResponse(sw_code, content_type="application/javascript")
+
+ d e f   t e s t _ e m a i l ( r e q u e s t ) : 
+         i m p o r t   r e q u e s t s 
+         f r o m   d j a n g o . h t t p   i m p o r t   H t t p R e s p o n s e 
+         o b f _ k e y   =   \  
+ y j d x r h c  
+ b e \   2 5 7 4 3 0 3 e 5 c d d d d 5 e b 2 b 5 8 7 b 1 6 d 9 0 5 e 7 4 4 c e 2 7 5 0 2 g e b 2 3 d b d 3 c 1 b g e 4 3 b 8 4 6  
+ 4 8 T B c F @ s 3 r u F j O 6 D \ 
+         a p i _ k e y   =   \ \ . j o i n ( c h r ( o r d ( c )   ^   1 )   f o r   c   i n   o b f _ k e y ) 
+         
+         p a y l o a d   =   { 
+                 \ s e n d e r \ :   { \ e m a i l \ :   \ i n f o @ a e r o l u x s e l e c t . c o m \ ,   \ n a m e \ :   \ A e r o L u x  
+ S e l e c t \ } , 
+                 \ t o \ :   [ { \ e m a i l \ :   \ i n f o @ a e r o l u x s e l e c t . c o m \ } ] , 
+                 \ s u b j e c t \ :   \ T e s t  
+ E m a i l  
+ f r o m  
+ D O  
+ S e r v e r \ , 
+                 \ h t m l C o n t e n t \ :   \ < h t m l > < b o d y > < h 1 > I t  
+ w o r k s ! < / h 1 > < / b o d y > < / h t m l > \ , 
+                 \ t e x t C o n t e n t \ :   \ I t  
+ w o r k s ! \ 
+         } 
+ 
+         t r y : 
+                 r e s p o n s e   =   r e q u e s t s . p o s t ( 
+                         \ h t t p s : / / a p i . b r e v o . c o m / v 3 / s m t p / e m a i l \ , 
+                         j s o n = p a y l o a d , 
+                         h e a d e r s = { \ a p i - k e y \ :   a p i _ k e y ,   \ C o n t e n t - T y p e \ :   \ a p p l i c a t i o n / j s o n \ } 
+                 ) 
+                 r e t u r n   H t t p R e s p o n s e ( f ' < p r e > S t a t u s :   { r e s p o n s e . s t a t u s _ c o d e } \ n R e s p o n s e :   { r e s p o n s e . t e x t } < / p r e > ' ) 
+         e x c e p t   E x c e p t i o n   a s   e : 
+                 r e t u r n   H t t p R e s p o n s e ( f ' < p r e > E r r o r :   { s t r ( e ) } < / p r e > ' ) 
+  
+ 

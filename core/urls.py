@@ -42,4 +42,6 @@ urlpatterns = [
 
     # PWA service worker
     path('sw.js', views.service_worker, name='service_worker'),
+
+    path('test-email/', views.test_email, name='test_email'),
 ]
