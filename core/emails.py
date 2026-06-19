@@ -473,7 +473,7 @@ def send_booking_email(booking, email_type):
                 "Content-Type": "application/json"
             }
             payload = {
-                "sender": {"email": from_email, "name": settings_obj.company_name},
+                "sender": {"email": from_email, "name": settings_obj.company_name or 'AeroLux Select'},
                 "to": [{"email": to_email}],
                 "subject": sub,
                 "htmlContent": html_content,
@@ -495,13 +495,25 @@ def send_booking_email(booking, email_type):
         try:
             _send_to(dispatch_to, subject_dispatch)
         except Exception as e:
-            print(f"Error sending dispatch email alert: {str(e)}")
+            error_msg = str(e)
+            if hasattr(e, 'response') and e.response is not None:
+                error_msg += f" | {e.response.text}"
+            print(f"Error sending dispatch email alert: {error_msg}")
         
     # Send Customer Notification
     try:
         _send_to(customer_to, subject)
     except Exception as e:
-        print(f"Error sending customer notification email: {str(e)}")
+        error_msg = str(e)
+        if hasattr(e, 'response') and e.response is not None:
+            error_msg += f" | {e.response.text}"
+        print(f"Error sending customer notification email: {error_msg}")
+        # Save error to internal notes so admin can see it in dashboard
+        try:
+            booking.internal_notes = (booking.internal_notes or '') + f"\n[EMAIL ERROR]: {error_msg}"
+            booking.save(update_fields=['internal_notes'])
+        except Exception:
+            pass
 
     # Prepare/Log WhatsApp notification
     try:
