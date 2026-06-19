@@ -204,15 +204,19 @@
     <!-- Immediate Theme Initialization Script (Avoids FOUC) -->
     <script>
         (function() {
-            document.documentElement.className = 'dark scroll-smooth';
+            // Read saved theme — default to 'dark'
+            var saved = localStorage.getItem('aerolux_theme') || 'dark';
+            document.documentElement.className = (saved === 'light' ? 'light' : 'dark') + ' scroll-smooth';
             
             function applyThemeVariables(theme) {
-                document.documentElement.style.setProperty('--theme-bg', 'var(--theme-bg-dark)');
-                document.documentElement.style.setProperty('--theme-text', 'var(--theme-text-dark)');
-                document.documentElement.style.setProperty('--theme-card', 'var(--theme-card-dark)');
-                document.documentElement.style.setProperty('--theme-border', 'var(--theme-border-dark)');
+                var isLight = theme === 'light';
+                document.documentElement.style.setProperty('--theme-bg', isLight ? 'var(--theme-bg-light)' : 'var(--theme-bg-dark)');
+                document.documentElement.style.setProperty('--theme-text', isLight ? 'var(--theme-text-light)' : 'var(--theme-text-dark)');
+                document.documentElement.style.setProperty('--theme-card', isLight ? 'var(--theme-card-light)' : 'var(--theme-card-dark)');
+                document.documentElement.style.setProperty('--theme-border', isLight ? 'var(--theme-border-light)' : 'var(--theme-border-dark)');
             }
-            applyThemeVariables('dark');
+            applyThemeVariables(saved);
+            window.__aeroluxTheme = saved;
             window.__applyThemeVariables = applyThemeVariables;
         })();
     </script>
@@ -274,10 +278,10 @@
     <header class="fixed top-0 left-0 right-0 z-50 glass-nav transition-all duration-300" id="main-header">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-20">
-                <!-- Brand Logo & Name -->
+                <!-- Brand Logo & Name — Bigger logo -->
                 <div class="flex-shrink-0 flex items-center">
                     <a href="{% site_url 'index' %}" class="flex items-center space-x-3 group">
-                        <img src="{% static 'core/images/logo.png' %}" alt="{{ current_site.name }}" class="h-12 w-auto object-contain">
+                        <img src="{% static 'core/images/logo.png' %}" alt="{{ current_site.name }}" class="h-16 w-auto object-contain md:h-20">
                     </a>
                 </div>
 
@@ -311,6 +315,12 @@
                         </div>
                     </div>
                     {% endif %}
+
+                    <!-- Theme Toggle Button -->
+                    <button id="theme-toggle" onclick="toggleTheme()" class="w-9 h-9 rounded-full bg-theme-card border border-luxe-gold/20 flex items-center justify-center text-luxe-gold hover:bg-luxe-gold/10 transition-all" title="Toggle Light/Dark mode">
+                        <i class="fas fa-moon text-sm" id="theme-icon-moon"></i>
+                        <i class="fas fa-sun text-sm hidden" id="theme-icon-sun"></i>
+                    </button>
 
                     <!-- Book Chauffeur Button -->
                     <a href="{% site_url 'booking_step1' %}" class="gold-btn site-btn px-6 py-2.5 rounded-full text-sm uppercase tracking-wider transition-all duration-300 font-semibold shadow-lg">
@@ -520,13 +530,43 @@
             }
         })();
 
-        // Dynamic Light/Dark Theme Toggler logic - Disabled for global dark mode
-        localStorage.setItem('theme', 'dark');
-        document.documentElement.classList.remove('light');
-        document.documentElement.classList.add('dark');
-        if (window.__applyThemeVariables) {
-            window.__applyThemeVariables('dark');
-        }
+        // Theme toggle function
+        window.toggleTheme = function() {
+            var current = localStorage.getItem('aerolux_theme') || 'dark';
+            var next = current === 'light' ? 'dark' : 'light';
+            localStorage.setItem('aerolux_theme', next);
+            document.documentElement.className = next + ' scroll-smooth';
+            if (window.__applyThemeVariables) {
+                window.__applyThemeVariables(next);
+            }
+            // Update icon visibility
+            var moon = document.getElementById('theme-icon-moon');
+            var sun = document.getElementById('theme-icon-sun');
+            if (moon && sun) {
+                if (next === 'light') {
+                    moon.classList.add('hidden');
+                    sun.classList.remove('hidden');
+                } else {
+                    moon.classList.remove('hidden');
+                    sun.classList.add('hidden');
+                }
+            }
+        };
+        // Sync toggle icon on page load
+        (function() {
+            var saved = localStorage.getItem('aerolux_theme') || 'dark';
+            var moon = document.getElementById('theme-icon-moon');
+            var sun = document.getElementById('theme-icon-sun');
+            if (moon && sun) {
+                if (saved === 'light') {
+                    moon.classList.add('hidden');
+                    sun.classList.remove('hidden');
+                } else {
+                    moon.classList.remove('hidden');
+                    sun.classList.add('hidden');
+                }
+            }
+        })();
     </script>
     {% block extra_js %}{% endblock %}
 </body>
