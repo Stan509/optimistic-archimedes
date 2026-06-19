@@ -312,21 +312,8 @@ def update_booking_status(request, booking_id, new_status):
         booking.status = new_status
         booking.save()
 
-        # Enforce status synchronization for linked booking legs only for CONFIRMED and CANCELLED
-        # This allows completing one leg while keeping the other leg pending
-        if new_status in ['CONFIRMED', 'CANCELLED']:
-            if booking.linked_booking:
-                try:
-                    booking.linked_booking.status = new_status
-                    booking.linked_booking.save()
-                except Exception:
-                    pass
-            for return_b in booking.return_bookings.all():
-                try:
-                    return_b.status = new_status
-                    return_b.save()
-                except Exception:
-                    pass
+        # Status synchronization for linked booking legs removed as per user request
+        # Bookings can now be managed independently
 
         messages.success(request, f'Booking #{booking.booking_reference} updated to {new_status}.')
         
