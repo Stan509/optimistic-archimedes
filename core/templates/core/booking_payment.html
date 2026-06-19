@@ -92,7 +92,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <p class="text-[10px] text-theme-text/60 leading-relaxed font-light">
+                            <p class="text-[10px] text-theme-text/60 leading-relaxed font-medium">
                                 AeroLux Select never processes or logs full credit card metrics in local files. All calculations occur safely within Stripe tokens.
                             </p>
                         </div>
@@ -104,7 +104,7 @@
                                     <i class="fas fa-circle-info text-sm"></i>
                                     <h4 class="text-xs font-bold uppercase tracking-wider">Chauffeur Collection Policy</h4>
                                 </div>
-                                <p class="text-xs text-theme-text/80 leading-relaxed font-light">
+                                <p class="text-xs text-theme-text/80 leading-relaxed font-medium">
                                     Pay directly to your chauffeur upon pickup. Drivers accept cash (USD/local), major corporate debit/credit cards terminal-side, or direct corporate invoice if a valid billing account is registered.
                                 </p>
                             </div>
@@ -113,7 +113,7 @@
                         <!-- Terms & Conditions Checkbox -->
                         <div class="flex items-start space-x-3 bg-theme-bg/30 p-4 rounded-xl border border-theme-border my-4">
                             <input type="checkbox" name="terms" id="terms-checkbox" required class="mt-1 h-4 w-4 rounded border-theme-border bg-theme-bg text-luxe-gold focus:ring-luxe-gold focus:ring-offset-luxe-black cursor-pointer">
-                            <label for="terms-checkbox" class="text-xs text-theme-text/70 font-light leading-relaxed select-none cursor-pointer">
+                            <label for="terms-checkbox" class="text-xs text-theme-text/70 font-medium leading-relaxed select-none cursor-pointer">
                                 I agree to the <a href="#" id="open-terms-modal" class="text-luxe-gold underline hover:text-luxe-gold-bright transition-colors" onclick="event.preventDefault(); event.stopPropagation();">Terms of Service</a>, Chauffeur Gratuity Policy, and Cancellation Rules of AeroLux Select.
                             </label>
                         </div>
@@ -153,11 +153,11 @@
                                 <span class="font-bold">{{ outbound_total|currency }}</span>
                             </h4>
                             <div class="flex justify-between items-center text-[11px] text-theme-text/70">
-                                <span class="font-light">Pickup Date & Time</span>
+                                <span class="font-medium">Pickup Date & Time</span>
                                 <span class="font-semibold text-theme-text">{{ booking_data.pickup_date }} at {{ booking_data.pickup_time }}</span>
                             </div>
                             <div class="flex justify-between items-center text-[11px] text-theme-text/80">
-                                <span class="font-light">Base Chauffeur Fare</span>
+                                <span class="font-medium">Base Chauffeur Fare</span>
                                 <span>{{ outbound_base|currency }}</span>
                             </div>
                             {% if booking_data.service_type == 'hourly' %}
@@ -167,13 +167,13 @@
                             {% endif %}
                             {% if stops_fee > 0 %}
                             <div class="flex justify-between items-center text-[11px] text-theme-text/80">
-                                <span class="font-light">Point-to-Point Stops Fee</span>
+                                <span class="font-medium">Point-to-Point Stops Fee</span>
                                 <span>{{ stops_fee|currency }}</span>
                             </div>
                             {% endif %}
                             {% for addon in selected_addons %}
                             <div class="flex justify-between items-center text-[11px] text-theme-text/80">
-                                <span class="font-light">{{ addon.name }} (VIP Add-On)</span>
+                                <span class="font-medium">{{ addon.name }} (VIP Add-On)</span>
                                 <span class="text-luxe-gold">+{{ addon.price|currency }}</span>
                             </div>
                             {% endfor %}
@@ -187,16 +187,16 @@
                                 <span class="font-bold">{{ return_total|currency }}</span>
                             </h4>
                             <div class="flex justify-between items-center text-[11px] text-theme-text/70">
-                                <span class="font-light">Return Date & Time</span>
+                                <span class="font-medium">Return Date & Time</span>
                                 <span class="font-semibold text-luxe-gold">{{ booking_data.return_date }} at {{ booking_data.return_time }}</span>
                             </div>
                             <div class="flex justify-between items-center text-[11px] text-theme-text/80">
-                                <span class="font-light">Base Chauffeur Fare</span>
+                                <span class="font-medium">Base Chauffeur Fare</span>
                                 <span>{{ return_base|currency }}</span>
                             </div>
                             {% for addon in selected_addons_return %}
                             <div class="flex justify-between items-center text-[11px] text-theme-text/80">
-                                <span class="font-light">{{ addon.name }} (VIP Add-On)</span>
+                                <span class="font-medium">{{ addon.name }} (VIP Add-On)</span>
                                 <span class="text-luxe-gold">+{{ addon.price|currency }}</span>
                             </div>
                             {% endfor %}
@@ -217,13 +217,13 @@
                                 <span>Due Now (Outbound):</span>
                                 <span>{{ outbound_total|currency }}</span>
                             </div>
-                            <div class="flex justify-between font-light text-theme-text/70">
+                            <div class="flex justify-between font-medium text-theme-text/70">
                                 <span>Due at Return pickup:</span>
                                 <span>{{ return_total|currency }}</span>
                             </div>
                         </div>
                         {% endif %}
-                        <span class="text-[9px] text-gray-600 block text-right font-light">All-inclusive USD Rates</span>
+                        <span class="text-[9px] text-gray-600 block text-right font-medium">All-inclusive USD Rates</span>
                     </div>
                 </div>
             </div>

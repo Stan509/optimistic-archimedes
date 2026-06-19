@@ -54,7 +54,7 @@
             <div class="text-center space-y-2 mb-10">
                 <span class="text-xs uppercase font-bold tracking-widest text-luxe-gold">Begin Reservation</span>
                 <h1 class="text-3xl font-bold font-display text-white">Trip Specifications</h1>
-                <p class="text-xs text-white/70 font-light max-w-md mx-auto">
+                <p class="text-xs text-white/70 font-medium max-w-md mx-auto">
                     Please provide your travel coordinates. We dynamically adjust all schedules based on your landing times.
                 </p>
             </div>
@@ -103,7 +103,7 @@
                 <div id="div-airport-transfer-wrapper" class="space-y-4">
                     <div class="flex flex-col md:flex-row items-center gap-4 relative">
                         <!-- Left Block: Airport Select -->
-                        <div id="transfer-start-wrapper" class="w-full font-light">
+                        <div id="transfer-start-wrapper" class="w-full font-medium">
                             <label id="lbl-transfer-start" for="airport_id" class="block text-xs uppercase tracking-widest font-bold text-theme-text/70 mb-2">Origin Airport</label>
                             <div class="relative">
                                 <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-luxe-gold">
@@ -129,15 +129,15 @@
                             </button>
                         </div>
                         <!-- Right Block: Destination Address (free text) -->
-                        <div id="transfer-end-wrapper" class="w-full font-light">
+                        <div id="transfer-end-wrapper" class="w-full font-medium">
                             <label id="lbl-transfer-end" for="destination_address" class="block text-xs uppercase tracking-widest font-bold text-theme-text/70 mb-2">Drop-off Address</label>
                             <div class="relative">
                                 <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-luxe-gold">
                                     <i class="fas fa-map-pin text-sm" id="icon-transfer-end"></i>
                                 </span>
-                                <input type="text" name="destination_address" id="destination_address" placeholder="Enter your destination address..." class="block w-full pl-11 pr-4 py-4 bg-theme-bg/80 rounded-xl border border-theme-border focus:border-luxe-gold text-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-luxe-gold font-light" autocomplete="off">
+                                <input type="text" name="destination_address" id="destination_address" placeholder="Enter your destination address..." class="block w-full pl-11 pr-4 py-4 bg-theme-bg/80 rounded-xl border border-theme-border focus:border-luxe-gold text-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-luxe-gold font-medium" autocomplete="off">
                             </div>
-                            <p id="geocode-status" class="text-[10px] text-theme-text/60 mt-1 font-light hidden">
+                            <p id="geocode-status" class="text-[10px] text-theme-text/60 mt-1 font-medium hidden">
                                 <i class="fas fa-map-marker-alt text-luxe-gold mr-1"></i>
                                 <span id="geocode-status-text">Address found — displaying on map</span>
                             </p>
@@ -191,7 +191,7 @@
                             <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-luxe-gold">
                                 <i class="fas fa-search text-xs"></i>
                             </span>
-                            <input type="text" name="pickup_address" id="pickup_address" placeholder="Enter starting address..." class="block w-full pl-10 pr-4 py-3.5 bg-theme-bg/90 rounded-xl border border-theme-border focus:border-luxe-gold text-xs text-gray-900 focus:outline-none focus:ring-1 focus:ring-luxe-gold font-light transition-all duration-300">
+                            <input type="text" name="pickup_address" id="pickup_address" placeholder="Enter starting address..." class="block w-full pl-10 pr-4 py-3.5 bg-theme-bg/90 rounded-xl border border-theme-border focus:border-luxe-gold text-xs text-gray-900 focus:outline-none focus:ring-1 focus:ring-luxe-gold font-medium transition-all duration-300">
                         </div>
                     </div>
                     <!-- Destination Location Card -->
@@ -222,7 +222,7 @@
                             <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-luxe-gold">
                                 <i class="fas fa-search text-xs"></i>
                             </span>
-                            <input type="text" name="dropoff_address" id="dropoff_address" placeholder="Enter destination address..." class="block w-full pl-10 pr-4 py-3.5 bg-theme-bg/90 rounded-xl border border-theme-border focus:border-luxe-gold text-xs text-gray-900 focus:outline-none focus:ring-1 focus:ring-luxe-gold font-light transition-all duration-300">
+                            <input type="text" name="dropoff_address" id="dropoff_address" placeholder="Enter destination address..." class="block w-full pl-10 pr-4 py-3.5 bg-theme-bg/90 rounded-xl border border-theme-border focus:border-luxe-gold text-xs text-gray-900 focus:outline-none focus:ring-1 focus:ring-luxe-gold font-medium transition-all duration-300">
                         </div>
                     </div>
                 </div>
@@ -238,7 +238,7 @@
                     </div>
                     <div>
                         <label for="stop_addresses" class="block text-[10px] uppercase text-theme-text/60 font-bold mb-1">Stop Addresses</label>
-                        <textarea name="stop_addresses" id="stop_addresses" rows="2" placeholder="List address details for each stop..." class="block w-full px-4 py-3 bg-theme-bg rounded-lg border border-theme-border focus:border-luxe-gold text-xs text-gray-900 focus:outline-none focus:ring-1 focus:ring-luxe-gold font-light"></textarea>
+                        <textarea name="stop_addresses" id="stop_addresses" rows="2" placeholder="List address details for each stop..." class="block w-full px-4 py-3 bg-theme-bg rounded-lg border border-theme-border focus:border-luxe-gold text-xs text-gray-900 focus:outline-none focus:ring-1 focus:ring-luxe-gold font-medium"></textarea>
                     </div>
                 </div>
 <!-- Date, Time, Passengers and Flight details split in 2x2 grid for extra space -->
@@ -288,7 +288,7 @@
                     <div class="flex items-center justify-between p-4 rounded-xl bg-theme-bg/40 border border-theme-border hover:border-luxe-gold/30 transition-all duration-300 cursor-pointer select-none mb-4" id="div-round-trip-row">
                         <div class="space-y-1">
                             <span class="block text-xs font-bold uppercase tracking-wider text-theme-text font-sans">Aller-Retour / Round-Trip</span>
-                            <span class="block text-[10px] text-theme-text/70 font-light">Planifier le trajet de retour</span>
+                            <span class="block text-[10px] text-theme-text/70 font-medium">Planifier le trajet de retour</span>
                         </div>
                         <div class="flex items-center space-x-3">
                             <span id="toggle-label" class="text-[10px] font-bold uppercase tracking-wider text-theme-text/60 transition-colors duration-300">Désactivé / OFF</span>
@@ -312,7 +312,7 @@
                                 <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-luxe-gold">
                                     <i class="fas fa-calendar-days text-sm"></i>
                                 </span>
-                                <input type="date" name="return_date" id="return_date" min="{{ today }}" class="block w-full pl-9 pr-2 py-4 bg-theme-bg/80 rounded-xl border border-theme-border focus:border-luxe-gold text-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-luxe-gold font-light">
+                                <input type="date" name="return_date" id="return_date" min="{{ today }}" class="block w-full pl-9 pr-2 py-4 bg-theme-bg/80 rounded-xl border border-theme-border focus:border-luxe-gold text-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-luxe-gold font-medium">
                             </div>
                         </div>
                         <div>
@@ -321,7 +321,7 @@
                                 <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-luxe-gold">
                                     <i class="fas fa-clock text-sm"></i>
                                 </span>
-                                <input type="time" name="return_time" id="return_time" class="block w-full pl-9 pr-2 py-4 bg-theme-bg/80 rounded-xl border border-theme-border focus:border-luxe-gold text-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-luxe-gold font-light">
+                                <input type="time" name="return_time" id="return_time" class="block w-full pl-9 pr-2 py-4 bg-theme-bg/80 rounded-xl border border-theme-border focus:border-luxe-gold text-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-luxe-gold font-medium">
                             </div>
                         </div>
                     </div>
@@ -333,9 +333,9 @@
                         <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-luxe-gold">
                             <i class="fas fa-handshake-simple text-sm"></i>
                         </span>
-                        <input type="text" name="meeting_point" id="meeting_point" placeholder="e.g. Terminal B exit gate 4, or hotel lobby entrance" class="block w-full pl-11 pr-4 py-4 bg-theme-bg/80 rounded-xl border border-theme-border focus:border-luxe-gold text-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-luxe-gold font-light">
+                        <input type="text" name="meeting_point" id="meeting_point" placeholder="e.g. Terminal B exit gate 4, or hotel lobby entrance" class="block w-full pl-11 pr-4 py-4 bg-theme-bg/80 rounded-xl border border-theme-border focus:border-luxe-gold text-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-luxe-gold font-medium">
                     </div>
-                    <p class="text-[10px] text-theme-text/60 font-light">Specify coordinates or instructions on where to meet the private chauffeur upon pickup.</p>
+                    <p class="text-[10px] text-theme-text/60 font-medium">Specify coordinates or instructions on where to meet the private chauffeur upon pickup.</p>
                 </div>
                 <!-- Return Meeting Point Field (Visible for round trip bookings) -->
                 <div id="div-return-meeting-point" class="py-4 border-t border-theme-border space-y-2 hidden">
@@ -344,9 +344,9 @@
                         <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-luxe-gold">
                             <i class="fas fa-handshake-simple text-sm"></i>
                         </span>
-                        <input type="text" name="return_meeting_point" id="return_meeting_point" placeholder="e.g. Hotel lobby entrance, or Terminal B exit gate 4" class="block w-full pl-11 pr-4 py-4 bg-theme-bg/80 rounded-xl border border-theme-border focus:border-luxe-gold text-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-luxe-gold font-light">
+                        <input type="text" name="return_meeting_point" id="return_meeting_point" placeholder="e.g. Hotel lobby entrance, or Terminal B exit gate 4" class="block w-full pl-11 pr-4 py-4 bg-theme-bg/80 rounded-xl border border-theme-border focus:border-luxe-gold text-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-luxe-gold font-medium">
                     </div>
-                    <p class="text-[10px] text-theme-text/60 font-light">Specify instructions on where to meet the private chauffeur for the return leg.</p>
+                    <p class="text-[10px] text-theme-text/60 font-medium">Specify instructions on where to meet the private chauffeur for the return leg.</p>
                 </div>
                 <!-- Submit Button -->
                 <button type="submit" id="submit-btn" disabled class="w-full gold-btn py-4.5 rounded-xl text-sm uppercase tracking-widest font-semibold mt-6 shadow-xl flex items-center justify-center space-x-3 cursor-not-allowed opacity-60">

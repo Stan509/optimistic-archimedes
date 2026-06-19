@@ -142,7 +142,7 @@
 
             
 
-            <p class="text-lg text-white/80 max-w-xl mx-auto lg:mx-0 leading-relaxed font-light">
+            <p class="text-lg text-white/80 max-w-xl mx-auto lg:mx-0 leading-relaxed font-medium">
 
                 {% site_content 'hero_subtitle' current_site.hero_subtitle|default:"Experience ultimate luxury and security." %}
 
@@ -152,16 +152,11 @@
 
             <div class="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 pt-4">
 
-                <a href="#services" class="border border-white/20 hover:border-luxe-gold bg-white/5 hover:bg-luxe-gold/10 px-8 py-3.5 rounded-full text-sm uppercase tracking-wider font-semibold transition-all duration-300 w-full sm:w-auto text-center">
-
+                <a href="#services" class="border border-white hover:border-luxe-gold bg-white text-luxe-black hover:bg-luxe-gold/10 hover:text-white px-8 py-3.5 rounded-full text-sm uppercase tracking-wider font-bold transition-all duration-300 w-full sm:w-auto text-center shadow-[0_0_15px_rgba(255,255,255,0.4)]">
                     Explore Services
-
                 </a>
-
-                <a href="{% site_url 'fleet' %}" class="text-sm font-semibold tracking-wider uppercase text-theme-text hover:text-luxe-gold transition-all duration-300 flex items-center space-x-2 py-3">
-
+                <a href="{% site_url 'fleet' %}" class="text-sm font-bold tracking-wider uppercase bg-white text-luxe-black hover:text-luxe-gold hover:bg-gray-100 transition-all duration-300 flex items-center justify-center space-x-2 py-3 px-8 rounded-full shadow-[0_0_15px_rgba(255,255,255,0.4)] w-full sm:w-auto">
                     <span>View Our Fleet</span>
-
                     <i class="fas fa-arrow-right text-xs"></i>
 
                 </a>
@@ -276,7 +271,7 @@
 
                             <!-- Left Block: Airport Select (default: Origin Airport) -->
 
-                            <div id="transfer-start-wrapper" class="w-full font-light">
+                            <div id="transfer-start-wrapper" class="w-full font-medium">
 
                                 <label id="lbl-transfer-start" for="airport_id" class="block text-xs uppercase tracking-widest font-bold text-theme-text/70 mb-2">Origin Airport</label>
 
@@ -328,7 +323,7 @@
 
                             <!-- Right Block: Destination Address (free text with geocoding) -->
 
-                            <div id="transfer-end-wrapper" class="w-full font-light">
+                            <div id="transfer-end-wrapper" class="w-full font-medium">
 
                                 <label id="lbl-transfer-end" for="destination_address" class="block text-xs uppercase tracking-widest font-bold text-theme-text/70 mb-2">Drop-off Address</label>
 
@@ -340,13 +335,13 @@
 
                                     </span>
 
-                                    <input type="text" name="destination_address" id="destination_address" placeholder="Enter your destination address..." class="block w-full pl-11 pr-4 py-4 bg-theme-bg/80 rounded-xl border border-theme-border focus:border-luxe-gold text-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-luxe-gold font-light" autocomplete="off">
+                                    <input type="text" name="destination_address" id="destination_address" placeholder="Enter your destination address..." class="block w-full pl-11 pr-4 py-4 bg-theme-bg/80 rounded-xl border border-theme-border focus:border-luxe-gold text-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-luxe-gold font-medium" autocomplete="off">
 
                                 </div>
 
                                 <!-- Geocoding result info -->
 
-                                <p id="geocode-status" class="text-[10px] text-theme-text/60 mt-1 font-light hidden">
+                                <p id="geocode-status" class="text-[10px] text-theme-text/60 mt-1 font-medium hidden">
 
                                     <i class="fas fa-map-marker-alt text-luxe-gold mr-1"></i>
 
@@ -454,7 +449,7 @@
 
                                 </span>
 
-                                <input type="text" name="pickup_address" id="pickup_address" placeholder="Enter starting address..." class="block w-full pl-10 pr-4 py-3.5 bg-theme-bg/90 rounded-xl border border-theme-border focus:border-luxe-gold text-xs text-gray-900 focus:outline-none focus:ring-1 focus:ring-luxe-gold font-light transition-all duration-300">
+                                <input type="text" name="pickup_address" id="pickup_address" placeholder="Enter starting address..." class="block w-full pl-10 pr-4 py-3.5 bg-theme-bg/90 rounded-xl border border-theme-border focus:border-luxe-gold text-xs text-gray-900 focus:outline-none focus:ring-1 focus:ring-luxe-gold font-medium transition-all duration-300">
 
                             </div>
 
@@ -516,7 +511,7 @@
 
                                 </span>
 
-                                <input type="text" name="dropoff_address" id="dropoff_address" placeholder="Enter destination address..." class="block w-full pl-10 pr-4 py-3.5 bg-theme-bg/90 rounded-xl border border-theme-border focus:border-luxe-gold text-xs text-gray-900 focus:outline-none focus:ring-1 focus:ring-luxe-gold font-light transition-all duration-300">
+                                <input type="text" name="dropoff_address" id="dropoff_address" placeholder="Enter destination address..." class="block w-full pl-10 pr-4 py-3.5 bg-theme-bg/90 rounded-xl border border-theme-border focus:border-luxe-gold text-xs text-gray-900 focus:outline-none focus:ring-1 focus:ring-luxe-gold font-medium transition-all duration-300">
 
                             </div>
 
@@ -548,7 +543,7 @@
 
                             <label for="stop_addresses" class="block text-[10px] uppercase text-theme-text/60 font-bold mb-1">Stop Addresses</label>
 
-                            <textarea name="stop_addresses" id="stop_addresses" rows="2" placeholder="List address details for each stop..." class="block w-full px-4 py-3 bg-theme-bg rounded-lg border border-theme-border focus:border-luxe-gold text-xs text-gray-900 focus:outline-none focus:ring-1 focus:ring-luxe-gold font-light"></textarea>
+                            <textarea name="stop_addresses" id="stop_addresses" rows="2" placeholder="List address details for each stop..." class="block w-full px-4 py-3 bg-theme-bg rounded-lg border border-theme-border focus:border-luxe-gold text-xs text-gray-900 focus:outline-none focus:ring-1 focus:ring-luxe-gold font-medium"></textarea>
 
                         </div>
 
@@ -652,7 +647,7 @@
 
                                 <span class="block text-xs font-bold uppercase tracking-wider text-theme-text font-sans">Aller-Retour / Round-Trip</span>
 
-                                <span class="block text-[10px] text-theme-text/70 font-light">Planifier le trajet de retour</span>
+                                <span class="block text-[10px] text-theme-text/70 font-medium">Planifier le trajet de retour</span>
 
                             </div>
 
@@ -694,7 +689,7 @@
 
                                     </span>
 
-                                    <input type="date" name="return_date" id="return_date" min="{{ today }}" class="block w-full pl-11 pr-4 py-4 bg-theme-bg/80 rounded-xl border border-theme-border focus:border-luxe-gold text-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-luxe-gold font-light">
+                                    <input type="date" name="return_date" id="return_date" min="{{ today }}" class="block w-full pl-11 pr-4 py-4 bg-theme-bg/80 rounded-xl border border-theme-border focus:border-luxe-gold text-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-luxe-gold font-medium">
 
                                 </div>
 
@@ -712,7 +707,7 @@
 
                                     </span>
 
-                                    <input type="time" name="return_time" id="return_time" class="block w-full pl-11 pr-4 py-4 bg-theme-bg/80 rounded-xl border border-theme-border focus:border-luxe-gold text-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-luxe-gold font-light">
+                                    <input type="time" name="return_time" id="return_time" class="block w-full pl-11 pr-4 py-4 bg-theme-bg/80 rounded-xl border border-theme-border focus:border-luxe-gold text-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-luxe-gold font-medium">
 
                                 </div>
 
@@ -736,11 +731,11 @@
 
                             </span>
 
-                            <input type="text" name="meeting_point" id="meeting_point" placeholder="e.g. Terminal B exit gate 4, or hotel lobby entrance" class="block w-full pl-11 pr-4 py-4 bg-theme-bg/80 rounded-xl border border-theme-border focus:border-luxe-gold text-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-luxe-gold font-light font-sans">
+                            <input type="text" name="meeting_point" id="meeting_point" placeholder="e.g. Terminal B exit gate 4, or hotel lobby entrance" class="block w-full pl-11 pr-4 py-4 bg-theme-bg/80 rounded-xl border border-theme-border focus:border-luxe-gold text-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-luxe-gold font-medium font-sans">
 
                         </div>
 
-                        <p class="text-[10px] text-theme-text/60 font-light">Specify coordinates or instructions on where to meet the private chauffeur upon pickup.</p>
+                        <p class="text-[10px] text-theme-text/60 font-medium">Specify coordinates or instructions on where to meet the private chauffeur upon pickup.</p>
 
                     </div>
 
@@ -784,7 +779,7 @@
 
             <div class="w-20 h-1 bg-luxe-gold mx-auto rounded-full"></div>
 
-            <p class="text-theme-text/70 font-light">
+            <p class="text-theme-text/70 font-medium">
 
                 {% site_content 'services_subtitle' 'Every booking features a high-grade professional driver, modern comfort amenities, and absolute promptness.' %}
 
@@ -810,7 +805,7 @@
 
                     <h3 class="text-xl font-bold tracking-wide text-theme-text font-display mb-4">Airport Transfers</h3>
 
-                    <p class="text-theme-text/70 text-sm leading-relaxed mb-6 font-light">
+                    <p class="text-theme-text/70 text-sm leading-relaxed mb-6 font-medium">
 
                         Flat-rate VIP service with real-time flight tracking, airport meet & greet inside the terminal, and complete flight delay protection.
 
@@ -842,7 +837,7 @@
 
                     <h3 class="text-xl font-bold tracking-wide text-theme-text font-display mb-4">Hourly Chauffeur</h3>
 
-                    <p class="text-theme-text/70 text-sm leading-relaxed mb-6 font-light">
+                    <p class="text-theme-text/70 text-sm leading-relaxed mb-6 font-medium">
 
                         Premium dedicated service for executives, diplomatic personnel, and multi-stop corporate itineraries. Complete control with premium flex hours.
 
@@ -874,7 +869,7 @@
 
                     <h3 class="text-xl font-bold tracking-wide text-theme-text font-display mb-4">Point-to-Point</h3>
 
-                    <p class="text-theme-text/70 text-sm leading-relaxed mb-6 font-light">
+                    <p class="text-theme-text/70 text-sm leading-relaxed mb-6 font-medium">
 
                         Direct premium transit between any two custom locations, featuring flat starting rates, multiple stop adjustments, and round-trip booking options.
 
@@ -908,7 +903,7 @@
 
                     <h3 class="text-xl font-bold tracking-wide text-theme-text font-display mb-4">Luxury Car Rental</h3>
 
-                    <p class="text-theme-text/70 text-sm leading-relaxed mb-6 font-light">
+                    <p class="text-theme-text/70 text-sm leading-relaxed mb-6 font-medium">
 
                         Premium vehicle rentals in Dominican Republic. Choose from elite SUVs and sedans to experience maximum driving freedom and class.
 
@@ -954,7 +949,7 @@
 
                 <div class="w-16 h-1 bg-luxe-gold rounded-full"></div>
 
-                <p class="text-theme-text/70 text-sm leading-relaxed font-light">
+                <p class="text-theme-text/70 text-sm leading-relaxed font-medium">
 
                     Our luxury fleet features the pristine and robust <strong class="text-theme-text">Cadillac Escalade</strong> and <strong class="text-theme-text">Chevrolet Suburban</strong>. Optimized for up to 6 passengers, offering spacious luggage storage, top-tier black leather cabins, and fully integrated Wi-Fi networks.
 
@@ -1056,7 +1051,7 @@
 
             {% if site_slug == 'dr' or current_site_slug == 'dr' %}
 
-            <p class="text-theme-text/70 font-light mt-4 text-sm max-w-2xl mx-auto">
+            <p class="text-theme-text/70 font-medium mt-4 text-sm max-w-2xl mx-auto">
 
                 {% site_content 'about_text' '' %}
 
@@ -1080,7 +1075,7 @@
 
                 <h4 class="text-sm font-bold uppercase tracking-wider text-theme-text mb-2">Guaranteed Flat Rates</h4>
 
-                <p class="text-xs text-theme-text/70 leading-relaxed font-light">
+                <p class="text-xs text-theme-text/70 leading-relaxed font-medium">
 
                     No hidden surge fees, no dynamic traffic penalties. You pay the exact quoted price at final reservation.
 
@@ -1100,7 +1095,7 @@
 
                 <h4 class="text-sm font-bold uppercase tracking-wider text-theme-text mb-2">Elite Security Drivers</h4>
 
-                <p class="text-xs text-theme-text/70 leading-relaxed font-light">
+                <p class="text-xs text-theme-text/70 leading-relaxed font-medium">
 
                     Meticulously vetted, professional chauffeurs with extensive route optimization and defense-driving training.
 
@@ -1120,7 +1115,7 @@
 
                 <h4 class="text-sm font-bold uppercase tracking-wider text-theme-text mb-2">Direct 24/7 Dispatch</h4>
 
-                <p class="text-xs text-theme-text/70 leading-relaxed font-light">
+                <p class="text-xs text-theme-text/70 leading-relaxed font-medium">
 
                     No complex automated phone loops. Instantly chat with real live support or your driver via WhatsApp 24/7.
 
@@ -1140,7 +1135,7 @@
 
                 <h4 class="text-sm font-bold uppercase tracking-wider text-theme-text mb-2">VIP Meet & Greet</h4>
 
-                <p class="text-xs text-theme-text/70 leading-relaxed font-light">
+                <p class="text-xs text-theme-text/70 leading-relaxed font-medium">
 
                     Terminals contain fast-track airport customs escorts, porter luggage handling, and direct greeting signboards.
 
@@ -1190,7 +1185,7 @@
 
                 </div>
 
-                <p class="text-sm leading-relaxed text-theme-text/80 mb-6 font-light italic">
+                <p class="text-sm leading-relaxed text-theme-text/80 mb-6 font-medium italic">
 
                     "{{ test.content }}"
 
@@ -1238,7 +1233,7 @@
 
                 </div>
 
-                <p class="text-sm leading-relaxed text-theme-text/80 mb-6 font-light italic">
+                <p class="text-sm leading-relaxed text-theme-text/80 mb-6 font-medium italic">
 
                     "Absolute professionalism. The driver was waiting terminal-side with a tablet, carried my heavy luggage, and the Escalade was immaculate. Highest recommendation."
 
@@ -1274,7 +1269,7 @@
 
                 </div>
 
-                <p class="text-sm leading-relaxed text-theme-text/80 mb-6 font-light italic">
+                <p class="text-sm leading-relaxed text-theme-text/80 mb-6 font-medium italic">
 
                     "Booking our VIP transfer from PUJ to Punta Cana resort was flawless. Add-ons like the Terminal Fast-track saved us hours of custom wait lines. Extremely comfortable vehicle."
 
@@ -1310,7 +1305,7 @@
 
                 </div>
 
-                <p class="text-sm leading-relaxed text-theme-text/80 mb-6 font-light italic">
+                <p class="text-sm leading-relaxed text-theme-text/80 mb-6 font-medium italic">
 
                     "Chauffeur hourly service was excellent. We used it for local corporate events in Manhattan. Impeccable route knowledge, perfect cabin environment, quiet and peaceful."
 

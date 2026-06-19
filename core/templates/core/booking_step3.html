@@ -94,7 +94,7 @@
                         <!-- VIP Add-ons block -->
                         <div class="space-y-4">
                             <h3 class="text-xs uppercase tracking-widest font-bold text-theme-text border-b border-theme-border pb-2">Premium Add-Ons & Enhancements</h3>
-                            <p class="text-[11px] text-theme-text/60 font-light leading-relaxed">
+                            <p class="text-[11px] text-theme-text/60 font-medium leading-relaxed">
                                 Select from our customizable premium services to maximize convenience. Added fees are calculated live in the itinerary summary.
                             </p>
                             
@@ -111,7 +111,7 @@
                                                     <i class="{% if addon.icon %}{{ addon.icon }}{% else %}fas fa-star{% endif %} text-luxe-gold text-[10px]"></i>
                                                     <span>{{ addon.name }}</span>
                                                 </h4>
-                                                <p class="text-[11px] text-theme-text/60 font-light mt-0.5">{{ addon.description }}</p>
+                                                <p class="text-[11px] text-theme-text/60 font-medium mt-0.5">{{ addon.description }}</p>
                                             </div>
                                             <span class="text-xs font-bold text-luxe-gold whitespace-nowrap ml-4">+{{ addon.price|currency }}</span>
                                         </div>
@@ -136,7 +136,7 @@
                                 <i class="fas fa-credit-card text-xs"></i>
                                 <span>Payment Preference</span>
                             </h3>
-                            <p class="text-[11px] text-theme-text/70 font-light">Choose how you would like to pay for your round-trip transfer:</p>
+                            <p class="text-[11px] text-theme-text/70 font-medium">Choose how you would like to pay for your round-trip transfer:</p>
                             <div class="space-y-3">
                                 <label class="flex items-center space-x-3 cursor-pointer select-none">
                                     <input type="radio" name="pay_separately" value="off" checked class="h-4.5 w-4.5 text-luxe-gold focus:ring-luxe-gold bg-theme-bg border-theme-border cursor-pointer">
