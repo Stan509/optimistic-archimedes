@@ -355,10 +355,10 @@
                 <div class="flex items-center md:hidden space-x-2">
                     <!-- Site Switcher (NYC / DR) -->
                     <div class="bg-theme-card border border-luxe-gold/30 rounded-full flex items-center p-0.5 shadow-[0_0_5px_rgba(212,175,55,0.2)]">
-                        <a href="{% url 'set_site' slug='nyc' %}" class="px-2 py-0.5 text-[10px] font-bold uppercase rounded-full transition-all {% if current_site_slug == 'nyc' %}bg-luxe-gold text-luxe-black{% else %}text-theme-text/80 hover:text-luxe-gold{% endif %}">
+                        <a href="{% site_url 'set_site' slug='nyc' %}" class="px-2 py-0.5 text-[10px] font-bold uppercase rounded-full transition-all {% if current_site_slug == 'nyc' %}bg-luxe-gold text-luxe-black{% else %}text-theme-text/80 hover:text-luxe-gold{% endif %}">
                             NYC
                         </a>
-                        <a href="{% url 'set_site' slug='dr' %}" class="px-2 py-0.5 text-[10px] font-bold uppercase rounded-full transition-all {% if current_site_slug == 'dr' %}bg-luxe-gold text-luxe-black{% else %}text-theme-text/80 hover:text-luxe-gold{% endif %}">
+                        <a href="{% site_url 'set_site' slug='dr' %}" class="px-2 py-0.5 text-[10px] font-bold uppercase rounded-full transition-all {% if current_site_slug == 'dr' %}bg-luxe-gold text-luxe-black{% else %}text-theme-text/80 hover:text-luxe-gold{% endif %}">
                             DR
                         </a>
                     </div>
