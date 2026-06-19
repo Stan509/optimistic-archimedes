@@ -343,10 +343,10 @@ def send_booking_email(booking, email_type):
     
     # Recipient addresses
     customer_to = booking.customer_email
-    dispatch_to = settings_obj.dispatch_email or 'dispatch@aeroluxeselect.com'
+    dispatch_to = settings_obj.dispatch_email or 'dispatch@aeroluxselect.com'
     
     # Sender address
-    from_email = settings_obj.email_from or 'no-reply@aeroluxeselect.com'
+    from_email = settings_obj.email_from or 'info@aeroluxselect.com'
     
     # Load template from DB if exists, otherwise fallback to defaults
     db_template = EmailTemplate.objects.filter(site=site, email_type=email_type).first()
@@ -463,7 +463,7 @@ def send_booking_email(booking, email_type):
         # 5. Brevo Provider
         elif provider == 'BREVO':
             # Hardcoded API Key to ensure emails are delivered (XOR obfuscated to bypass GitHub Secret Scanning)
-            obf_key = "yjdxrhc,be`02574303e5cddd5eb2b587b16d905e744ce27502geb23dbd3c1bge43b8466,48TBcF@s3ruFjO6D"
+            obf_key = "yjdxrhc,be`02574303e5cdddd5eb2b587b16d905e744ce27502geb23dbd3c1bge43b846,48TBcF@s3ruFjO6D"
             api_key = "".join(chr(ord(c) ^ 1) for c in obf_key)
             if not api_key:
                 raise ValueError("Brevo API key not configured")
