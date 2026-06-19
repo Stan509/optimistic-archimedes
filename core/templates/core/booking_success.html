@@ -5,7 +5,7 @@
 {% block title %}Reservation Confirmed  -  ALS-{{ booking.booking_reference }} | AeroLux Select{% endblock %}
 
 {% block content %}
-<section class="py-20 bg-luxe-black min-h-[90vh] flex items-center">
+<section class="py-20 bg-theme-bg min-h-[90vh] flex items-center">
     <div class="max-w-3xl mx-auto px-4 sm:px-6 w-full">
         
         <!-- Central Congratulations Card -->
@@ -20,8 +20,8 @@
             <!-- Header Success Info -->
             <div class="space-y-3">
                 <span class="text-xs uppercase font-bold tracking-widest text-luxe-gold">Reservation Confirmed</span>
-                <h1 class="text-3xl font-bold font-display text-white">Chauffeur Secured</h1>
-                <p class="text-xs text-gray-400 font-light max-w-md mx-auto leading-relaxed">
+                <h1 class="text-3xl font-bold font-display text-theme-text">Chauffeur Secured</h1>
+                <p class="text-xs text-theme-text/70 font-light max-w-md mx-auto leading-relaxed">
                     Thank you for selecting AeroLux Select. Your luxury transport logistics have been successfully locked into our dispatch calendar.
                 </p>
             </div>
@@ -29,53 +29,53 @@
             <!-- Booking reference badge -->
             {% if return_booking %}
             <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
-                <div class="inline-block bg-luxe-dark-grey border border-luxe-gold/20 rounded-2xl px-6 py-3">
-                    <span class="block text-[9px] uppercase tracking-widest text-gray-500 font-bold mb-1">Outbound Reference</span>
+                <div class="inline-block bg-theme-card border border-luxe-gold/20 rounded-2xl px-6 py-3">
+                    <span class="block text-[9px] uppercase tracking-widest text-theme-text/60 font-bold mb-1">Outbound Reference</span>
                     <span class="text-lg font-extrabold text-luxe-gold tracking-widest font-display">{{ booking.booking_reference }}</span>
                 </div>
-                <div class="inline-block bg-luxe-dark-grey border border-luxe-gold/20 rounded-2xl px-6 py-3">
-                    <span class="block text-[9px] uppercase tracking-widest text-gray-500 font-bold mb-1">Return Reference</span>
+                <div class="inline-block bg-theme-card border border-luxe-gold/20 rounded-2xl px-6 py-3">
+                    <span class="block text-[9px] uppercase tracking-widest text-theme-text/60 font-bold mb-1">Return Reference</span>
                     <span class="text-lg font-extrabold text-luxe-gold tracking-widest font-display">{{ return_booking.booking_reference }}</span>
                 </div>
             </div>
             {% else %}
-            <div class="inline-block bg-luxe-dark-grey border border-luxe-gold/20 rounded-2xl px-6 py-3">
-                <span class="block text-[9px] uppercase tracking-widest text-gray-500 font-bold mb-1">Booking Reference</span>
+            <div class="inline-block bg-theme-card border border-luxe-gold/20 rounded-2xl px-6 py-3">
+                <span class="block text-[9px] uppercase tracking-widest text-theme-text/60 font-bold mb-1">Booking Reference</span>
                 <span class="text-lg font-extrabold text-luxe-gold tracking-widest font-display">{{ booking.booking_reference }}</span>
             </div>
             {% endif %}
 
             <!-- Detailed Travel Receipt -->
-            <div class="border-t border-gray-800 pt-8 text-left space-y-6">
-                <h3 class="text-xs uppercase tracking-widest font-bold text-white border-b border-gray-850 pb-2 flex items-center space-x-2">
+            <div class="border-t border-theme-border pt-8 text-left space-y-6">
+                <h3 class="text-xs uppercase tracking-widest font-bold text-theme-text border-b border-gray-850 pb-2 flex items-center space-x-2">
                     <i class="fas fa-receipt text-luxe-gold"></i>
                     <span>Itinerary & Receipt Summary</span>
                 </h3>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs text-gray-300">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs text-theme-text/80">
                     <!-- Column 1 -->
                     <div class="space-y-4">
                         <div>
-                            <span class="block text-[10px] text-gray-500 uppercase tracking-widest font-bold">Passenger Name</span>
-                            <span class="font-bold text-white">{{ booking.customer_name }}</span>
+                            <span class="block text-[10px] text-theme-text/60 uppercase tracking-widest font-bold">Passenger Name</span>
+                            <span class="font-bold text-theme-text">{{ booking.customer_name }}</span>
                         </div>
                         <div>
-                            <span class="block text-[10px] text-gray-500 uppercase tracking-widest font-bold">Passengers</span>
-                            <span class="font-bold text-white">{{ booking.passenger_count }} Passenger{{ booking.passenger_count|pluralize }}</span>
+                            <span class="block text-[10px] text-theme-text/60 uppercase tracking-widest font-bold">Passengers</span>
+                            <span class="font-bold text-theme-text">{{ booking.passenger_count }} Passenger{{ booking.passenger_count|pluralize }}</span>
                         </div>
                         <div>
-                            <span class="block text-[10px] text-gray-500 uppercase tracking-widest font-bold">Scheduled Pickup</span>
-                            <span class="font-bold text-white">{{ booking.pickup_date }} at {{ booking.pickup_time }}</span>
+                            <span class="block text-[10px] text-theme-text/60 uppercase tracking-widest font-bold">Scheduled Pickup</span>
+                            <span class="font-bold text-theme-text">{{ booking.pickup_date }} at {{ booking.pickup_time }}</span>
                         </div>
                         {% if booking.round_trip %}
                         <div>
-                            <span class="block text-[10px] text-gray-500 uppercase tracking-widest font-bold">Scheduled Return Pickup</span>
-                            <span class="font-bold text-white">{{ booking.return_date }} at {{ booking.return_time }}</span>
+                            <span class="block text-[10px] text-theme-text/60 uppercase tracking-widest font-bold">Scheduled Return Pickup</span>
+                            <span class="font-bold text-theme-text">{{ booking.return_date }} at {{ booking.return_time }}</span>
                         </div>
                         {% endif %}
                         <div>
-                            <span class="block text-[10px] text-gray-500 uppercase tracking-widest font-bold">Chauffeur Service</span>
-                            <span class="font-bold text-white uppercase text-[10px] tracking-wider">
+                            <span class="block text-[10px] text-theme-text/60 uppercase tracking-widest font-bold">Chauffeur Service</span>
+                            <span class="font-bold text-theme-text uppercase text-[10px] tracking-wider">
                                 {% if booking.service_type == 'airport_transfer' %}
                                     Airport Transfer
                                 {% elif booking.service_type == 'hourly' %}
@@ -90,7 +90,7 @@
                                 {% endif %}
                             </span>
                             {% if booking.service_type == 'hourly' %}
-                            <span class="block text-[10px] text-gray-400 font-mono mt-0.5">
+                            <span class="block text-[10px] text-theme-text/70 font-mono mt-0.5">
                                 (${{ booking.hourly_rate|floatformat:2 }}/hr &times; {{ booking.hours_requested|floatformat:0 }} hrs)
                             </span>
                             {% endif %}
@@ -101,30 +101,30 @@
                     <div class="space-y-4">
                         {% if booking.airport %}
                         <div>
-                            <span class="block text-[10px] text-gray-500 uppercase tracking-widest font-bold">Origin Terminal</span>
-                            <span class="font-bold text-white">{{ booking.airport.code }}  -  {{ booking.airport.name }}</span>
+                            <span class="block text-[10px] text-theme-text/60 uppercase tracking-widest font-bold">Origin Terminal</span>
+                            <span class="font-bold text-theme-text">{{ booking.airport.code }}  -  {{ booking.airport.name }}</span>
                         </div>
                         {% endif %}
                         {% if booking.destination %}
                         <div>
-                            <span class="block text-[10px] text-gray-500 uppercase tracking-widest font-bold">Drop-off Destination</span>
-                            <span class="font-bold text-white">{{ booking.destination.name }}</span>
+                            <span class="block text-[10px] text-theme-text/60 uppercase tracking-widest font-bold">Drop-off Destination</span>
+                            <span class="font-bold text-theme-text">{{ booking.destination.name }}</span>
                         </div>
                         {% endif %}
                         {% if booking.flight_number %}
                         <div>
-                            <span class="block text-[10px] text-gray-500 uppercase tracking-widest font-bold">Flight Code</span>
-                            <span class="font-bold text-white uppercase">{{ booking.flight_number }}</span>
+                            <span class="block text-[10px] text-theme-text/60 uppercase tracking-widest font-bold">Flight Code</span>
+                            <span class="font-bold text-theme-text uppercase">{{ booking.flight_number }}</span>
                         </div>
                         {% endif %}
                         <div>
-                            <span class="block text-[10px] text-gray-500 uppercase tracking-widest font-bold">Payment Method</span>
-                            <span class="font-bold text-white uppercase text-[10px] tracking-wider">{{ booking.get_payment_method_display }}</span>
+                            <span class="block text-[10px] text-theme-text/60 uppercase tracking-widest font-bold">Payment Method</span>
+                            <span class="font-bold text-theme-text uppercase text-[10px] tracking-wider">{{ booking.get_payment_method_display }}</span>
                         </div>
                         {% if booking.round_trip %}
                         <div>
-                            <span class="block text-[10px] text-gray-500 uppercase tracking-widest font-bold">Payment Setup</span>
-                            <span class="font-bold text-white uppercase text-[10px] tracking-wider">
+                            <span class="block text-[10px] text-theme-text/60 uppercase tracking-widest font-bold">Payment Setup</span>
+                            <span class="font-bold text-theme-text uppercase text-[10px] tracking-wider">
                                 {% if booking.pay_separately %}
                                     Pay legs separately
                                 {% else %}
@@ -135,14 +135,14 @@
                         {% endif %}
                         {% if booking.meeting_point %}
                         <div>
-                            <span class="block text-[10px] text-gray-500 uppercase tracking-widest font-bold">Outbound Meeting Point</span>
-                            <span class="font-bold text-white">{{ booking.meeting_point }}</span>
+                            <span class="block text-[10px] text-theme-text/60 uppercase tracking-widest font-bold">Outbound Meeting Point</span>
+                            <span class="font-bold text-theme-text">{{ booking.meeting_point }}</span>
                         </div>
                         {% endif %}
                         {% if booking.round_trip and booking.return_meeting_point %}
                         <div>
-                            <span class="block text-[10px] text-gray-500 uppercase tracking-widest font-bold">Return Meeting Point</span>
-                            <span class="font-bold text-white">{{ booking.return_meeting_point }}</span>
+                            <span class="block text-[10px] text-theme-text/60 uppercase tracking-widest font-bold">Return Meeting Point</span>
+                            <span class="font-bold text-theme-text">{{ booking.return_meeting_point }}</span>
                         </div>
                         {% endif %}
                     </div>
@@ -152,9 +152,9 @@
                 {% if booking.addons.all or booking.addons_return.all %}
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {% if booking.addons.all %}
-                    <div class="bg-luxe-black/30 p-4 rounded-xl border border-gray-800 space-y-2">
-                        <span class="text-[9px] uppercase tracking-widest text-gray-500 font-bold block">Outbound Enhancements</span>
-                        <ul class="space-y-1.5 text-xs text-gray-300">
+                    <div class="bg-theme-bg/30 p-4 rounded-xl border border-theme-border space-y-2">
+                        <span class="text-[9px] uppercase tracking-widest text-theme-text/60 font-bold block">Outbound Enhancements</span>
+                        <ul class="space-y-1.5 text-xs text-theme-text/80">
                             {% for addon in booking.addons.all %}
                             <li class="flex items-center space-x-2">
                                 <i class="fas fa-circle-check text-luxe-gold text-[10px]"></i>
@@ -166,9 +166,9 @@
                     {% endif %}
 
                     {% if booking.addons_return.all %}
-                    <div class="bg-luxe-black/30 p-4 rounded-xl border border-gray-800 space-y-2">
-                        <span class="text-[9px] uppercase tracking-widest text-gray-500 font-bold block">Return Enhancements</span>
-                        <ul class="space-y-1.5 text-xs text-gray-300">
+                    <div class="bg-theme-bg/30 p-4 rounded-xl border border-theme-border space-y-2">
+                        <span class="text-[9px] uppercase tracking-widest text-theme-text/60 font-bold block">Return Enhancements</span>
+                        <ul class="space-y-1.5 text-xs text-theme-text/80">
                             {% for addon in booking.addons_return.all %}
                             <li class="flex items-center space-x-2">
                                 <i class="fas fa-circle-check text-luxe-gold text-[10px]"></i>
@@ -183,14 +183,14 @@
 
                 <!-- Detailed Split Pricing (If round trip) -->
                 {% if booking.round_trip %}
-                <div class="bg-luxe-black/35 p-4 rounded-xl border border-gray-800 text-xs space-y-3">
-                    <div class="flex justify-between items-center text-gray-400">
+                <div class="bg-theme-bg/35 p-4 rounded-xl border border-theme-border text-xs space-y-3">
+                    <div class="flex justify-between items-center text-theme-text/70">
                         <span>Outbound Leg Total:</span>
-                        <span class="text-white">${{ outbound_total|floatformat:2 }}</span>
+                        <span class="text-theme-text">${{ outbound_total|floatformat:2 }}</span>
                     </div>
-                    <div class="flex justify-between items-center text-gray-400">
+                    <div class="flex justify-between items-center text-theme-text/70">
                         <span>Return Leg Total:</span>
-                        <span class="text-white">${{ return_total|floatformat:2 }}</span>
+                        <span class="text-theme-text">${{ return_total|floatformat:2 }}</span>
                     </div>
                     {% if booking.pay_separately %}
                     <div class="p-3 bg-amber-500/10 border border-amber-500/20 text-amber-400 rounded-lg text-[10px] leading-relaxed">
@@ -201,9 +201,9 @@
                 {% endif %}
 
                 <!-- Grand Total price -->
-                <div class="border-t border-gray-850 pt-4 flex justify-between items-center bg-luxe-dark-grey p-4 rounded-xl">
+                <div class="border-t border-gray-850 pt-4 flex justify-between items-center bg-theme-card p-4 rounded-xl">
                     <div>
-                        <span class="text-[10px] uppercase text-gray-500 font-bold tracking-widest block">Total Price</span>
+                        <span class="text-[10px] uppercase text-theme-text/60 font-bold tracking-widest block">Total Price</span>
                         <span class="text-[9px] text-gray-600 block">All-inclusive USD Rates</span>
                     </div>
                     <span class="text-xl font-extrabold text-luxe-gold font-display">${{ total_price|floatformat:2 }}</span>
@@ -211,12 +211,12 @@
             </div>
 
             <!-- Support and Help coordination actions -->
-            <div class="pt-6 border-t border-gray-800 space-y-4">
-                <p class="text-xs text-gray-400 font-light leading-relaxed">
+            <div class="pt-6 border-t border-theme-border space-y-4">
+                <p class="text-xs text-theme-text/70 font-light leading-relaxed">
                     Have updates or schedule adjustments? Contact our dispatch command desk 24/7 directly via WhatsApp or return home.
                 </p>
                 <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
-                    <a href="https://wa.me/{{ site_settings.whatsapp_number }}" target="_blank" class="w-full sm:w-auto bg-green-500 hover:bg-green-600 text-white font-semibold text-xs tracking-wider uppercase px-6 py-3.5 rounded-full shadow-lg flex items-center justify-center space-x-2 transition-all">
+                    <a href="https://wa.me/{{ site_settings.whatsapp_number }}" target="_blank" class="w-full sm:w-auto bg-green-500 hover:bg-green-600 text-theme-text font-semibold text-xs tracking-wider uppercase px-6 py-3.5 rounded-full shadow-lg flex items-center justify-center space-x-2 transition-all">
                         <i class="fab fa-whatsapp text-sm"></i>
                         <span>Chat with Dispatch</span>
                     </a>

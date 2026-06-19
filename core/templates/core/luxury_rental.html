@@ -6,24 +6,24 @@
 
 {% block content %}
 <!-- Banner Section -->
-<section class="relative py-24 bg-luxe-dark-grey overflow-hidden border-b border-luxe-gold/10">
+<section class="relative py-24 bg-theme-card overflow-hidden border-b border-luxe-gold/10">
     <div class="absolute inset-0 z-0">
-        <div class="absolute inset-0 bg-gradient-to-r from-luxe-black via-black/90 to-transparent z-10"></div>
+        <div class="absolute inset-0 bg-gradient-to-r from-theme-bg via-theme-bg/90 to-transparent z-10"></div>
         <img src="https://images.unsplash.com/photo-1549399542-7e3f8b79c341?auto=format&fit=crop&q=80&w=1200" alt="Luxury Car Rental" class="w-full h-full object-cover object-center opacity-40">
     </div>
     <div class="relative z-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <span class="text-xs uppercase font-bold tracking-widest text-luxe-gold">Prestige Travel Selection</span>
-        <h1 class="text-4xl sm:text-5xl font-extrabold font-display text-white mt-3">
+        <h1 class="text-4xl sm:text-5xl font-extrabold font-display text-theme-text mt-3">
             Luxury Chauffeur <span class="gold-gradient-text">Rentals</span>
         </h1>
-        <p class="text-gray-400 text-sm max-w-xl mt-4 leading-relaxed font-light">
+        <p class="text-theme-text/70 text-sm max-w-xl mt-4 leading-relaxed font-light">
             Secure high-end vehicles driven by our certified executive drivers. We handle detailing, refueling, and driving while you focus on what matters.
         </p>
     </div>
 </section>
 
 <!-- Detailed Luxury Rental Breakdown -->
-<section class="py-24 bg-luxe-black">
+<section class="py-24 bg-theme-bg">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-16 items-start">
             
@@ -31,8 +31,8 @@
             <div class="lg:col-span-8 space-y-12">
                 <!-- Overview Copy -->
                 <div class="space-y-6">
-                    <h2 class="text-2xl font-bold font-display text-white border-b border-gray-800 pb-4">Our Rental Experience</h2>
-                    <p class="text-gray-300 font-light leading-relaxed text-sm">
+                    <h2 class="text-2xl font-bold font-display text-theme-text border-b border-theme-border pb-4">Our Rental Experience</h2>
+                    <p class="text-theme-text/80 font-light leading-relaxed text-sm">
                         Sit back in high-grade comfort while our elite security driver navigates city traffic or tropical routes. Perfect for weddings, promotional campaigns, high-profile delegation transport, or VIP family vacations.
                     </p>
                     
@@ -42,8 +42,8 @@
                                 <i class="fas fa-crown text-luxe-gold"></i>
                             </div>
                             <div>
-                                <h3 class="text-sm font-bold uppercase tracking-wider text-white mb-2">Chauffeur Included</h3>
-                                <p class="text-xs text-gray-400 leading-relaxed font-light">
+                                <h3 class="text-sm font-bold uppercase tracking-wider text-theme-text mb-2">Chauffeur Included</h3>
+                                <p class="text-xs text-theme-text/70 leading-relaxed font-light">
                                     Every rental is accompanied by a professional security-certified driver. No driving stress, navigation struggles, or parking fees.
                                 </p>
                             </div>
@@ -54,8 +54,8 @@
                                 <i class="fas fa-compass text-luxe-gold"></i>
                             </div>
                             <div>
-                                <h3 class="text-sm font-bold uppercase tracking-wider text-white mb-2">Bespoke Travel Paths</h3>
-                                <p class="text-xs text-gray-400 leading-relaxed font-light">
+                                <h3 class="text-sm font-bold uppercase tracking-wider text-theme-text mb-2">Bespoke Travel Paths</h3>
+                                <p class="text-xs text-theme-text/70 leading-relaxed font-light">
                                     Customize multiple pickup sites, custom stops, scenic tours, and lunch reservations directly with our logistics team.
                                 </p>
                             </div>
@@ -65,11 +65,11 @@
 
                 <!-- Active Fleet Categories -->
                 <div class="space-y-6">
-                    <h2 class="text-2xl font-bold font-display text-white border-b border-gray-800 pb-4">Active Vehicle Categories</h2>
+                    <h2 class="text-2xl font-bold font-display text-theme-text border-b border-theme-border pb-4">Active Vehicle Categories</h2>
                     <div class="space-y-6">
                         {% for cat in categories %}
                         <div class="glass-card rounded-2xl overflow-hidden hover:border-luxe-gold/20 transition-all duration-300 grid grid-cols-1 md:grid-cols-12 gap-6 p-4">
-                            <div class="md:col-span-5 rounded-lg overflow-hidden h-48 md:h-full bg-luxe-grey relative">
+                            <div class="md:col-span-5 rounded-lg overflow-hidden h-48 md:h-full bg-theme-card relative">
                                 {% if cat.image %}
                                 <img src="{{ cat.image.url }}" alt="{{ cat.name }}" class="w-full h-full object-cover">
                                 {% else %}
@@ -79,14 +79,14 @@
                             <div class="md:col-span-7 flex flex-col justify-between space-y-4">
                                 <div>
                                     <div class="flex items-center justify-between">
-                                        <h3 class="text-lg font-bold font-display text-white uppercase tracking-wider">{{ cat.name }}</h3>
+                                        <h3 class="text-lg font-bold font-display text-theme-text uppercase tracking-wider">{{ cat.name }}</h3>
                                         <span class="text-[10px] uppercase font-bold tracking-widest text-luxe-gold">Premium Class</span>
                                     </div>
-                                    <p class="text-xs text-gray-400 leading-relaxed mt-2 font-light">
+                                    <p class="text-xs text-theme-text/70 leading-relaxed mt-2 font-light">
                                         {{ cat.description|default:"Pristine luxury class offering exceptional legroom, advanced temperature zones, and professional amenities." }}
                                     </p>
                                 </div>
-                                <div class="flex items-center space-x-6 text-xs text-gray-300 font-semibold border-t border-gray-800 pt-4">
+                                <div class="flex items-center space-x-6 text-xs text-theme-text/80 font-semibold border-t border-theme-border pt-4">
                                     <div class="flex items-center space-x-2">
                                         <i class="fas fa-user text-luxe-gold"></i>
                                         <span>{{ cat.passengers_capacity }} Seats</span>
@@ -99,7 +99,7 @@
                             </div>
                         </div>
                         {% empty %}
-                        <p class="text-xs text-gray-500 italic">No fleet categories available.</p>
+                        <p class="text-xs text-theme-text/60 italic">No fleet categories available.</p>
                         {% endfor %}
                     </div>
                 </div>
@@ -113,8 +113,8 @@
                         <i class="fas fa-calendar-days text-luxe-gold text-lg"></i>
                     </div>
                     <div class="space-y-2">
-                        <h3 class="text-lg font-bold font-display text-white uppercase tracking-wider">Reserve Luxury Rental</h3>
-                        <p class="text-xs text-gray-400 font-light leading-relaxed">
+                        <h3 class="text-lg font-bold font-display text-theme-text uppercase tracking-wider">Reserve Luxury Rental</h3>
+                        <p class="text-xs text-theme-text/70 font-light leading-relaxed">
                             Book pristine chauffeur-driven vehicles by selecting our custom rentals. Fill your transfer routing inside.
                         </p>
                     </div>

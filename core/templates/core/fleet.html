@@ -6,24 +6,24 @@
 
 {% block content %}
 <!-- Banner Section -->
-<section class="relative py-24 bg-luxe-dark-grey overflow-hidden border-b border-luxe-gold/10">
+<section class="relative py-24 bg-theme-card overflow-hidden border-b border-luxe-gold/10">
     <div class="absolute inset-0 z-0">
-        <div class="absolute inset-0 bg-gradient-to-r from-luxe-black via-black/90 to-transparent z-10"></div>
+        <div class="absolute inset-0 bg-gradient-to-r from-theme-bg via-theme-bg/90 to-transparent z-10"></div>
         <img src="https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&q=80&w=1200" alt="Executive SUV Chauffeur Fleet" class="w-full h-full object-cover object-center opacity-40">
     </div>
     <div class="relative z-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <span class="text-xs uppercase font-bold tracking-widest text-luxe-gold">The Standard of Excellence</span>
-        <h1 class="text-4xl sm:text-5xl font-extrabold font-display text-white mt-3">
+        <h1 class="text-4xl sm:text-5xl font-extrabold font-display text-theme-text mt-3">
             Elite Luxury <span class="gold-gradient-text">Fleet</span>
         </h1>
-        <p class="text-gray-400 text-sm max-w-xl mt-4 leading-relaxed font-light">
+        <p class="text-theme-text/70 text-sm max-w-xl mt-4 leading-relaxed font-light">
             We maintain a state-of-the-art fleet of executive SUVs and prestige vehicles. Thoroughly inspected, fully loaded with cabin amenities, and detailed before every dispatch.
         </p>
     </div>
 </section>
 
 <!-- Fleet Grid Section -->
-<section class="py-24 bg-luxe-black">
+<section class="py-24 bg-theme-bg">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-16">
 
         <!-- Showcase of Categories -->
@@ -31,13 +31,13 @@
             {% for category in categories %}
             <div class="glass-card rounded-2xl overflow-hidden hover:border-luxe-gold/30 transition-all duration-300 flex flex-col justify-between group">
                 <!-- Category Photo -->
-                <div class="relative h-64 bg-luxe-grey overflow-hidden">
+                <div class="relative h-64 bg-theme-card overflow-hidden">
                     {% if category.image %}
                     <img src="{{ category.image.url }}" alt="{{ category.name }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
                     {% else %}
                     <img src="https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&q=80&w=800" alt="{{ category.name }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
                     {% endif %}
-                    <div class="absolute top-4 right-4 bg-luxe-black/80 px-3 py-1 rounded-full border border-luxe-gold/20 text-[10px] font-extrabold uppercase tracking-widest text-luxe-gold">
+                    <div class="absolute top-4 right-4 bg-theme-bg/80 px-3 py-1 rounded-full border border-luxe-gold/20 text-[10px] font-extrabold uppercase tracking-widest text-luxe-gold">
                         {{ category.name }}
                     </div>
                 </div>
@@ -45,37 +45,37 @@
                 <!-- Details & Specs -->
                 <div class="p-6 space-y-6 flex-grow flex flex-col justify-between">
                     <div class="space-y-3">
-                        <h3 class="text-lg font-bold font-display text-white">{{ category.name }}</h3>
-                        <p class="text-xs text-gray-400 font-light leading-relaxed">
+                        <h3 class="text-lg font-bold font-display text-theme-text">{{ category.name }}</h3>
+                        <p class="text-xs text-theme-text/70 font-light leading-relaxed">
                             {{ category.description|default:"Top-tier black-on-black cabin experience optimized for maximum logistics efficiency." }}
                         </p>
                     </div>
 
                     <!-- Capacities row -->
-                    <div class="grid grid-cols-2 gap-2 bg-luxe-black/40 p-3 rounded-xl border border-gray-800 text-center text-xs">
+                    <div class="grid grid-cols-2 gap-2 bg-theme-bg/40 p-3 rounded-xl border border-theme-border text-center text-xs">
                         <div>
-                            <span class="block text-[10px] text-gray-500 uppercase tracking-widest">Seats</span>
-                            <span class="font-extrabold text-white">{{ category.passengers_capacity }} Max</span>
+                            <span class="block text-[10px] text-theme-text/60 uppercase tracking-widest">Seats</span>
+                            <span class="font-extrabold text-theme-text">{{ category.passengers_capacity }} Max</span>
                         </div>
                         <div>
-                            <span class="block text-[10px] text-gray-500 uppercase tracking-widest">Luggage</span>
-                            <span class="font-extrabold text-white">{{ category.luggage_capacity }} Bags</span>
+                            <span class="block text-[10px] text-theme-text/60 uppercase tracking-widest">Luggage</span>
+                            <span class="font-extrabold text-theme-text">{{ category.luggage_capacity }} Bags</span>
                         </div>
                     </div>
 
                     <!-- Dynamic Features list -->
-                    <div class="space-y-2 border-t border-gray-800 pt-4">
-                        <span class="text-[10px] text-gray-500 uppercase font-bold tracking-widest block">Premium Comforts</span>
-                        <div class="flex flex-wrap gap-2 pt-1 text-[10px] uppercase font-semibold text-gray-300">
-                            <span class="bg-luxe-grey border border-gray-800 px-2.5 py-1 rounded-md flex items-center space-x-1.5">
+                    <div class="space-y-2 border-t border-theme-border pt-4">
+                        <span class="text-[10px] text-theme-text/60 uppercase font-bold tracking-widest block">Premium Comforts</span>
+                        <div class="flex flex-wrap gap-2 pt-1 text-[10px] uppercase font-semibold text-theme-text/80">
+                            <span class="bg-theme-card border border-theme-border px-2.5 py-1 rounded-md flex items-center space-x-1.5">
                                 <i class="fas fa-wifi text-luxe-gold"></i>
                                 <span>4G Cabin Wi-Fi</span>
                             </span>
-                            <span class="bg-luxe-grey border border-gray-800 px-2.5 py-1 rounded-md flex items-center space-x-1.5">
+                            <span class="bg-theme-card border border-theme-border px-2.5 py-1 rounded-md flex items-center space-x-1.5">
                                 <i class="fas fa-bottle-water text-luxe-gold"></i>
                                 <span>Ice Water</span>
                             </span>
-                            <span class="bg-luxe-grey border border-gray-800 px-2.5 py-1 rounded-md flex items-center space-x-1.5">
+                            <span class="bg-theme-card border border-theme-border px-2.5 py-1 rounded-md flex items-center space-x-1.5">
                                 <i class="fas fa-plug text-luxe-gold"></i>
                                 <span>USB outlets</span>
                             </span>
@@ -84,8 +84,8 @@
                 </div>
 
                 <!-- Action Bar -->
-                <div class="border-t border-gray-800 p-4 bg-luxe-dark-grey flex items-center justify-between">
-                    <a href="{% site_url 'fleet_detail' slug=category.slug %}" class="text-[10px] font-bold uppercase tracking-wider text-gray-400 hover:text-white transition-colors">
+                <div class="border-t border-theme-border p-4 bg-theme-card flex items-center justify-between">
+                    <a href="{% site_url 'fleet_detail' slug=category.slug %}" class="text-[10px] font-bold uppercase tracking-wider text-theme-text/70 hover:text-theme-text transition-colors">
                         View Specs
                     </a>
                     <a href="{% site_url 'booking_step1' %}" class="gold-btn px-4 py-2 rounded-lg text-xs uppercase tracking-wider font-semibold shadow-sm">
@@ -96,7 +96,7 @@
             {% empty %}
             <div class="text-center py-12 glass-card rounded-2xl col-span-full">
                 <i class="fas fa-car text-gray-600 text-3xl mb-4"></i>
-                <p class="text-sm text-gray-400 italic">No luxury categories configured yet.</p>
+                <p class="text-sm text-theme-text/70 italic">No luxury categories configured yet.</p>
             </div>
             {% endfor %}
         </div>

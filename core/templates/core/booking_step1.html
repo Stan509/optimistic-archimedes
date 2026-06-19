@@ -31,12 +31,12 @@
 </style>
 {% endblock %}
 {% block content %}
-<section class="py-16 bg-luxe-black min-h-[85vh]">
+<section class="py-16 bg-theme-bg min-h-[85vh]">
     <div class="max-w-6xl mx-auto px-4 sm:px-6">
         
         <!-- Premium Multi-step Progress Indicator -->
         <div class="mb-12">
-            <div class="flex justify-between items-center text-xs uppercase tracking-wider text-gray-500 font-semibold mb-3">
+            <div class="flex justify-between items-center text-xs uppercase tracking-wider text-theme-text/60 font-semibold mb-3">
                 <span class="text-luxe-gold">1. Trip Routing</span>
                 <span>2. Select Vehicle</span>
                 <span>3. Passenger Details</span>
@@ -53,8 +53,8 @@
             
             <div class="text-center space-y-2 mb-10">
                 <span class="text-xs uppercase font-bold tracking-widest text-luxe-gold">Begin Reservation</span>
-                <h1 class="text-3xl font-bold font-display text-white">Trip Specifications</h1>
-                <p class="text-xs text-gray-400 font-light max-w-md mx-auto">
+                <h1 class="text-3xl font-bold font-display text-theme-text">Trip Specifications</h1>
+                <p class="text-xs text-theme-text/70 font-light max-w-md mx-auto">
                     Please provide your travel coordinates. We dynamically adjust all schedules based on your landing times.
                 </p>
             </div>
@@ -68,8 +68,8 @@
                 <input type="hidden" name="distance_km" id="distance_km" value="{{ booking_data.distance_km|default:'' }}">
                 <!-- Service Type selector -->
                 <div>
-                    <label class="block text-xs uppercase tracking-widest font-bold text-gray-400 mb-3">Service Type</label>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3 bg-luxe-black p-1.5 rounded-2xl border border-gray-800">
+                    <label class="block text-xs uppercase tracking-widest font-bold text-theme-text/70 mb-3">Service Type</label>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3 bg-theme-bg p-1.5 rounded-2xl border border-theme-border">
                         <label class="cursor-pointer text-center p-4 rounded-xl text-xs font-semibold uppercase tracking-wider transition-all duration-300 block select-none border border-transparent" id="lbl-transfer">
                             <input type="radio" name="service_type" value="airport_transfer" checked class="sr-only" id="rad-transfer">
                             <i class="fas fa-plane-departure text-base text-luxe-gold mb-2 block"></i>
@@ -77,20 +77,20 @@
                         </label>
                         <label class="cursor-pointer text-center p-4 rounded-xl text-xs font-semibold uppercase tracking-wider transition-all duration-300 block select-none border border-transparent" id="lbl-p2p">
                             <input type="radio" name="service_type" value="point_to_point" class="sr-only" id="rad-p2p">
-                            <i class="fas fa-route text-base text-gray-500 mb-2 block" id="icon-p2p"></i>
-                            <span class="block text-gray-400" id="span-p2p">Point to Point</span>
+                            <i class="fas fa-route text-base text-theme-text/60 mb-2 block" id="icon-p2p"></i>
+                            <span class="block text-theme-text/70" id="span-p2p">Point to Point</span>
                         </label>
                         <label class="cursor-pointer text-center p-4 rounded-xl text-xs font-semibold uppercase tracking-wider transition-all duration-300 block select-none border border-transparent" id="lbl-hourly">
                             <input type="radio" name="service_type" value="hourly" class="sr-only" id="rad-hourly">
-                            <i class="fas fa-clock text-base text-gray-500 mb-2 block" id="icon-hourly"></i>
-                            <span class="block text-gray-400" id="span-hourly">Hourly Chauffeur</span>
+                            <i class="fas fa-clock text-base text-theme-text/60 mb-2 block" id="icon-hourly"></i>
+                            <span class="block text-theme-text/70" id="span-hourly">Hourly Chauffeur</span>
                         </label>
                     </div>
                 </div>
                 <!-- Interactive Dark Map -->
-                <div class="relative w-full h-[600px] bg-luxe-black border border-gray-800 rounded-2xl overflow-hidden shadow-inner group mb-2" style="height: 600px;">
+                <div class="relative w-full h-[600px] bg-theme-bg border border-theme-border rounded-2xl overflow-hidden shadow-inner group mb-2" style="height: 600px;">
                     <div id="booking-map" class="w-full h-full z-0"></div>
-                    <div class="absolute top-4 left-4 z-[1000] bg-luxe-black/90 px-3 py-1.5 rounded-lg border border-gray-800 backdrop-blur-md">
+                    <div class="absolute top-4 left-4 z-[1000] bg-theme-bg/90 px-3 py-1.5 rounded-lg border border-theme-border backdrop-blur-md">
                         <span class="text-[9px] uppercase font-bold tracking-widest text-luxe-gold flex items-center gap-1.5">
                             <i class="fa-solid fa-map-location-dot animate-pulse"></i>
                             <span>Interactive Luxury Routing Map</span>
@@ -104,12 +104,12 @@
                     <div class="flex flex-col md:flex-row items-center gap-4 relative">
                         <!-- Left Block: Airport Select -->
                         <div id="transfer-start-wrapper" class="w-full font-light">
-                            <label id="lbl-transfer-start" for="airport_id" class="block text-xs uppercase tracking-widest font-bold text-gray-400 mb-2">Origin Airport</label>
+                            <label id="lbl-transfer-start" for="airport_id" class="block text-xs uppercase tracking-widest font-bold text-theme-text/70 mb-2">Origin Airport</label>
                             <div class="relative">
                                 <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-luxe-gold">
                                     <i class="fas fa-plane-departure text-sm" id="icon-transfer-start"></i>
                                 </span>
-                                <select name="airport_id" id="airport_id" class="block w-full pl-11 pr-10 py-4 bg-luxe-black/80 rounded-xl border border-gray-800 focus:border-luxe-gold text-sm text-white focus:outline-none focus:ring-1 focus:ring-luxe-gold appearance-none">
+                                <select name="airport_id" id="airport_id" class="block w-full pl-11 pr-10 py-4 bg-theme-bg/80 rounded-xl border border-theme-border focus:border-luxe-gold text-sm text-theme-text focus:outline-none focus:ring-1 focus:ring-luxe-gold appearance-none">
                                     <option value="" disabled selected>Select Airport...</option>
                                     {% for airport in airports %}
                                     <option value="{{ airport.id }}" data-lat="{{ airport.latitude }}" data-lng="{{ airport.longitude }}">{{ airport.code }} — {{ airport.name }}</option>
@@ -117,27 +117,27 @@
                                     <option value="" disabled>No serviced airports in this hub</option>
                                     {% endfor %}
                                 </select>
-                                <span class="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-500 pointer-events-none">
+                                <span class="absolute inset-y-0 right-0 pr-4 flex items-center text-theme-text/60 pointer-events-none">
                                     <i class="fas fa-chevron-down text-xs"></i>
                                 </span>
                             </div>
                         </div>
                         <!-- Inversion Toggle Button -->
                         <div class="flex justify-center items-center md:pt-6">
-                            <button type="button" id="btn-switch-direction" class="w-10 h-10 rounded-full bg-luxe-black border border-gray-800 text-luxe-gold hover:border-luxe-gold/50 hover:text-luxe-gold-bright transition-all duration-300 flex items-center justify-center shadow-lg active:scale-95 cursor-pointer" title="Switch Directions">
+                            <button type="button" id="btn-switch-direction" class="w-10 h-10 rounded-full bg-theme-bg border border-theme-border text-luxe-gold hover:border-luxe-gold/50 hover:text-luxe-gold-bright transition-all duration-300 flex items-center justify-center shadow-lg active:scale-95 cursor-pointer" title="Switch Directions">
                                 <i class="fas fa-right-left rotate-90 md:rotate-0 text-sm"></i>
                             </button>
                         </div>
                         <!-- Right Block: Destination Address (free text) -->
                         <div id="transfer-end-wrapper" class="w-full font-light">
-                            <label id="lbl-transfer-end" for="destination_address" class="block text-xs uppercase tracking-widest font-bold text-gray-400 mb-2">Drop-off Address</label>
+                            <label id="lbl-transfer-end" for="destination_address" class="block text-xs uppercase tracking-widest font-bold text-theme-text/70 mb-2">Drop-off Address</label>
                             <div class="relative">
                                 <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-luxe-gold">
                                     <i class="fas fa-map-pin text-sm" id="icon-transfer-end"></i>
                                 </span>
-                                <input type="text" name="destination_address" id="destination_address" placeholder="Enter your destination address..." class="block w-full pl-11 pr-4 py-4 bg-luxe-black/80 rounded-xl border border-gray-800 focus:border-luxe-gold text-sm text-white focus:outline-none focus:ring-1 focus:ring-luxe-gold font-light" autocomplete="off">
+                                <input type="text" name="destination_address" id="destination_address" placeholder="Enter your destination address..." class="block w-full pl-11 pr-4 py-4 bg-theme-bg/80 rounded-xl border border-theme-border focus:border-luxe-gold text-sm text-theme-text focus:outline-none focus:ring-1 focus:ring-luxe-gold font-light" autocomplete="off">
                             </div>
-                            <p id="geocode-status" class="text-[10px] text-gray-500 mt-1 font-light hidden">
+                            <p id="geocode-status" class="text-[10px] text-theme-text/60 mt-1 font-light hidden">
                                 <i class="fas fa-map-marker-alt text-luxe-gold mr-1"></i>
                                 <span id="geocode-status-text">Address found — displaying on map</span>
                             </p>
@@ -147,26 +147,26 @@
                 <!-- Hourly fields (Hidden by Default, minimum 3 hours, maximum 12 hours) -->
                 <div id="div-hourly" class="hidden space-y-4">
                     <div>
-                        <label for="hours_requested" class="block text-xs uppercase tracking-widest font-bold text-gray-400 mb-2">Hours Requested (3 - 12 Hours)</label>
+                        <label for="hours_requested" class="block text-xs uppercase tracking-widest font-bold text-theme-text/70 mb-2">Hours Requested (3 - 12 Hours)</label>
                         <div class="relative">
                             <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-luxe-gold">
                                 <i class="fas fa-stopwatch text-sm"></i>
                             </span>
-                            <input type="number" name="hours_requested" id="hours_requested" min="3" max="12" value="3" class="block w-full pl-11 pr-4 py-4 bg-luxe-black/80 rounded-xl border border-gray-800 focus:border-luxe-gold text-sm text-white focus:outline-none focus:ring-1 focus:ring-luxe-gold">
+                            <input type="number" name="hours_requested" id="hours_requested" min="3" max="12" value="3" class="block w-full pl-11 pr-4 py-4 bg-theme-bg/80 rounded-xl border border-theme-border focus:border-luxe-gold text-sm text-theme-text focus:outline-none focus:ring-1 focus:ring-luxe-gold">
                         </div>
                     </div>
                 </div>
                 <!-- Custom Pickup / Drop-off Addresses as interactive cards (shown for hourly/point-to-point) -->
                 <div id="div-custom-addresses" class="hidden grid grid-cols-1 md:grid-cols-2 gap-6">
                     <!-- Starting Location Card -->
-                    <div class="glass-card rounded-2xl p-5 border border-gray-800 hover:border-luxe-gold/50 transition-all duration-500 flex flex-col space-y-4 group">
+                    <div class="glass-card rounded-2xl p-5 border border-theme-border hover:border-luxe-gold/50 transition-all duration-500 flex flex-col space-y-4 group">
                         <div class="flex items-center justify-between">
-                            <label for="pickup_address" class="block text-xs uppercase tracking-widest font-bold text-gray-400">Pickup Location (Depart)</label>
+                            <label for="pickup_address" class="block text-xs uppercase tracking-widest font-bold text-theme-text/70">Pickup Location (Depart)</label>
                             <span class="text-luxe-gold animate-pulse text-xs"><i class="fas fa-circle-dot"></i></span>
                         </div>
                         
                         <!-- Visual Micro Map representation -->
-                        <div id="map-pickup" class="relative w-full h-28 bg-luxe-black border border-gray-900 rounded-xl overflow-hidden cursor-pointer group-hover:border-luxe-gold/30 transition-colors duration-500">
+                        <div id="map-pickup" class="relative w-full h-28 bg-theme-bg border border-theme-border rounded-xl overflow-hidden cursor-pointer group-hover:border-luxe-gold/30 transition-colors duration-500">
                             <!-- SVG Grid lines simulating map streets -->
                             <svg class="absolute inset-0 w-full h-full opacity-20 stroke-gray-700" xmlns="http://www.w3.org/2000/svg">
                                 <defs>
@@ -184,25 +184,25 @@
                                 <div class="w-4 h-4 rounded-full bg-luxe-gold/40 flex items-center justify-center animate-pulse absolute"></div>
                                 <i class="fas fa-location-dot text-luxe-gold text-lg z-10 filter drop-shadow-[0_0_8px_rgba(201,168,76,0.6)]"></i>
                             </div>
-                            <span class="absolute bottom-2 right-2 text-[8px] uppercase tracking-wider text-gray-500 font-bold bg-luxe-black/80 px-2 py-0.5 rounded border border-gray-900">Click to Select Plaza Hotel</span>
+                            <span class="absolute bottom-2 right-2 text-[8px] uppercase tracking-wider text-theme-text/60 font-bold bg-theme-bg/80 px-2 py-0.5 rounded border border-theme-border">Click to Select Plaza Hotel</span>
                         </div>
                         <!-- TextInput field integrated inside the card -->
                         <div class="relative">
                             <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-luxe-gold">
                                 <i class="fas fa-search text-xs"></i>
                             </span>
-                            <input type="text" name="pickup_address" id="pickup_address" placeholder="Enter starting address..." class="block w-full pl-10 pr-4 py-3.5 bg-luxe-black/90 rounded-xl border border-gray-800 focus:border-luxe-gold text-xs text-white focus:outline-none focus:ring-1 focus:ring-luxe-gold font-light transition-all duration-300">
+                            <input type="text" name="pickup_address" id="pickup_address" placeholder="Enter starting address..." class="block w-full pl-10 pr-4 py-3.5 bg-theme-bg/90 rounded-xl border border-theme-border focus:border-luxe-gold text-xs text-theme-text focus:outline-none focus:ring-1 focus:ring-luxe-gold font-light transition-all duration-300">
                         </div>
                     </div>
                     <!-- Destination Location Card -->
-                    <div id="div-dropoff-location" class="glass-card rounded-2xl p-5 border border-gray-800 hover:border-luxe-gold/50 transition-all duration-500 flex flex-col space-y-4 group">
+                    <div id="div-dropoff-location" class="glass-card rounded-2xl p-5 border border-theme-border hover:border-luxe-gold/50 transition-all duration-500 flex flex-col space-y-4 group">
                         <div class="flex items-center justify-between">
-                            <label for="dropoff_address" class="block text-xs uppercase tracking-widest font-bold text-gray-400">Destination Location (Arrival)</label>
+                            <label for="dropoff_address" class="block text-xs uppercase tracking-widest font-bold text-theme-text/70">Destination Location (Arrival)</label>
                             <span class="text-luxe-gold animate-pulse text-xs"><i class="fas fa-location-dot"></i></span>
                         </div>
                         
                         <!-- Visual Micro Map representation -->
-                        <div id="map-dropoff" class="relative w-full h-28 bg-luxe-black border border-gray-900 rounded-xl overflow-hidden cursor-pointer group-hover:border-luxe-gold/30 transition-colors duration-500">
+                        <div id="map-dropoff" class="relative w-full h-28 bg-theme-bg border border-theme-border rounded-xl overflow-hidden cursor-pointer group-hover:border-luxe-gold/30 transition-colors duration-500">
                             <!-- SVG Grid lines simulating map streets -->
                             <svg class="absolute inset-0 w-full h-full opacity-20 stroke-gray-700" xmlns="http://www.w3.org/2000/svg">
                                 <rect width="100%" height="100%" fill="url(#grid-pickup)" />
@@ -215,83 +215,83 @@
                                 <div class="w-4 h-4 rounded-full bg-luxe-gold/40 flex items-center justify-center animate-pulse absolute"></div>
                                 <i class="fas fa-location-arrow text-luxe-gold text-base z-10 filter drop-shadow-[0_0_8px_rgba(201,168,76,0.6)]"></i>
                             </div>
-                            <span class="absolute bottom-2 right-2 text-[8px] uppercase tracking-wider text-gray-500 font-bold bg-luxe-black/80 px-2 py-0.5 rounded border border-gray-900">Click to Select JFK Airport</span>
+                            <span class="absolute bottom-2 right-2 text-[8px] uppercase tracking-wider text-theme-text/60 font-bold bg-theme-bg/80 px-2 py-0.5 rounded border border-theme-border">Click to Select JFK Airport</span>
                         </div>
                         <!-- TextInput field integrated inside the card -->
                         <div class="relative">
                             <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-luxe-gold">
                                 <i class="fas fa-search text-xs"></i>
                             </span>
-                            <input type="text" name="dropoff_address" id="dropoff_address" placeholder="Enter destination address..." class="block w-full pl-10 pr-4 py-3.5 bg-luxe-black/90 rounded-xl border border-gray-800 focus:border-luxe-gold text-xs text-white focus:outline-none focus:ring-1 focus:ring-luxe-gold font-light transition-all duration-300">
+                            <input type="text" name="dropoff_address" id="dropoff_address" placeholder="Enter destination address..." class="block w-full pl-10 pr-4 py-3.5 bg-theme-bg/90 rounded-xl border border-theme-border focus:border-luxe-gold text-xs text-theme-text focus:outline-none focus:ring-1 focus:ring-luxe-gold font-light transition-all duration-300">
                         </div>
                     </div>
                 </div>
                 <!-- Intermediate Stops Section (For Hourly and Point-to-Point) -->
-                <div id="div-stops-section" class="hidden space-y-4 bg-luxe-black/30 p-5 rounded-2xl border border-gray-800">
+                <div id="div-stops-section" class="hidden space-y-4 bg-theme-bg/30 p-5 rounded-2xl border border-theme-border">
                     <div class="flex items-center justify-between">
-                        <label for="number_of_stops" class="block text-xs uppercase tracking-widest font-bold text-gray-400">Intermediate Stops</label>
+                        <label for="number_of_stops" class="block text-xs uppercase tracking-widest font-bold text-theme-text/70">Intermediate Stops</label>
                         <div class="flex items-center space-x-2" id="div-stops-count-wrapper">
-                            <span class="text-[10px] text-gray-500 font-semibold uppercase">Quantity:</span>
-                            <input type="number" name="number_of_stops" id="number_of_stops" min="0" value="0" class="w-16 bg-luxe-black border border-gray-800 rounded px-2 py-1 text-xs text-white focus:border-luxe-gold outline-none">
+                            <span class="text-[10px] text-theme-text/60 font-semibold uppercase">Quantity:</span>
+                            <input type="number" name="number_of_stops" id="number_of_stops" min="0" value="0" class="w-16 bg-theme-bg border border-theme-border rounded px-2 py-1 text-xs text-theme-text focus:border-luxe-gold outline-none">
                             <span class="text-[10px] text-luxe-gold font-bold">($20/stop for Point-to-Point)</span>
                         </div>
                     </div>
                     <div>
-                        <label for="stop_addresses" class="block text-[10px] uppercase text-gray-500 font-bold mb-1">Stop Addresses</label>
-                        <textarea name="stop_addresses" id="stop_addresses" rows="2" placeholder="List address details for each stop..." class="block w-full px-4 py-3 bg-luxe-black rounded-lg border border-gray-800 focus:border-luxe-gold text-xs text-white focus:outline-none focus:ring-1 focus:ring-luxe-gold font-light"></textarea>
+                        <label for="stop_addresses" class="block text-[10px] uppercase text-theme-text/60 font-bold mb-1">Stop Addresses</label>
+                        <textarea name="stop_addresses" id="stop_addresses" rows="2" placeholder="List address details for each stop..." class="block w-full px-4 py-3 bg-theme-bg rounded-lg border border-theme-border focus:border-luxe-gold text-xs text-theme-text focus:outline-none focus:ring-1 focus:ring-luxe-gold font-light"></textarea>
                     </div>
                 </div>
 <!-- Date, Time, Passengers and Flight details split in 2x2 grid for extra space -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                        <label for="pickup_date" class="block text-xs uppercase tracking-widest font-bold text-gray-400 mb-2">Pickup Date</label>
+                        <label for="pickup_date" class="block text-xs uppercase tracking-widest font-bold text-theme-text/70 mb-2">Pickup Date</label>
                         <div class="relative">
                             <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-luxe-gold">
                                 <i class="fas fa-calendar-days text-sm"></i>
                             </span>
-                            <input type="date" name="pickup_date" id="pickup_date" required min="{{ today }}" value="{{ today }}" class="block w-full pl-11 pr-4 py-4 bg-luxe-black/80 rounded-xl border border-gray-800 focus:border-luxe-gold text-sm text-white focus:outline-none focus:ring-1 focus:ring-luxe-gold">
+                            <input type="date" name="pickup_date" id="pickup_date" required min="{{ today }}" value="{{ today }}" class="block w-full pl-11 pr-4 py-4 bg-theme-bg/80 rounded-xl border border-theme-border focus:border-luxe-gold text-sm text-theme-text focus:outline-none focus:ring-1 focus:ring-luxe-gold">
                         </div>
                     </div>
                     
                     <div>
-                        <label for="pickup_time" class="block text-xs uppercase tracking-widest font-bold text-gray-400 mb-2">Pickup Time</label>
+                        <label for="pickup_time" class="block text-xs uppercase tracking-widest font-bold text-theme-text/70 mb-2">Pickup Time</label>
                         <div class="relative">
                             <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-luxe-gold">
                                 <i class="fas fa-clock text-sm"></i>
                             </span>
-                            <input type="time" name="pickup_time" id="pickup_time" required value="12:00" class="block w-full pl-11 pr-4 py-4 bg-luxe-black/80 rounded-xl border border-gray-800 focus:border-luxe-gold text-sm text-white focus:outline-none focus:ring-1 focus:ring-luxe-gold">
+                            <input type="time" name="pickup_time" id="pickup_time" required value="12:00" class="block w-full pl-11 pr-4 py-4 bg-theme-bg/80 rounded-xl border border-theme-border focus:border-luxe-gold text-sm text-theme-text focus:outline-none focus:ring-1 focus:ring-luxe-gold">
                         </div>
                     </div>
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                     <div>
-                        <label for="passenger_count" class="block text-xs uppercase tracking-widest font-bold text-gray-400 mb-2">Passengers</label>
+                        <label for="passenger_count" class="block text-xs uppercase tracking-widest font-bold text-theme-text/70 mb-2">Passengers</label>
                         <div class="relative">
                             <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-luxe-gold">
                                 <i class="fas fa-users text-sm"></i>
                             </span>
-                            <input type="number" name="passenger_count" id="passenger_count" required min="1" max="14" value="1" class="block w-full pl-11 pr-4 py-4 bg-luxe-black/80 rounded-xl border border-gray-800 focus:border-luxe-gold text-sm text-white focus:outline-none focus:ring-1 focus:ring-luxe-gold">
+                            <input type="number" name="passenger_count" id="passenger_count" required min="1" max="14" value="1" class="block w-full pl-11 pr-4 py-4 bg-theme-bg/80 rounded-xl border border-theme-border focus:border-luxe-gold text-sm text-theme-text focus:outline-none focus:ring-1 focus:ring-luxe-gold">
                         </div>
                     </div>
                     <div id="div-flight">
-                        <label for="flight_number" class="block text-xs uppercase tracking-widest font-bold text-gray-400 mb-2">Flight Number</label>
+                        <label for="flight_number" class="block text-xs uppercase tracking-widest font-bold text-theme-text/70 mb-2">Flight Number</label>
                         <div class="relative">
                             <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-luxe-gold">
                                 <i class="fas fa-plane text-sm"></i>
                             </span>
-                            <input type="text" name="flight_number" id="flight_number" placeholder="e.g. AA1234" class="block w-full pl-11 pr-4 py-4 bg-luxe-black/80 rounded-xl border border-gray-800 focus:border-luxe-gold text-sm text-white focus:outline-none focus:ring-1 focus:ring-luxe-gold uppercase">
+                            <input type="text" name="flight_number" id="flight_number" placeholder="e.g. AA1234" class="block w-full pl-11 pr-4 py-4 bg-theme-bg/80 rounded-xl border border-theme-border focus:border-luxe-gold text-sm text-theme-text focus:outline-none focus:ring-1 focus:ring-luxe-gold uppercase">
                         </div>
                     </div>
                 </div>
 <!-- Round-trip Section (For Airport Transfer and Point-to-Point) -->
-                <div id="div-round-trip" class="py-2 border-t border-gray-800">
-                    <div class="flex items-center justify-between p-4 rounded-xl bg-luxe-black/40 border border-gray-800 hover:border-luxe-gold/30 transition-all duration-300 cursor-pointer select-none mb-4" id="div-round-trip-row">
+                <div id="div-round-trip" class="py-2 border-t border-theme-border">
+                    <div class="flex items-center justify-between p-4 rounded-xl bg-theme-bg/40 border border-theme-border hover:border-luxe-gold/30 transition-all duration-300 cursor-pointer select-none mb-4" id="div-round-trip-row">
                         <div class="space-y-1">
-                            <span class="block text-xs font-bold uppercase tracking-wider text-white font-sans">Aller-Retour / Round-Trip</span>
-                            <span class="block text-[10px] text-gray-400 font-light">Planifier le trajet de retour</span>
+                            <span class="block text-xs font-bold uppercase tracking-wider text-theme-text font-sans">Aller-Retour / Round-Trip</span>
+                            <span class="block text-[10px] text-theme-text/70 font-light">Planifier le trajet de retour</span>
                         </div>
                         <div class="flex items-center space-x-3">
-                            <span id="toggle-label" class="text-[10px] font-bold uppercase tracking-wider text-gray-500 transition-colors duration-300">Désactivé / OFF</span>
+                            <span id="toggle-label" class="text-[10px] font-bold uppercase tracking-wider text-theme-text/60 transition-colors duration-300">Désactivé / OFF</span>
                             <div class="relative inline-flex items-center">
                                 <input type="checkbox" name="round_trip" id="round_trip" class="sr-only">
                                 <div class="w-14 h-7 bg-gray-850 border border-gray-700 rounded-full transition-colors duration-300 flex items-center px-1" id="toggle-bg">
@@ -305,48 +305,48 @@
                     </div>
                     
                     <!-- Return date/time subfields (dynamic show) -->
-                    <div id="div-return-fields" class="hidden grid grid-cols-1 md:grid-cols-2 gap-4 mt-4 pt-4 border-t border-gray-900">
+                    <div id="div-return-fields" class="hidden grid grid-cols-1 md:grid-cols-2 gap-4 mt-4 pt-4 border-t border-theme-border">
                         <div>
-                            <label for="return_date" class="block text-xs uppercase tracking-widest font-bold text-gray-400 mb-2">Return Date</label>
+                            <label for="return_date" class="block text-xs uppercase tracking-widest font-bold text-theme-text/70 mb-2">Return Date</label>
                             <div class="relative">
                                 <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-luxe-gold">
                                     <i class="fas fa-calendar-days text-sm"></i>
                                 </span>
-                                <input type="date" name="return_date" id="return_date" min="{{ today }}" class="block w-full pl-9 pr-2 py-4 bg-luxe-black/80 rounded-xl border border-gray-800 focus:border-luxe-gold text-sm text-white focus:outline-none focus:ring-1 focus:ring-luxe-gold font-light">
+                                <input type="date" name="return_date" id="return_date" min="{{ today }}" class="block w-full pl-9 pr-2 py-4 bg-theme-bg/80 rounded-xl border border-theme-border focus:border-luxe-gold text-sm text-theme-text focus:outline-none focus:ring-1 focus:ring-luxe-gold font-light">
                             </div>
                         </div>
                         <div>
-                            <label for="return_time" class="block text-xs uppercase tracking-widest font-bold text-gray-400 mb-2">Return Time</label>
+                            <label for="return_time" class="block text-xs uppercase tracking-widest font-bold text-theme-text/70 mb-2">Return Time</label>
                             <div class="relative">
                                 <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-luxe-gold">
                                     <i class="fas fa-clock text-sm"></i>
                                 </span>
-                                <input type="time" name="return_time" id="return_time" class="block w-full pl-9 pr-2 py-4 bg-luxe-black/80 rounded-xl border border-gray-800 focus:border-luxe-gold text-sm text-white focus:outline-none focus:ring-1 focus:ring-luxe-gold font-light">
+                                <input type="time" name="return_time" id="return_time" class="block w-full pl-9 pr-2 py-4 bg-theme-bg/80 rounded-xl border border-theme-border focus:border-luxe-gold text-sm text-theme-text focus:outline-none focus:ring-1 focus:ring-luxe-gold font-light">
                             </div>
                         </div>
                     </div>
                 </div>
                 <!-- Meeting Point Field (Visible for all service types) -->
-                <div class="py-4 border-t border-gray-800 space-y-2">
-                    <label for="meeting_point" class="block text-xs uppercase tracking-widest font-bold text-gray-400">Meeting Point (Lieu de rencontre)</label>
+                <div class="py-4 border-t border-theme-border space-y-2">
+                    <label for="meeting_point" class="block text-xs uppercase tracking-widest font-bold text-theme-text/70">Meeting Point (Lieu de rencontre)</label>
                     <div class="relative">
                         <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-luxe-gold">
                             <i class="fas fa-handshake-simple text-sm"></i>
                         </span>
-                        <input type="text" name="meeting_point" id="meeting_point" placeholder="e.g. Terminal B exit gate 4, or hotel lobby entrance" class="block w-full pl-11 pr-4 py-4 bg-luxe-black/80 rounded-xl border border-gray-800 focus:border-luxe-gold text-sm text-white focus:outline-none focus:ring-1 focus:ring-luxe-gold font-light">
+                        <input type="text" name="meeting_point" id="meeting_point" placeholder="e.g. Terminal B exit gate 4, or hotel lobby entrance" class="block w-full pl-11 pr-4 py-4 bg-theme-bg/80 rounded-xl border border-theme-border focus:border-luxe-gold text-sm text-theme-text focus:outline-none focus:ring-1 focus:ring-luxe-gold font-light">
                     </div>
-                    <p class="text-[10px] text-gray-500 font-light">Specify coordinates or instructions on where to meet the private chauffeur upon pickup.</p>
+                    <p class="text-[10px] text-theme-text/60 font-light">Specify coordinates or instructions on where to meet the private chauffeur upon pickup.</p>
                 </div>
                 <!-- Return Meeting Point Field (Visible for round trip bookings) -->
-                <div id="div-return-meeting-point" class="py-4 border-t border-gray-800 space-y-2 hidden">
-                    <label for="return_meeting_point" class="block text-xs uppercase tracking-widest font-bold text-gray-400">Return Meeting Point (Lieu de rencontre retour)</label>
+                <div id="div-return-meeting-point" class="py-4 border-t border-theme-border space-y-2 hidden">
+                    <label for="return_meeting_point" class="block text-xs uppercase tracking-widest font-bold text-theme-text/70">Return Meeting Point (Lieu de rencontre retour)</label>
                     <div class="relative">
                         <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-luxe-gold">
                             <i class="fas fa-handshake-simple text-sm"></i>
                         </span>
-                        <input type="text" name="return_meeting_point" id="return_meeting_point" placeholder="e.g. Hotel lobby entrance, or Terminal B exit gate 4" class="block w-full pl-11 pr-4 py-4 bg-luxe-black/80 rounded-xl border border-gray-800 focus:border-luxe-gold text-sm text-white focus:outline-none focus:ring-1 focus:ring-luxe-gold font-light">
+                        <input type="text" name="return_meeting_point" id="return_meeting_point" placeholder="e.g. Hotel lobby entrance, or Terminal B exit gate 4" class="block w-full pl-11 pr-4 py-4 bg-theme-bg/80 rounded-xl border border-theme-border focus:border-luxe-gold text-sm text-theme-text focus:outline-none focus:ring-1 focus:ring-luxe-gold font-light">
                     </div>
-                    <p class="text-[10px] text-gray-500 font-light">Specify instructions on where to meet the private chauffeur for the return leg.</p>
+                    <p class="text-[10px] text-theme-text/60 font-light">Specify instructions on where to meet the private chauffeur for the return leg.</p>
                 </div>
                 <!-- Submit Button -->
                 <button type="submit" id="submit-btn" disabled class="w-full gold-btn py-4.5 rounded-xl text-sm uppercase tracking-widest font-semibold mt-6 shadow-xl flex items-center justify-center space-x-3 cursor-not-allowed opacity-60">
@@ -434,22 +434,22 @@
         }
         // Service Type Visual Toggles
         function updateServiceType() {
-            lblTransfer.className = "cursor-pointer text-center p-4 rounded-xl text-xs font-semibold uppercase tracking-wider transition-all duration-300 block select-none border border-transparent hover:bg-luxe-grey";
-            lblHourly.className = "cursor-pointer text-center p-4 rounded-xl text-xs font-semibold uppercase tracking-wider transition-all duration-300 block select-none border border-transparent hover:bg-luxe-grey";
-            lblP2P.className = "cursor-pointer text-center p-4 rounded-xl text-xs font-semibold uppercase tracking-wider transition-all duration-300 block select-none border border-transparent hover:bg-luxe-grey";
+            lblTransfer.className = "cursor-pointer text-center p-4 rounded-xl text-xs font-semibold uppercase tracking-wider transition-all duration-300 block select-none border border-transparent hover:bg-theme-card";
+            lblHourly.className = "cursor-pointer text-center p-4 rounded-xl text-xs font-semibold uppercase tracking-wider transition-all duration-300 block select-none border border-transparent hover:bg-theme-card";
+            lblP2P.className = "cursor-pointer text-center p-4 rounded-xl text-xs font-semibold uppercase tracking-wider transition-all duration-300 block select-none border border-transparent hover:bg-theme-card";
             if (lblRental) {
-                lblRental.className = "cursor-pointer text-center p-4 rounded-xl text-xs font-semibold uppercase tracking-wider transition-all duration-300 block select-none border border-transparent hover:bg-luxe-grey";
+                lblRental.className = "cursor-pointer text-center p-4 rounded-xl text-xs font-semibold uppercase tracking-wider transition-all duration-300 block select-none border border-transparent hover:bg-theme-card";
             }
             
-            iconHourly.className = "fas fa-clock text-base text-gray-500 mb-2 block";
-            iconP2P.className = "fas fa-route text-base text-gray-500 mb-2 block";
+            iconHourly.className = "fas fa-clock text-base text-theme-text/60 mb-2 block";
+            iconP2P.className = "fas fa-route text-base text-theme-text/60 mb-2 block";
             if (iconRental) {
-                iconRental.className = "fas fa-car text-base text-gray-500 mb-2 block";
+                iconRental.className = "fas fa-car text-base text-theme-text/60 mb-2 block";
             }
-            spanHourly.className = "block text-gray-400";
-            spanP2P.className = "block text-gray-400";
+            spanHourly.className = "block text-theme-text/70";
+            spanP2P.className = "block text-theme-text/70";
             if (spanRental) {
-                spanRental.className = "block text-gray-400";
+                spanRental.className = "block text-theme-text/70";
             }
             if (radTransfer.checked) {
                 lblTransfer.className = "cursor-pointer text-center p-4 rounded-xl text-xs font-semibold uppercase tracking-wider bg-luxe-gold/10 border border-luxe-gold/50 text-luxe-gold block select-none";
@@ -468,7 +468,7 @@
             else if (radP2P.checked) {
                 lblP2P.className = "cursor-pointer text-center p-4 rounded-xl text-xs font-semibold uppercase tracking-wider bg-luxe-gold/10 border border-luxe-gold/50 text-luxe-gold block select-none";
                 iconP2P.className = "fas fa-route text-base text-luxe-gold mb-2 block";
-                spanP2P.className = "block text-white";
+                spanP2P.className = "block text-theme-text";
                 divAirportTransferWrapper.classList.add('hidden');
                 divFlight.classList.add('hidden');
                 divHourly.classList.add('hidden');
@@ -484,7 +484,7 @@
             else if (radHourly.checked) {
                 lblHourly.className = "cursor-pointer text-center p-4 rounded-xl text-xs font-semibold uppercase tracking-wider bg-luxe-gold/10 border border-luxe-gold/50 text-luxe-gold block select-none";
                 iconHourly.className = "fas fa-clock text-base text-luxe-gold mb-2 block";
-                spanHourly.className = "block text-white";
+                spanHourly.className = "block text-theme-text";
                 divAirportTransferWrapper.classList.add('hidden');
                 divFlight.classList.add('hidden');
                 divHourly.classList.remove('hidden');
@@ -501,7 +501,7 @@
             else if (radRental && radRental.checked) {
                 lblRental.className = "cursor-pointer text-center p-4 rounded-xl text-xs font-semibold uppercase tracking-wider bg-luxe-gold/10 border border-luxe-gold/50 text-luxe-gold block select-none";
                 iconRental.className = "fas fa-car text-base text-luxe-gold mb-2 block";
-                spanRental.className = "block text-white";
+                spanRental.className = "block text-theme-text";
                 divAirportTransferWrapper.classList.add('hidden');
                 divFlight.classList.add('hidden');
                 divHourly.classList.add('hidden');
@@ -573,22 +573,22 @@
                 toggleBg.classList.add('bg-luxe-gold', 'border-luxe-gold/50');
                 toggleDot.style.transform = 'translateX(28px)';
                 toggleDot.classList.remove('bg-gray-500');
-                toggleDot.classList.add('bg-luxe-black');
+                toggleDot.classList.add('bg-theme-bg');
                 if (toggleLabel) {
                     toggleLabel.textContent = "Activé / ON";
-                    toggleLabel.classList.remove('text-gray-500');
+                    toggleLabel.classList.remove('text-theme-text/60');
                     toggleLabel.classList.add('text-luxe-gold');
                 }
             } else {
                 toggleBg.classList.remove('bg-luxe-gold', 'border-luxe-gold/50');
                 toggleBg.classList.add('bg-gray-850', 'border-gray-700');
                 toggleDot.style.transform = 'translateX(0px)';
-                toggleDot.classList.remove('bg-luxe-black');
+                toggleDot.classList.remove('bg-theme-bg');
                 toggleDot.classList.add('bg-gray-500');
                 if (toggleLabel) {
                     toggleLabel.textContent = "Désactivé / OFF";
                     toggleLabel.classList.remove('text-luxe-gold');
-                    toggleLabel.classList.add('text-gray-500');
+                    toggleLabel.classList.add('text-theme-text/60');
                 }
             }
         }

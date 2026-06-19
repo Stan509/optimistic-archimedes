@@ -134,7 +134,7 @@
 
             
 
-            <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight font-display text-white leading-tight">
+            <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight font-display text-theme-text leading-tight">
 
                 {% site_content 'hero_title' current_site.hero_title|default:"AeroLux Select" %}
 
@@ -142,7 +142,7 @@
 
             
 
-            <p class="text-lg text-gray-300 max-w-xl mx-auto lg:mx-0 leading-relaxed font-light">
+            <p class="text-lg text-theme-text/80 max-w-xl mx-auto lg:mx-0 leading-relaxed font-light">
 
                 {% site_content 'hero_subtitle' current_site.hero_subtitle|default:"Experience ultimate luxury and security." %}
 
@@ -158,7 +158,7 @@
 
                 </a>
 
-                <a href="{% site_url 'fleet' %}" class="text-sm font-semibold tracking-wider uppercase text-white hover:text-luxe-gold transition-all duration-300 flex items-center space-x-2 py-3">
+                <a href="{% site_url 'fleet' %}" class="text-sm font-semibold tracking-wider uppercase text-theme-text hover:text-luxe-gold transition-all duration-300 flex items-center space-x-2 py-3">
 
                     <span>View Our Fleet</span>
 
@@ -204,9 +204,9 @@
 
                     <div>
 
-                        <label class="block text-xs uppercase tracking-widest font-bold text-gray-400 mb-3">Service Type</label>
+                        <label class="block text-xs uppercase tracking-widest font-bold text-theme-text/70 mb-3">Service Type</label>
 
-                    <div class="grid grid-cols-2 {% if site_slug == 'dr' %}sm:grid-cols-4{% else %}sm:grid-cols-3{% endif %} gap-2 sm:gap-3 bg-luxe-black p-1.5 rounded-2xl border border-gray-800">
+                    <div class="grid grid-cols-2 {% if site_slug == 'dr' %}sm:grid-cols-4{% else %}sm:grid-cols-3{% endif %} gap-2 sm:gap-3 bg-theme-bg p-1.5 rounded-2xl border border-theme-border">
 
                         <label class="cursor-pointer text-center p-4 rounded-xl text-xs font-semibold uppercase tracking-wider transition-all duration-300 block select-none border border-transparent" id="lbl-transfer">
 
@@ -222,9 +222,9 @@
 
                             <input type="radio" name="service_type" value="point_to_point" class="sr-only" id="rad-p2p">
 
-                            <i class="fas fa-route text-base text-gray-500 mb-2 block" id="icon-p2p"></i>
+                            <i class="fas fa-route text-base text-theme-text/60 mb-2 block" id="icon-p2p"></i>
 
-                            <span class="block text-gray-400" id="span-p2p">Point to Point</span>
+                            <span class="block text-theme-text/70" id="span-p2p">Point to Point</span>
 
                         </label>
 
@@ -232,9 +232,9 @@
 
                             <input type="radio" name="service_type" value="hourly" class="sr-only" id="rad-hourly">
 
-                            <i class="fas fa-clock text-base text-gray-500 mb-2 block" id="icon-hourly"></i>
+                            <i class="fas fa-clock text-base text-theme-text/60 mb-2 block" id="icon-hourly"></i>
 
-                            <span class="block text-gray-400" id="span-hourly">Hourly Chauffeur</span>
+                            <span class="block text-theme-text/70" id="span-hourly">Hourly Chauffeur</span>
 
                         </label>
 
@@ -246,11 +246,11 @@
 
                     <!-- Interactive Dark Map -->
 
-                    <div class="relative w-full h-[450px] bg-luxe-black border border-gray-800 rounded-2xl overflow-hidden shadow-inner group mb-2" style="height: 450px;">
+                    <div class="relative w-full h-[450px] bg-theme-bg border border-theme-border rounded-2xl overflow-hidden shadow-inner group mb-2" style="height: 450px;">
 
                         <div id="booking-map" class="w-full h-full z-0"></div>
 
-                        <div class="absolute top-4 left-4 z-[1000] bg-luxe-black/90 px-3 py-1.5 rounded-lg border border-gray-800 backdrop-blur-md">
+                        <div class="absolute top-4 left-4 z-[1000] bg-theme-bg/90 px-3 py-1.5 rounded-lg border border-theme-border backdrop-blur-md">
 
                             <span class="text-[9px] uppercase font-bold tracking-widest text-luxe-gold flex items-center gap-1.5">
 
@@ -278,7 +278,7 @@
 
                             <div id="transfer-start-wrapper" class="w-full font-light">
 
-                                <label id="lbl-transfer-start" for="airport_id" class="block text-xs uppercase tracking-widest font-bold text-gray-400 mb-2">Origin Airport</label>
+                                <label id="lbl-transfer-start" for="airport_id" class="block text-xs uppercase tracking-widest font-bold text-theme-text/70 mb-2">Origin Airport</label>
 
                                 <div class="relative">
 
@@ -288,7 +288,7 @@
 
                                     </span>
 
-                                    <select name="airport_id" id="airport_id" class="block w-full pl-11 pr-10 py-4 bg-luxe-black/80 rounded-xl border border-gray-800 focus:border-luxe-gold text-sm text-white focus:outline-none focus:ring-1 focus:ring-luxe-gold appearance-none">
+                                    <select name="airport_id" id="airport_id" class="block w-full pl-11 pr-10 py-4 bg-theme-bg/80 rounded-xl border border-theme-border focus:border-luxe-gold text-sm text-theme-text focus:outline-none focus:ring-1 focus:ring-luxe-gold appearance-none">
 
                                         <option value="" disabled selected>Select Airport...</option>
 
@@ -304,7 +304,7 @@
 
                                     </select>
 
-                                    <span class="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-500 pointer-events-none">
+                                    <span class="absolute inset-y-0 right-0 pr-4 flex items-center text-theme-text/60 pointer-events-none">
 
                                         <i class="fas fa-chevron-down text-xs"></i>
 
@@ -318,7 +318,7 @@
 
                             <div class="flex justify-center items-center md:pt-6">
 
-                                <button type="button" id="btn-switch-direction" class="w-10 h-10 rounded-full bg-luxe-black border border-gray-800 text-luxe-gold hover:border-luxe-gold/50 hover:text-luxe-gold-bright transition-all duration-300 flex items-center justify-center shadow-lg active:scale-95 cursor-pointer" title="Switch Directions">
+                                <button type="button" id="btn-switch-direction" class="w-10 h-10 rounded-full bg-theme-bg border border-theme-border text-luxe-gold hover:border-luxe-gold/50 hover:text-luxe-gold-bright transition-all duration-300 flex items-center justify-center shadow-lg active:scale-95 cursor-pointer" title="Switch Directions">
 
                                     <i class="fas fa-right-left rotate-90 md:rotate-0 text-sm"></i>
 
@@ -330,7 +330,7 @@
 
                             <div id="transfer-end-wrapper" class="w-full font-light">
 
-                                <label id="lbl-transfer-end" for="destination_address" class="block text-xs uppercase tracking-widest font-bold text-gray-400 mb-2">Drop-off Address</label>
+                                <label id="lbl-transfer-end" for="destination_address" class="block text-xs uppercase tracking-widest font-bold text-theme-text/70 mb-2">Drop-off Address</label>
 
                                 <div class="relative">
 
@@ -340,13 +340,13 @@
 
                                     </span>
 
-                                    <input type="text" name="destination_address" id="destination_address" placeholder="Enter your destination address..." class="block w-full pl-11 pr-4 py-4 bg-luxe-black/80 rounded-xl border border-gray-800 focus:border-luxe-gold text-sm text-white focus:outline-none focus:ring-1 focus:ring-luxe-gold font-light" autocomplete="off">
+                                    <input type="text" name="destination_address" id="destination_address" placeholder="Enter your destination address..." class="block w-full pl-11 pr-4 py-4 bg-theme-bg/80 rounded-xl border border-theme-border focus:border-luxe-gold text-sm text-theme-text focus:outline-none focus:ring-1 focus:ring-luxe-gold font-light" autocomplete="off">
 
                                 </div>
 
                                 <!-- Geocoding result info -->
 
-                                <p id="geocode-status" class="text-[10px] text-gray-500 mt-1 font-light hidden">
+                                <p id="geocode-status" class="text-[10px] text-theme-text/60 mt-1 font-light hidden">
 
                                     <i class="fas fa-map-marker-alt text-luxe-gold mr-1"></i>
 
@@ -366,7 +366,7 @@
 
                         <div>
 
-                            <label for="hours_requested" class="block text-xs uppercase tracking-widest font-bold text-gray-400 mb-2">Hours Requested (3 - 12 Hours)</label>
+                            <label for="hours_requested" class="block text-xs uppercase tracking-widest font-bold text-theme-text/70 mb-2">Hours Requested (3 - 12 Hours)</label>
 
                             <div class="relative">
 
@@ -376,7 +376,7 @@
 
                                 </span>
 
-                                <input type="number" name="hours_requested" id="hours_requested" min="3" max="12" value="3" class="block w-full pl-11 pr-4 py-4 bg-luxe-black/80 rounded-xl border border-gray-800 focus:border-luxe-gold text-sm text-white focus:outline-none focus:ring-1 focus:ring-luxe-gold">
+                                <input type="number" name="hours_requested" id="hours_requested" min="3" max="12" value="3" class="block w-full pl-11 pr-4 py-4 bg-theme-bg/80 rounded-xl border border-theme-border focus:border-luxe-gold text-sm text-theme-text focus:outline-none focus:ring-1 focus:ring-luxe-gold">
 
                             </div>
 
@@ -390,11 +390,11 @@
 
                         <!-- Starting Location Card -->
 
-                        <div class="glass-card rounded-2xl p-5 border border-gray-800 hover:border-luxe-gold/50 transition-all duration-500 flex flex-col space-y-4 group">
+                        <div class="glass-card rounded-2xl p-5 border border-theme-border hover:border-luxe-gold/50 transition-all duration-500 flex flex-col space-y-4 group">
 
                             <div class="flex items-center justify-between">
 
-                                <label for="pickup_address" class="block text-xs uppercase tracking-widest font-bold text-gray-400">Pickup Location (Depart)</label>
+                                <label for="pickup_address" class="block text-xs uppercase tracking-widest font-bold text-theme-text/70">Pickup Location (Depart)</label>
 
                                 <span class="text-luxe-gold animate-pulse text-xs"><i class="fas fa-circle-dot"></i></span>
 
@@ -404,7 +404,7 @@
 
                             <!-- Visual Micro Map representation -->
 
-                            <div id="map-pickup" class="relative w-full h-28 bg-luxe-black border border-gray-900 rounded-xl overflow-hidden cursor-pointer group-hover:border-luxe-gold/30 transition-colors duration-500">
+                            <div id="map-pickup" class="relative w-full h-28 bg-theme-bg border border-theme-border rounded-xl overflow-hidden cursor-pointer group-hover:border-luxe-gold/30 transition-colors duration-500">
 
                                 <!-- SVG Grid lines simulating map streets -->
 
@@ -440,7 +440,7 @@
 
                                 </div>
 
-                                <span class="absolute bottom-2 right-2 text-[8px] uppercase tracking-wider text-gray-500 font-bold bg-luxe-black/80 px-2 py-0.5 rounded border border-gray-900">Click to Select Plaza Hotel</span>
+                                <span class="absolute bottom-2 right-2 text-[8px] uppercase tracking-wider text-theme-text/60 font-bold bg-theme-bg/80 px-2 py-0.5 rounded border border-theme-border">Click to Select Plaza Hotel</span>
 
                             </div>
 
@@ -454,7 +454,7 @@
 
                                 </span>
 
-                                <input type="text" name="pickup_address" id="pickup_address" placeholder="Enter starting address..." class="block w-full pl-10 pr-4 py-3.5 bg-luxe-black/90 rounded-xl border border-gray-800 focus:border-luxe-gold text-xs text-white focus:outline-none focus:ring-1 focus:ring-luxe-gold font-light transition-all duration-300">
+                                <input type="text" name="pickup_address" id="pickup_address" placeholder="Enter starting address..." class="block w-full pl-10 pr-4 py-3.5 bg-theme-bg/90 rounded-xl border border-theme-border focus:border-luxe-gold text-xs text-theme-text focus:outline-none focus:ring-1 focus:ring-luxe-gold font-light transition-all duration-300">
 
                             </div>
 
@@ -462,11 +462,11 @@
 
                         <!-- Destination Location Card -->
 
-                        <div id="div-dropoff-location" class="glass-card rounded-2xl p-5 border border-gray-800 hover:border-luxe-gold/50 transition-all duration-500 flex flex-col space-y-4 group">
+                        <div id="div-dropoff-location" class="glass-card rounded-2xl p-5 border border-theme-border hover:border-luxe-gold/50 transition-all duration-500 flex flex-col space-y-4 group">
 
                             <div class="flex items-center justify-between">
 
-                                <label for="dropoff_address" class="block text-xs uppercase tracking-widest font-bold text-gray-400">Destination Location (Arrival)</label>
+                                <label for="dropoff_address" class="block text-xs uppercase tracking-widest font-bold text-theme-text/70">Destination Location (Arrival)</label>
 
                                 <span class="text-luxe-gold animate-pulse text-xs"><i class="fas fa-location-dot"></i></span>
 
@@ -476,7 +476,7 @@
 
                             <!-- Visual Micro Map representation -->
 
-                            <div id="map-dropoff" class="relative w-full h-28 bg-luxe-black border border-gray-900 rounded-xl overflow-hidden cursor-pointer group-hover:border-luxe-gold/30 transition-colors duration-500">
+                            <div id="map-dropoff" class="relative w-full h-28 bg-theme-bg border border-theme-border rounded-xl overflow-hidden cursor-pointer group-hover:border-luxe-gold/30 transition-colors duration-500">
 
                                 <!-- SVG Grid lines simulating map streets -->
 
@@ -502,7 +502,7 @@
 
                                 </div>
 
-                                <span class="absolute bottom-2 right-2 text-[8px] uppercase tracking-wider text-gray-500 font-bold bg-luxe-black/80 px-2 py-0.5 rounded border border-gray-900">Click to Select JFK Airport</span>
+                                <span class="absolute bottom-2 right-2 text-[8px] uppercase tracking-wider text-theme-text/60 font-bold bg-theme-bg/80 px-2 py-0.5 rounded border border-theme-border">Click to Select JFK Airport</span>
 
                             </div>
 
@@ -516,7 +516,7 @@
 
                                 </span>
 
-                                <input type="text" name="dropoff_address" id="dropoff_address" placeholder="Enter destination address..." class="block w-full pl-10 pr-4 py-3.5 bg-luxe-black/90 rounded-xl border border-gray-800 focus:border-luxe-gold text-xs text-white focus:outline-none focus:ring-1 focus:ring-luxe-gold font-light transition-all duration-300">
+                                <input type="text" name="dropoff_address" id="dropoff_address" placeholder="Enter destination address..." class="block w-full pl-10 pr-4 py-3.5 bg-theme-bg/90 rounded-xl border border-theme-border focus:border-luxe-gold text-xs text-theme-text focus:outline-none focus:ring-1 focus:ring-luxe-gold font-light transition-all duration-300">
 
                             </div>
 
@@ -526,17 +526,17 @@
 
                     <!-- Intermediate Stops Section (For Hourly and Point-to-Point) -->
 
-                    <div id="div-stops-section" class="hidden space-y-4 bg-luxe-black/30 p-5 rounded-2xl border border-gray-800">
+                    <div id="div-stops-section" class="hidden space-y-4 bg-theme-bg/30 p-5 rounded-2xl border border-theme-border">
 
                         <div class="flex items-center justify-between">
 
-                            <label for="number_of_stops" class="block text-xs uppercase tracking-widest font-bold text-gray-400">Intermediate Stops</label>
+                            <label for="number_of_stops" class="block text-xs uppercase tracking-widest font-bold text-theme-text/70">Intermediate Stops</label>
 
                             <div class="flex items-center space-x-2" id="div-stops-count-wrapper">
 
-                                <span class="text-[10px] text-gray-500 font-semibold uppercase">Quantity:</span>
+                                <span class="text-[10px] text-theme-text/60 font-semibold uppercase">Quantity:</span>
 
-                                <input type="number" name="number_of_stops" id="number_of_stops" min="0" value="0" class="w-16 bg-luxe-black border border-gray-800 rounded px-2 py-1 text-xs text-white focus:border-luxe-gold outline-none">
+                                <input type="number" name="number_of_stops" id="number_of_stops" min="0" value="0" class="w-16 bg-theme-bg border border-theme-border rounded px-2 py-1 text-xs text-theme-text focus:border-luxe-gold outline-none">
 
                                 <span class="text-[10px] text-luxe-gold font-bold">($20/stop for Point-to-Point)</span>
 
@@ -546,9 +546,9 @@
 
                         <div>
 
-                            <label for="stop_addresses" class="block text-[10px] uppercase text-gray-500 font-bold mb-1">Stop Addresses</label>
+                            <label for="stop_addresses" class="block text-[10px] uppercase text-theme-text/60 font-bold mb-1">Stop Addresses</label>
 
-                            <textarea name="stop_addresses" id="stop_addresses" rows="2" placeholder="List address details for each stop..." class="block w-full px-4 py-3 bg-luxe-black rounded-lg border border-gray-800 focus:border-luxe-gold text-xs text-white focus:outline-none focus:ring-1 focus:ring-luxe-gold font-light"></textarea>
+                            <textarea name="stop_addresses" id="stop_addresses" rows="2" placeholder="List address details for each stop..." class="block w-full px-4 py-3 bg-theme-bg rounded-lg border border-theme-border focus:border-luxe-gold text-xs text-theme-text focus:outline-none focus:ring-1 focus:ring-luxe-gold font-light"></textarea>
 
                         </div>
 
@@ -560,7 +560,7 @@
 
                         <div>
 
-                            <label for="pickup_date" class="block text-xs uppercase tracking-widest font-bold text-gray-400 mb-2">Pickup Date</label>
+                            <label for="pickup_date" class="block text-xs uppercase tracking-widest font-bold text-theme-text/70 mb-2">Pickup Date</label>
 
                             <div class="relative">
 
@@ -570,7 +570,7 @@
 
                                 </span>
 
-                                <input type="date" name="pickup_date" id="pickup_date" required min="{{ today }}" value="{{ today }}" class="block w-full pl-11 pr-4 py-4 bg-luxe-black/80 rounded-xl border border-gray-800 focus:border-luxe-gold text-sm text-white focus:outline-none focus:ring-1 focus:ring-luxe-gold">
+                                <input type="date" name="pickup_date" id="pickup_date" required min="{{ today }}" value="{{ today }}" class="block w-full pl-11 pr-4 py-4 bg-theme-bg/80 rounded-xl border border-theme-border focus:border-luxe-gold text-sm text-theme-text focus:outline-none focus:ring-1 focus:ring-luxe-gold">
 
                             </div>
 
@@ -580,7 +580,7 @@
 
                         <div>
 
-                            <label for="pickup_time" class="block text-xs uppercase tracking-widest font-bold text-gray-400 mb-2">Pickup Time</label>
+                            <label for="pickup_time" class="block text-xs uppercase tracking-widest font-bold text-theme-text/70 mb-2">Pickup Time</label>
 
                             <div class="relative">
 
@@ -590,7 +590,7 @@
 
                                 </span>
 
-                                <input type="time" name="pickup_time" id="pickup_time" required value="12:00" class="block w-full pl-11 pr-4 py-4 bg-luxe-black/80 rounded-xl border border-gray-800 focus:border-luxe-gold text-sm text-white focus:outline-none focus:ring-1 focus:ring-luxe-gold">
+                                <input type="time" name="pickup_time" id="pickup_time" required value="12:00" class="block w-full pl-11 pr-4 py-4 bg-theme-bg/80 rounded-xl border border-theme-border focus:border-luxe-gold text-sm text-theme-text focus:outline-none focus:ring-1 focus:ring-luxe-gold">
 
                             </div>
 
@@ -604,7 +604,7 @@
 
                         <div>
 
-                            <label for="passenger_count" class="block text-xs uppercase tracking-widest font-bold text-gray-400 mb-2">Passengers</label>
+                            <label for="passenger_count" class="block text-xs uppercase tracking-widest font-bold text-theme-text/70 mb-2">Passengers</label>
 
                             <div class="relative">
 
@@ -614,7 +614,7 @@
 
                                 </span>
 
-                                <input type="number" name="passenger_count" id="passenger_count" required min="1" max="14" value="1" class="block w-full pl-11 pr-4 py-4 bg-luxe-black/80 rounded-xl border border-gray-800 focus:border-luxe-gold text-sm text-white focus:outline-none focus:ring-1 focus:ring-luxe-gold">
+                                <input type="number" name="passenger_count" id="passenger_count" required min="1" max="14" value="1" class="block w-full pl-11 pr-4 py-4 bg-theme-bg/80 rounded-xl border border-theme-border focus:border-luxe-gold text-sm text-theme-text focus:outline-none focus:ring-1 focus:ring-luxe-gold">
 
                             </div>
 
@@ -624,7 +624,7 @@
 
                         <div id="div-flight">
 
-                            <label for="flight_number" class="block text-xs uppercase tracking-widest font-bold text-gray-400 mb-2">Flight Number</label>
+                            <label for="flight_number" class="block text-xs uppercase tracking-widest font-bold text-theme-text/70 mb-2">Flight Number</label>
 
                             <div class="relative">
 
@@ -634,7 +634,7 @@
 
                                 </span>
 
-                                <input type="text" name="flight_number" id="flight_number" placeholder="e.g. AA1234" class="block w-full pl-11 pr-4 py-4 bg-luxe-black/80 rounded-xl border border-gray-800 focus:border-luxe-gold text-sm text-white focus:outline-none focus:ring-1 focus:ring-luxe-gold uppercase">
+                                <input type="text" name="flight_number" id="flight_number" placeholder="e.g. AA1234" class="block w-full pl-11 pr-4 py-4 bg-theme-bg/80 rounded-xl border border-theme-border focus:border-luxe-gold text-sm text-theme-text focus:outline-none focus:ring-1 focus:ring-luxe-gold uppercase">
 
                             </div>
 
@@ -644,21 +644,21 @@
 
                     <!-- Round-trip Section (For Airport Transfer and Point-to-Point) -->
 
-                    <div id="div-round-trip" class="py-2 border-t border-gray-800">
+                    <div id="div-round-trip" class="py-2 border-t border-theme-border">
 
-                        <div class="flex items-center justify-between p-4 rounded-xl bg-luxe-black/40 border border-gray-800 hover:border-luxe-gold/30 transition-all duration-300 cursor-pointer select-none mb-4" id="div-round-trip-row">
+                        <div class="flex items-center justify-between p-4 rounded-xl bg-theme-bg/40 border border-theme-border hover:border-luxe-gold/30 transition-all duration-300 cursor-pointer select-none mb-4" id="div-round-trip-row">
 
                             <div class="space-y-1">
 
-                                <span class="block text-xs font-bold uppercase tracking-wider text-white font-sans">Aller-Retour / Round-Trip</span>
+                                <span class="block text-xs font-bold uppercase tracking-wider text-theme-text font-sans">Aller-Retour / Round-Trip</span>
 
-                                <span class="block text-[10px] text-gray-400 font-light">Planifier le trajet de retour</span>
+                                <span class="block text-[10px] text-theme-text/70 font-light">Planifier le trajet de retour</span>
 
                             </div>
 
                             <div class="flex items-center space-x-3">
 
-                                <span id="toggle-label" class="text-[10px] font-bold uppercase tracking-wider text-gray-500 transition-colors duration-300">Désactivé / OFF</span>
+                                <span id="toggle-label" class="text-[10px] font-bold uppercase tracking-wider text-theme-text/60 transition-colors duration-300">Désactivé / OFF</span>
 
                                 <div class="relative inline-flex items-center">
 
@@ -680,11 +680,11 @@
 
                         <!-- Return date/time subfields (dynamic show) -->
 
-                        <div id="div-return-fields" class="hidden grid grid-cols-1 md:grid-cols-2 gap-4 mt-4 pt-4 border-t border-gray-900">
+                        <div id="div-return-fields" class="hidden grid grid-cols-1 md:grid-cols-2 gap-4 mt-4 pt-4 border-t border-theme-border">
 
                             <div>
 
-                                <label for="return_date" class="block text-xs uppercase tracking-widest font-bold text-gray-400 mb-2">Return Date</label>
+                                <label for="return_date" class="block text-xs uppercase tracking-widest font-bold text-theme-text/70 mb-2">Return Date</label>
 
                                 <div class="relative">
 
@@ -694,7 +694,7 @@
 
                                     </span>
 
-                                    <input type="date" name="return_date" id="return_date" min="{{ today }}" class="block w-full pl-11 pr-4 py-4 bg-luxe-black/80 rounded-xl border border-gray-800 focus:border-luxe-gold text-sm text-white focus:outline-none focus:ring-1 focus:ring-luxe-gold font-light">
+                                    <input type="date" name="return_date" id="return_date" min="{{ today }}" class="block w-full pl-11 pr-4 py-4 bg-theme-bg/80 rounded-xl border border-theme-border focus:border-luxe-gold text-sm text-theme-text focus:outline-none focus:ring-1 focus:ring-luxe-gold font-light">
 
                                 </div>
 
@@ -702,7 +702,7 @@
 
                             <div>
 
-                                <label for="return_time" class="block text-xs uppercase tracking-widest font-bold text-gray-400 mb-2">Return Time</label>
+                                <label for="return_time" class="block text-xs uppercase tracking-widest font-bold text-theme-text/70 mb-2">Return Time</label>
 
                                 <div class="relative">
 
@@ -712,7 +712,7 @@
 
                                     </span>
 
-                                    <input type="time" name="return_time" id="return_time" class="block w-full pl-11 pr-4 py-4 bg-luxe-black/80 rounded-xl border border-gray-800 focus:border-luxe-gold text-sm text-white focus:outline-none focus:ring-1 focus:ring-luxe-gold font-light">
+                                    <input type="time" name="return_time" id="return_time" class="block w-full pl-11 pr-4 py-4 bg-theme-bg/80 rounded-xl border border-theme-border focus:border-luxe-gold text-sm text-theme-text focus:outline-none focus:ring-1 focus:ring-luxe-gold font-light">
 
                                 </div>
 
@@ -724,9 +724,9 @@
 
                     <!-- Meeting Point Field (Visible for all service types) -->
 
-                    <div class="py-4 border-t border-gray-800 space-y-2">
+                    <div class="py-4 border-t border-theme-border space-y-2">
 
-                        <label for="meeting_point" class="block text-xs uppercase tracking-widest font-bold text-gray-400">Meeting Point (Lieu de rencontre)</label>
+                        <label for="meeting_point" class="block text-xs uppercase tracking-widest font-bold text-theme-text/70">Meeting Point (Lieu de rencontre)</label>
 
                         <div class="relative">
 
@@ -736,11 +736,11 @@
 
                             </span>
 
-                            <input type="text" name="meeting_point" id="meeting_point" placeholder="e.g. Terminal B exit gate 4, or hotel lobby entrance" class="block w-full pl-11 pr-4 py-4 bg-luxe-black/80 rounded-xl border border-gray-800 focus:border-luxe-gold text-sm text-white focus:outline-none focus:ring-1 focus:ring-luxe-gold font-light font-sans">
+                            <input type="text" name="meeting_point" id="meeting_point" placeholder="e.g. Terminal B exit gate 4, or hotel lobby entrance" class="block w-full pl-11 pr-4 py-4 bg-theme-bg/80 rounded-xl border border-theme-border focus:border-luxe-gold text-sm text-theme-text focus:outline-none focus:ring-1 focus:ring-luxe-gold font-light font-sans">
 
                         </div>
 
-                        <p class="text-[10px] text-gray-500 font-light">Specify coordinates or instructions on where to meet the private chauffeur upon pickup.</p>
+                        <p class="text-[10px] text-theme-text/60 font-light">Specify coordinates or instructions on where to meet the private chauffeur upon pickup.</p>
 
                     </div>
 
@@ -766,7 +766,7 @@
 
 <!-- Premium Services Grid -->
 
-<section id="services" class="py-24 bg-luxe-dark-grey relative">
+<section id="services" class="py-24 bg-theme-card relative">
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
@@ -776,7 +776,7 @@
 
             <span class="text-xs uppercase font-bold tracking-widest text-luxe-gold">Luxury Offerings</span>
 
-            <h2 class="text-3xl sm:text-4xl font-extrabold tracking-tight font-display text-white">
+            <h2 class="text-3xl sm:text-4xl font-extrabold tracking-tight font-display text-theme-text">
 
                 {% site_content 'services_title' 'VIP Transportation Solutions' %}
 
@@ -784,7 +784,7 @@
 
             <div class="w-20 h-1 bg-luxe-gold mx-auto rounded-full"></div>
 
-            <p class="text-gray-400 font-light">
+            <p class="text-theme-text/70 font-light">
 
                 {% site_content 'services_subtitle' 'Every booking features a high-grade professional driver, modern comfort amenities, and absolute promptness.' %}
 
@@ -808,9 +808,9 @@
 
                     </div>
 
-                    <h3 class="text-xl font-bold tracking-wide text-white font-display mb-4">Airport Transfers</h3>
+                    <h3 class="text-xl font-bold tracking-wide text-theme-text font-display mb-4">Airport Transfers</h3>
 
-                    <p class="text-gray-400 text-sm leading-relaxed mb-6 font-light">
+                    <p class="text-theme-text/70 text-sm leading-relaxed mb-6 font-light">
 
                         Flat-rate VIP service with real-time flight tracking, airport meet & greet inside the terminal, and complete flight delay protection.
 
@@ -840,9 +840,9 @@
 
                     </div>
 
-                    <h3 class="text-xl font-bold tracking-wide text-white font-display mb-4">Hourly Chauffeur</h3>
+                    <h3 class="text-xl font-bold tracking-wide text-theme-text font-display mb-4">Hourly Chauffeur</h3>
 
-                    <p class="text-gray-400 text-sm leading-relaxed mb-6 font-light">
+                    <p class="text-theme-text/70 text-sm leading-relaxed mb-6 font-light">
 
                         Premium dedicated service for executives, diplomatic personnel, and multi-stop corporate itineraries. Complete control with premium flex hours.
 
@@ -872,9 +872,9 @@
 
                     </div>
 
-                    <h3 class="text-xl font-bold tracking-wide text-white font-display mb-4">Point-to-Point</h3>
+                    <h3 class="text-xl font-bold tracking-wide text-theme-text font-display mb-4">Point-to-Point</h3>
 
-                    <p class="text-gray-400 text-sm leading-relaxed mb-6 font-light">
+                    <p class="text-theme-text/70 text-sm leading-relaxed mb-6 font-light">
 
                         Direct premium transit between any two custom locations, featuring flat starting rates, multiple stop adjustments, and round-trip booking options.
 
@@ -906,9 +906,9 @@
 
                     </div>
 
-                    <h3 class="text-xl font-bold tracking-wide text-white font-display mb-4">Luxury Car Rental</h3>
+                    <h3 class="text-xl font-bold tracking-wide text-theme-text font-display mb-4">Luxury Car Rental</h3>
 
-                    <p class="text-gray-400 text-sm leading-relaxed mb-6 font-light">
+                    <p class="text-theme-text/70 text-sm leading-relaxed mb-6 font-light">
 
                         Premium vehicle rentals in Dominican Republic. Choose from elite SUVs and sedans to experience maximum driving freedom and class.
 
@@ -936,7 +936,7 @@
 
 <!-- Executive Fleet Preview -->
 
-<section class="py-24 bg-luxe-black">
+<section class="py-24 bg-theme-bg">
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
@@ -946,7 +946,7 @@
 
                 <span class="text-xs uppercase font-bold tracking-widest text-luxe-gold">{% site_content 'fleet_title' 'Elite Fleet' %}</span>
 
-                <h2 class="text-3xl sm:text-4xl font-extrabold font-display text-white tracking-tight leading-tight">
+                <h2 class="text-3xl sm:text-4xl font-extrabold font-display text-theme-text tracking-tight leading-tight">
 
                     {% site_content 'fleet_subtitle' 'Executive SUV Elite Class' %}
 
@@ -954,15 +954,15 @@
 
                 <div class="w-16 h-1 bg-luxe-gold rounded-full"></div>
 
-                <p class="text-gray-400 text-sm leading-relaxed font-light">
+                <p class="text-theme-text/70 text-sm leading-relaxed font-light">
 
-                    Our luxury fleet features the pristine and robust <strong class="text-white">Cadillac Escalade</strong> and <strong class="text-white">Chevrolet Suburban</strong>. Optimized for up to 6 passengers, offering spacious luggage storage, top-tier black leather cabins, and fully integrated Wi-Fi networks.
+                    Our luxury fleet features the pristine and robust <strong class="text-theme-text">Cadillac Escalade</strong> and <strong class="text-theme-text">Chevrolet Suburban</strong>. Optimized for up to 6 passengers, offering spacious luggage storage, top-tier black leather cabins, and fully integrated Wi-Fi networks.
 
                 </p>
 
                 
 
-                <div class="grid grid-cols-2 gap-4 py-4 text-xs font-medium uppercase tracking-wider text-gray-300">
+                <div class="grid grid-cols-2 gap-4 py-4 text-xs font-medium uppercase tracking-wider text-theme-text/80">
 
                     <div class="flex items-center space-x-3">
 
@@ -1016,9 +1016,9 @@
 
                     <img src="https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&q=80&w=1000" alt="Executive SUV Escalade" class="w-full h-[400px] object-cover group-hover:scale-105 transition-transform duration-700">
 
-                    <div class="absolute bottom-0 inset-x-0 p-6 bg-gradient-to-t from-black/90 to-transparent">
+                    <div class="absolute bottom-0 inset-x-0 p-6 bg-gradient-to-t from-theme-bg/90 to-transparent">
 
-                        <h4 class="text-lg font-bold font-display text-white uppercase tracking-wider mb-1">Cadillac Escalade ESV</h4>
+                        <h4 class="text-lg font-bold font-display text-theme-text uppercase tracking-wider mb-1">Cadillac Escalade ESV</h4>
 
                         <p class="text-xs text-luxe-gold font-semibold uppercase tracking-widest">AeroLux Select Chauffeur standard</p>
 
@@ -1036,7 +1036,7 @@
 
 <!-- Why Choose Us Section -->
 
-<section class="py-24 bg-luxe-dark-grey relative overflow-hidden">
+<section class="py-24 bg-theme-card relative overflow-hidden">
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
@@ -1046,7 +1046,7 @@
 
             <span class="text-xs uppercase font-bold tracking-widest text-luxe-gold">{% site_content 'about_section_tag' 'Why AeroLux Select' %}</span>
 
-            <h2 class="text-3xl sm:text-4xl font-extrabold font-display tracking-tight text-white">
+            <h2 class="text-3xl sm:text-4xl font-extrabold font-display tracking-tight text-theme-text">
 
                 {% site_content 'about_title' 'Uncompromising Professional Standards' %}
 
@@ -1056,7 +1056,7 @@
 
             {% if site_slug == 'dr' or current_site_slug == 'dr' %}
 
-            <p class="text-gray-400 font-light mt-4 text-sm max-w-2xl mx-auto">
+            <p class="text-theme-text/70 font-light mt-4 text-sm max-w-2xl mx-auto">
 
                 {% site_content 'about_text' '' %}
 
@@ -1078,9 +1078,9 @@
 
                 </div>
 
-                <h4 class="text-sm font-bold uppercase tracking-wider text-white mb-2">Guaranteed Flat Rates</h4>
+                <h4 class="text-sm font-bold uppercase tracking-wider text-theme-text mb-2">Guaranteed Flat Rates</h4>
 
-                <p class="text-xs text-gray-400 leading-relaxed font-light">
+                <p class="text-xs text-theme-text/70 leading-relaxed font-light">
 
                     No hidden surge fees, no dynamic traffic penalties. You pay the exact quoted price at final reservation.
 
@@ -1098,9 +1098,9 @@
 
                 </div>
 
-                <h4 class="text-sm font-bold uppercase tracking-wider text-white mb-2">Elite Security Drivers</h4>
+                <h4 class="text-sm font-bold uppercase tracking-wider text-theme-text mb-2">Elite Security Drivers</h4>
 
-                <p class="text-xs text-gray-400 leading-relaxed font-light">
+                <p class="text-xs text-theme-text/70 leading-relaxed font-light">
 
                     Meticulously vetted, professional chauffeurs with extensive route optimization and defense-driving training.
 
@@ -1118,9 +1118,9 @@
 
                 </div>
 
-                <h4 class="text-sm font-bold uppercase tracking-wider text-white mb-2">Direct 24/7 Dispatch</h4>
+                <h4 class="text-sm font-bold uppercase tracking-wider text-theme-text mb-2">Direct 24/7 Dispatch</h4>
 
-                <p class="text-xs text-gray-400 leading-relaxed font-light">
+                <p class="text-xs text-theme-text/70 leading-relaxed font-light">
 
                     No complex automated phone loops. Instantly chat with real live support or your driver via WhatsApp 24/7.
 
@@ -1138,9 +1138,9 @@
 
                 </div>
 
-                <h4 class="text-sm font-bold uppercase tracking-wider text-white mb-2">VIP Meet & Greet</h4>
+                <h4 class="text-sm font-bold uppercase tracking-wider text-theme-text mb-2">VIP Meet & Greet</h4>
 
-                <p class="text-xs text-gray-400 leading-relaxed font-light">
+                <p class="text-xs text-theme-text/70 leading-relaxed font-light">
 
                     Terminals contain fast-track airport customs escorts, porter luggage handling, and direct greeting signboards.
 
@@ -1156,7 +1156,7 @@
 
 <!-- Client Testimonials -->
 
-<section class="py-24 bg-luxe-black">
+<section class="py-24 bg-theme-bg">
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
@@ -1166,7 +1166,7 @@
 
             <span class="text-xs uppercase font-bold tracking-widest text-luxe-gold">{% site_content 'testimonials_section_tag' 'Client Endorsements' %}</span>
 
-            <h2 class="text-3xl sm:text-4xl font-extrabold font-display tracking-tight text-white">
+            <h2 class="text-3xl sm:text-4xl font-extrabold font-display tracking-tight text-theme-text">
 
                 {% site_content 'testimonials_title' 'Trusted by Elite Global Travelers' %}
 
@@ -1190,13 +1190,13 @@
 
                 </div>
 
-                <p class="text-sm leading-relaxed text-gray-300 mb-6 font-light italic">
+                <p class="text-sm leading-relaxed text-theme-text/80 mb-6 font-light italic">
 
                     "{{ test.content }}"
 
                 </p>
 
-                <div class="flex items-center space-x-3 pt-4 border-t border-gray-800">
+                <div class="flex items-center space-x-3 pt-4 border-t border-theme-border">
 
                     {% if test.image %}
 
@@ -1214,9 +1214,9 @@
 
                     <div>
 
-                        <h4 class="text-xs font-bold uppercase tracking-wider text-white">{{ test.author }}</h4>
+                        <h4 class="text-xs font-bold uppercase tracking-wider text-theme-text">{{ test.author }}</h4>
 
-                        <p class="text-[10px] text-gray-500 font-medium">{{ test.company|default:"Verified Client" }}</p>
+                        <p class="text-[10px] text-theme-text/60 font-medium">{{ test.company|default:"Verified Client" }}</p>
 
                     </div>
 
@@ -1238,13 +1238,13 @@
 
                 </div>
 
-                <p class="text-sm leading-relaxed text-gray-300 mb-6 font-light italic">
+                <p class="text-sm leading-relaxed text-theme-text/80 mb-6 font-light italic">
 
                     "Absolute professionalism. The driver was waiting terminal-side with a tablet, carried my heavy luggage, and the Escalade was immaculate. Highest recommendation."
 
                 </p>
 
-                <div class="flex items-center space-x-3 pt-4 border-t border-gray-800">
+                <div class="flex items-center space-x-3 pt-4 border-t border-theme-border">
 
                     <div class="w-10 h-10 rounded-full bg-luxe-gold/20 flex items-center justify-center text-luxe-gold font-bold text-xs">
 
@@ -1254,9 +1254,9 @@
 
                     <div>
 
-                        <h4 class="text-xs font-bold uppercase tracking-wider text-white">Jonathan Davis</h4>
+                        <h4 class="text-xs font-bold uppercase tracking-wider text-theme-text">Jonathan Davis</h4>
 
-                        <p class="text-[10px] text-gray-500 font-medium">Managing Director, Atlas Capital</p>
+                        <p class="text-[10px] text-theme-text/60 font-medium">Managing Director, Atlas Capital</p>
 
                     </div>
 
@@ -1274,13 +1274,13 @@
 
                 </div>
 
-                <p class="text-sm leading-relaxed text-gray-300 mb-6 font-light italic">
+                <p class="text-sm leading-relaxed text-theme-text/80 mb-6 font-light italic">
 
                     "Booking our VIP transfer from PUJ to Punta Cana resort was flawless. Add-ons like the Terminal Fast-track saved us hours of custom wait lines. Extremely comfortable vehicle."
 
                 </p>
 
-                <div class="flex items-center space-x-3 pt-4 border-t border-gray-800">
+                <div class="flex items-center space-x-3 pt-4 border-t border-theme-border">
 
                     <div class="w-10 h-10 rounded-full bg-luxe-gold/20 flex items-center justify-center text-luxe-gold font-bold text-xs">
 
@@ -1290,9 +1290,9 @@
 
                     <div>
 
-                        <h4 class="text-xs font-bold uppercase tracking-wider text-white">Sarah Reynolds</h4>
+                        <h4 class="text-xs font-bold uppercase tracking-wider text-theme-text">Sarah Reynolds</h4>
 
-                        <p class="text-[10px] text-gray-500 font-medium">VIP Leisure Traveler</p>
+                        <p class="text-[10px] text-theme-text/60 font-medium">VIP Leisure Traveler</p>
 
                     </div>
 
@@ -1310,13 +1310,13 @@
 
                 </div>
 
-                <p class="text-sm leading-relaxed text-gray-300 mb-6 font-light italic">
+                <p class="text-sm leading-relaxed text-theme-text/80 mb-6 font-light italic">
 
                     "Chauffeur hourly service was excellent. We used it for local corporate events in Manhattan. Impeccable route knowledge, perfect cabin environment, quiet and peaceful."
 
                 </p>
 
-                <div class="flex items-center space-x-3 pt-4 border-t border-gray-800">
+                <div class="flex items-center space-x-3 pt-4 border-t border-theme-border">
 
                     <div class="w-10 h-10 rounded-full bg-luxe-gold/20 flex items-center justify-center text-luxe-gold font-bold text-xs">
 
@@ -1326,9 +1326,9 @@
 
                     <div>
 
-                        <h4 class="text-xs font-bold uppercase tracking-wider text-white">Marcus Harris</h4>
+                        <h4 class="text-xs font-bold uppercase tracking-wider text-theme-text">Marcus Harris</h4>
 
-                        <p class="text-[10px] text-gray-500 font-medium">VP of Events, Nexus Tech</p>
+                        <p class="text-[10px] text-theme-text/60 font-medium">VP of Events, Nexus Tech</p>
 
                     </div>
 
@@ -1515,37 +1515,37 @@
 
         function updateServiceType() {
 
-            lblTransfer.className = "cursor-pointer text-center p-4 rounded-xl text-xs font-semibold uppercase tracking-wider transition-all duration-300 block select-none border border-transparent hover:bg-luxe-grey";
+            lblTransfer.className = "cursor-pointer text-center p-4 rounded-xl text-xs font-semibold uppercase tracking-wider transition-all duration-300 block select-none border border-transparent hover:bg-theme-card";
 
-            lblHourly.className = "cursor-pointer text-center p-4 rounded-xl text-xs font-semibold uppercase tracking-wider transition-all duration-300 block select-none border border-transparent hover:bg-luxe-grey";
+            lblHourly.className = "cursor-pointer text-center p-4 rounded-xl text-xs font-semibold uppercase tracking-wider transition-all duration-300 block select-none border border-transparent hover:bg-theme-card";
 
-            lblP2P.className = "cursor-pointer text-center p-4 rounded-xl text-xs font-semibold uppercase tracking-wider transition-all duration-300 block select-none border border-transparent hover:bg-luxe-grey";
+            lblP2P.className = "cursor-pointer text-center p-4 rounded-xl text-xs font-semibold uppercase tracking-wider transition-all duration-300 block select-none border border-transparent hover:bg-theme-card";
 
             if (lblRental) {
 
-                lblRental.className = "cursor-pointer text-center p-4 rounded-xl text-xs font-semibold uppercase tracking-wider transition-all duration-300 block select-none border border-transparent hover:bg-luxe-grey";
+                lblRental.className = "cursor-pointer text-center p-4 rounded-xl text-xs font-semibold uppercase tracking-wider transition-all duration-300 block select-none border border-transparent hover:bg-theme-card";
 
             }
 
             
 
-            iconHourly.className = "fas fa-clock text-base text-gray-500 mb-2 block";
+            iconHourly.className = "fas fa-clock text-base text-theme-text/60 mb-2 block";
 
-            iconP2P.className = "fas fa-route text-base text-gray-500 mb-2 block";
+            iconP2P.className = "fas fa-route text-base text-theme-text/60 mb-2 block";
 
             if (iconRental) {
 
-                iconRental.className = "fas fa-car text-base text-gray-500 mb-2 block";
+                iconRental.className = "fas fa-car text-base text-theme-text/60 mb-2 block";
 
             }
 
-            spanHourly.className = "block text-gray-400";
+            spanHourly.className = "block text-theme-text/70";
 
-            spanP2P.className = "block text-gray-400";
+            spanP2P.className = "block text-theme-text/70";
 
             if (spanRental) {
 
-                spanRental.className = "block text-gray-400";
+                spanRental.className = "block text-theme-text/70";
 
             }
 
@@ -1583,7 +1583,7 @@
 
                 iconP2P.className = "fas fa-route text-base text-luxe-gold mb-2 block";
 
-                spanP2P.className = "block text-white";
+                spanP2P.className = "block text-theme-text";
 
                 divAirportTransferWrapper.classList.add('hidden');
 
@@ -1615,7 +1615,7 @@
 
                 iconHourly.className = "fas fa-clock text-base text-luxe-gold mb-2 block";
 
-                spanHourly.className = "block text-white";
+                spanHourly.className = "block text-theme-text";
 
                 divAirportTransferWrapper.classList.add('hidden');
 
@@ -1651,7 +1651,7 @@
 
                 iconRental.className = "fas fa-car text-base text-luxe-gold mb-2 block";
 
-                spanRental.className = "block text-white";
+                spanRental.className = "block text-theme-text";
 
                 divAirportTransferWrapper.classList.add('hidden');
 
@@ -1761,13 +1761,13 @@
 
                 toggleDot.classList.remove('bg-gray-500');
 
-                toggleDot.classList.add('bg-luxe-black');
+                toggleDot.classList.add('bg-theme-bg');
 
                 if (toggleLabel) {
 
                     toggleLabel.textContent = "Activé / ON";
 
-                    toggleLabel.classList.remove('text-gray-500');
+                    toggleLabel.classList.remove('text-theme-text/60');
 
                     toggleLabel.classList.add('text-luxe-gold');
 
@@ -1781,7 +1781,7 @@
 
                 toggleDot.style.transform = 'translateX(0px)';
 
-                toggleDot.classList.remove('bg-luxe-black');
+                toggleDot.classList.remove('bg-theme-bg');
 
                 toggleDot.classList.add('bg-gray-500');
 
@@ -1791,7 +1791,7 @@
 
                     toggleLabel.classList.remove('text-luxe-gold');
 
-                    toggleLabel.classList.add('text-gray-500');
+                    toggleLabel.classList.add('text-theme-text/60');
 
                 }
 

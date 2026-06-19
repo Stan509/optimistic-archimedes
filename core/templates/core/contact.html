@@ -6,33 +6,33 @@
 
 {% block content %}
 <!-- Premium Banner Section -->
-<section class="relative py-24 bg-luxe-dark-grey overflow-hidden border-b border-luxe-gold/10">
+<section class="relative py-24 bg-theme-card overflow-hidden border-b border-luxe-gold/10">
     <div class="absolute inset-0 z-0">
-        <div class="absolute inset-0 bg-gradient-to-r from-luxe-black via-black/90 to-transparent z-10"></div>
+        <div class="absolute inset-0 bg-gradient-to-r from-theme-bg via-theme-bg/90 to-transparent z-10"></div>
         <img src="https://images.unsplash.com/photo-1436491865332-7a61a109cc05?auto=format&fit=crop&q=80&w=1200" alt="VIP Support Contact" class="w-full h-full object-cover object-center opacity-30">
     </div>
     <div class="relative z-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <span class="text-xs uppercase font-bold tracking-widest text-luxe-gold">24/7 Dispatch Desk</span>
-        <h1 class="text-4xl sm:text-5xl font-extrabold font-display text-white mt-3">
+        <h1 class="text-4xl sm:text-5xl font-extrabold font-display text-theme-text mt-3">
             Contact Chauffeur <span class="gold-gradient-text">Support</span>
         </h1>
-        <p class="text-gray-400 text-sm max-w-xl mt-4 leading-relaxed font-light">
+        <p class="text-theme-text/70 text-sm max-w-xl mt-4 leading-relaxed font-light">
             Need custom charter support, fleet coordination for major corporate events, or immediate dispatch assistance? Our dedicated desk is standing by.
         </p>
     </div>
 </section>
 
 <!-- Contact Form & Details Section -->
-<section class="py-24 bg-luxe-black">
+<section class="py-24 bg-theme-bg">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
             
             <!-- Left Info Panel (Coordinates) -->
             <div class="lg:col-span-5 space-y-8">
                 <div class="glass-card rounded-2xl p-6 sm:p-8 space-y-6 border border-luxe-gold/10">
-                    <h3 class="text-lg font-bold font-display text-white uppercase tracking-wider">AeroLux Select Hub</h3>
+                    <h3 class="text-lg font-bold font-display text-theme-text uppercase tracking-wider">AeroLux Select Hub</h3>
                     <div class="w-12 h-0.5 bg-luxe-gold"></div>
-                    <p class="text-xs text-gray-400 leading-relaxed font-light">
+                    <p class="text-xs text-theme-text/70 leading-relaxed font-light">
                         Operating premier private chauffeured networks across the New York Metro area and major Dominican Republic luxury zones.
                     </p>
 
@@ -44,9 +44,9 @@
                                 <i class="fas fa-phone text-luxe-gold text-sm"></i>
                             </div>
                             <div>
-                                <h4 class="text-gray-500 uppercase tracking-widest font-bold mb-1">Direct Hotline</h4>
-                                <a href="tel:{{ site_settings.contact_phone }}" class="text-sm font-bold text-white hover:text-luxe-gold transition-colors">{{ site_settings.contact_phone }}</a>
-                                <span class="block text-[10px] text-gray-500 font-light mt-0.5">Vocal bookings & client support</span>
+                                <h4 class="text-theme-text/60 uppercase tracking-widest font-bold mb-1">Direct Hotline</h4>
+                                <a href="tel:{{ site_settings.contact_phone }}" class="text-sm font-bold text-theme-text hover:text-luxe-gold transition-colors">{{ site_settings.contact_phone }}</a>
+                                <span class="block text-[10px] text-theme-text/60 font-light mt-0.5">Vocal bookings & client support</span>
                             </div>
                         </div>
                         {% endif %}
@@ -58,9 +58,9 @@
                                 <i class="fas fa-envelope text-luxe-gold text-sm"></i>
                             </div>
                             <div>
-                                <h4 class="text-gray-500 uppercase tracking-widest font-bold mb-1">VIP Concierge Email</h4>
-                                <a href="mailto:{{ site_settings.contact_email }}" class="text-sm font-bold text-white hover:text-luxe-gold transition-colors">{{ site_settings.contact_email }}</a>
-                                <span class="block text-[10px] text-gray-500 font-light mt-0.5">Corporate billing and event planning</span>
+                                <h4 class="text-theme-text/60 uppercase tracking-widest font-bold mb-1">VIP Concierge Email</h4>
+                                <a href="mailto:{{ site_settings.contact_email }}" class="text-sm font-bold text-theme-text hover:text-luxe-gold transition-colors">{{ site_settings.contact_email }}</a>
+                                <span class="block text-[10px] text-theme-text/60 font-light mt-0.5">Corporate billing and event planning</span>
                             </div>
                         </div>
                         {% endif %}
@@ -72,29 +72,29 @@
                                 <i class="fab fa-whatsapp text-green-500 text-base font-bold"></i>
                             </div>
                             <div>
-                                <h4 class="text-gray-500 uppercase tracking-widest font-bold mb-1">WhatsApp Live Dispatch</h4>
+                                <h4 class="text-theme-text/60 uppercase tracking-widest font-bold mb-1">WhatsApp Live Dispatch</h4>
                                 <a href="https://wa.me/{{ site_settings.whatsapp_number }}" target="_blank" class="text-sm font-bold text-green-500 hover:text-green-600 transition-colors">Chat via WhatsApp</a>
-                                <span class="block text-[10px] text-gray-500 font-light mt-0.5">Instant flight adjustments & driver maps</span>
+                                <span class="block text-[10px] text-theme-text/60 font-light mt-0.5">Instant flight adjustments & driver maps</span>
                             </div>
                         </div>
                         {% endif %}
                     </div>
 
                     <!-- Social profiles -->
-                    <div class="border-t border-gray-800 pt-6 space-y-3">
-                        <span class="text-[10px] uppercase text-gray-500 font-bold tracking-widest block">Corporate Networks</span>
+                    <div class="border-t border-theme-border pt-6 space-y-3">
+                        <span class="text-[10px] uppercase text-theme-text/60 font-bold tracking-widest block">Corporate Networks</span>
                         <div class="flex space-x-4 pt-1">
                             {% if site_settings.social_instagram %}
-                                <a href="{{ site_settings.social_instagram }}" class="w-8 h-8 rounded bg-luxe-grey border border-gray-800 flex items-center justify-center text-gray-400 hover:text-luxe-gold transition-all"><i class="fab fa-instagram"></i></a>
+                                <a href="{{ site_settings.social_instagram }}" class="w-8 h-8 rounded bg-theme-card border border-theme-border flex items-center justify-center text-theme-text/70 hover:text-luxe-gold transition-all"><i class="fab fa-instagram"></i></a>
                             {% endif %}
                             {% if site_settings.social_facebook %}
-                                <a href="{{ site_settings.social_facebook }}" class="w-8 h-8 rounded bg-luxe-grey border border-gray-800 flex items-center justify-center text-gray-400 hover:text-luxe-gold transition-all"><i class="fab fa-facebook-f"></i></a>
+                                <a href="{{ site_settings.social_facebook }}" class="w-8 h-8 rounded bg-theme-card border border-theme-border flex items-center justify-center text-theme-text/70 hover:text-luxe-gold transition-all"><i class="fab fa-facebook-f"></i></a>
                             {% endif %}
                             {% if site_settings.social_twitter %}
-                                <a href="{{ site_settings.social_twitter }}" class="w-8 h-8 rounded bg-luxe-grey border border-gray-800 flex items-center justify-center text-gray-400 hover:text-luxe-gold transition-all"><i class="fab fa-x-twitter"></i></a>
+                                <a href="{{ site_settings.social_twitter }}" class="w-8 h-8 rounded bg-theme-card border border-theme-border flex items-center justify-center text-theme-text/70 hover:text-luxe-gold transition-all"><i class="fab fa-x-twitter"></i></a>
                             {% endif %}
                             {% if site_settings.social_tiktok %}
-                                <a href="{{ site_settings.social_tiktok }}" class="w-8 h-8 rounded bg-luxe-grey border border-gray-800 flex items-center justify-center text-gray-400 hover:text-luxe-gold transition-all"><i class="fab fa-tiktok"></i></a>
+                                <a href="{{ site_settings.social_tiktok }}" class="w-8 h-8 rounded bg-theme-card border border-theme-border flex items-center justify-center text-theme-text/70 hover:text-luxe-gold transition-all"><i class="fab fa-tiktok"></i></a>
                             {% endif %}
                         </div>
                     </div>
@@ -104,7 +104,7 @@
             <!-- Right Panel (Premium inquiry form) -->
             <div class="lg:col-span-7">
                 <div class="glass-card rounded-2xl p-6 sm:p-8 border border-luxe-gold/10 space-y-6">
-                    <h3 class="text-lg font-bold font-display text-white uppercase tracking-wider">Send Support Request</h3>
+                    <h3 class="text-lg font-bold font-display text-theme-text uppercase tracking-wider">Send Support Request</h3>
                     <div class="w-12 h-0.5 bg-luxe-gold"></div>
                     
                     <form action="" method="POST" class="space-y-4">
@@ -112,23 +112,23 @@
                         
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                                <label for="contact_name" class="block text-xs text-gray-400 mb-1">Your Name</label>
-                                <input type="text" name="name" id="contact_name" required class="block w-full px-4 py-3 bg-luxe-black rounded-lg border border-gray-800 focus:border-luxe-gold text-sm text-white focus:outline-none focus:ring-1 focus:ring-luxe-gold">
+                                <label for="contact_name" class="block text-xs text-theme-text/70 mb-1">Your Name</label>
+                                <input type="text" name="name" id="contact_name" required class="block w-full px-4 py-3 bg-theme-bg rounded-lg border border-theme-border focus:border-luxe-gold text-sm text-theme-text focus:outline-none focus:ring-1 focus:ring-luxe-gold">
                             </div>
                             <div>
-                                <label for="contact_email" class="block text-xs text-gray-400 mb-1">Email Address</label>
-                                <input type="email" name="email" id="contact_email" required class="block w-full px-4 py-3 bg-luxe-black rounded-lg border border-gray-800 focus:border-luxe-gold text-sm text-white focus:outline-none focus:ring-1 focus:ring-luxe-gold">
+                                <label for="contact_email" class="block text-xs text-theme-text/70 mb-1">Email Address</label>
+                                <input type="email" name="email" id="contact_email" required class="block w-full px-4 py-3 bg-theme-bg rounded-lg border border-theme-border focus:border-luxe-gold text-sm text-theme-text focus:outline-none focus:ring-1 focus:ring-luxe-gold">
                             </div>
                         </div>
 
                         <div>
-                            <label for="contact_subject" class="block text-xs text-gray-400 mb-1">Subject</label>
-                            <input type="text" name="subject" id="contact_subject" required class="block w-full px-4 py-3 bg-luxe-black rounded-lg border border-gray-800 focus:border-luxe-gold text-sm text-white focus:outline-none focus:ring-1 focus:ring-luxe-gold">
+                            <label for="contact_subject" class="block text-xs text-theme-text/70 mb-1">Subject</label>
+                            <input type="text" name="subject" id="contact_subject" required class="block w-full px-4 py-3 bg-theme-bg rounded-lg border border-theme-border focus:border-luxe-gold text-sm text-theme-text focus:outline-none focus:ring-1 focus:ring-luxe-gold">
                         </div>
 
                         <div>
-                            <label for="contact_message" class="block text-xs text-gray-400 mb-1">Your Message</label>
-                            <textarea name="message" id="contact_message" rows="5" required placeholder="Describe your corporate event routing or support request..." class="block w-full px-4 py-3 bg-luxe-black rounded-lg border border-gray-800 focus:border-luxe-gold text-sm text-white focus:outline-none focus:ring-1 focus:ring-luxe-gold"></textarea>
+                            <label for="contact_message" class="block text-xs text-theme-text/70 mb-1">Your Message</label>
+                            <textarea name="message" id="contact_message" rows="5" required placeholder="Describe your corporate event routing or support request..." class="block w-full px-4 py-3 bg-theme-bg rounded-lg border border-theme-border focus:border-luxe-gold text-sm text-theme-text focus:outline-none focus:ring-1 focus:ring-luxe-gold"></textarea>
                         </div>
 
                         <button type="submit" class="w-full gold-btn py-4 rounded-xl text-xs uppercase tracking-widest font-semibold mt-4 shadow-xl flex items-center justify-center space-x-3">

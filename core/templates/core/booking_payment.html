@@ -5,15 +5,15 @@
 {% block title %}Book Chauffeur  -  Step 4: Secure Checkout | AeroLux Select{% endblock %}
 
 {% block content %}
-<section class="py-16 bg-luxe-black min-h-[85vh]">
+<section class="py-16 bg-theme-bg min-h-[85vh]">
     <div class="max-w-4xl mx-auto px-4 sm:px-6">
         
         <!-- Premium Multi-step Progress Indicator -->
         <div class="mb-12">
-            <div class="flex justify-between items-center text-xs uppercase tracking-wider text-gray-500 font-semibold mb-3">
-                <span class="text-gray-400">1. Trip Routing</span>
-                <span class="text-gray-400">2. Select Vehicle</span>
-                <span class="text-gray-400">3. Passenger Details</span>
+            <div class="flex justify-between items-center text-xs uppercase tracking-wider text-theme-text/60 font-semibold mb-3">
+                <span class="text-theme-text/70">1. Trip Routing</span>
+                <span class="text-theme-text/70">2. Select Vehicle</span>
+                <span class="text-theme-text/70">3. Passenger Details</span>
                 <span class="text-luxe-gold">4. Payment & Checkout</span>
             </div>
             <!-- Progress Bar -->
@@ -31,14 +31,14 @@
                     
                     <div class="space-y-1">
                         <span class="text-[10px] uppercase font-bold tracking-widest text-luxe-gold">Step 4 of 4</span>
-                        <h1 class="text-2xl font-bold font-display text-white">Secure Checkout</h1>
+                        <h1 class="text-2xl font-bold font-display text-theme-text">Secure Checkout</h1>
                         <div class="w-12 h-0.5 bg-luxe-gold mt-1"></div>
                     </div>
 
                     <!-- Payment Toggle Tabs -->
                     <div>
-                        <label class="block text-xs uppercase tracking-widest font-bold text-gray-400 mb-3">Payment Method</label>
-                        <div class="grid grid-cols-2 gap-2 bg-luxe-black p-1 rounded-xl border border-gray-800">
+                        <label class="block text-xs uppercase tracking-widest font-bold text-theme-text/70 mb-3">Payment Method</label>
+                        <div class="grid grid-cols-2 gap-2 bg-theme-bg p-1 rounded-xl border border-theme-border">
                             <button type="button" id="tab-stripe" class="py-3 rounded-lg text-xs font-bold uppercase tracking-wider transition-all duration-300 flex items-center justify-center space-x-2 border border-transparent">
                                 <i class="fas fa-credit-card"></i>
                                 <span>Credit Card</span>
@@ -58,41 +58,41 @@
 
                         <!-- Stripe Section -->
                         <div id="stripe-section" class="space-y-4">
-                            <div class="bg-luxe-black/30 p-4 rounded-xl border border-gray-800 space-y-4">
-                                <div class="flex items-center justify-between text-xs text-gray-400">
+                            <div class="bg-theme-bg/30 p-4 rounded-xl border border-theme-border space-y-4">
+                                <div class="flex items-center justify-between text-xs text-theme-text/70">
                                     <span>Card details powered by</span>
-                                    <span class="font-bold text-white tracking-widest uppercase flex items-center text-[10px]"><i class="fab fa-stripe text-lg mr-1 text-luxe-gold"></i> STRIPE</span>
+                                    <span class="font-bold text-theme-text tracking-widest uppercase flex items-center text-[10px]"><i class="fab fa-stripe text-lg mr-1 text-luxe-gold"></i> STRIPE</span>
                                 </div>
                                 
                                 <div class="space-y-3">
                                     <div>
-                                        <label class="block text-[10px] uppercase text-gray-500 font-bold mb-1">Cardholder Name</label>
-                                        <input type="text" name="cardholder_name" id="cardholder-name" placeholder="Johnathan Doe" class="block w-full px-4 py-3 bg-luxe-black rounded-lg border border-gray-800 focus:border-luxe-gold text-sm text-white focus:outline-none focus:ring-1 focus:ring-luxe-gold">
+                                        <label class="block text-[10px] uppercase text-theme-text/60 font-bold mb-1">Cardholder Name</label>
+                                        <input type="text" name="cardholder_name" id="cardholder-name" placeholder="Johnathan Doe" class="block w-full px-4 py-3 bg-theme-bg rounded-lg border border-theme-border focus:border-luxe-gold text-sm text-theme-text focus:outline-none focus:ring-1 focus:ring-luxe-gold">
                                     </div>
 
                                     <div>
-                                        <label class="block text-[10px] uppercase text-gray-500 font-bold mb-1">Card Number</label>
+                                        <label class="block text-[10px] uppercase text-theme-text/60 font-bold mb-1">Card Number</label>
                                         <div class="relative">
-                                            <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500">
+                                            <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-theme-text/60">
                                                 <i class="fas fa-credit-card text-xs"></i>
                                             </span>
-                                            <input type="text" name="card_number" id="card-number" placeholder="4242 •••• •••• 4242" class="block w-full pl-9 pr-4 py-3 bg-luxe-black rounded-lg border border-gray-800 focus:border-luxe-gold text-sm text-white focus:outline-none focus:ring-1 focus:ring-luxe-gold">
+                                            <input type="text" name="card_number" id="card-number" placeholder="4242 •••• •••• 4242" class="block w-full pl-9 pr-4 py-3 bg-theme-bg rounded-lg border border-theme-border focus:border-luxe-gold text-sm text-theme-text focus:outline-none focus:ring-1 focus:ring-luxe-gold">
                                         </div>
                                     </div>
 
                                     <div class="grid grid-cols-2 gap-4">
                                         <div>
-                                            <label class="block text-[10px] uppercase text-gray-500 font-bold mb-1">Expiration Date</label>
-                                            <input type="text" name="card_expiry" id="card-expiry" placeholder="MM/YY" class="block w-full px-4 py-3 bg-luxe-black rounded-lg border border-gray-800 focus:border-luxe-gold text-sm text-white focus:outline-none focus:ring-1 focus:ring-luxe-gold">
+                                            <label class="block text-[10px] uppercase text-theme-text/60 font-bold mb-1">Expiration Date</label>
+                                            <input type="text" name="card_expiry" id="card-expiry" placeholder="MM/YY" class="block w-full px-4 py-3 bg-theme-bg rounded-lg border border-theme-border focus:border-luxe-gold text-sm text-theme-text focus:outline-none focus:ring-1 focus:ring-luxe-gold">
                                         </div>
                                         <div>
-                                            <label class="block text-[10px] uppercase text-gray-500 font-bold mb-1">CVC Code</label>
-                                            <input type="text" name="card_cvc" id="card-cvc" placeholder="123" class="block w-full px-4 py-3 bg-luxe-black rounded-lg border border-gray-800 focus:border-luxe-gold text-sm text-white focus:outline-none focus:ring-1 focus:ring-luxe-gold">
+                                            <label class="block text-[10px] uppercase text-theme-text/60 font-bold mb-1">CVC Code</label>
+                                            <input type="text" name="card_cvc" id="card-cvc" placeholder="123" class="block w-full px-4 py-3 bg-theme-bg rounded-lg border border-theme-border focus:border-luxe-gold text-sm text-theme-text focus:outline-none focus:ring-1 focus:ring-luxe-gold">
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                            <p class="text-[10px] text-gray-500 leading-relaxed font-light">
+                            <p class="text-[10px] text-theme-text/60 leading-relaxed font-light">
                                 AeroLux Select never processes or logs full credit card metrics in local files. All calculations occur safely within Stripe tokens.
                             </p>
                         </div>
@@ -104,16 +104,16 @@
                                     <i class="fas fa-circle-info text-sm"></i>
                                     <h4 class="text-xs font-bold uppercase tracking-wider">Chauffeur Collection Policy</h4>
                                 </div>
-                                <p class="text-xs text-gray-300 leading-relaxed font-light">
+                                <p class="text-xs text-theme-text/80 leading-relaxed font-light">
                                     Pay directly to your chauffeur upon pickup. Drivers accept cash (USD/local), major corporate debit/credit cards terminal-side, or direct corporate invoice if a valid billing account is registered.
                                 </p>
                             </div>
                         </div>
 
                         <!-- Terms & Conditions Checkbox -->
-                        <div class="flex items-start space-x-3 bg-luxe-black/30 p-4 rounded-xl border border-gray-800 my-4">
-                            <input type="checkbox" name="terms" id="terms-checkbox" required class="mt-1 h-4 w-4 rounded border-gray-800 bg-luxe-black text-luxe-gold focus:ring-luxe-gold focus:ring-offset-luxe-black cursor-pointer">
-                            <label for="terms-checkbox" class="text-xs text-gray-400 font-light leading-relaxed select-none cursor-pointer">
+                        <div class="flex items-start space-x-3 bg-theme-bg/30 p-4 rounded-xl border border-theme-border my-4">
+                            <input type="checkbox" name="terms" id="terms-checkbox" required class="mt-1 h-4 w-4 rounded border-theme-border bg-theme-bg text-luxe-gold focus:ring-luxe-gold focus:ring-offset-luxe-black cursor-pointer">
+                            <label for="terms-checkbox" class="text-xs text-theme-text/70 font-light leading-relaxed select-none cursor-pointer">
                                 I agree to the <a href="#" id="open-terms-modal" class="text-luxe-gold underline hover:text-luxe-gold-bright transition-colors" onclick="event.preventDefault(); event.stopPropagation();">Terms of Service</a>, Chauffeur Gratuity Policy, and Cancellation Rules of AeroLux Select.
                             </label>
                         </div>
@@ -126,7 +126,7 @@
                     </form>
 
                     <div class="flex justify-start">
-                        <a href="{% site_url 'booking_step3' %}" class="inline-flex items-center space-x-2 text-xs uppercase font-semibold text-gray-400 hover:text-white transition-colors">
+                        <a href="{% site_url 'booking_step3' %}" class="inline-flex items-center space-x-2 text-xs uppercase font-semibold text-theme-text/70 hover:text-theme-text transition-colors">
                             <i class="fas fa-chevron-left text-[10px]"></i>
                             <span>Back to Details</span>
                         </a>
@@ -139,7 +139,7 @@
                 <div class="glass-card rounded-3xl p-6 sm:p-8 shadow-2xl relative overflow-hidden space-y-6">
                     <div class="absolute top-0 left-0 w-full h-1 bg-luxe-gold"></div>
                     
-                    <h3 class="text-sm font-bold uppercase tracking-widest text-luxe-gold border-b border-gray-800 pb-3 flex items-center space-x-2">
+                    <h3 class="text-sm font-bold uppercase tracking-widest text-luxe-gold border-b border-theme-border pb-3 flex items-center space-x-2">
                         <i class="fas fa-file-invoice-dollar"></i>
                         <span>Invoice Breakdown</span>
                     </h3>
@@ -147,32 +147,32 @@
                     <!-- Line items breakdown -->
                     <div class="space-y-4 text-xs">
                         <!-- Outbound Leg -->
-                        <div class="space-y-2 pb-3 {% if booking_data.round_trip %}border-b border-gray-800{% endif %}">
+                        <div class="space-y-2 pb-3 {% if booking_data.round_trip %}border-b border-theme-border{% endif %}">
                             <h4 class="text-[10px] uppercase font-bold text-luxe-gold tracking-wider flex items-center justify-between">
                                 <span>Outbound Leg (Aller)</span>
                                 <span class="font-bold">{{ outbound_total|currency }}</span>
                             </h4>
-                            <div class="flex justify-between items-center text-[11px] text-gray-400">
+                            <div class="flex justify-between items-center text-[11px] text-theme-text/70">
                                 <span class="font-light">Pickup Date & Time</span>
-                                <span class="font-semibold text-white">{{ booking_data.pickup_date }} at {{ booking_data.pickup_time }}</span>
+                                <span class="font-semibold text-theme-text">{{ booking_data.pickup_date }} at {{ booking_data.pickup_time }}</span>
                             </div>
-                            <div class="flex justify-between items-center text-[11px] text-gray-300">
+                            <div class="flex justify-between items-center text-[11px] text-theme-text/80">
                                 <span class="font-light">Base Chauffeur Fare</span>
                                 <span>{{ outbound_base|currency }}</span>
                             </div>
                             {% if booking_data.service_type == 'hourly' %}
-                            <div class="text-[10px] text-gray-400 pl-2 font-mono">
+                            <div class="text-[10px] text-theme-text/70 pl-2 font-mono">
                                 ({{ booking_data.hours_requested }} Hours)
                             </div>
                             {% endif %}
                             {% if stops_fee > 0 %}
-                            <div class="flex justify-between items-center text-[11px] text-gray-300">
+                            <div class="flex justify-between items-center text-[11px] text-theme-text/80">
                                 <span class="font-light">Point-to-Point Stops Fee</span>
                                 <span>{{ stops_fee|currency }}</span>
                             </div>
                             {% endif %}
                             {% for addon in selected_addons %}
-                            <div class="flex justify-between items-center text-[11px] text-gray-300">
+                            <div class="flex justify-between items-center text-[11px] text-theme-text/80">
                                 <span class="font-light">{{ addon.name }} (VIP Add-On)</span>
                                 <span class="text-luxe-gold">+{{ addon.price|currency }}</span>
                             </div>
@@ -181,21 +181,21 @@
 
                         <!-- Return Leg -->
                         {% if booking_data.round_trip %}
-                        <div class="space-y-2 pb-3 border-b border-gray-800">
+                        <div class="space-y-2 pb-3 border-b border-theme-border">
                             <h4 class="text-[10px] uppercase font-bold text-luxe-gold tracking-wider flex items-center justify-between">
                                 <span>Return Leg (Retour)</span>
                                 <span class="font-bold">{{ return_total|currency }}</span>
                             </h4>
-                            <div class="flex justify-between items-center text-[11px] text-gray-400">
+                            <div class="flex justify-between items-center text-[11px] text-theme-text/70">
                                 <span class="font-light">Return Date & Time</span>
                                 <span class="font-semibold text-luxe-gold">{{ booking_data.return_date }} at {{ booking_data.return_time }}</span>
                             </div>
-                            <div class="flex justify-between items-center text-[11px] text-gray-300">
+                            <div class="flex justify-between items-center text-[11px] text-theme-text/80">
                                 <span class="font-light">Base Chauffeur Fare</span>
                                 <span>{{ return_base|currency }}</span>
                             </div>
                             {% for addon in selected_addons_return %}
-                            <div class="flex justify-between items-center text-[11px] text-gray-300">
+                            <div class="flex justify-between items-center text-[11px] text-theme-text/80">
                                 <span class="font-light">{{ addon.name }} (VIP Add-On)</span>
                                 <span class="text-luxe-gold">+{{ addon.price|currency }}</span>
                             </div>
@@ -205,19 +205,19 @@
                     </div>
 
                     <!-- Grand Total block -->
-                    <div class="border-t border-gray-800 pt-4 flex flex-col space-y-2">
-                        <div class="flex justify-between items-center text-xs uppercase text-gray-500 font-bold tracking-widest">
+                    <div class="border-t border-theme-border pt-4 flex flex-col space-y-2">
+                        <div class="flex justify-between items-center text-xs uppercase text-theme-text/60 font-bold tracking-widest">
                             <span>Grand Total</span>
                             <span class="text-xl text-luxe-gold font-display font-black">{{ total_price|currency }}</span>
                         </div>
                         
                         {% if booking_data.round_trip and booking_data.pay_separately %}
                         <div class="mt-2 p-3 bg-luxe-gold/5 border border-luxe-gold/20 rounded-xl space-y-1 text-[11px]">
-                            <div class="flex justify-between font-bold text-white">
+                            <div class="flex justify-between font-bold text-theme-text">
                                 <span>Due Now (Outbound):</span>
                                 <span>{{ outbound_total|currency }}</span>
                             </div>
-                            <div class="flex justify-between font-light text-gray-400">
+                            <div class="flex justify-between font-light text-theme-text/70">
                                 <span>Due at Return pickup:</span>
                                 <span>{{ return_total|currency }}</span>
                             </div>
@@ -234,18 +234,18 @@
 
 <!-- Terms & Conditions Modal -->
 <div id="terms-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-black/80 backdrop-blur-md transition-all duration-300">
-    <div class="relative w-full max-w-2xl bg-luxe-grey border border-luxe-gold/20 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6 max-h-[80vh] flex flex-col">
-        <div class="flex items-center justify-between border-b border-gray-800 pb-4">
-            <h3 class="text-lg font-bold font-display text-white uppercase tracking-wider flex items-center">
+    <div class="relative w-full max-w-2xl bg-theme-card border border-luxe-gold/20 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6 max-h-[80vh] flex flex-col">
+        <div class="flex items-center justify-between border-b border-theme-border pb-4">
+            <h3 class="text-lg font-bold font-display text-theme-text uppercase tracking-wider flex items-center">
                 <i class="fas fa-file-signature text-luxe-gold mr-2.5"></i>
                 Terms & Conditions
             </h3>
-            <button type="button" id="close-terms-modal-x" class="text-gray-400 hover:text-white transition-colors">
+            <button type="button" id="close-terms-modal-x" class="text-theme-text/70 hover:text-theme-text transition-colors">
                 <i class="fas fa-xmark text-lg"></i>
             </button>
         </div>
         
-        <div class="flex-grow overflow-y-auto text-sm text-gray-300 leading-relaxed space-y-4 pr-2 scrollbar-thin scrollbar-thumb-luxe-gold">
+        <div class="flex-grow overflow-y-auto text-sm text-theme-text/80 leading-relaxed space-y-4 pr-2 scrollbar-thin scrollbar-thumb-luxe-gold">
             {% if site_settings.terms_and_conditions %}
                 {{ site_settings.terms_and_conditions|linebreaks }}
             {% else %}
@@ -253,7 +253,7 @@
             {% endif %}
         </div>
         
-        <div class="flex items-center justify-end border-t border-gray-800 pt-4">
+        <div class="flex items-center justify-end border-t border-theme-border pt-4">
             <button type="button" id="close-terms-modal-btn" class="gold-btn px-6 py-2.5 rounded-xl text-xs uppercase tracking-wider font-semibold transition-all">
                 Accept & Close
             </button>
@@ -286,8 +286,8 @@
         const closeTermsModalBtn = document.getElementById('close-terms-modal-btn');
 
         function togglePaymentMethod(method) {
-            tabStripe.className = "py-3 rounded-lg text-xs font-bold uppercase tracking-wider transition-all duration-300 flex items-center justify-center space-x-2 border border-transparent text-gray-400 hover:text-white";
-            tabCash.className = "py-3 rounded-lg text-xs font-bold uppercase tracking-wider transition-all duration-300 flex items-center justify-center space-x-2 border border-transparent text-gray-400 hover:text-white";
+            tabStripe.className = "py-3 rounded-lg text-xs font-bold uppercase tracking-wider transition-all duration-300 flex items-center justify-center space-x-2 border border-transparent text-theme-text/70 hover:text-theme-text";
+            tabCash.className = "py-3 rounded-lg text-xs font-bold uppercase tracking-wider transition-all duration-300 flex items-center justify-center space-x-2 border border-transparent text-theme-text/70 hover:text-theme-text";
             
             if (method === 'STRIPE') {
                 tabStripe.className = "py-3 rounded-lg text-xs font-bold uppercase tracking-wider bg-luxe-gold/10 border border-luxe-gold/50 text-luxe-gold flex items-center justify-center space-x-2";

@@ -6,24 +6,24 @@
 
 {% block content %}
 <!-- Premium Header Banner -->
-<section class="relative py-20 bg-luxe-dark-grey overflow-hidden border-b border-luxe-gold/10">
+<section class="relative py-20 bg-theme-card overflow-hidden border-b border-luxe-gold/10">
     <div class="absolute inset-0 z-0">
-        <div class="absolute inset-0 bg-gradient-to-r from-luxe-black via-black/80 to-transparent z-10"></div>
+        <div class="absolute inset-0 bg-gradient-to-r from-theme-bg via-theme-bg/80 to-transparent z-10"></div>
         <img src="https://images.unsplash.com/photo-1549399542-7e3f8b79c341?auto=format&fit=crop&q=80&w=1200" alt="VIP Chauffeur Services" class="w-full h-full object-cover object-center opacity-40">
     </div>
     <div class="relative z-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <span class="text-xs uppercase font-bold tracking-widest text-luxe-gold">Tailored to Perfection</span>
-        <h1 class="text-4xl sm:text-5xl font-extrabold font-display text-white mt-3">
+        <h1 class="text-4xl sm:text-5xl font-extrabold font-display text-theme-text mt-3">
             Our Luxury <span class="gold-gradient-text">Offerings</span>
         </h1>
-        <p class="text-gray-400 text-sm max-w-xl mt-4 leading-relaxed font-light">
+        <p class="text-theme-text/70 text-sm max-w-xl mt-4 leading-relaxed font-light">
             We provide seamless premium logistics designed specifically for corporate executives, high-profile dignitaries, and luxury leisure seekers.
         </p>
     </div>
 </section>
 
 <!-- Detailed Main Services Overview -->
-<section class="py-24 bg-luxe-black">
+<section class="py-24 bg-theme-bg">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-24">
         
         <!-- Airport Transfer Service Details -->
@@ -32,11 +32,11 @@
                 <div class="w-12 h-12 bg-luxe-gold/10 rounded-xl flex items-center justify-center border border-luxe-gold/20">
                     <i class="fas fa-plane-departure text-luxe-gold text-lg"></i>
                 </div>
-                <h2 class="text-2xl sm:text-3xl font-bold font-display text-white">VIP Airport Transfers</h2>
-                <p class="text-gray-400 text-sm leading-relaxed font-light">
+                <h2 class="text-2xl sm:text-3xl font-bold font-display text-theme-text">VIP Airport Transfers</h2>
+                <p class="text-theme-text/70 text-sm leading-relaxed font-light">
                     Arrive with complete peace of mind. Our signature Airport Transfer service eliminates all logistical headaches. A dedicated professional driver will monitor your flight status in real-time, waiting with an elegant greeting sign inside the terminal arrivals hall.
                 </p>
-                <ul class="space-y-3 text-xs uppercase tracking-wider text-gray-300 font-semibold">
+                <ul class="space-y-3 text-xs uppercase tracking-wider text-theme-text/80 font-semibold">
                     <li class="flex items-center space-x-3"><i class="fas fa-check text-luxe-gold"></i> <span>Flight Status Real-Time Auto-Tracking</span></li>
                     <li class="flex items-center space-x-3"><i class="fas fa-check text-luxe-gold"></i> <span>Terminal In-Hall Meet & Greet Included</span></li>
                     <li class="flex items-center space-x-3"><i class="fas fa-check text-luxe-gold"></i> <span>60-Minute Complimentary Wait Time</span></li>
@@ -46,7 +46,7 @@
                     <a href="{% site_url 'airport_transfer' %}" class="gold-btn px-6 py-3 rounded-full text-xs uppercase tracking-widest font-semibold shadow-lg">
                         Learn Transfer Details
                     </a>
-                    <a href="{% site_url 'booking_step1' %}" class="text-xs font-semibold tracking-wider uppercase text-white hover:text-luxe-gold transition-colors">
+                    <a href="{% site_url 'booking_step1' %}" class="text-xs font-semibold tracking-wider uppercase text-theme-text hover:text-luxe-gold transition-colors">
                         Book Transfer Now
                     </a>
                 </div>
@@ -64,11 +64,11 @@
                 <div class="w-12 h-12 bg-luxe-gold/10 rounded-xl flex items-center justify-center border border-luxe-gold/20">
                     <i class="fas fa-clock text-luxe-gold text-lg"></i>
                 </div>
-                <h2 class="text-2xl sm:text-3xl font-bold font-display text-white">Dedicated Hourly Chauffeur</h2>
-                <p class="text-gray-400 text-sm leading-relaxed font-light">
+                <h2 class="text-2xl sm:text-3xl font-bold font-display text-theme-text">Dedicated Hourly Chauffeur</h2>
+                <p class="text-theme-text/70 text-sm leading-relaxed font-light">
                     Enjoy total flexibility and executive control. Our hourly chauffeur service places a premium vehicle and professional security driver at your command for a minimum of 3 hours. Modify itineraries, make unplanned stops, and hold meetings with absolute discretion.
                 </p>
-                <ul class="space-y-3 text-xs uppercase tracking-wider text-gray-300 font-semibold">
+                <ul class="space-y-3 text-xs uppercase tracking-wider text-theme-text/80 font-semibold">
                     <li class="flex items-center space-x-3"><i class="fas fa-check text-luxe-gold"></i> <span>Minimum 3-Hour Executive Flex Booking</span></li>
                     <li class="flex items-center space-x-3"><i class="fas fa-check text-luxe-gold"></i> <span>Unlimited Stops and Direct Chauffeur Access</span></li>
                     <li class="flex items-center space-x-3"><i class="fas fa-check text-luxe-gold"></i> <span>Complete Security Vetted Route Logistics</span></li>
@@ -78,7 +78,7 @@
                     <a href="{% site_url 'hourly_service' %}" class="gold-btn px-6 py-3 rounded-full text-xs uppercase tracking-widest font-semibold shadow-lg">
                         Learn Hourly Details
                     </a>
-                    <a href="{% site_url 'booking_step1' %}" class="text-xs font-semibold tracking-wider uppercase text-white hover:text-luxe-gold transition-colors">
+                    <a href="{% site_url 'booking_step1' %}" class="text-xs font-semibold tracking-wider uppercase text-theme-text hover:text-luxe-gold transition-colors">
                         Book Hourly Now
                     </a>
                 </div>
@@ -96,11 +96,11 @@
                 <div class="w-12 h-12 bg-luxe-gold/10 rounded-xl flex items-center justify-center border border-luxe-gold/20">
                     <i class="fas fa-route text-luxe-gold text-lg"></i>
                 </div>
-                <h2 class="text-2xl sm:text-3xl font-bold font-display text-white">Point-to-Point Transfers</h2>
-                <p class="text-gray-400 text-sm leading-relaxed font-light">
+                <h2 class="text-2xl sm:text-3xl font-bold font-display text-theme-text">Point-to-Point Transfers</h2>
+                <p class="text-theme-text/70 text-sm leading-relaxed font-light">
                     Direct premium transit between any two specific addresses. Enjoy complete comfort and security inside our elite cabins while our security chauffeur drives you safely to your exact destination. Fully customizable with multiple intermediate stops.
                 </p>
-                <ul class="space-y-3 text-xs uppercase tracking-wider text-gray-300 font-semibold">
+                <ul class="space-y-3 text-xs uppercase tracking-wider text-theme-text/80 font-semibold">
                     <li class="flex items-center space-x-3"><i class="fas fa-check text-luxe-gold"></i> <span>Flat Rate Starting Base Pricing</span></li>
                     <li class="flex items-center space-x-3"><i class="fas fa-check text-luxe-gold"></i> <span>Add Intermediate Stops for $20.00 Each</span></li>
                     <li class="flex items-center space-x-3"><i class="fas fa-check text-luxe-gold"></i> <span>Round-Trip Booking Configurations</span></li>
@@ -126,11 +126,11 @@
                 <div class="w-12 h-12 bg-luxe-gold/10 rounded-xl flex items-center justify-center border border-luxe-gold/20">
                     <i class="fas fa-car text-luxe-gold text-lg"></i>
                 </div>
-                <h2 class="text-2xl sm:text-3xl font-bold font-display text-white">Luxury Car Rental</h2>
-                <p class="text-gray-400 text-sm leading-relaxed font-light">
+                <h2 class="text-2xl sm:text-3xl font-bold font-display text-theme-text">Luxury Car Rental</h2>
+                <p class="text-theme-text/70 text-sm leading-relaxed font-light">
                     Rent elite, top-tier luxury vehicles for your business trip or holiday in the Dominican Republic. Select from our premium fleet of SUVs, luxury sedans, and high-performance sports cars. Experience premium driving freedom at your own pace.
                 </p>
-                <ul class="space-y-3 text-xs uppercase tracking-wider text-gray-300 font-semibold">
+                <ul class="space-y-3 text-xs uppercase tracking-wider text-theme-text/80 font-semibold">
                     <li class="flex items-center space-x-3"><i class="fas fa-check text-luxe-gold"></i> <span>Premium Fleet of Vetted Luxury Vehicles</span></li>
                     <li class="flex items-center space-x-3"><i class="fas fa-check text-luxe-gold"></i> <span>Optional Chauffeur/Driver Add-on Availability</span></li>
                     <li class="flex items-center space-x-3"><i class="fas fa-check text-luxe-gold"></i> <span>Flexible Pick-up and Drop-off Points</span></li>
@@ -140,7 +140,7 @@
                     <a href="{% site_url 'luxury_rental' %}" class="gold-btn px-6 py-3 rounded-full text-xs uppercase tracking-widest font-semibold shadow-lg">
                         Learn Rental Details
                     </a>
-                    <a href="{% site_url 'booking_step1' %}?service_type=luxury_rental" class="text-xs font-semibold tracking-wider uppercase text-white hover:text-luxe-gold transition-colors">
+                    <a href="{% site_url 'booking_step1' %}?service_type=luxury_rental" class="text-xs font-semibold tracking-wider uppercase text-theme-text hover:text-luxe-gold transition-colors">
                         Book Rental Now
                     </a>
                 </div>
@@ -157,16 +157,16 @@
 </section>
 
 <!-- VIP Add-Ons & Elite Enhancements Section -->
-<section class="py-24 bg-luxe-dark-grey border-t border-luxe-gold/10">
+<section class="py-24 bg-theme-card border-t border-luxe-gold/10">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <!-- Section Header -->
         <div class="text-center max-w-3xl mx-auto mb-16 space-y-4">
             <span class="text-xs uppercase font-bold tracking-widest text-luxe-gold">Elite Customizations</span>
-            <h2 class="text-3xl sm:text-4xl font-extrabold font-display tracking-tight text-white">
+            <h2 class="text-3xl sm:text-4xl font-extrabold font-display tracking-tight text-theme-text">
                 VIP Travel Enhancements
             </h2>
             <div class="w-20 h-1 bg-luxe-gold mx-auto rounded-full"></div>
-            <p class="text-gray-400 text-sm font-light leading-relaxed">
+            <p class="text-theme-text/70 text-sm font-light leading-relaxed">
                 Elevate your travel experience with our premium catalogue of dedicated airport and custom tour add-ons. Available at instant booking.
             </p>
         </div>
@@ -183,14 +183,14 @@
                     <div class="w-10 h-10 bg-luxe-gold/10 rounded-lg flex items-center justify-center mb-4">
                         <i class="{% if addon.icon %}{{ addon.icon }}{% else %}fas fa-star{% endif %} text-luxe-gold text-sm"></i>
                     </div>
-                    <h3 class="text-sm font-bold uppercase tracking-wider text-white mb-2">{{ addon.name }}</h3>
-                    <p class="text-xs text-gray-400 leading-relaxed mb-6 font-light">
+                    <h3 class="text-sm font-bold uppercase tracking-wider text-theme-text mb-2">{{ addon.name }}</h3>
+                    <p class="text-xs text-theme-text/70 leading-relaxed mb-6 font-light">
                         {{ addon.description|default:"Exclusive enhancement designed to maximize convenience and security during your transfer." }}
                     </p>
                 </div>
                 
-                <div class="border-t border-gray-800 pt-4 flex items-center justify-between">
-                    <span class="text-[10px] uppercase text-gray-500 font-bold tracking-wider">Premium Flat Fee</span>
+                <div class="border-t border-theme-border pt-4 flex items-center justify-between">
+                    <span class="text-[10px] uppercase text-theme-text/60 font-bold tracking-wider">Premium Flat Fee</span>
                     <span class="text-sm font-extrabold text-luxe-gold font-display">{{ addon.price|currency }}</span>
                 </div>
             </div>
@@ -202,13 +202,13 @@
                     <div class="w-10 h-10 bg-luxe-gold/10 rounded-lg flex items-center justify-center mb-4">
                         <i class="fas fa-bolt text-luxe-gold text-sm"></i>
                     </div>
-                    <h3 class="text-sm font-bold uppercase tracking-wider text-white mb-2">Fast-track VIP</h3>
-                    <p class="text-xs text-gray-400 leading-relaxed mb-6 font-light">
+                    <h3 class="text-sm font-bold uppercase tracking-wider text-theme-text mb-2">Fast-track VIP</h3>
+                    <p class="text-xs text-theme-text/70 leading-relaxed mb-6 font-light">
                         Skip lengthy customs queues. A certified airport liaison escorts you directly through priority passport lanes.
                     </p>
                 </div>
-                <div class="border-t border-gray-800 pt-4 flex items-center justify-between">
-                    <span class="text-[10px] uppercase text-gray-500 font-bold tracking-wider">Flat Fee</span>
+                <div class="border-t border-theme-border pt-4 flex items-center justify-between">
+                    <span class="text-[10px] uppercase text-theme-text/60 font-bold tracking-wider">Flat Fee</span>
                     <span class="text-sm font-extrabold text-luxe-gold font-display">$45.00</span>
                 </div>
             </div>
@@ -219,13 +219,13 @@
                     <div class="w-10 h-10 bg-luxe-gold/10 rounded-lg flex items-center justify-center mb-4">
                         <i class="fas fa-user-tie text-luxe-gold text-sm"></i>
                     </div>
-                    <h3 class="text-sm font-bold uppercase tracking-wider text-white mb-2">Concierge Assistant</h3>
-                    <p class="text-xs text-gray-400 leading-relaxed mb-6 font-light">
+                    <h3 class="text-sm font-bold uppercase tracking-wider text-theme-text mb-2">Concierge Assistant</h3>
+                    <p class="text-xs text-theme-text/70 leading-relaxed mb-6 font-light">
                         Personal assistant handles hotel check-in details, restaurant reservations, and luggage porter coordination.
                     </p>
                 </div>
-                <div class="border-t border-gray-800 pt-4 flex items-center justify-between">
-                    <span class="text-[10px] uppercase text-gray-500 font-bold tracking-wider">Flat Fee</span>
+                <div class="border-t border-theme-border pt-4 flex items-center justify-between">
+                    <span class="text-[10px] uppercase text-theme-text/60 font-bold tracking-wider">Flat Fee</span>
                     <span class="text-sm font-extrabold text-luxe-gold font-display">$35.00</span>
                 </div>
             </div>
@@ -236,13 +236,13 @@
                     <div class="w-10 h-10 bg-luxe-gold/10 rounded-lg flex items-center justify-center mb-4">
                         <i class="fas fa-shuffle text-luxe-gold text-sm"></i>
                     </div>
-                    <h3 class="text-sm font-bold uppercase tracking-wider text-white mb-2">Multi-stop Add-on</h3>
-                    <p class="text-xs text-gray-400 leading-relaxed mb-6 font-light">
+                    <h3 class="text-sm font-bold uppercase tracking-wider text-theme-text mb-2">Multi-stop Add-on</h3>
+                    <p class="text-xs text-theme-text/70 leading-relaxed mb-6 font-light">
                         Add a secondary destination stop to your single transfer route for grocery pick-ups or corporate drop-offs.
                     </p>
                 </div>
-                <div class="border-t border-gray-800 pt-4 flex items-center justify-between">
-                    <span class="text-[10px] uppercase text-gray-500 font-bold tracking-wider">Per stop</span>
+                <div class="border-t border-theme-border pt-4 flex items-center justify-between">
+                    <span class="text-[10px] uppercase text-theme-text/60 font-bold tracking-wider">Per stop</span>
                     <span class="text-sm font-extrabold text-luxe-gold font-display">$25.00</span>
                 </div>
             </div>
@@ -253,13 +253,13 @@
                     <div class="w-10 h-10 bg-luxe-gold/10 rounded-lg flex items-center justify-center mb-4">
                         <i class="fas fa-house-chimney text-luxe-gold text-sm"></i>
                     </div>
-                    <h3 class="text-sm font-bold uppercase tracking-wider text-white mb-2">Real Estate Tour</h3>
-                    <p class="text-xs text-gray-400 leading-relaxed mb-6 font-light">
+                    <h3 class="text-sm font-bold uppercase tracking-wider text-theme-text mb-2">Real Estate Tour</h3>
+                    <p class="text-xs text-theme-text/70 leading-relaxed mb-6 font-light">
                         Explore local ultra-luxury properties with a chauffeur trained in route guides for luxury real estate zones.
                     </p>
                 </div>
-                <div class="border-t border-gray-800 pt-4 flex items-center justify-between">
-                    <span class="text-[10px] uppercase text-gray-500 font-bold tracking-wider">Hourly rate</span>
+                <div class="border-t border-theme-border pt-4 flex items-center justify-between">
+                    <span class="text-[10px] uppercase text-theme-text/60 font-bold tracking-wider">Hourly rate</span>
                     <span class="text-sm font-extrabold text-luxe-gold font-display">$150.00</span>
                 </div>
             </div>

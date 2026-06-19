@@ -6,24 +6,24 @@
 
 {% block content %}
 <!-- Banner Section -->
-<section class="relative py-24 bg-luxe-dark-grey overflow-hidden border-b border-luxe-gold/10">
+<section class="relative py-24 bg-theme-card overflow-hidden border-b border-luxe-gold/10">
     <div class="absolute inset-0 z-0">
-        <div class="absolute inset-0 bg-gradient-to-r from-luxe-black via-black/90 to-transparent z-10"></div>
+        <div class="absolute inset-0 bg-gradient-to-r from-theme-bg via-theme-bg/90 to-transparent z-10"></div>
         <img src="https://images.unsplash.com/photo-1494976388531-d10580905c35?auto=format&fit=crop&q=80&w=1200" alt="Hourly Chauffeur Service" class="w-full h-full object-cover object-center opacity-40">
     </div>
     <div class="relative z-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <span class="text-xs uppercase font-bold tracking-widest text-luxe-gold">As-Directed Logistics</span>
-        <h1 class="text-4xl sm:text-5xl font-extrabold font-display text-white mt-3">
+        <h1 class="text-4xl sm:text-5xl font-extrabold font-display text-theme-text mt-3">
             Dedicated Hourly <span class="gold-gradient-text">Chauffeur</span>
         </h1>
-        <p class="text-gray-400 text-sm max-w-xl mt-4 leading-relaxed font-light">
+        <p class="text-theme-text/70 text-sm max-w-xl mt-4 leading-relaxed font-light">
             Enjoy total corporate flexibility. Secure a premium vehicle and elite driver dedicated entirely to your schedule. Min {{ hourly_min|default:3 }} hours.
         </p>
     </div>
 </section>
 
 <!-- Detailed Hourly breakdown -->
-<section class="py-24 bg-luxe-black">
+<section class="py-24 bg-theme-bg">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-16 items-start">
             
@@ -31,8 +31,8 @@
             <div class="lg:col-span-8 space-y-12">
                 <!-- Overview Copy -->
                 <div class="space-y-6">
-                    <h2 class="text-2xl font-bold font-display text-white border-b border-gray-800 pb-4">As-Directed Freedom</h2>
-                    <p class="text-gray-300 font-light leading-relaxed text-sm">
+                    <h2 class="text-2xl font-bold font-display text-theme-text border-b border-theme-border pb-4">As-Directed Freedom</h2>
+                    <p class="text-theme-text/80 font-light leading-relaxed text-sm">
                         For executive schedules that are constantly changing. Our Hourly Chauffeur (As-Directed) service ensures your professional driver is parked terminal-side or outside your office door, ready to roll at a moment's notice.
                     </p>
                     
@@ -42,8 +42,8 @@
                                 <i class="fas fa-route text-luxe-gold"></i>
                             </div>
                             <div>
-                                <h3 class="text-sm font-bold uppercase tracking-wider text-white mb-2">Unlimited Route Stops</h3>
-                                <p class="text-xs text-gray-400 leading-relaxed font-light">
+                                <h3 class="text-sm font-bold uppercase tracking-wider text-theme-text mb-2">Unlimited Route Stops</h3>
+                                <p class="text-xs text-theme-text/70 leading-relaxed font-light">
                                     Direct the driver to any destination, add stops on the go, or make spontaneous detours without needing to re-quote.
                                 </p>
                             </div>
@@ -54,8 +54,8 @@
                                 <i class="fas fa-briefcase text-luxe-gold"></i>
                             </div>
                             <div>
-                                <h3 class="text-sm font-bold uppercase tracking-wider text-white mb-2">Executive Discretion</h3>
-                                <p class="text-xs text-gray-400 leading-relaxed font-light">
+                                <h3 class="text-sm font-bold uppercase tracking-wider text-theme-text mb-2">Executive Discretion</h3>
+                                <p class="text-xs text-theme-text/70 leading-relaxed font-light">
                                     Chauffeurs sign strict non-disclosure pacts. Take calls and manage high-level corporate tasks with complete digital and vocal privacy.
                                 </p>
                             </div>
@@ -66,8 +66,8 @@
                                 <i class="fas fa-hourglass text-luxe-gold"></i>
                             </div>
                             <div>
-                                <h3 class="text-sm font-bold uppercase tracking-wider text-white mb-2">Min {{ hourly_min|default:3 }} Hours Booking</h3>
-                                <p class="text-xs text-gray-400 leading-relaxed font-light">
+                                <h3 class="text-sm font-bold uppercase tracking-wider text-theme-text mb-2">Min {{ hourly_min|default:3 }} Hours Booking</h3>
+                                <p class="text-xs text-theme-text/70 leading-relaxed font-light">
                                     Requires a base reservation of at least {{ hourly_min|default:3 }} hours to ensure complete driver dispatch block exclusivity.
                                 </p>
                             </div>
@@ -78,8 +78,8 @@
                                 <i class="fas fa-comment-sms text-luxe-gold"></i>
                             </div>
                             <div>
-                                <h3 class="text-sm font-bold uppercase tracking-wider text-white mb-2">Direct Driver WhatsApp</h3>
-                                <p class="text-xs text-gray-400 leading-relaxed font-light">
+                                <h3 class="text-sm font-bold uppercase tracking-wider text-theme-text mb-2">Direct Driver WhatsApp</h3>
+                                <p class="text-xs text-theme-text/70 leading-relaxed font-light">
                                     Once dispatched, receive your chauffeur's direct line details for immediate pickup coordinate adjustments.
                                 </p>
                             </div>
@@ -89,18 +89,18 @@
 
                 <!-- Hourly Pricing Details -->
                 <div class="glass-card rounded-2xl p-6 border border-luxe-gold/20 space-y-4">
-                    <h3 class="text-base font-bold font-display text-white uppercase tracking-wider">Transparent Hourly Rates</h3>
-                    <p class="text-xs text-gray-400 font-light leading-relaxed">
+                    <h3 class="text-base font-bold font-display text-theme-text uppercase tracking-wider">Transparent Hourly Rates</h3>
+                    <p class="text-xs text-theme-text/70 font-light leading-relaxed">
                         AeroLux Select values clarity. Our premium hourly rates are fixed depending on the selected vehicle class. No surge multipliers, no dynamic timing multipliers.
                     </p>
-                    <div class="flex items-center justify-around py-4 border-y border-gray-800 text-center">
+                    <div class="flex items-center justify-around py-4 border-y border-theme-border text-center">
                         <div>
-                            <span class="text-[9px] uppercase tracking-wider text-gray-500 font-bold">Standard Rates</span>
+                            <span class="text-[9px] uppercase tracking-wider text-theme-text/60 font-bold">Standard Rates</span>
                             <div class="text-xl font-extrabold text-luxe-gold font-display mt-1">${{ hourly_rate_min|default:"65.00" }} - ${{ hourly_rate_max|default:"90.00" }}/hr</div>
                         </div>
                         <div>
-                            <span class="text-[9px] uppercase tracking-wider text-gray-500 font-bold">Minimum Block</span>
-                            <div class="text-xl font-extrabold text-white font-display mt-1">{{ hourly_min|default:3 }} Hours</div>
+                            <span class="text-[9px] uppercase tracking-wider text-theme-text/60 font-bold">Minimum Block</span>
+                            <div class="text-xl font-extrabold text-theme-text font-display mt-1">{{ hourly_min|default:3 }} Hours</div>
                         </div>
                     </div>
                 </div>
@@ -114,8 +114,8 @@
                         <i class="fas fa-user-clock text-luxe-gold text-lg"></i>
                     </div>
                     <div class="space-y-2">
-                        <h3 class="text-lg font-bold font-display text-white uppercase tracking-wider">Book Hourly Ride</h3>
-                        <p class="text-xs text-gray-400 font-light leading-relaxed">
+                        <h3 class="text-lg font-bold font-display text-theme-text uppercase tracking-wider">Book Hourly Ride</h3>
+                        <p class="text-xs text-theme-text/70 font-light leading-relaxed">
                             Reserve your dedicated private vehicle and professional security chauffeur by the hour instantly.
                         </p>
                     </div>
