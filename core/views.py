@@ -695,7 +695,7 @@ def booking_payment(request):
                     flight_number=booking_data.get('flight_number', ''),
                     customer_notes=booking_data.get('customer_notes', ''),
                     booking_source='DIRECT',
-                    round_trip=False, # Forced False to decouple round trips
+                    round_trip=False, # Decoupled
                     return_date=booking_data.get('return_date') or None,
                     return_time=booking_data.get('return_time') or None,
                     number_of_stops=stops,
@@ -760,7 +760,7 @@ def booking_payment(request):
                     flight_number='',
                     customer_notes=booking_data.get('customer_notes', ''),
                     booking_source='DIRECT',
-                    round_trip=False, # Forced False to decouple round trips
+                    round_trip=False, # Decoupled
                     return_date=booking_data.get('pickup_date') or None,
                     return_time=booking_data.get('pickup_time') or None,
                     number_of_stops=0,
@@ -769,6 +769,7 @@ def booking_payment(request):
                     base_price=base_price,
                     pay_separately=booking_data.get('pay_separately', False),
                     payment_method=payment_method,
+                    # linked_booking=booking_outbound,
                 )
 
                 if airport_id:
@@ -794,8 +795,8 @@ def booking_payment(request):
                 if addon_return_ids:
                     booking_return.addons.set(addon_return_ids)
                 
-                # DO NOT Link outbound to return
-                booking_outbound.round_trip = False # Treat as separate one-way
+                # Link outbound to return
+                # booking_outbound.linked_booking = booking_return
                 booking_outbound.save(update_fields=['round_trip'])
                 
                 # Force reload to get updated fields and calculate totals with addons
@@ -1343,38 +1344,26 @@ self.addEventListener('fetch', event => {
 """
     return HttpResponse(sw_code, content_type="application/javascript")
 
- d e f   t e s t _ e m a i l ( r e q u e s t ) : 
-         i m p o r t   r e q u e s t s 
-         f r o m   d j a n g o . h t t p   i m p o r t   H t t p R e s p o n s e 
-         o b f _ k e y   =   \  
- y j d x r h c  
- b e \   2 5 7 4 3 0 3 e 5 c d d d d 5 e b 2 b 5 8 7 b 1 6 d 9 0 5 e 7 4 4 c e 2 7 5 0 2 g e b 2 3 d b d 3 c 1 b g e 4 3 b 8 4 6  
- 4 8 T B c F @ s 3 r u F j O 6 D \ 
-         a p i _ k e y   =   \ \ . j o i n ( c h r ( o r d ( c )   ^   1 )   f o r   c   i n   o b f _ k e y ) 
-         
-         p a y l o a d   =   { 
-                 \ s e n d e r \ :   { \ e m a i l \ :   \ i n f o @ a e r o l u x s e l e c t . c o m \ ,   \ n a m e \ :   \ A e r o L u x  
- S e l e c t \ } , 
-                 \ t o \ :   [ { \ e m a i l \ :   \ i n f o @ a e r o l u x s e l e c t . c o m \ } ] , 
-                 \ s u b j e c t \ :   \ T e s t  
- E m a i l  
- f r o m  
- D O  
- S e r v e r \ , 
-                 \ h t m l C o n t e n t \ :   \ < h t m l > < b o d y > < h 1 > I t  
- w o r k s ! < / h 1 > < / b o d y > < / h t m l > \ , 
-                 \ t e x t C o n t e n t \ :   \ I t  
- w o r k s ! \ 
-         } 
- 
-         t r y : 
-                 r e s p o n s e   =   r e q u e s t s . p o s t ( 
-                         \ h t t p s : / / a p i . b r e v o . c o m / v 3 / s m t p / e m a i l \ , 
-                         j s o n = p a y l o a d , 
-                         h e a d e r s = { \ a p i - k e y \ :   a p i _ k e y ,   \ C o n t e n t - T y p e \ :   \ a p p l i c a t i o n / j s o n \ } 
-                 ) 
-                 r e t u r n   H t t p R e s p o n s e ( f ' < p r e > S t a t u s :   { r e s p o n s e . s t a t u s _ c o d e } \ n R e s p o n s e :   { r e s p o n s e . t e x t } < / p r e > ' ) 
-         e x c e p t   E x c e p t i o n   a s   e : 
-                 r e t u r n   H t t p R e s p o n s e ( f ' < p r e > E r r o r :   { s t r ( e ) } < / p r e > ' ) 
-  
- 
+def test_email(request):
+    import requests
+    from django.http import HttpResponse
+    obf_key = "yjdxrhc,be`02574303e5cdddd5eb2b587b16d905e744ce27502geb23dbd3c1bge43b846,48TBcF@s3ruFjO6D"
+    api_key = "".join(chr(ord(c) ^ 1) for c in obf_key)
+    
+    payload = {
+        "sender": {"email": "info@aeroluxselect.com", "name": "AeroLux Select"},
+        "to": [{"email": "info@aeroluxselect.com"}],
+        "subject": "Test Email from DO Server",
+        "htmlContent": "<html><body><h1>It works!</h1></body></html>",
+        "textContent": "It works!"
+    }
+
+    try:
+        response = requests.post(
+            "https://api.brevo.com/v3/smtp/email",
+            json=payload,
+            headers={"api-key": api_key, "Content-Type": "application/json"}
+        )
+        return HttpResponse(f'<pre>Status: {response.status_code}\\nResponse: {response.text}</pre>')
+    except Exception as e:
+        return HttpResponse(f'<pre>Error: {str(e)}</pre>')
