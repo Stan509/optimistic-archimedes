@@ -6,7 +6,7 @@
 
 {% block content %}
 <!-- Banner Section -->
-<section class="relative py-24 bg-theme-card overflow-hidden border-b border-luxe-gold/10">
+<section data-aos="fade-up"  class="relative py-24 bg-theme-card overflow-hidden border-b border-luxe-gold/10">
     <div class="absolute inset-0 z-0">
         <div class="absolute inset-0 bg-gradient-to-r from-black via-black/90 to-transparent z-10"></div>
         <img src="https://images.unsplash.com/photo-1436491865332-7a61a109cc05?auto=format&fit=crop&q=80&w=1200" alt="VIP Airport Transfer" class="w-full h-full object-cover object-center opacity-40">
@@ -23,7 +23,7 @@
 </section>
 
 <!-- Detailed Airport Transfers Breakdown -->
-<section class="py-24 bg-theme-bg">
+<section data-aos="fade-up"  class="py-24 bg-theme-bg">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-16 items-start">
             
@@ -92,7 +92,7 @@
                     <h2 class="text-2xl font-bold font-display text-theme-text border-b border-theme-border pb-4">Serviced Airports in this Hub</h2>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {% for airport in airports %}
-                        <div class="glass-card p-4 rounded-xl flex items-center justify-between hover:border-luxe-gold/20 transition-all duration-300">
+                        <div data-aos="fade-up" data-aos-delay="100"  class="glass-card p-4 rounded-xl flex items-center justify-between hover:border-luxe-gold/20 transition-all duration-300">
                             <div class="flex items-center space-x-3">
                                 <div class="w-10 h-10 bg-luxe-gold/10 border border-luxe-gold/25 rounded flex items-center justify-center text-sm font-extrabold text-luxe-gold tracking-widest font-display">
                                     {{ airport.code }}
@@ -113,7 +113,7 @@
 
             <!-- Right CTA Booking Card -->
             <div class="lg:col-span-4 sticky top-24">
-                <div class="glass-card rounded-2xl p-6 relative overflow-hidden shadow-xl text-center space-y-6">
+                <div data-aos="fade-up" data-aos-delay="100"  class="glass-card rounded-2xl p-6 relative overflow-hidden shadow-xl text-center space-y-6">
                     <div class="absolute top-0 left-0 w-full h-1 bg-luxe-gold"></div>
                     <div class="w-14 h-14 bg-luxe-gold/10 rounded-full flex items-center justify-center mx-auto">
                         <i class="fas fa-ticket text-luxe-gold text-lg"></i>

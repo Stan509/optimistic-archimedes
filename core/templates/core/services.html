@@ -6,7 +6,7 @@
 
 {% block content %}
 <!-- Premium Header Banner -->
-<section class="relative py-20 bg-theme-card overflow-hidden border-b border-luxe-gold/10">
+<section data-aos="fade-up"  class="relative py-20 bg-theme-card overflow-hidden border-b border-luxe-gold/10">
     <div class="absolute inset-0 z-0">
         <div class="absolute inset-0 bg-gradient-to-r from-black via-black/80 to-transparent z-10"></div>
         <img src="https://images.unsplash.com/photo-1549399542-7e3f8b79c341?auto=format&fit=crop&q=80&w=1200" alt="VIP Chauffeur Services" class="w-full h-full object-cover object-center opacity-40">
@@ -23,7 +23,7 @@
 </section>
 
 <!-- Detailed Main Services Overview -->
-<section class="py-24 bg-theme-bg">
+<section data-aos="fade-up"  class="py-24 bg-theme-bg">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-24">
         
         <!-- Airport Transfer Service Details -->
@@ -52,7 +52,7 @@
                 </div>
             </div>
             <div class="lg:col-span-6">
-                <div class="glass-card rounded-2xl overflow-hidden shadow-2xl">
+                <div data-aos="fade-up" data-aos-delay="100"  class="glass-card rounded-2xl overflow-hidden shadow-2xl">
                     <img src="https://images.unsplash.com/photo-1436491865332-7a61a109cc05?auto=format&fit=crop&q=80&w=800" alt="VIP Airport Transfer" class="w-full h-80 object-cover">
                 </div>
             </div>
@@ -84,7 +84,7 @@
                 </div>
             </div>
             <div class="lg:col-span-6 lg:order-1">
-                <div class="glass-card rounded-2xl overflow-hidden shadow-2xl">
+                <div data-aos="fade-up" data-aos-delay="100"  class="glass-card rounded-2xl overflow-hidden shadow-2xl">
                     <img src="https://images.unsplash.com/photo-1494976388531-d10580905c35?auto=format&fit=crop&q=80&w=800" alt="Dedicated Hourly Chauffeur" class="w-full h-80 object-cover">
                 </div>
             </div>
@@ -113,7 +113,7 @@
                 </div>
             </div>
             <div class="lg:col-span-6">
-                <div class="glass-card rounded-2xl overflow-hidden shadow-2xl">
+                <div data-aos="fade-up" data-aos-delay="100"  class="glass-card rounded-2xl overflow-hidden shadow-2xl">
                     <img src="https://images.unsplash.com/photo-1549399542-7e3f8b79c341?auto=format&fit=crop&q=80&w=800" alt="Point-to-Point Transfer" class="w-full h-80 object-cover">
                 </div>
             </div>
@@ -146,7 +146,7 @@
                 </div>
             </div>
             <div class="lg:col-span-6 lg:order-1">
-                <div class="glass-card rounded-2xl overflow-hidden shadow-2xl">
+                <div data-aos="fade-up" data-aos-delay="100"  class="glass-card rounded-2xl overflow-hidden shadow-2xl">
                     <img src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&q=80&w=800" alt="Luxury Car Rental" class="w-full h-80 object-cover">
                 </div>
             </div>
@@ -157,7 +157,7 @@
 </section>
 
 <!-- VIP Add-Ons & Elite Enhancements Section -->
-<section class="py-24 bg-theme-card border-t border-luxe-gold/10">
+<section data-aos="fade-up"  class="py-24 bg-theme-card border-t border-luxe-gold/10">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <!-- Section Header -->
         <div class="text-center max-w-3xl mx-auto mb-16 space-y-4">
@@ -174,7 +174,7 @@
         <!-- Add-Ons Grid -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {% for addon in addons %}
-            <div class="glass-card rounded-2xl p-6 hover:border-luxe-gold/40 hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between relative overflow-hidden">
+            <div data-aos="fade-up" data-aos-delay="100"  class="glass-card rounded-2xl p-6 hover:border-luxe-gold/40 hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between relative overflow-hidden">
                 <div class="absolute top-0 right-0 w-16 h-16 bg-luxe-gold/5 rounded-bl-full flex items-center justify-center">
                     <i class="{% if addon.icon %}{{ addon.icon }}{% else %}fas fa-crown{% endif %} text-xs text-luxe-gold/30"></i>
                 </div>
@@ -197,7 +197,7 @@
             {% empty %}
             <!-- Static Fallbacks if DB has no active PremiumAddOns -->
             <!-- Fast-track VIP -->
-            <div class="glass-card rounded-2xl p-6 flex flex-col justify-between">
+            <div data-aos="fade-up" data-aos-delay="100"  class="glass-card rounded-2xl p-6 flex flex-col justify-between">
                 <div>
                     <div class="w-10 h-10 bg-luxe-gold/10 rounded-lg flex items-center justify-center mb-4">
                         <i class="fas fa-bolt text-luxe-gold text-sm"></i>
@@ -214,7 +214,7 @@
             </div>
 
             <!-- Concierge booking -->
-            <div class="glass-card rounded-2xl p-6 flex flex-col justify-between">
+            <div data-aos="fade-up" data-aos-delay="100"  class="glass-card rounded-2xl p-6 flex flex-col justify-between">
                 <div>
                     <div class="w-10 h-10 bg-luxe-gold/10 rounded-lg flex items-center justify-center mb-4">
                         <i class="fas fa-user-tie text-luxe-gold text-sm"></i>
@@ -231,7 +231,7 @@
             </div>
 
             <!-- Multi-stop -->
-            <div class="glass-card rounded-2xl p-6 flex flex-col justify-between">
+            <div data-aos="fade-up" data-aos-delay="100"  class="glass-card rounded-2xl p-6 flex flex-col justify-between">
                 <div>
                     <div class="w-10 h-10 bg-luxe-gold/10 rounded-lg flex items-center justify-center mb-4">
                         <i class="fas fa-shuffle text-luxe-gold text-sm"></i>
@@ -248,7 +248,7 @@
             </div>
 
             <!-- Real estate tour -->
-            <div class="glass-card rounded-2xl p-6 flex flex-col justify-between">
+            <div data-aos="fade-up" data-aos-delay="100"  class="glass-card rounded-2xl p-6 flex flex-col justify-between">
                 <div>
                     <div class="w-10 h-10 bg-luxe-gold/10 rounded-lg flex items-center justify-center mb-4">
                         <i class="fas fa-house-chimney text-luxe-gold text-sm"></i>

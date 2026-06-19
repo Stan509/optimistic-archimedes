@@ -20,6 +20,7 @@
     
     <!-- FontAwesome Icons CDN -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
     
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -130,9 +131,9 @@
             border-bottom: 1px solid var(--theme-border-dark);
         }
         .light .glass-nav {
-            background: rgba(255, 255, 255, 0.7);
+            background: #FFFFFF;
             border-bottom: 1px solid var(--theme-border-light);
-            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.02);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05);
         }
         .glass-card {
             backdrop-filter: blur(16px);
@@ -164,6 +165,15 @@
             font-weight: 600;
             transition: all 0.3s ease;
         }
+        .light .text-luxe-gold {
+            background: linear-gradient(135deg, #C9A84C 0%, #DFBA5B 50%, #C9A84C 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .light .bg-luxe-gold {
+            background: linear-gradient(135deg, #C9A84C 0%, #DFBA5B 50%, #C9A84C 100%) !important;
+            color: #0A0A0A !important;
+        }
         .gold-btn:hover {
             box-shadow: 0 0 20px rgba(223, 186, 91, 0.4);
             transform: translateY(-1px);
@@ -181,8 +191,15 @@
         .mobile-bottom-nav {
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
+            transition: all 0.3s ease;
+        }
+        .dark .mobile-bottom-nav {
             background: rgba(10, 10, 10, 0.92);
             border-top: 1px solid rgba(201, 168, 76, 0.15);
+        }
+        .light .mobile-bottom-nav {
+            background: rgba(255, 255, 255, 0.95);
+            border-top: 1px solid rgba(0, 31, 63, 0.2);
         }
         .mobile-bottom-nav a.active {
             color: var(--theme-primary);
@@ -277,11 +294,11 @@
     <!-- Premium Navigation Bar -->
     <header class="fixed top-0 left-0 right-0 z-50 glass-nav transition-all duration-300" id="main-header">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between h-32">
+            <div class="flex items-center justify-between h-28">
                 <!-- Brand Logo & Name — Bigger logo -->
                 <div class="flex-shrink-0 flex items-center">
                     <a href="{% site_url 'index' %}" class="flex items-center space-x-3 group pr-10">
-                        <img src="{% static 'core/images/logo.png' %}" alt="{{ current_site.name }}" class="h-28 w-auto object-cover md:h-32 py-1 transform scale-[1.8] origin-left">
+                        <img src="{% static 'core/images/logo.png' %}" alt="{{ current_site.name }}" class="h-24 w-auto object-cover md:h-28 py-1 transform scale-[1.5] origin-left">
                     </a>
                 </div>
 
@@ -346,7 +363,7 @@
         {% if messages %}
         <div class="max-w-7xl mx-auto px-4 mt-6">
             {% for message in messages %}
-            <div class="glass-card mb-4 border-l-4 {% if message.tags == 'success' %}border-green-500 bg-green-500/10 text-green-200{% elif message.tags == 'warning' %}border-amber-500 bg-amber-500/10 text-amber-200{% elif message.tags == 'error' %}border-red-500 bg-red-500/10 text-red-200{% else %}border-luxe-gold bg-theme-card text-luxe-gold{% endif %} p-4 rounded-r-lg flex items-center justify-between" role="alert">
+            <div data-aos="fade-up" data-aos-delay="100"  class="glass-card mb-4 border-l-4 {% if message.tags == 'success' %}border-green-500 bg-green-500/10 text-green-200{% elif message.tags == 'warning' %}border-amber-500 bg-amber-500/10 text-amber-200{% elif message.tags == 'error' %}border-red-500 bg-red-500/10 text-red-200{% else %}border-luxe-gold bg-theme-card text-luxe-gold{% endif %} p-4 rounded-r-lg flex items-center justify-between" role="alert">
                 <div class="flex items-center space-x-3">
                     <i class="fas {% if message.tags == 'success' %}fa-circle-check{% elif message.tags == 'warning' %}fa-circle-exclamation{% else %}fa-circle-info{% endif %} text-lg"></i>
                     <p class="text-sm font-medium">{{ message }}</p>
@@ -569,5 +586,14 @@
         })();
     </script>
     {% block extra_js %}{% endblock %}
+    
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script>
+        AOS.init({
+            duration: 800,
+            once: true,
+            offset: 50
+        });
+    </script>
 </body>
 </html>

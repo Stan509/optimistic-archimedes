@@ -6,7 +6,7 @@
 
 {% block content %}
 <!-- Banner Section -->
-<section class="relative py-24 bg-theme-card overflow-hidden border-b border-luxe-gold/10">
+<section data-aos="fade-up"  class="relative py-24 bg-theme-card overflow-hidden border-b border-luxe-gold/10">
     <div class="absolute inset-0 z-0">
         <div class="absolute inset-0 bg-gradient-to-r from-black via-black/90 to-transparent z-10"></div>
         {% if category.image %}
@@ -30,7 +30,7 @@
 </section>
 
 <!-- Detail specs breakdown -->
-<section class="py-24 bg-theme-bg">
+<section data-aos="fade-up"  class="py-24 bg-theme-bg">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-16 items-start">
             
@@ -45,13 +45,13 @@
                     
                     {% if category.spline_scene_url %}
                     <!-- Live interactive Spline canvas -->
-                    <div class="w-full h-[400px] md:h-[500px] rounded-3xl overflow-hidden glass-card relative">
+                    <div data-aos="fade-up" data-aos-delay="100"  class="w-full h-[400px] md:h-[500px] rounded-3xl overflow-hidden glass-card relative">
                         <div class="absolute inset-0 bg-theme-bg/30 pointer-events-none z-10"></div>
                         <iframe src="{{ category.spline_scene_url }}" frameborder="0" width="100%" height="100%" class="absolute inset-0"></iframe>
                     </div>
                     {% else %}
                     <!-- Beautiful High-end Fallback Image layout -->
-                    <div class="w-full h-[400px] rounded-3xl overflow-hidden glass-card relative group">
+                    <div data-aos="fade-up" data-aos-delay="100"  class="w-full h-[400px] rounded-3xl overflow-hidden glass-card relative group">
                         <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent z-10"></div>
                         <img src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&q=80&w=1000" alt="Executive SUV Fallback" class="w-full h-full object-cover group-hover:scale-[1.01] transition-transform duration-700">
                         <div class="absolute bottom-6 left-6 z-20 space-y-1">
@@ -96,7 +96,7 @@
                     
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         {% for vehicle in vehicles %}
-                        <div class="glass-card rounded-xl overflow-hidden p-4 flex items-center space-x-4">
+                        <div data-aos="fade-up" data-aos-delay="100"  class="glass-card rounded-xl overflow-hidden p-4 flex items-center space-x-4">
                             <div class="w-20 h-20 bg-theme-card rounded-lg overflow-hidden flex-shrink-0">
                                 {% if vehicle.image %}
                                 <img src="{{ vehicle.image.url }}" alt="{{ vehicle.name }}" class="w-full h-full object-cover">
@@ -122,7 +122,7 @@
 
             <!-- Right booking CTA -->
             <div class="lg:col-span-4 sticky top-24">
-                <div class="glass-card rounded-2xl p-6 relative overflow-hidden shadow-xl text-center space-y-6">
+                <div data-aos="fade-up" data-aos-delay="100"  class="glass-card rounded-2xl p-6 relative overflow-hidden shadow-xl text-center space-y-6">
                     <div class="absolute top-0 left-0 w-full h-1 bg-luxe-gold"></div>
                     <span class="text-[9px] uppercase font-bold tracking-widest text-luxe-gold">Instant Dispatch</span>
                     <h3 class="text-lg font-bold font-display text-theme-text uppercase tracking-wider">Book {{ category.name }}</h3>

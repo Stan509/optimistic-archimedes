@@ -31,7 +31,7 @@
 </style>
 {% endblock %}
 {% block content %}
-<section class="py-16 bg-theme-bg min-h-[85vh]">
+<section data-aos="fade-up"  class="py-16 bg-theme-bg min-h-[85vh]">
     <div class="max-w-6xl mx-auto px-4 sm:px-6">
         
         <!-- Premium Multi-step Progress Indicator -->
@@ -48,7 +48,7 @@
             </div>
         </div>
         <!-- Central Form Card -->
-        <div class="glass-card rounded-3xl p-8 sm:p-10 shadow-2xl relative overflow-hidden">
+        <div data-aos="fade-up" data-aos-delay="100"  class="glass-card rounded-3xl p-8 sm:p-10 shadow-2xl relative overflow-hidden">
             <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-luxe-gold to-luxe-gold-bright"></div>
             
             <div class="text-center space-y-2 mb-10">
@@ -159,7 +159,7 @@
                 <!-- Custom Pickup / Drop-off Addresses as interactive cards (shown for hourly/point-to-point) -->
                 <div id="div-custom-addresses" class="hidden grid grid-cols-1 md:grid-cols-2 gap-6">
                     <!-- Starting Location Card -->
-                    <div class="glass-card rounded-2xl p-5 border border-theme-border hover:border-luxe-gold/50 transition-all duration-500 flex flex-col space-y-4 group">
+                    <div data-aos="fade-up" data-aos-delay="100"  class="glass-card rounded-2xl p-5 border border-theme-border hover:border-luxe-gold/50 transition-all duration-500 flex flex-col space-y-4 group">
                         <div class="flex items-center justify-between">
                             <label for="pickup_address" class="block text-xs uppercase tracking-widest font-bold text-theme-text/90">Pickup Location (Depart)</label>
                             <span class="text-luxe-gold animate-pulse text-xs"><i class="fas fa-circle-dot"></i></span>
@@ -195,7 +195,7 @@
                         </div>
                     </div>
                     <!-- Destination Location Card -->
-                    <div id="div-dropoff-location" class="glass-card rounded-2xl p-5 border border-theme-border hover:border-luxe-gold/50 transition-all duration-500 flex flex-col space-y-4 group">
+                    <div data-aos="fade-up" data-aos-delay="100"  id="div-dropoff-location" class="glass-card rounded-2xl p-5 border border-theme-border hover:border-luxe-gold/50 transition-all duration-500 flex flex-col space-y-4 group">
                         <div class="flex items-center justify-between">
                             <label for="dropoff_address" class="block text-xs uppercase tracking-widest font-bold text-theme-text/90">Destination Location (Arrival)</label>
                             <span class="text-luxe-gold animate-pulse text-xs"><i class="fas fa-location-dot"></i></span>

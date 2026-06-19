@@ -6,7 +6,7 @@
 
 {% block content %}
 <!-- Banner Section -->
-<section class="relative py-24 bg-theme-card overflow-hidden border-b border-luxe-gold/10">
+<section data-aos="fade-up"  class="relative py-24 bg-theme-card overflow-hidden border-b border-luxe-gold/10">
     <div class="absolute inset-0 z-0">
         <div class="absolute inset-0 bg-gradient-to-r from-black via-black/90 to-transparent z-10"></div>
         <img src="https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&q=80&w=1200" alt="Executive SUV Chauffeur Fleet" class="w-full h-full object-cover object-center opacity-40">
@@ -23,13 +23,13 @@
 </section>
 
 <!-- Fleet Grid Section -->
-<section class="py-24 bg-theme-bg">
+<section data-aos="fade-up"  class="py-24 bg-theme-bg">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-16">
 
         <!-- Showcase of Categories -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {% for category in categories %}
-            <div class="glass-card rounded-2xl overflow-hidden hover:border-luxe-gold/30 transition-all duration-300 flex flex-col justify-between group">
+            <div data-aos="fade-up" data-aos-delay="100"  class="glass-card rounded-2xl overflow-hidden hover:border-luxe-gold/30 transition-all duration-300 flex flex-col justify-between group">
                 <!-- Category Photo -->
                 <div class="relative h-64 bg-theme-card overflow-hidden">
                     {% if category.image %}
@@ -94,7 +94,7 @@
                 </div>
             </div>
             {% empty %}
-            <div class="text-center py-12 glass-card rounded-2xl col-span-full">
+            <div data-aos="fade-up" data-aos-delay="100"  class="text-center py-12 glass-card rounded-2xl col-span-full">
                 <i class="fas fa-car text-gray-600 text-3xl mb-4"></i>
                 <p class="text-sm text-theme-text/90 italic">No luxury categories configured yet.</p>
             </div>
