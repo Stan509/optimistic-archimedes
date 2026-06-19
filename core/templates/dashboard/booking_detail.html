@@ -164,7 +164,7 @@
                     </span>
                 </div>
 
-                {% if booking.service_type == 'AIRPORT_TRANSFER' %}
+                {% if booking.airport or booking.service_type == 'AIRPORT_TRANSFER' or booking.service_type == 'airport_transfer' %}
                 <div>
                     <span class="block text-xs text-luxury-muted uppercase tracking-wider">Origin Airport</span>
                     <span class="block font-semibold text-white mt-1">
@@ -185,6 +185,8 @@
                         {% endif %}
                     </span>
                 </div>
+                {% endif %}
+                <!-- Pickup & Dropoff addresses visible for ALL booking types -->
                 <div class="sm:col-span-2">
                     <span class="block text-xs text-luxury-muted uppercase tracking-wider">Full Route Addresses</span>
                     <div class="mt-2 space-y-2 text-xs">
@@ -194,7 +196,7 @@
                                 {% if booking.pickup_address %}
                                     {{ booking.pickup_address }}
                                 {% elif booking.airport %}
-                                    {{ booking.airport.name }}
+                                    {{ booking.airport.name }} ({{ booking.airport.code }})
                                 {% else %}
                                     N/A
                                 {% endif %}
@@ -214,7 +216,6 @@
                         </div>
                     </div>
                 </div>
-                {% endif %}
 
                 {% if booking.service_type == 'HOURLY' %}
                 <div>
@@ -654,10 +655,7 @@ ${bold}Return Meeting Point:${bold} ${booking.returnLocation}`;
     {% endif %}
 
     details += `\n${bold}Vehicle:${bold} ${booking.vehicle}
-${bold}VIP Add-ons:${bold} ${booking.addons}
-${bold}Total Price:${bold} ${{ booking.total_price|floatformat:2 }}
-${bold}Amount Paid:${bold} ${{ booking.amount_paid|floatformat:2 }}
-${bold}Balance:${bold} ${{ balance|floatformat:2 }}`;
+${bold}VIP Add-ons:${bold} ${booking.addons}`;
 
     return details;
 }

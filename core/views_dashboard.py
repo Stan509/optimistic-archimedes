@@ -330,15 +330,22 @@ def update_booking_status(request, booking_id, new_status):
 
         messages.success(request, f'Booking #{booking.booking_reference} updated to {new_status}.')
         
-        # Trigger dynamic emails on confirmation or cancellation
+        # Trigger notifications (email + WhatsApp) on status change
         try:
             from core.emails import send_booking_email
-            if new_status == 'CONFIRMED':
-                send_booking_email(booking, 'confirmed')
-            elif new_status == 'CANCELLED':
-                send_booking_email(booking, 'cancelled')
-        except Exception as email_err:
-            print(f"Error triggering dashboard status email: {str(email_err)}")
+            from core.whatsapp import send_whatsapp
+
+            status_map = {
+                'CONFIRMED': 'confirmed',
+                'COMPLETED': 'completed',
+                'CANCELLED': 'cancelled',
+            }
+            notify_type = status_map.get(new_status)
+            if notify_type:
+                send_booking_email(booking, notify_type)
+                send_whatsapp(booking, notify_type)
+        except Exception as e:
+            print(f"Error triggering dashboard status notification: {str(e)}")
 
     return redirect('dashboard:bookings')
 
