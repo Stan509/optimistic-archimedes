@@ -273,7 +273,7 @@
                                     <span class="absolute inset-y-0 left-0 booking-icon pl-2 sm:pl-4 flex items-center text-luxe-gold">
                                         <i class="fas fa-plane-departure text-[9px] sm:text-sm" id="icon-transfer-start"></i>
                                     </span>
-                                    <select name="airport_id" id="airport_id" class="booking-select block w-full pl-6 sm:pl-11 pr-5 sm:pr-10 py-1.5 sm:py-3.5 bg-theme-bg/80 rounded-xl border border-theme-border focus:border-luxe-gold text-[10px] sm:text-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-luxe-gold appearance-none">
+                                    <select name="airport_id" id="airport_id" required class="booking-select block w-full pl-6 sm:pl-11 pr-5 sm:pr-10 py-1.5 sm:py-3.5 bg-theme-bg/80 rounded-xl border border-theme-border focus:border-luxe-gold text-[10px] sm:text-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-luxe-gold appearance-none">
                                         <option value="" disabled selected>Select Airport...</option>
                                         {% for airport in airports %}
                                         <option value="{{ airport.id }}" data-lat="{{ airport.latitude }}" data-lng="{{ airport.longitude }}">{{ airport.code }} — {{ airport.name }}</option>
@@ -297,7 +297,7 @@
                                     <span class="absolute inset-y-0 left-0 booking-icon pl-2 sm:pl-4 flex items-center text-luxe-gold">
                                         <i class="fas fa-map-pin text-[9px] sm:text-sm" id="icon-transfer-end"></i>
                                     </span>
-                                    <input type="text" name="destination_address" id="destination_address" placeholder="Enter address..." class="booking-input block w-full pl-6 sm:pl-11 pr-2 sm:pr-4 py-1.5 sm:py-3.5 bg-theme-bg/80 rounded-xl border border-theme-border focus:border-luxe-gold text-[10px] sm:text-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-luxe-gold font-medium" autocomplete="off">
+                                    <input type="text" name="destination_address" id="destination_address" required placeholder="Enter address..." class="booking-input block w-full pl-6 sm:pl-11 pr-2 sm:pr-4 py-1.5 sm:py-3.5 bg-theme-bg/80 rounded-xl border border-theme-border focus:border-luxe-gold text-[10px] sm:text-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-luxe-gold font-medium" autocomplete="off">
                                 </div>
                                 <p id="geocode-status" class="text-[9px] sm:text-[10px] text-theme-text/95 mt-1 font-medium hidden">
                                     <i class="fas fa-map-marker-alt text-luxe-gold mr-1"></i>
@@ -1094,8 +1094,234 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="{% static 'core/js/booking-leaflet.js' %}"></script>
 <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        // Switch Direction Logic
+      document.addEventListener('DOMContentLoaded', () => {
+        const radTransfer = document.getElementById('rad-transfer');
+        const radHourly = document.getElementById('rad-hourly');
+        const radP2P = document.getElementById('rad-p2p');
+        const radRental = null;
+        const lblRental = null;
+        const iconRental = null;
+        const spanRental = null;
+        const lblTransfer = document.getElementById('lbl-transfer');
+        const lblHourly = document.getElementById('lbl-hourly');
+        const lblP2P = document.getElementById('lbl-p2p');
+        const iconTransfer = document.getElementById('icon-transfer');
+        const iconHourly = document.getElementById('icon-hourly');
+        const iconP2P = document.getElementById('icon-p2p');
+        const spanTransfer = document.getElementById('span-transfer');
+        const spanHourly = document.getElementById('span-hourly');
+        const spanP2P = document.getElementById('span-p2p');
+        const divAirportTransferWrapper = document.getElementById('div-airport-transfer-wrapper');
+        const divHourly = document.getElementById('div-hourly');
+        const divFlight = document.getElementById('div-flight');
+        const divCustomAddresses = document.getElementById('div-custom-addresses');
+        const divDropoffLocation = document.getElementById('div-dropoff-location');
+        const divStopsSection = document.getElementById('div-stops-section');
+        const divStopsCountWrapper = document.getElementById('div-stops-count-wrapper');
+        const divRoundTrip = document.getElementById('div-round-trip');
+        const divReturnFields = document.getElementById('div-return-fields');
+        const airportSelect = document.getElementById('airport_id');
+        const destinationAddress = document.getElementById('destination_address');
+        const pickupAddress = document.getElementById('pickup_address');
+        const dropoffAddress = document.getElementById('dropoff_address');
+        const roundTripCheckbox = document.getElementById('round_trip');
+        const returnDateInput = document.getElementById('return_date');
+        const returnTimeInput = document.getElementById('return_time');
+        const submitBtn = document.getElementById('submit-btn');
+        const geocodeStatus = document.getElementById('geocode-status');
+        const geocodeStatusText = document.getElementById('geocode-status-text');
+        function checkValidation() {
+            let isValid = false;
+            if (radTransfer.checked) {
+                if (airportSelect.value && destinationAddress.value.trim() !== '') {
+                    isValid = true;
+                }
+            } else if (radHourly.checked) {
+                if (pickupAddress.value.trim() !== '') {
+                    isValid = true;
+                }
+            } else if (radP2P.checked) {
+                if (pickupAddress.value.trim() !== '' && dropoffAddress.value.trim() !== '') {
+                    isValid = true;
+                }
+            } else if (radRental && radRental.checked) {
+                if (pickupAddress.value.trim() !== '' && dropoffAddress.value.trim() !== '') {
+                    isValid = true;
+                }
+            }
+            if (isValid && roundTripCheckbox.checked && !radHourly.checked) {
+                if (!returnDateInput.value || !returnTimeInput.value) {
+                    isValid = false;
+                }
+            }
+            if (isValid) {
+                submitBtn.disabled = false;
+                submitBtn.classList.remove('opacity-60', 'cursor-not-allowed');
+                submitBtn.classList.add('hover:scale-[1.01]', 'cursor-pointer');
+            } else {
+                submitBtn.disabled = true;
+                submitBtn.classList.add('opacity-60', 'cursor-not-allowed');
+                submitBtn.classList.remove('hover:scale-[1.01]', 'cursor-pointer');
+            }
+        }
+        function updateServiceType() {
+            lblTransfer.className = "cursor-pointer text-center p-2 sm:p-4 rounded-xl text-[10px] sm:text-xs font-semibold uppercase tracking-wider transition-all duration-300 block select-none border border-transparent";
+            lblHourly.className = "cursor-pointer text-center p-2 sm:p-4 rounded-xl text-[10px] sm:text-xs font-semibold uppercase tracking-wider transition-all duration-300 block select-none border border-transparent";
+            lblP2P.className = "cursor-pointer text-center p-2 sm:p-4 rounded-xl text-[10px] sm:text-xs font-semibold uppercase tracking-wider transition-all duration-300 block select-none border border-transparent";
+            if (lblRental) {
+                lblRental.className = "cursor-pointer text-center p-2 sm:p-4 rounded-xl text-[10px] sm:text-xs font-semibold uppercase tracking-wider transition-all duration-300 block select-none border border-transparent";
+            }
+            iconTransfer.className = "fas fa-plane-departure text-sm sm:text-base text-luxe-gold mb-1 sm:mb-2 block";
+            iconHourly.className = "fas fa-clock text-sm sm:text-base text-theme-text/95 mb-1 sm:mb-2 block";
+            iconP2P.className = "fas fa-route text-sm sm:text-base text-theme-text/95 mb-1 sm:mb-2 block";
+            if (iconRental) {
+                iconRental.className = "fas fa-car text-sm sm:text-base text-theme-text/95 mb-1 sm:mb-2 block";
+            }
+            spanTransfer.className = "block text-theme-text/90";
+            spanHourly.className = "block text-theme-text/90";
+            spanP2P.className = "block text-theme-text/90";
+            if (spanRental) {
+                spanRental.className = "block text-theme-text/90";
+            }
+            if (radTransfer.checked) {
+                lblTransfer.className = "cursor-pointer text-center p-2 sm:p-4 rounded-xl text-[10px] sm:text-xs font-semibold uppercase tracking-wider bg-luxe-gold/10 border border-luxe-gold/50 text-luxe-gold block select-none";
+                iconTransfer.className = "fas fa-plane-departure text-sm sm:text-base text-luxe-gold mb-1 sm:mb-2 block";
+                spanTransfer.className = "block text-theme-text";
+                divAirportTransferWrapper.classList.remove('hidden');
+                divFlight.classList.remove('hidden');
+                divHourly.classList.add('hidden');
+                divCustomAddresses.classList.add('hidden');
+                divStopsSection.classList.add('hidden');
+                divRoundTrip.classList.remove('hidden');
+                airportSelect.required = true;
+                pickupAddress.required = false;
+                dropoffAddress.required = false;
+            } 
+            else if (radP2P.checked) {
+                lblP2P.className = "cursor-pointer text-center p-2 sm:p-4 rounded-xl text-[10px] sm:text-xs font-semibold uppercase tracking-wider bg-luxe-gold/10 border border-luxe-gold/50 text-luxe-gold block select-none";
+                iconP2P.className = "fas fa-route text-sm sm:text-base text-luxe-gold mb-1 sm:mb-2 block";
+                spanP2P.className = "block text-theme-text";
+                divAirportTransferWrapper.classList.add('hidden');
+                divFlight.classList.add('hidden');
+                divHourly.classList.add('hidden');
+                divCustomAddresses.classList.remove('hidden');
+                divDropoffLocation.classList.remove('hidden');
+                divStopsSection.classList.remove('hidden');
+                divStopsCountWrapper.classList.remove('hidden');
+                divRoundTrip.classList.remove('hidden');
+                airportSelect.required = false;
+                pickupAddress.required = true;
+                dropoffAddress.required = true;
+            }
+            else if (radHourly.checked) {
+                lblHourly.className = "cursor-pointer text-center p-2 sm:p-4 rounded-xl text-[10px] sm:text-xs font-semibold uppercase tracking-wider bg-luxe-gold/10 border border-luxe-gold/50 text-luxe-gold block select-none";
+                iconHourly.className = "fas fa-clock text-sm sm:text-base text-luxe-gold mb-1 sm:mb-2 block";
+                spanHourly.className = "block text-theme-text";
+                divAirportTransferWrapper.classList.add('hidden');
+                divFlight.classList.add('hidden');
+                divHourly.classList.remove('hidden');
+                divCustomAddresses.classList.remove('hidden');
+                divDropoffLocation.classList.add('hidden');
+                divStopsSection.classList.remove('hidden');
+                divStopsCountWrapper.classList.add('hidden');
+                divRoundTrip.classList.add('hidden');
+                roundTripCheckbox.checked = false;
+                airportSelect.required = false;
+                pickupAddress.required = true;
+                dropoffAddress.required = false;
+            }
+            else if (radRental && radRental.checked) {
+                lblRental.className = "cursor-pointer text-center p-2 sm:p-4 rounded-xl text-[10px] sm:text-xs font-semibold uppercase tracking-wider bg-luxe-gold/10 border border-luxe-gold/50 text-luxe-gold block select-none";
+                iconRental.className = "fas fa-car text-sm sm:text-base text-luxe-gold mb-1 sm:mb-2 block";
+                spanRental.className = "block text-theme-text";
+                divAirportTransferWrapper.classList.add('hidden');
+                divFlight.classList.add('hidden');
+                divHourly.classList.add('hidden');
+                divCustomAddresses.classList.remove('hidden');
+                divDropoffLocation.classList.remove('hidden');
+                divStopsSection.classList.add('hidden');
+                divRoundTrip.classList.remove('hidden');
+                airportSelect.required = false;
+                pickupAddress.required = true;
+                dropoffAddress.required = true;
+            }
+            toggleRoundTripFields();
+            checkValidation();
+        }
+        function toggleRoundTripFields() {
+            const divReturnMeetingPoint = document.getElementById('div-return-meeting-point');
+            if (roundTripCheckbox.checked && !divRoundTrip.classList.contains('hidden')) {
+                divReturnFields.classList.remove('hidden');
+                if (divReturnMeetingPoint) divReturnMeetingPoint.classList.remove('hidden');
+                returnDateInput.required = true;
+                returnTimeInput.required = true;
+            } else {
+                divReturnFields.classList.add('hidden');
+                if (divReturnMeetingPoint) divReturnMeetingPoint.classList.add('hidden');
+                returnDateInput.required = false;
+                returnTimeInput.required = false;
+            }
+            checkValidation();
+        }
+        radTransfer.addEventListener('change', updateServiceType);
+        radHourly.addEventListener('change', updateServiceType);
+        radP2P.addEventListener('change', updateServiceType);
+        if (radRental) {
+            radRental.addEventListener('change', updateServiceType);
+        }
+        const toggleBg = document.getElementById('toggle-bg');
+        const toggleDot = document.getElementById('toggle-dot');
+        function syncRoundTripUI() {
+            if (!toggleBg || !toggleDot) return;
+            const toggleLabel = document.getElementById('toggle-label');
+            if (roundTripCheckbox.checked) {
+                toggleBg.classList.remove('bg-gray-300', 'border-gray-400');
+                toggleBg.classList.add('bg-luxe-gold', 'border-luxe-gold/50');
+                toggleDot.style.transform = 'translateX(22px)';
+                toggleDot.classList.remove('bg-white');
+                toggleDot.classList.add('bg-theme-bg');
+                if (toggleLabel) {
+                    toggleLabel.textContent = "ON";
+                    toggleLabel.classList.remove('text-theme-text/95');
+                    toggleLabel.classList.add('text-luxe-gold');
+                }
+            } else {
+                toggleBg.classList.remove('bg-luxe-gold', 'border-luxe-gold/50');
+                toggleBg.classList.add('bg-gray-300', 'border-gray-400');
+                toggleDot.style.transform = 'translateX(0px)';
+                toggleDot.classList.remove('bg-theme-bg');
+                toggleDot.classList.add('bg-white');
+                if (toggleLabel) {
+                    toggleLabel.textContent = "OFF";
+                    toggleLabel.classList.remove('text-luxe-gold');
+                    toggleLabel.classList.add('text-theme-text/95');
+                }
+            }
+        }
+        const roundTripRow = document.getElementById('div-round-trip-row');
+        if (roundTripRow) {
+            roundTripRow.addEventListener('click', (e) => {
+                if (e.target !== roundTripCheckbox) {
+                    roundTripCheckbox.checked = !roundTripCheckbox.checked;
+                    roundTripCheckbox.dispatchEvent(new Event('change'));
+                }
+            });
+        }
+        roundTripCheckbox.addEventListener('change', () => {
+            syncRoundTripUI();
+            toggleRoundTripFields();
+        });
+        syncRoundTripUI();
+        returnDateInput.addEventListener('change', checkValidation);
+        returnTimeInput.addEventListener('change', checkValidation);
+        destinationAddress.addEventListener('input', () => {
+            checkValidation();
+            const status = document.getElementById('geocode-status');
+            const statusText = document.getElementById('geocode-status-text');
+            if (status) status.classList.add('hidden');
+        });
+        pickupAddress.addEventListener('input', checkValidation);
+        dropoffAddress.addEventListener('input', checkValidation);
         const btnSwitchDirection = document.getElementById('btn-switch-direction');
         const transferDirectionInput = document.getElementById('transfer_direction');
         const lblTransferStart = document.getElementById('lbl-transfer-start');
@@ -1104,48 +1330,49 @@
         const iconTransferEnd = document.getElementById('icon-transfer-end');
         const startWrapper = document.getElementById('transfer-start-wrapper');
         const endWrapper = document.getElementById('transfer-end-wrapper');
-        const airportSelect = document.getElementById('airport_id');
-        const destinationAddress = document.getElementById('destination_address');
-
         if (btnSwitchDirection) {
             btnSwitchDirection.addEventListener('click', () => {
                 const currentDir = transferDirectionInput.value;
                 if (currentDir === 'AIRPORT_TO_DEST') {
-                    // Switch to: Pickup Address → Airport
                     transferDirectionInput.value = 'DEST_TO_AIRPORT';
-                    // Swap labels and icons
                     lblTransferStart.textContent = "Destination Airport";
                     lblTransferEnd.textContent = "Pickup Address";
-                    iconTransferStart.className = "fas fa-plane-arrival text-[9px] sm:text-sm";
-                    iconTransferEnd.className = "fas fa-map-pin text-[9px] sm:text-sm";
+                    iconTransferStart.className = "fas fa-plane-arrival text-sm";
+                    iconTransferEnd.className = "fas fa-map-pin text-sm";
                     destinationAddress.placeholder = "Enter your pickup address...";
+                    startWrapper.style.order = "3";
+                    endWrapper.style.order = "1";
                 } else {
-                    // Switch back to: Airport → Destination Address
                     transferDirectionInput.value = 'AIRPORT_TO_DEST';
-                    // Swap labels and icons back
                     lblTransferStart.textContent = "Origin Airport";
                     lblTransferEnd.textContent = "Drop-off Address";
-                    iconTransferStart.className = "fas fa-plane-departure text-[9px] sm:text-sm";
-                    iconTransferEnd.className = "fas fa-map-pin text-[9px] sm:text-sm";
+                    iconTransferStart.className = "fas fa-plane-departure text-sm";
+                    iconTransferEnd.className = "fas fa-map-pin text-sm";
                     destinationAddress.placeholder = "Enter your destination address...";
+                    startWrapper.style.order = "1";
+                    endWrapper.style.order = "3";
                 }
-                // Swap the actual field content between the two wrappers
-                const startContent = startWrapper.innerHTML;
-                const endContent = endWrapper.innerHTML;
-                startWrapper.innerHTML = endContent;
-                endWrapper.innerHTML = startContent;
-                // Re-select elements after swapping
-                const newAirportSelect = document.getElementById('airport_id');
-                const newDestinationAddress = document.getElementById('destination_address');
-                // Swap coordinate inputs values
                 const pLat = document.getElementById('pickup_lat').value;
                 const pLng = document.getElementById('pickup_lng').value;
                 document.getElementById('pickup_lat').value = document.getElementById('dropoff_lat').value;
                 document.getElementById('pickup_lng').value = document.getElementById('dropoff_lng').value;
                 document.getElementById('dropoff_lat').value = pLat;
                 document.getElementById('dropoff_lng').value = pLng;
+                checkValidation();
             });
         }
+        const urlParams = new URLSearchParams(window.location.search);
+        const serviceTypeParam = urlParams.get('service_type');
+        if (serviceTypeParam === 'luxury_rental' && radRental) {
+            radRental.checked = true;
+        } else if (serviceTypeParam === 'point_to_point') {
+            radP2P.checked = true;
+        } else if (serviceTypeParam === 'hourly') {
+            radHourly.checked = true;
+        } else if (serviceTypeParam === 'airport_transfer') {
+            radTransfer.checked = true;
+        }
+        updateServiceType();
     });
 </script>
 {% endblock %}
