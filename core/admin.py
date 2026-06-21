@@ -13,7 +13,6 @@ from core.models import (
     PricingRule,
     AirportCategoryPrice,
     VehicleCategory,
-    Vehicle,
     PremiumAddOn,
     Booking,
     SiteContent,
@@ -74,17 +73,6 @@ class AirportCategoryPriceInline(admin.TabularInline):
     fields = ('vehicle_category', 'base_price', 'base_km', 'price_per_km', 'is_active')
     show_change_link = True
 
-
-class VehicleInline(admin.TabularInline):
-    model = Vehicle
-    extra = 0
-    fields = ('name', 'model_year', 'price_multiplier', 'is_active')
-    show_change_link = True
-
-
-# ──────────────────────────────────────────────
-#  Site
-# ──────────────────────────────────────────────
 
 @admin.register(Site)
 class SiteAdmin(admin.ModelAdmin):
@@ -213,7 +201,7 @@ class VehicleCategoryAdmin(admin.ModelAdmin):
     list_filter = ('is_active',)
     search_fields = ('name',)
     prepopulated_fields = {'slug': ('name',)}
-    inlines = [VehicleInline]
+    
 
     fieldsets = (
         (None, {
@@ -227,34 +215,6 @@ class VehicleCategoryAdmin(admin.ModelAdmin):
         }),
     )
 
-
-@admin.register(Vehicle)
-class VehicleAdmin(admin.ModelAdmin):
-    list_display = ('name', 'category', 'model_year', 'price_multiplier', 'is_active')
-    list_filter = ('category', 'sites', 'is_active')
-    search_fields = ('name',)
-    list_select_related = ('category',)
-    filter_horizontal = ('sites',)
-
-    fieldsets = (
-        (None, {
-            'fields': ('category', 'name', 'model_year', 'is_active'),
-        }),
-        ('Availability', {
-            'fields': ('sites',),
-        }),
-        ('Pricing & Features', {
-            'fields': ('price_multiplier', 'features'),
-        }),
-        ('Media', {
-            'fields': ('image',),
-        }),
-    )
-
-
-# ──────────────────────────────────────────────
-#  Premium Add-On
-# ──────────────────────────────────────────────
 
 @admin.register(PremiumAddOn)
 class PremiumAddOnAdmin(admin.ModelAdmin):

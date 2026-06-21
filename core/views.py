@@ -165,19 +165,16 @@ def fleet(request):
     site, slug = _get_site_or_404(request)
 
     try:
-        from core.models import VehicleCategory, Vehicle
+        from core.models import VehicleCategory
         categories = VehicleCategory.objects.filter(is_active=True).order_by('order')
-        vehicles = Vehicle.objects.filter(
-            is_active=True,
-            sites=site
-        ).select_related('category') if site else Vehicle.objects.none()
+        
     except Exception:
         categories = []
-        vehicles = []
+        
 
     context = {
         'categories': categories,
-        'vehicles': vehicles,
+        
         'site_slug': slug,
         'language': _get_language(request),
     }
@@ -189,20 +186,16 @@ def fleet_detail(request, slug):
     site, site_slug = _get_site_or_404(request)
 
     try:
-        from core.models import VehicleCategory, Vehicle
+        from core.models import VehicleCategory
         category = get_object_or_404(VehicleCategory, slug=slug, is_active=True)
-        vehicles = Vehicle.objects.filter(
-            category=category,
-            is_active=True,
-            sites=site
-        ) if site else Vehicle.objects.none()
+        
     except Exception:
         category = None
-        vehicles = []
+        
 
     context = {
         'category': category,
-        'vehicles': vehicles,
+        
         'site_slug': site_slug,
         'language': _get_language(request),
     }

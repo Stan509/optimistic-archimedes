@@ -460,64 +460,6 @@ class VehicleCategory(models.Model):
         super().save(*args, **kwargs)
 
 
-class Vehicle(models.Model):
-    """
-    A specific vehicle within a category, optionally available on multiple sites.
-    """
-
-    category = models.ForeignKey(
-        VehicleCategory,
-        on_delete=models.CASCADE,
-        related_name='vehicles',
-        help_text='Vehicle category (e.g. Executive SUV).',
-    )
-    sites = models.ManyToManyField(
-        Site,
-        related_name='vehicles',
-        blank=True,
-        help_text='Sites where this vehicle is available.',
-    )
-    name = models.CharField(
-        max_length=200,
-        help_text='Vehicle name (e.g. "Cadillac Escalade ESV").',
-    )
-    model_year = models.PositiveIntegerField(
-        blank=True,
-        null=True,
-        validators=[MinValueValidator(2000), MaxValueValidator(2050)],
-        help_text='Model year.',
-    )
-    image = models.ImageField(
-        upload_to='vehicles/',
-        blank=True,
-        null=True,
-    )
-    price_multiplier = models.DecimalField(
-        max_digits=4,
-        decimal_places=2,
-        default=Decimal('1.00'),
-        validators=[MinValueValidator(Decimal('0.50')), MaxValueValidator(Decimal('5.00'))],
-        help_text='Price multiplier relative to the category base price (1.0 = standard).',
-    )
-    features = models.JSONField(
-        default=dict,
-        blank=True,
-        help_text='JSON dict of features (e.g. {"wifi": true, "minibar": true, "leather_seats": true}).',
-    )
-    is_active = models.BooleanField(default=True)
-
-    objects = models.Manager()
-    active = ActiveManager()
-
-    class Meta:
-        verbose_name = 'Vehicle'
-        verbose_name_plural = 'Vehicles'
-        ordering = ['category', 'name']
-
-    def __str__(self):
-        year = f' {self.model_year}' if self.model_year else ''
-        return f'{self.name}{year}'
-
 
 # ═══════════════════════════════════════════════
 #  PRICING RULE  — Hourly & Point-to-Point pricing
@@ -539,14 +481,7 @@ class PricingRule(models.Model):
         related_name='pricing_rules',
         help_text='Site this rule applies to.',
     )
-    vehicle = models.ForeignKey(
-        Vehicle,
-        on_delete=models.CASCADE,
-        related_name='pricing_rules',
-        blank=True,
-        null=True,
-        help_text='Specific vehicle this price applies to.',
-    )
+    
     vehicle_category = models.ForeignKey(
         VehicleCategory,
         on_delete=models.CASCADE,
@@ -601,7 +536,7 @@ class PricingRule(models.Model):
         ordering = ['site', 'service_type', 'base_price']
 
     def __str__(self):
-        vehicle_name = self.vehicle.name if self.vehicle else self.vehicle_category.name
+        vehicle_name = self.vehicle_category.name
         return f'[{self.get_service_type_display()}] {self.site.slug.upper()} — {vehicle_name}: ${self.base_price}'
 
     def get_effective_price(self, distance_km=None):
@@ -895,8 +830,8 @@ class Booking(models.Model):
     )
 
     # ── Vehicle ──
-    vehicle = models.ForeignKey(
-        Vehicle,
+    vehicle_category = models.ForeignKey(
+        VehicleCategory,
         on_delete=models.SET_NULL,
         related_name='bookings',
         blank=True,
