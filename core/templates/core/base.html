@@ -11,6 +11,11 @@
     {% block seo %}
     <meta name="description" content="{{ current_site.tagline|default:'AeroLux Select offers premium private airport transfers, hourly chauffeur service, and point-to-point transfers.' }}">
     <meta name="keywords" content="luxury transportation, airport transfer, private chauffeur, VIP car service, point-to-point transfer, NYC premium car, Dominican Republic VIP transfer">
+    <meta property="og:title" content="{{ current_site.name|default:'AeroLux Select' }} | Luxury Transportation">
+    <meta property="og:description" content="{{ current_site.tagline|default:'Experience seamless luxury transfers in NYC and Dominican Republic.' }}">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://www.aeroluxselect.com">
+    <meta name="twitter:card" content="summary_large_image">
     {% endblock %}
 
     <!-- Google Fonts: Outfit & Playfair Display -->

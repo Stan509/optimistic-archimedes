@@ -90,11 +90,11 @@
     <div class="relative z-20 max-w-3xl w-full mx-auto px-4 sm:px-6 lg:px-8">
         <!-- Premium Multi-step Progress Indicator -->
         <div class="mb-8">
-            <div class="flex justify-between items-center text-xs uppercase tracking-wider text-theme-text/95 font-semibold mb-3">
-                <span class="text-luxe-gold">1. Trip Routing</span>
-                <span>2. Select Vehicle</span>
-                <span>3. Passenger Details</span>
-                <span>4. Payment & Checkout</span>
+            <div class="flex justify-between items-center text-xs uppercase tracking-wider text-white font-semibold mb-3">
+                <span class="text-luxe-gold" id="step-1">1. Trip Routing</span>
+                <span id="step-2">2. Select Vehicle</span>
+                <span id="step-3">3. Passenger Details</span>
+                <span class="hidden sm:inline" id="step-4">4. Payment</span>
             </div>
             <div class="w-full h-1 bg-gray-800 rounded-full overflow-hidden">
                 <div class="h-full w-1/4 bg-gradient-to-r from-luxe-gold to-luxe-gold-bright transition-all duration-500"></div>
@@ -121,7 +121,7 @@
                         <label class="cursor-pointer text-center p-2 sm:p-4 rounded-xl text-[10px] sm:text-xs font-semibold uppercase tracking-wider transition-all duration-300 block select-none border border-transparent" id="lbl-transfer">
                             <input type="radio" name="service_type" value="airport_transfer" checked class="sr-only" id="rad-transfer">
                             <i class="fas fa-plane-departure text-sm sm:text-base text-luxe-gold mb-1 sm:mb-2 block" id="icon-transfer"></i>
-                            <span class="block">Airport Transfer</span>
+                            <span class="block" id="span-transfer">Airport Transfer</span>
                         </label>
                         <label class="cursor-pointer text-center p-2 sm:p-4 rounded-xl text-[10px] sm:text-xs font-semibold uppercase tracking-wider transition-all duration-300 block select-none border border-transparent" id="lbl-p2p">
                             <input type="radio" name="service_type" value="point_to_point" class="sr-only" id="rad-p2p">
