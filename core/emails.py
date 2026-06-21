@@ -368,21 +368,29 @@ def send_booking_email(booking, email_type):
 
     # Helper to send to a specific recipient
     def _send_to(to_email, sub):
-        # FORCED BREVO CONFIGURATION
-        provider = 'BREVO'
+        # Fetch provider from settings, fallback to SMTP
+        provider = getattr(settings_obj, 'email_provider', 'SMTP')
+        if not provider:
+            provider = 'SMTP'
         
         # 1. SMTP Provider
         if provider == 'SMTP':
-            if settings_obj.email_host:
-                backend = EmailBackend(
-                    host=settings_obj.email_host,
-                    port=settings_obj.email_port,
-                    username=settings_obj.email_username,
-                    password=settings_obj.email_password,
-                    use_tls=settings_obj.email_use_tls,
-                )
-            else:
-                backend = None
+            import os
+            # Use DB settings if configured, otherwise fallback to Namecheap environment
+            host = settings_obj.email_host or os.getenv('EMAIL_HOST', 'mail.privateemail.com')
+            port = settings_obj.email_port or int(os.getenv('EMAIL_PORT', 587))
+            user = settings_obj.email_username or os.getenv('EMAIL_HOST_USER', 'info@aeroluxselect.com')
+            pwd = settings_obj.email_password or os.getenv('EMAIL_HOST_PASSWORD', '')
+            tls = settings_obj.email_use_tls if settings_obj.email_host else True
+            
+            backend = EmailBackend(
+                host=host,
+                port=port,
+                username=user,
+                password=pwd,
+                use_tls=tls,
+                fail_silently=False,
+            )
                 
             email = EmailMultiAlternatives(
                 subject=sub,
