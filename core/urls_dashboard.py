@@ -27,10 +27,6 @@ urlpatterns = [
     path('fleet/categories/', views.fleet_categories, name='fleet_categories'),
     path('fleet/categories/add/', views.fleet_category_form, name='add_category'),
     path('fleet/categories/<slug:slug>/edit/', views.fleet_category_form, name='edit_category'),
-    path('fleet/vehicles/', views.fleet_vehicles, name='fleet_vehicles'),
-    path('fleet/vehicles/add/', views.fleet_vehicle_form, name='add_vehicle'),
-    path('fleet/vehicles/<int:pk>/edit/', views.fleet_vehicle_form, name='edit_vehicle'),
-    path('fleet/vehicles/<int:pk>/toggle/', views.toggle_vehicle_active, name='toggle_vehicle_active'),
 
     # Airports & Destinations Management
     path('airports/', views.dashboard_airports, name='airports'),

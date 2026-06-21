@@ -344,14 +344,14 @@ def update_booking_status(request, booking_id, new_status):
 @user_passes_test(is_admin, login_url='dashboard:login')
 def dashboard_fleet(request):
     """Fleet overview page."""
-    from core.models import VehicleCategory, Vehicle
+    from core.models import VehicleCategory
 
     categories = VehicleCategory.objects.all().order_by('order')
-    vehicles = Vehicle.objects.all().select_related('category')
+    
 
     context = {
         'categories': categories,
-        'vehicles': vehicles,
+        
         'active_tab': 'fleet',
     }
     return render(request, 'dashboard/fleet.html', context)
@@ -412,83 +412,6 @@ def fleet_category_form(request, slug=None):
     }
     return render(request, 'dashboard/fleet_category_form.html', context)
 
-
-@user_passes_test(is_admin, login_url='dashboard:login')
-def fleet_vehicles(request):
-    """Manage individual vehicles."""
-    from core.models import Vehicle
-    vehicles = Vehicle.objects.all().select_related('category')
-
-    context = {
-        'vehicles': vehicles,
-        'active_tab': 'fleet',
-    }
-    return render(request, 'dashboard/fleet_vehicles.html', context)
-
-
-@user_passes_test(is_admin, login_url='dashboard:login')
-def fleet_vehicle_form(request, pk=None):
-    """Add or edit a vehicle."""
-    from core.models import Vehicle, VehicleCategory, Site
-
-    vehicle = None
-    if pk:
-        vehicle = get_object_or_404(Vehicle, pk=pk)
-
-    categories = VehicleCategory.objects.all()
-    sites = Site.objects.filter(is_active=True)
-
-    if request.method == 'POST':
-        data = {
-            'name': request.POST.get('name'),
-            'category_id': int(request.POST.get('category')),
-            'model_year': int(request.POST.get('model_year', 2024)),
-            'price_multiplier': float(request.POST.get('price_multiplier', 1.0)),
-            'is_active': request.POST.get('is_active') == 'on',
-        }
-        site_ids = request.POST.getlist('sites')
-
-        if vehicle:
-            for key, value in data.items():
-                setattr(vehicle, key, value)
-            if request.FILES.get('image'):
-                vehicle.image = request.FILES['image']
-            vehicle.save()
-            vehicle.sites.set(site_ids)
-            messages.success(request, f'Vehicle "{vehicle.name}" updated.')
-        else:
-            vehicle = Vehicle(**data)
-            if request.FILES.get('image'):
-                vehicle.image = request.FILES['image']
-            vehicle.save()
-            vehicle.sites.set(site_ids)
-            messages.success(request, f'Vehicle "{vehicle.name}" created.')
-
-        return redirect('dashboard:fleet_vehicles')
-
-    context = {
-        'vehicle': vehicle,
-        'categories': categories,
-        'sites': sites,
-        'active_tab': 'fleet',
-    }
-    return render(request, 'dashboard/fleet_vehicle_form.html', context)
-
-
-@user_passes_test(is_admin, login_url='dashboard:login')
-def toggle_vehicle_active(request, pk):
-    """Toggle the availability/is_active status of a vehicle from the fleet list."""
-    from core.models import Vehicle
-    vehicle = get_object_or_404(Vehicle, pk=pk)
-    vehicle.is_active = not vehicle.is_active
-    vehicle.save()
-    messages.success(request, f'Vehicle "{vehicle.name}" availability status updated to {"Active" if vehicle.is_active else "Inactive"}.')
-    return redirect('dashboard:fleet_vehicles')
-
-
-# =========================================================================
-# AIRPORTS & DESTINATIONS MANAGEMENT
-# =========================================================================
 
 @user_passes_test(is_admin, login_url='dashboard:login')
 def dashboard_airports(request):
@@ -631,7 +554,7 @@ def dashboard_pricing(request):
     site_filter = request.GET.get('site', '')
 
     rules = PricingRule.objects.all().select_related(
-        'site', 'vehicle', 'vehicle_category'
+        'site', 'vehicle_category'
     )
 
     if site_filter:
@@ -648,14 +571,14 @@ def dashboard_pricing(request):
 @user_passes_test(is_admin, login_url='dashboard:login')
 def pricing_form(request, pk=None):
     """Add or edit a pricing rule (Hourly/P2P only)."""
-    from core.models import PricingRule, Site, Vehicle, VehicleCategory
+    from core.models import PricingRule, Site, VehicleCategory
 
     rule = None
     if pk:
         rule = get_object_or_404(PricingRule, pk=pk)
 
     sites = Site.objects.filter(is_active=True)
-    vehicles = Vehicle.objects.filter(is_active=True).select_related('category')
+    
     categories = VehicleCategory.objects.filter(is_active=True)
 
     if request.method == 'POST':
@@ -669,7 +592,7 @@ def pricing_form(request, pk=None):
             'is_active': request.POST.get('is_active') == 'on',
         }
 
-        vehicle_id = request.POST.get('vehicle')
+        
         if vehicle_id:
             data['vehicle_id'] = int(vehicle_id)
         else:
@@ -696,7 +619,7 @@ def pricing_form(request, pk=None):
     context = {
         'rule': rule,
         'sites': sites,
-        'vehicles': vehicles,
+        
         'categories': categories,
         'active_tab': 'pricing',
     }

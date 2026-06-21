@@ -141,10 +141,8 @@
                         <i id="fleet-chevron" class="fa-solid fa-chevron-right text-xs transition-transform duration-200 {% if active_tab == 'fleet' %}rotate-90{% endif %}"></i>
                     </div>
                     <div id="fleet-submenu" class="pl-12 pr-4 py-1 space-y-1 {% if active_tab != 'fleet' %}hidden{% endif %}">
-                        <a href="{% url 'dashboard:fleet' %}" class="block py-2 text-xs text-luxury-muted hover:text-gold-400 transition-colors">Overview</a>
                         <a href="{% url 'dashboard:fleet_categories' %}" class="block py-2 text-xs text-luxury-muted hover:text-gold-400 transition-colors">Categories</a>
-                        <a href="{% url 'dashboard:fleet_vehicles' %}" class="block py-2 text-xs text-luxury-muted hover:text-gold-400 transition-colors">Vehicles</a>
-                    </div>
+                        </div>
                 </div>
 
                 <a href="{% url 'dashboard:airports' %}" class="flex items-center space-x-3.5 px-4 py-3 rounded-lg text-luxury-muted hover:text-white hover:bg-luxury-card transition-all {% if active_tab == 'airports' %}sidebar-active{% endif %}">

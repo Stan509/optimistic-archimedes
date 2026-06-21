@@ -599,7 +599,7 @@ def booking_payment(request):
 
     try:
         from core.models import (
-            Booking, VehicleCategory, Vehicle, Airport, Destination,
+            Booking, VehicleCategory, Airport, Destination,
             PremiumAddOn, SiteSettings
         )
 
