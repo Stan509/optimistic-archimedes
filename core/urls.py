@@ -29,6 +29,7 @@ urlpatterns = [
     path('book/details/', views.booking_step3, name='booking_step3'),
     path('book/payment/', views.booking_payment, name='booking_payment'),
     path('book/success/<str:reference>/', views.booking_success, name='booking_success'),
+    path('api/pricing/', views.api_pricing, name='api_pricing'),
 
     # Contact
     path('contact/', views.contact, name='contact'),

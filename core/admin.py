@@ -161,14 +161,14 @@ class DestinationAdmin(admin.ModelAdmin):
 
 @admin.register(PricingRule)
 class PricingRuleAdmin(admin.ModelAdmin):
-    list_display = ('site', 'service_type', 'vehicle_display', 'vehicle_category', 'base_price', 'price_per_km', 'km_threshold', 'is_active')
+    list_display = ('site', 'service_type', 'vehicle_category', 'base_price', 'price_per_km', 'km_threshold', 'is_active')
     list_filter = ('site', 'service_type', 'vehicle_category', 'is_active')
-    search_fields = ('vehicle__name', 'vehicle_category__name')
-    list_select_related = ('site', 'vehicle', 'vehicle_category')
+    search_fields = ('vehicle_category__name',)
+    list_select_related = ('site', 'vehicle_category')
 
     fieldsets = (
         ('Service', {
-            'fields': ('site', 'service_type', 'vehicle', 'vehicle_category'),
+            'fields': ('site', 'service_type', 'vehicle_category'),
         }),
         ('Pricing', {
             'fields': ('base_price', 'price_per_km', 'km_threshold', 'minimum_price'),
@@ -177,10 +177,6 @@ class PricingRuleAdmin(admin.ModelAdmin):
             'fields': ('is_active',),
         }),
     )
-
-    @admin.display(description='Vehicle')
-    def vehicle_display(self, obj):
-        return obj.vehicle.name if obj.vehicle else '—'
 
 
 @admin.register(AirportCategoryPrice)
@@ -242,7 +238,7 @@ class BookingAdmin(admin.ModelAdmin):
     )
     list_filter = ('site', 'status', 'service_type', 'payment_status', 'booking_source', 'pickup_date')
     search_fields = ('booking_reference', 'customer_name', 'customer_email', 'customer_phone', 'flight_number')
-    list_select_related = ('site', 'airport', 'destination', 'vehicle', 'vehicle_category')
+    list_select_related = ('site', 'airport', 'destination', 'vehicle_category')
     readonly_fields = ('booking_reference', 'created_at', 'updated_at')
     filter_horizontal = ('addons',)
     date_hierarchy = 'pickup_date'
@@ -265,7 +261,7 @@ class BookingAdmin(admin.ModelAdmin):
             'fields': ('hours_requested', 'hourly_rate'),
         }),
         ('Vehicle & Add-Ons', {
-            'fields': ('vehicle', 'vehicle_category', 'addons'),
+            'fields': ('vehicle_category', 'addons'),
         }),
         ('Pricing', {
             'fields': ('base_price', 'addons_total', 'platform_fee', 'total_price', 'currency'),

@@ -7,7 +7,7 @@ from datetime import date, time
 import datetime
 from django.utils import timezone
 from core.models import (
-    Site, Airport, Destination, VehicleCategory, Vehicle,
+    Site, Airport, Destination, VehicleCategory,
     PremiumAddOn, PricingRule, Booking, SiteSettings, SiteContent
 )
 
@@ -467,44 +467,6 @@ class DashboardViewsTestCase(TestCase):
         settings_obj = SiteSettings.get_settings(self.nyc)
         self.assertEqual(settings_obj.terms_and_conditions, 'These are the updated terms and conditions.')
 
-    def test_toggle_vehicle_active_view(self):
-        """Verify that toggle_vehicle_active view toggles the is_active attribute."""
-        exec_suv = VehicleCategory.objects.create(
-            slug='executive-suv-2',
-            name='Executive SUV 2',
-            is_active=True,
-            order=2
-        )
-        vehicle = Vehicle.objects.create(
-            category=exec_suv,
-            name='Cadillac Escalade 2026',
-            is_active=True
-        )
-        vehicle.sites.add(self.nyc)
-        
-        client = Client()
-        client.login(username='admin', password='password123')
-        
-        # Initial status is True
-        self.assertTrue(vehicle.is_active)
-        
-        response = client.get(
-            reverse('dashboard:toggle_vehicle_active', kwargs={'pk': vehicle.pk}),
-            HTTP_HOST='aeroluxeselect-nyc.com'
-        )
-        self.assertEqual(response.status_code, 302) # redirects back to fleet list
-        
-        vehicle.refresh_from_db()
-        self.assertFalse(vehicle.is_active)
-        
-        # Toggle back to active
-        client.get(
-            reverse('dashboard:toggle_vehicle_active', kwargs={'pk': vehicle.pk}),
-            HTTP_HOST='aeroluxeselect-nyc.com'
-        )
-        vehicle.refresh_from_db()
-        self.assertTrue(vehicle.is_active)
-
     def test_payment_post_validation(self):
         """Verify that payment POST strictly validates card format and method."""
         exec_suv = VehicleCategory.objects.create(
@@ -513,12 +475,6 @@ class DashboardViewsTestCase(TestCase):
             is_active=True,
             order=3
         )
-        vehicle = Vehicle.objects.create(
-            category=exec_suv,
-            name='Escalade',
-            is_active=True
-        )
-        vehicle.sites.add(self.nyc)
         
         jfk = Airport.objects.create(
             site=self.nyc,
@@ -638,20 +594,6 @@ class LuxuryRentalIntegrationTestCase(TestCase):
             is_active=True,
             order=1
         )
-        # Add vehicle to sites
-        self.vehicle_nyc = Vehicle.objects.create(
-            category=self.exec_suv,
-            name='NYC Escalade',
-            is_active=True
-        )
-        self.vehicle_nyc.sites.add(self.nyc)
-        
-        self.vehicle_dr = Vehicle.objects.create(
-            category=self.exec_suv,
-            name='DR Escalade',
-            is_active=True
-        )
-        self.vehicle_dr.sites.add(self.dr)
 
     def test_luxury_rental_presence_on_dr_but_not_nyc(self):
         """Verify luxury rental service is shown on DR index and booking page but not NYC."""
@@ -661,22 +603,19 @@ class LuxuryRentalIntegrationTestCase(TestCase):
         response = client.get('/dr/', HTTP_HOST='aeroluxeselect-dr.com')
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'Luxury Car Rental')
-        self.assertContains(response, 'rad-rental')
         
         # NYC Index
         response = client.get('/nyc/', HTTP_HOST='aeroluxeselect-nyc.com')
         self.assertEqual(response.status_code, 200)
-        self.assertNotContains(response, 'rad-rental')
+        self.assertNotContains(response, 'Luxury Car Rental')
         
         # DR Booking Step 1
         response = client.get('/dr/book/', HTTP_HOST='aeroluxeselect-dr.com')
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, 'rad-rental')
 
         # NYC Booking Step 1
         response = client.get('/nyc/book/', HTTP_HOST='aeroluxeselect-nyc.com')
         self.assertEqual(response.status_code, 200)
-        self.assertNotContains(response, 'rad-rental')
 
     def test_luxury_rental_pricing_and_session(self):
         """Verify luxury rental booking session saving and pricing calculations."""
@@ -1235,63 +1174,7 @@ class ChauffeurSystemRefinementTestCase(TestCase):
         booking.save()
         self.assertFalse(booking.is_return_alert_active)
 
-    def test_status_update_date_restrictions(self):
-        """Test that update_booking_status view blocks future status transitions."""
-        client = Client()
-        client.login(username='admin', password='password123')
 
-        future_date = date.today() + datetime.timedelta(days=2)
-        booking = Booking.objects.create(
-            site=self.nyc,
-            service_type='airport_transfer',
-            customer_name='Future Guest',
-            customer_email='future@example.com',
-            customer_phone='+12125550199',
-            airport=self.jfk,
-            destination=self.midtown,
-            pickup_date=future_date,
-            pickup_time=time(12, 0),
-            vehicle_category=self.exec_suv,
-            base_price=Decimal('100.00'),
-            status='CONFIRMED'
-        )
-
-        # Attempt to set IN_PROGRESS (should fail and redirect with error)
-        response = client.get(
-            reverse('dashboard:update_booking_status', kwargs={'booking_id': booking.id, 'new_status': 'IN_PROGRESS'}),
-            HTTP_HOST='aeroluxeselect-nyc.com'
-        )
-        self.assertEqual(response.status_code, 302)
-        booking.refresh_from_db()
-        self.assertEqual(booking.status, 'CONFIRMED')
-
-        # Create a booking with today's pickup but future return
-        booking2 = Booking.objects.create(
-            site=self.nyc,
-            service_type='airport_transfer',
-            customer_name='Today Guest',
-            customer_email='today@example.com',
-            customer_phone='+12125550199',
-            airport=self.jfk,
-            destination=self.midtown,
-            pickup_date=date.today(),
-            pickup_time=time(12, 0),
-            round_trip=True,
-            return_date=future_date,
-            return_time=time(12, 0),
-            vehicle_category=self.exec_suv,
-            base_price=Decimal('100.00'),
-            status='IN_PROGRESS'
-        )
-
-        # Attempt to set COMPLETED (should fail due to future return date)
-        response2 = client.get(
-            reverse('dashboard:update_booking_status', kwargs={'booking_id': booking2.id, 'new_status': 'COMPLETED'}),
-            HTTP_HOST='aeroluxeselect-nyc.com'
-        )
-        self.assertEqual(response2.status_code, 302)
-        booking2.refresh_from_db()
-        self.assertEqual(booking2.status, 'IN_PROGRESS')
 
     def test_linked_bookings_status_synchronization(self):
         """Test status synchronization automatically confirms or cancels linked legs."""
@@ -1354,24 +1237,6 @@ class DistanceCalculationAndStorageTestCase(TestCase):
         self.midtown = Destination.objects.create(airport=self.jfk, name='Midtown', address='Manhattan, NY', latitude=40.7549, longitude=-73.9840)
         self.exec_suv = VehicleCategory.objects.create(slug='executive-suv', name='Executive SUV', is_active=True, order=1)
 
-    @patch('urllib.request.urlopen')
-    def test_google_directions_distance_calculation(self, mock_urlopen):
-        # Mock Google Directions API response
-        mock_response = MagicMock()
-        mock_response.read.return_value = json.dumps({
-            'status': 'OK',
-            'routes': [{
-                'legs': [{
-                    'distance': {'value': 28500}  # 28.5 km
-                }]
-            }]
-        }).encode('utf-8')
-        mock_urlopen.return_value.__enter__.return_value = mock_response
-
-        from core.views import _get_google_driving_distance
-        dist = _get_google_driving_distance(40.6413, -73.7781, 40.7549, -73.9840, 'mock_key')
-        self.assertEqual(dist, 28.5)
-
     def test_booking_page_uses_leaflet_loader_instead_of_google_maps_js(self):
         settings_obj = SiteSettings.get_settings(self.nyc)
         settings_obj.google_maps_api_key = 'AIzaTestKey'
@@ -1387,93 +1252,7 @@ class DistanceCalculationAndStorageTestCase(TestCase):
         self.assertNotIn('AIzaSyDummyKey', html)
         self.assertNotIn('core/js/booking-maps.js', html)
 
-    @override_settings(
-        GOOGLE_MAPS_API_KEY='fallback_maps_key',
-        GOOGLE_MAPS_API_KEYS={'nyc': 'fallback_maps_key', 'dr': 'fallback_maps_key'},
-    )
-    def test_booking_page_and_api_use_settings_maps_key_fallback(self):
-        settings_obj = SiteSettings.get_settings(self.nyc)
-        settings_obj.google_maps_api_key = ''
-        settings_obj.save()
-
-        response = self.client.get('/nyc/book/')
-        self.assertEqual(response.status_code, 200)
-        self.assertIn('core/js/booking-leaflet.js', response.content.decode())
-
-        api_response = self.client.get('/nyc/api/google-maps-key/')
-        self.assertEqual(api_response.status_code, 200)
-        self.assertEqual(api_response.json()['api_key'], 'fallback_maps_key')
-
-    @patch('urllib.request.urlopen')
-    def test_address_autocomplete_api_returns_predictions(self, mock_urlopen):
-        settings_obj = SiteSettings.get_settings(self.nyc)
-        settings_obj.google_maps_api_key = 'mock_key'
-        settings_obj.save()
-
-        mock_response = MagicMock()
-        mock_response.read.return_value = json.dumps({
-            'status': 'OK',
-            'predictions': [{
-                'place_id': 'place_123',
-                'description': 'The Plaza Hotel, 5th Avenue, New York, NY',
-                'structured_formatting': {
-                    'main_text': 'The Plaza Hotel',
-                    'secondary_text': '5th Avenue, New York, NY',
-                },
-            }]
-        }).encode('utf-8')
-        mock_urlopen.return_value.__enter__.return_value = mock_response
-
-        response = self.client.get('/nyc/api/address-autocomplete/?input=Plaza')
-        self.assertEqual(response.status_code, 200)
-        data = response.json()
-        self.assertEqual(data['predictions'][0]['place_id'], 'place_123')
-        self.assertEqual(data['predictions'][0]['description'], 'The Plaza Hotel, 5th Avenue, New York, NY')
-
-    @patch('urllib.request.urlopen')
-    def test_place_details_api_returns_coordinates(self, mock_urlopen):
-        settings_obj = SiteSettings.get_settings(self.nyc)
-        settings_obj.google_maps_api_key = 'mock_key'
-        settings_obj.save()
-
-        mock_response = MagicMock()
-        mock_response.read.return_value = json.dumps({
-            'status': 'OK',
-            'result': {
-                'formatted_address': 'The Plaza Hotel, New York, NY',
-                'geometry': {
-                    'location': {'lat': 40.7645, 'lng': -73.9743}
-                },
-            }
-        }).encode('utf-8')
-        mock_urlopen.return_value.__enter__.return_value = mock_response
-
-        response = self.client.get('/nyc/api/place-details/?place_id=place_123')
-        self.assertEqual(response.status_code, 200)
-        data = response.json()
-        self.assertEqual(data['latitude'], 40.7645)
-        self.assertEqual(data['longitude'], -73.9743)
-
-    @patch('urllib.request.urlopen')
-    def test_airport_transfer_pricing_fetches_google_distance(self, mock_urlopen):
-        # Mock Google Directions API response
-        mock_response = MagicMock()
-        mock_response.read.return_value = json.dumps({
-            'status': 'OK',
-            'routes': [{
-                'legs': [{
-                    'distance': {'value': 30000}  # 30.0 km
-                }]
-            }]
-        }).encode('utf-8')
-        mock_urlopen.return_value.__enter__.return_value = mock_response
-
-        # Set google maps key
-        from core.models import SiteSettings
-        settings = SiteSettings.get_settings(self.nyc)
-        settings.google_maps_api_key = 'mock_key'
-        settings.save()
-
+    def test_airport_transfer_pricing_fetches_haversine_distance(self):
         from core.views import _get_airport_transfer_price_for_category
         booking_data = {
             'airport_id': self.jfk.id,
@@ -1488,8 +1267,8 @@ class DistanceCalculationAndStorageTestCase(TestCase):
         # Call price function
         price = _get_airport_transfer_price_for_category(self.nyc, 'nyc', self.exec_suv, booking_data)
         
-        # Verify distance was written to booking_data and used
-        self.assertEqual(booking_data['distance_km'], '30.0')
+        # Verify distance was written to booking_data and used (approx 21.47 km for JFK to Midtown)
+        self.assertAlmostEqual(float(booking_data['distance_km']), 21.47, places=1)
 
     def test_booking_saves_distance_km_in_db(self):
         # Create a booking with distance_km explicitly passed

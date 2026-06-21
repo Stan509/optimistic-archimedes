@@ -301,16 +301,8 @@ def _get_category_price(site, slug, category, booking_data):
             site=site,
             vehicle_category=category,
             service_type='hourly',
-            is_active=True,
-            vehicle__isnull=True,
+            is_active=True
         ).first()
-        if not rule:
-            rule = PricingRule.objects.filter(
-                site=site,
-                vehicle_category=category,
-                service_type='hourly',
-                is_active=True
-            ).first()
         hourly_rate = float(rule.base_price) if rule else float(settings.HOURLY_RATE_RANGE['min'])
         return hourly_rate * hours
 
@@ -319,16 +311,8 @@ def _get_category_price(site, slug, category, booking_data):
             site=site,
             vehicle_category=category,
             service_type='point_to_point',
-            is_active=True,
-            vehicle__isnull=True,
+            is_active=True
         ).first()
-        if not rule:
-            rule = PricingRule.objects.filter(
-                site=site,
-                vehicle_category=category,
-                service_type='point_to_point',
-                is_active=True
-            ).first()
 
         base_price = float(rule.base_price) if rule else 80.0
         fare = base_price
@@ -362,16 +346,8 @@ def _get_category_price(site, slug, category, booking_data):
             site=site,
             vehicle_category=category,
             service_type='luxury_rental',
-            is_active=True,
-            vehicle__isnull=True,
+            is_active=True
         ).first()
-        if not rule:
-            rule = PricingRule.objects.filter(
-                site=site,
-                vehicle_category=category,
-                service_type='luxury_rental',
-                is_active=True
-            ).first()
         return float(rule.base_price) if rule else 150.0
 
     return 0.0
@@ -688,7 +664,7 @@ def booking_payment(request):
                     flight_number=booking_data.get('flight_number', ''),
                     customer_notes=booking_data.get('customer_notes', ''),
                     booking_source='DIRECT',
-                    round_trip=False, # Decoupled
+                    round_trip=True,
                     return_date=booking_data.get('return_date') or None,
                     return_time=booking_data.get('return_time') or None,
                     number_of_stops=stops,
@@ -709,9 +685,6 @@ def booking_payment(request):
                 cat_id = booking_data.get('vehicle_category_id')
                 if cat_id:
                     booking_outbound.vehicle_category_id = int(cat_id)
-                vehicle_id = booking_data.get('vehicle_id')
-                if vehicle_id:
-                    booking_outbound.vehicle_id = int(vehicle_id)
 
                 # Set outbound addons total (outbound leg only has addon_ids)
                 outbound_addons_total = Decimal('0.00')
@@ -753,7 +726,7 @@ def booking_payment(request):
                     flight_number='',
                     customer_notes=booking_data.get('customer_notes', ''),
                     booking_source='DIRECT',
-                    round_trip=False, # Decoupled
+                    round_trip=True,
                     return_date=booking_data.get('pickup_date') or None,
                     return_time=booking_data.get('pickup_time') or None,
                     number_of_stops=0,
@@ -762,7 +735,7 @@ def booking_payment(request):
                     base_price=base_price,
                     pay_separately=booking_data.get('pay_separately', False),
                     payment_method=payment_method,
-                    # linked_booking=booking_outbound,
+                    linked_booking=booking_outbound,
                 )
 
                 if airport_id:
@@ -771,8 +744,6 @@ def booking_payment(request):
                     booking_return.destination_id = int(dest_id)
                 if cat_id:
                     booking_return.vehicle_category_id = int(cat_id)
-                if vehicle_id:
-                    booking_return.vehicle_id = int(vehicle_id)
 
                 # Set return addons total (return leg only has addon_return_ids)
                 return_addons_total = Decimal('0.00')
@@ -789,8 +760,8 @@ def booking_payment(request):
                     booking_return.addons.set(addon_return_ids)
                 
                 # Link outbound to return
-                # booking_outbound.linked_booking = booking_return
-                booking_outbound.save(update_fields=['round_trip'])
+                booking_outbound.linked_booking = booking_return
+                booking_outbound.save(update_fields=['round_trip', 'linked_booking'])
                 
                 # Force reload to get updated fields and calculate totals with addons
                 booking_outbound = Booking.objects.get(pk=booking_outbound.pk)
@@ -869,27 +840,16 @@ def booking_payment(request):
                 cat_id = booking_data.get('vehicle_category_id')
                 if cat_id:
                     booking.vehicle_category_id = int(cat_id)
-                vehicle_id = booking_data.get('vehicle_id')
-                if vehicle_id:
-                    booking.vehicle_id = int(vehicle_id)
 
                 if booking_data.get('service_type') == 'hourly':
                     booking.hours_requested = int(booking_data.get('hours_requested', 3))
                     from core.models import PricingRule
                     rule = PricingRule.objects.filter(
                         site=site,
-                        vehicle_id=vehicle_id,
+                        vehicle_category_id=cat_id,
                         service_type='hourly',
-                        is_active=True
+                        is_active=True,
                     ).first()
-                    if not rule and cat_id:
-                        rule = PricingRule.objects.filter(
-                            site=site,
-                            vehicle_category_id=cat_id,
-                            service_type='hourly',
-                            is_active=True,
-                            vehicle__isnull=True,
-                        ).first()
                     booking.hourly_rate = Decimal(str(rule.base_price if rule else settings.HOURLY_RATE_RANGE['min']))
 
                 # Addons total
@@ -1186,7 +1146,6 @@ def api_pricing(request):
                         vehicle_category=cat,
                         service_type='hourly',
                         is_active=True,
-                        vehicle__isnull=True,
                     ).first()
                     hourly_rate = float(rule.base_price) if rule else float(settings.HOURLY_RATE_RANGE['min'])
                     hours = int(booking_data['hours_requested'])

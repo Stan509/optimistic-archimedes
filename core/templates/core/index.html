@@ -232,17 +232,17 @@
                     <div>
                         <label class="block text-xs uppercase tracking-widest font-bold text-theme-text/90 mb-3">Service Type</label>
                         <div class="grid grid-cols-3 gap-1 sm:gap-3 bg-theme-bg p-1 rounded-2xl border border-theme-border">
-                            <label class="cursor-pointer text-center p-2 sm:p-4 rounded-xl text-[10px] sm:text-xs font-semibold uppercase tracking-wider transition-all duration-300 block select-none border border-transparent" id="lbl-transfer">
+                            <label class="cursor-pointer text-center p-2 sm:p-4 rounded-xl text-[10px] sm:text-xs font-semibold uppercase tracking-wider transition-all duration-300 block select-none border border-transparent" id="lbl-transfer" for="rad-transfer">
                                 <input type="radio" name="service_type" value="airport_transfer" checked class="sr-only" id="rad-transfer">
                                 <i class="fas fa-plane-departure text-sm sm:text-base text-luxe-gold mb-1 sm:mb-2 block" id="icon-transfer"></i>
                                 <span class="block" id="span-transfer">Airport Transfer</span>
                             </label>
-                            <label class="cursor-pointer text-center p-2 sm:p-4 rounded-xl text-[10px] sm:text-xs font-semibold uppercase tracking-wider transition-all duration-300 block select-none border border-transparent" id="lbl-p2p">
+                            <label class="cursor-pointer text-center p-2 sm:p-4 rounded-xl text-[10px] sm:text-xs font-semibold uppercase tracking-wider transition-all duration-300 block select-none border border-transparent" id="lbl-p2p" for="rad-p2p">
                                 <input type="radio" name="service_type" value="point_to_point" class="sr-only" id="rad-p2p">
                                 <i class="fas fa-route text-sm sm:text-base text-theme-text/95 mb-1 sm:mb-2 block" id="icon-p2p"></i>
                                 <span class="block text-theme-text/90" id="span-p2p">Point to Point</span>
                             </label>
-                            <label class="cursor-pointer text-center p-2 sm:p-4 rounded-xl text-[10px] sm:text-xs font-semibold uppercase tracking-wider transition-all duration-300 block select-none border border-transparent" id="lbl-hourly">
+                            <label class="cursor-pointer text-center p-2 sm:p-4 rounded-xl text-[10px] sm:text-xs font-semibold uppercase tracking-wider transition-all duration-300 block select-none border border-transparent" id="lbl-hourly" for="rad-hourly">
                                 <input type="radio" name="service_type" value="hourly" class="sr-only" id="rad-hourly">
                                 <i class="fas fa-clock text-sm sm:text-base text-theme-text/95 mb-1 sm:mb-2 block" id="icon-hourly"></i>
                                 <span class="block text-theme-text/90" id="span-hourly">Hourly Chauffeur</span>
@@ -273,7 +273,7 @@
                                     <span class="absolute inset-y-0 left-0 booking-icon pl-2 sm:pl-4 flex items-center text-luxe-gold">
                                         <i class="fas fa-plane-departure text-[9px] sm:text-sm" id="icon-transfer-start"></i>
                                     </span>
-                                    <select name="airport_id" id="airport_id" required class="booking-select block w-full pl-6 sm:pl-11 pr-5 sm:pr-10 py-1.5 sm:py-3.5 bg-theme-bg/80 rounded-xl border border-theme-border focus:border-luxe-gold text-[10px] sm:text-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-luxe-gold appearance-none">
+                                    <select name="airport_id" id="airport_id" required class="booking-select block w-full pl-6 sm:pl-11 pr-5 sm:pr-10 py-1.5 sm:py-3.5 bg-theme-bg/80 rounded-xl border border-theme-border focus:border-luxe-gold text-[10px] sm:text-sm text-theme-text focus:outline-none focus:ring-1 focus:ring-luxe-gold appearance-none">
                                         <option value="" disabled selected>Select Airport...</option>
                                         {% for airport in airports %}
                                         <option value="{{ airport.id }}" data-lat="{{ airport.latitude }}" data-lng="{{ airport.longitude }}">{{ airport.code }} — {{ airport.name }}</option>
@@ -297,7 +297,7 @@
                                     <span class="absolute inset-y-0 left-0 booking-icon pl-2 sm:pl-4 flex items-center text-luxe-gold">
                                         <i class="fas fa-map-pin text-[9px] sm:text-sm" id="icon-transfer-end"></i>
                                     </span>
-                                    <input type="text" name="destination_address" id="destination_address" required placeholder="Enter address..." class="booking-input block w-full pl-6 sm:pl-11 pr-2 sm:pr-4 py-1.5 sm:py-3.5 bg-theme-bg/80 rounded-xl border border-theme-border focus:border-luxe-gold text-[10px] sm:text-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-luxe-gold font-medium" autocomplete="off">
+                                    <input type="text" name="destination_address" id="destination_address" required placeholder="Enter address..." class="booking-input block w-full pl-6 sm:pl-11 pr-2 sm:pr-4 py-1.5 sm:py-3.5 bg-theme-bg/80 rounded-xl border border-theme-border focus:border-luxe-gold text-[10px] sm:text-sm text-theme-text focus:outline-none focus:ring-1 focus:ring-luxe-gold font-medium" autocomplete="off">
                                 </div>
                                 <p id="geocode-status" class="text-[9px] sm:text-[10px] text-theme-text/95 mt-1 font-medium hidden">
                                     <i class="fas fa-map-marker-alt text-luxe-gold mr-1"></i>
@@ -315,7 +315,7 @@
                                 <span class="absolute inset-y-0 left-0 booking-icon pl-3 sm:pl-4 flex items-center text-luxe-gold">
                                     <i class="fas fa-stopwatch text-[10px] sm:text-sm"></i>
                                 </span>
-                                <input type="number" name="hours_requested" id="hours_requested" min="3" max="12" value="3" class="booking-input block w-full pl-8 sm:pl-11 pr-3 sm:pr-4 py-2 sm:py-3.5 bg-theme-bg/80 rounded-xl border border-theme-border focus:border-luxe-gold text-[11px] sm:text-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-luxe-gold">
+                                <input type="number" name="hours_requested" id="hours_requested" min="3" max="12" value="3" class="booking-input block w-full pl-8 sm:pl-11 pr-3 sm:pr-4 py-2 sm:py-3.5 bg-theme-bg/80 rounded-xl border border-theme-border focus:border-luxe-gold text-[11px] sm:text-sm text-theme-text focus:outline-none focus:ring-1 focus:ring-luxe-gold">
                             </div>
                         </div>
                     </div>
@@ -348,7 +348,7 @@
                                 <span class="absolute inset-y-0 left-0 booking-icon pl-3 sm:pl-4 flex items-center text-luxe-gold">
                                     <i class="fas fa-search text-[10px] sm:text-xs"></i>
                                 </span>
-                                <input type="text" name="pickup_address" id="pickup_address" placeholder="Enter starting address..." class="booking-input block w-full pl-8 sm:pl-10 pr-3 sm:pr-4 py-2 sm:py-3.5 bg-theme-bg/90 rounded-xl border border-theme-border focus:border-luxe-gold text-[11px] sm:text-xs text-gray-900 focus:outline-none focus:ring-1 focus:ring-luxe-gold font-medium transition-all duration-300">
+                                <input type="text" name="pickup_address" id="pickup_address" placeholder="Enter starting address..." class="booking-input block w-full pl-8 sm:pl-10 pr-3 sm:pr-4 py-2 sm:py-3.5 bg-theme-bg/90 rounded-xl border border-theme-border focus:border-luxe-gold text-[11px] sm:text-xs text-theme-text focus:outline-none focus:ring-1 focus:ring-luxe-gold font-medium transition-all duration-300">
                             </div>
                         </div>
                         <div data-aos="fade-up" data-aos-delay="100" id="div-dropoff-location" class="glass-card rounded-2xl p-3 sm:p-5 border border-theme-border hover:border-luxe-gold/50 transition-all duration-500 flex flex-col space-y-3 sm:space-y-4 group">
@@ -372,7 +372,7 @@
                                 <span class="absolute inset-y-0 left-0 booking-icon pl-3 sm:pl-4 flex items-center text-luxe-gold">
                                     <i class="fas fa-search text-[10px] sm:text-xs"></i>
                                 </span>
-                                <input type="text" name="dropoff_address" id="dropoff_address" placeholder="Enter destination address..." class="booking-input block w-full pl-8 sm:pl-10 pr-3 sm:pr-4 py-2 sm:py-3.5 bg-theme-bg/90 rounded-xl border border-theme-border focus:border-luxe-gold text-[11px] sm:text-xs text-gray-900 focus:outline-none focus:ring-1 focus:ring-luxe-gold font-medium transition-all duration-300">
+                                <input type="text" name="dropoff_address" id="dropoff_address" placeholder="Enter destination address..." class="booking-input block w-full pl-8 sm:pl-10 pr-3 sm:pr-4 py-2 sm:py-3.5 bg-theme-bg/90 rounded-xl border border-theme-border focus:border-luxe-gold text-[11px] sm:text-xs text-theme-text focus:outline-none focus:ring-1 focus:ring-luxe-gold font-medium transition-all duration-300">
                             </div>
                         </div>
                     </div>
@@ -383,13 +383,13 @@
                             <label for="number_of_stops" class="block text-[10px] sm:text-xs uppercase tracking-widest font-bold text-theme-text/90">Intermediate Stops</label>
                             <div class="flex items-center space-x-2" id="div-stops-count-wrapper">
                                 <span class="text-[9px] sm:text-[10px] text-theme-text/95 font-semibold uppercase">Quantity:</span>
-                                <input type="number" name="number_of_stops" id="number_of_stops" min="0" value="0" class="w-14 sm:w-16 bg-theme-bg border border-theme-border rounded px-1.5 sm:px-2 py-0.5 sm:py-1 text-[11px] sm:text-xs text-gray-900 focus:border-luxe-gold outline-none">
+                                <input type="number" name="number_of_stops" id="number_of_stops" min="0" value="0" class="w-14 sm:w-16 bg-theme-bg border border-theme-border rounded px-1.5 sm:px-2 py-0.5 sm:py-1 text-[11px] sm:text-xs text-theme-text focus:border-luxe-gold outline-none">
                                 <span class="text-[9px] sm:text-[10px] text-luxe-gold font-bold">($20/stop)</span>
                             </div>
                         </div>
                         <div>
                             <label for="stop_addresses" class="block text-[9px] sm:text-[10px] uppercase text-theme-text/95 font-bold mb-1">Stop Addresses</label>
-                            <textarea name="stop_addresses" id="stop_addresses" rows="2" placeholder="List address details for each stop..." class="block w-full px-3 sm:px-4 py-2 sm:py-3 bg-theme-bg rounded-lg border border-theme-border focus:border-luxe-gold text-[11px] sm:text-xs text-gray-900 focus:outline-none focus:ring-1 focus:ring-luxe-gold font-medium"></textarea>
+                            <textarea name="stop_addresses" id="stop_addresses" rows="2" placeholder="List address details for each stop..." class="block w-full px-3 sm:px-4 py-2 sm:py-3 bg-theme-bg rounded-lg border border-theme-border focus:border-luxe-gold text-[11px] sm:text-xs text-theme-text focus:outline-none focus:ring-1 focus:ring-luxe-gold font-medium"></textarea>
                         </div>
                     </div>
 
@@ -401,7 +401,7 @@
                                 <span class="absolute inset-y-0 left-0 booking-icon pl-3 sm:pl-4 flex items-center text-luxe-gold">
                                     <i class="fas fa-calendar-days text-[10px] sm:text-sm"></i>
                                 </span>
-                                <input type="date" name="pickup_date" id="pickup_date" required min="{{ today }}" value="{{ today }}" class="booking-input block w-full pl-8 sm:pl-11 pr-2 sm:pr-4 py-2 sm:py-3.5 bg-theme-bg/80 rounded-xl border border-theme-border focus:border-luxe-gold text-[11px] sm:text-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-luxe-gold">
+                                <input type="date" name="pickup_date" id="pickup_date" required min="{{ today }}" value="{{ today }}" class="booking-input block w-full pl-8 sm:pl-11 pr-2 sm:pr-4 py-2 sm:py-3.5 bg-theme-bg/80 rounded-xl border border-theme-border focus:border-luxe-gold text-[11px] sm:text-sm text-theme-text focus:outline-none focus:ring-1 focus:ring-luxe-gold">
                             </div>
                         </div>
                         <div>
@@ -410,7 +410,7 @@
                                 <span class="absolute inset-y-0 left-0 booking-icon pl-3 sm:pl-4 flex items-center text-luxe-gold">
                                     <i class="fas fa-clock text-[10px] sm:text-sm"></i>
                                 </span>
-                                <input type="time" name="pickup_time" id="pickup_time" required value="12:00" class="booking-input block w-full pl-8 sm:pl-11 pr-2 sm:pr-4 py-2 sm:py-3.5 bg-theme-bg/80 rounded-xl border border-theme-border focus:border-luxe-gold text-[11px] sm:text-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-luxe-gold">
+                                <input type="time" name="pickup_time" id="pickup_time" required value="12:00" class="booking-input block w-full pl-8 sm:pl-11 pr-2 sm:pr-4 py-2 sm:py-3.5 bg-theme-bg/80 rounded-xl border border-theme-border focus:border-luxe-gold text-[11px] sm:text-sm text-theme-text focus:outline-none focus:ring-1 focus:ring-luxe-gold">
                             </div>
                         </div>
                     </div>
@@ -421,7 +421,7 @@
                                 <span class="absolute inset-y-0 left-0 booking-icon pl-3 sm:pl-4 flex items-center text-luxe-gold">
                                     <i class="fas fa-users text-[10px] sm:text-sm"></i>
                                 </span>
-                                <input type="number" name="passenger_count" id="passenger_count" required min="1" max="14" value="1" class="booking-input block w-full pl-8 sm:pl-11 pr-2 sm:pr-4 py-2 sm:py-3.5 bg-theme-bg/80 rounded-xl border border-theme-border focus:border-luxe-gold text-[11px] sm:text-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-luxe-gold">
+                                <input type="number" name="passenger_count" id="passenger_count" required min="1" max="14" value="1" class="booking-input block w-full pl-8 sm:pl-11 pr-2 sm:pr-4 py-2 sm:py-3.5 bg-theme-bg/80 rounded-xl border border-theme-border focus:border-luxe-gold text-[11px] sm:text-sm text-theme-text focus:outline-none focus:ring-1 focus:ring-luxe-gold">
                             </div>
                         </div>
                         <div id="div-flight">
@@ -430,7 +430,7 @@
                                 <span class="absolute inset-y-0 left-0 booking-icon pl-3 sm:pl-4 flex items-center text-luxe-gold">
                                     <i class="fas fa-plane text-[10px] sm:text-sm"></i>
                                 </span>
-                                <input type="text" name="flight_number" id="flight_number" placeholder="e.g. AA1234" class="booking-input block w-full pl-8 sm:pl-11 pr-2 sm:pr-4 py-2 sm:py-3.5 bg-theme-bg/80 rounded-xl border border-theme-border focus:border-luxe-gold text-[11px] sm:text-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-luxe-gold uppercase">
+                                <input type="text" name="flight_number" id="flight_number" placeholder="e.g. AA1234" class="booking-input block w-full pl-8 sm:pl-11 pr-2 sm:pr-4 py-2 sm:py-3.5 bg-theme-bg/80 rounded-xl border border-theme-border focus:border-luxe-gold text-[11px] sm:text-sm text-theme-text focus:outline-none focus:ring-1 focus:ring-luxe-gold uppercase">
                             </div>
                         </div>
                     </div>
@@ -459,7 +459,7 @@
                                     <span class="absolute inset-y-0 left-0 booking-icon pl-3 sm:pl-4 flex items-center text-luxe-gold">
                                         <i class="fas fa-calendar-days text-[10px] sm:text-sm"></i>
                                     </span>
-                                    <input type="date" name="return_date" id="return_date" min="{{ today }}" class="booking-input block w-full pl-8 sm:pl-11 pr-2 sm:pr-4 py-2 sm:py-3.5 bg-theme-bg/80 rounded-xl border border-theme-border focus:border-luxe-gold text-[11px] sm:text-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-luxe-gold font-medium">
+                                    <input type="date" name="return_date" id="return_date" min="{{ today }}" class="booking-input block w-full pl-8 sm:pl-11 pr-2 sm:pr-4 py-2 sm:py-3.5 bg-theme-bg/80 rounded-xl border border-theme-border focus:border-luxe-gold text-[11px] sm:text-sm text-theme-text focus:outline-none focus:ring-1 focus:ring-luxe-gold font-medium">
                                 </div>
                             </div>
                             <div>
@@ -468,7 +468,7 @@
                                     <span class="absolute inset-y-0 left-0 booking-icon pl-3 sm:pl-4 flex items-center text-luxe-gold">
                                         <i class="fas fa-clock text-[10px] sm:text-sm"></i>
                                     </span>
-                                    <input type="time" name="return_time" id="return_time" class="booking-input block w-full pl-8 sm:pl-11 pr-2 sm:pr-4 py-2 sm:py-3.5 bg-theme-bg/80 rounded-xl border border-theme-border focus:border-luxe-gold text-[11px] sm:text-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-luxe-gold font-medium">
+                                    <input type="time" name="return_time" id="return_time" class="booking-input block w-full pl-8 sm:pl-11 pr-2 sm:pr-4 py-2 sm:py-3.5 bg-theme-bg/80 rounded-xl border border-theme-border focus:border-luxe-gold text-[11px] sm:text-sm text-theme-text focus:outline-none focus:ring-1 focus:ring-luxe-gold font-medium">
                                 </div>
                             </div>
                         </div>
@@ -481,7 +481,7 @@
                             <span class="absolute inset-y-0 left-0 booking-icon pl-3 sm:pl-4 flex items-center text-luxe-gold">
                                 <i class="fas fa-handshake-simple text-[10px] sm:text-sm"></i>
                             </span>
-                            <input type="text" name="meeting_point" id="meeting_point" placeholder="e.g. Terminal B exit gate 4, or hotel lobby entrance" class="booking-input block w-full pl-8 sm:pl-11 pr-3 sm:pr-4 py-2 sm:py-3.5 bg-theme-bg/80 rounded-xl border border-theme-border focus:border-luxe-gold text-[11px] sm:text-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-luxe-gold font-medium font-sans">
+                            <input type="text" name="meeting_point" id="meeting_point" placeholder="e.g. Terminal B exit gate 4, or hotel lobby entrance" class="booking-input block w-full pl-8 sm:pl-11 pr-3 sm:pr-4 py-2 sm:py-3.5 bg-theme-bg/80 rounded-xl border border-theme-border focus:border-luxe-gold text-[11px] sm:text-sm text-theme-text focus:outline-none focus:ring-1 focus:ring-luxe-gold font-medium font-sans">
                         </div>
                         <p class="text-[9px] sm:text-[10px] text-theme-text/95 font-medium">Specify coordinates or instructions on where to meet the private chauffeur upon pickup.</p>
                     </div>
