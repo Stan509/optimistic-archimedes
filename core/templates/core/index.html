@@ -63,16 +63,55 @@
     }
 
     .hero-perspective {
+
         perspective: 1200px;
+
         transform-style: preserve-3d;
+
     }
-    /* 3-col row for airport+switch+address */
+
+    /* 3-col row for airport+switch+address - same height for all */
     .airport-row-3 {
         display: grid;
         grid-template-columns: 1fr auto 1fr;
         gap: 0.5rem;
-        align-items: start;
+        align-items: end;
     }
+    @media (max-width: 640px) {
+        .airport-row-3 {
+            grid-template-columns: 1fr auto 1fr;
+            gap: 0.25rem;
+            align-items: end;
+        }
+        .field-row-2 {
+            display: grid !important;
+            grid-template-columns: 1fr 1fr !important;
+            gap: 0.5rem !important;
+        }
+        .booking-input {
+            padding-top: 0.35rem !important;
+            padding-bottom: 0.35rem !important;
+            padding-left: 1.25rem !important;
+            font-size: 0.7rem !important;
+        }
+        .booking-select {
+            padding-top: 0.35rem !important;
+            padding-bottom: 0.35rem !important;
+            padding-left: 1.25rem !important;
+            font-size: 0.7rem !important;
+        }
+        .booking-icon {
+            padding-left: 0.5rem !important;
+        }
+        .btn-switch-mobile {
+            width: 1.75rem !important;
+            height: 1.75rem !important;
+        }
+        .btn-switch-mobile i {
+            font-size: 0.7rem !important;
+        }
+    }
+
 </style>
 
 {% endblock %}
@@ -168,543 +207,290 @@
 
         </div>
 
-        <!-- Dynamic Booking Widget Column -->
+        <!-- Dynamic Booking Widget Column (EXACT same form as /book page) -->
 
         <div class="lg:col-span-7 order-1 lg:order-2">
 
-            <div data-aos="fade-up" data-aos-delay="100"  class="glass-card rounded-3xl p-6 sm:p-8 shadow-2xl relative overflow-hidden">
+            <div data-aos="fade-up" data-aos-delay="100" class="glass-card rounded-3xl p-6 sm:p-8 shadow-2xl relative overflow-hidden">
 
                 <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-luxe-gold to-luxe-gold-bright"></div>
 
                 <h3 class="text-xl font-semibold tracking-wider font-display mb-6 uppercase flex items-center space-x-2 text-luxe-gold">
-
                     <i class="fas fa-calendar-check"></i>
-
                     <span>Quick Reservation</span>
-
                 </h3>
 
                 <form action="{% site_url 'booking_step1' %}" method="POST" id="booking-step1-form" class="space-y-6">
-
                     {% csrf_token %}
-
                     <input type="hidden" name="pickup_lat" id="pickup_lat">
-
                     <input type="hidden" name="pickup_lng" id="pickup_lng">
-
                     <input type="hidden" name="dropoff_lat" id="dropoff_lat">
-
                     <input type="hidden" name="dropoff_lng" id="dropoff_lng">
-
                     <input type="hidden" name="distance_km" id="distance_km">
 
-                    <!-- Service Type selector -->
-
+                    <!-- Service Type selector - 3 cols on ALL screens -->
                     <div>
-
                         <label class="block text-xs uppercase tracking-widest font-bold text-theme-text/90 mb-3">Service Type</label>
-
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3 bg-transparent p-1.5 rounded-2xl">
-
-                        <label class="cursor-pointer text-center p-4 rounded-xl text-xs font-semibold uppercase tracking-wider transition-all duration-300 block select-none border border-transparent" id="lbl-transfer">
-
-                            <input type="radio" name="service_type" value="airport_transfer" checked class="sr-only" id="rad-transfer">
-
-                            <i class="fas fa-plane-departure text-base text-theme-text/95 mb-2 block" id="icon-transfer"></i>
-
-                            <span class="block text-theme-text/90" id="span-transfer">Airport Transfer</span>
-
-                        </label>
-
-                        <label class="cursor-pointer text-center p-4 rounded-xl text-xs font-semibold uppercase tracking-wider transition-all duration-300 block select-none border border-transparent" id="lbl-p2p">
-
-                            <input type="radio" name="service_type" value="point_to_point" class="sr-only" id="rad-p2p">
-
-                            <i class="fas fa-route text-base text-theme-text/95 mb-2 block" id="icon-p2p"></i>
-
-                            <span class="block text-theme-text/90" id="span-p2p">Point to Point</span>
-
-                        </label>
-
-                        <label class="cursor-pointer text-center p-4 rounded-xl text-xs font-semibold uppercase tracking-wider transition-all duration-300 block select-none border border-transparent" id="lbl-hourly">
-
-                            <input type="radio" name="service_type" value="hourly" class="sr-only" id="rad-hourly">
-
-                            <i class="fas fa-clock text-base text-theme-text/95 mb-2 block" id="icon-hourly"></i>
-
-                            <span class="block text-theme-text/90" id="span-hourly">Hourly Chauffeur</span>
-
-                        </label>
-
-
-
-                    </div>
-
+                        <div class="grid grid-cols-3 gap-1 sm:gap-3 bg-theme-bg p-1 rounded-2xl border border-theme-border">
+                            <label class="cursor-pointer text-center p-2 sm:p-4 rounded-xl text-[10px] sm:text-xs font-semibold uppercase tracking-wider transition-all duration-300 block select-none border border-transparent" id="lbl-transfer">
+                                <input type="radio" name="service_type" value="airport_transfer" checked class="sr-only" id="rad-transfer">
+                                <i class="fas fa-plane-departure text-sm sm:text-base text-luxe-gold mb-1 sm:mb-2 block" id="icon-transfer"></i>
+                                <span class="block">Airport Transfer</span>
+                            </label>
+                            <label class="cursor-pointer text-center p-2 sm:p-4 rounded-xl text-[10px] sm:text-xs font-semibold uppercase tracking-wider transition-all duration-300 block select-none border border-transparent" id="lbl-p2p">
+                                <input type="radio" name="service_type" value="point_to_point" class="sr-only" id="rad-p2p">
+                                <i class="fas fa-route text-sm sm:text-base text-theme-text/95 mb-1 sm:mb-2 block" id="icon-p2p"></i>
+                                <span class="block text-theme-text/90" id="span-p2p">Point to Point</span>
+                            </label>
+                            <label class="cursor-pointer text-center p-2 sm:p-4 rounded-xl text-[10px] sm:text-xs font-semibold uppercase tracking-wider transition-all duration-300 block select-none border border-transparent" id="lbl-hourly">
+                                <input type="radio" name="service_type" value="hourly" class="sr-only" id="rad-hourly">
+                                <i class="fas fa-clock text-sm sm:text-base text-theme-text/95 mb-1 sm:mb-2 block" id="icon-hourly"></i>
+                                <span class="block text-theme-text/90" id="span-hourly">Hourly Chauffeur</span>
+                            </label>
+                        </div>
                     </div>
 
                     <!-- Interactive Dark Map -->
-
-                    <div class="relative w-full h-[450px] bg-theme-bg border border-theme-border rounded-2xl overflow-hidden shadow-inner group mb-2" style="height: 450px;">
-
+                    <div class="relative w-full aspect-square md:aspect-auto md:h-[450px] bg-theme-bg border border-theme-border rounded-2xl overflow-hidden shadow-inner group mb-2">
                         <div id="booking-map" class="w-full h-full z-0"></div>
-
                         <div class="absolute top-4 left-4 z-[1000] bg-theme-bg/90 px-3 py-1.5 rounded-lg border border-theme-border backdrop-blur-md">
-
                             <span class="text-[9px] uppercase font-bold tracking-widest text-luxe-gold flex items-center gap-1.5">
-
                                 <i class="fa-solid fa-map-location-dot animate-pulse"></i>
-
                                 <span>Interactive Luxury Routing Map</span>
-
                             </span>
-
                         </div>
-
                     </div>
 
                     <!-- Direction State Tracker -->
                     <input type="hidden" name="transfer_direction" id="transfer_direction" value="AIRPORT_TO_DEST">
-                    <!-- Airport Transfer wrapper (airport + address with Toggle switch) -->
+
+                    <!-- Airport Transfer wrapper (airport + switch + address on same row) -->
                     <div id="div-airport-transfer-wrapper" class="space-y-4">
-                        <div class="flex flex-col md:flex-row items-center gap-4 relative">
-                            <!-- Left Block: Airport Select (default: Origin Airport) -->
-                            <div id="transfer-start-wrapper" class="w-full font-medium" style="order: 1;">
-                                <label id="lbl-transfer-start" for="airport_id" class="block text-xs uppercase tracking-widest font-bold text-theme-text/90 mb-2">Origin Airport</label>
+                        <div class="airport-row-3">
+                            <div id="transfer-start-wrapper" class="w-full font-medium">
+                                <label id="lbl-transfer-start" for="airport_id" class="block text-[10px] sm:text-xs uppercase tracking-widest font-bold text-theme-text/90 mb-1 sm:mb-2">Origin Airport</label>
                                 <div class="relative">
-                                    <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-luxe-gold">
-                                        <i class="fas fa-plane-departure text-sm" id="icon-transfer-start"></i>
+                                    <span class="absolute inset-y-0 left-0 booking-icon pl-2 sm:pl-4 flex items-center text-luxe-gold">
+                                        <i class="fas fa-plane-departure text-[9px] sm:text-sm" id="icon-transfer-start"></i>
                                     </span>
-                                    <select name="airport_id" id="airport_id" class="block w-full pl-11 pr-10 py-4 bg-theme-bg/80 rounded-xl border border-theme-border focus:border-luxe-gold text-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-luxe-gold appearance-none">
+                                    <select name="airport_id" id="airport_id" class="booking-select block w-full pl-6 sm:pl-11 pr-5 sm:pr-10 py-1.5 sm:py-3.5 bg-theme-bg/80 rounded-xl border border-theme-border focus:border-luxe-gold text-[10px] sm:text-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-luxe-gold appearance-none">
                                         <option value="" disabled selected>Select Airport...</option>
                                         {% for airport in airports %}
-                                        <option value="{{ airport.id }}" data-lat="{{ airport.latitude }}" data-lng="{{ airport.longitude }}">{{ airport.code }}  -  {{ airport.name }}</option>
+                                        <option value="{{ airport.id }}" data-lat="{{ airport.latitude }}" data-lng="{{ airport.longitude }}">{{ airport.code }} — {{ airport.name }}</option>
                                         {% empty %}
                                         <option value="" disabled>No serviced airports in this hub</option>
                                         {% endfor %}
                                     </select>
-                                    <span class="absolute inset-y-0 right-0 pr-4 flex items-center text-theme-text/95 pointer-events-none">
-                                        <i class="fas fa-chevron-down text-xs"></i>
+                                    <span class="absolute inset-y-0 right-0 pr-2 sm:pr-4 flex items-center text-theme-text/95 pointer-events-none">
+                                        <i class="fas fa-chevron-down text-[9px] sm:text-xs"></i>
                                     </span>
                                 </div>
                             </div>
-                            <!-- Inversion Toggle Button -->
-                            <div class="flex justify-center items-center md:pt-6" style="order: 2;">
-                                <button type="button" id="btn-switch-direction" class="w-10 h-10 rounded-full bg-theme-bg border border-theme-border hover:border-luxe-gold/50 hover:text-luxe-gold-bright transition-all duration-300 flex items-center justify-center shadow-lg active:scale-95 cursor-pointer" title="Switch Directions">
-                                    <i class="fas fa-right-left rotate-90 md:rotate-0 text-sm text-luxe-gold"></i>
+                            <div class="flex justify-center items-end pb-1 sm:pb-0">
+                                <button type="button" id="btn-switch-direction" class="btn-switch-mobile w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-theme-bg border border-theme-border text-luxe-gold hover:border-luxe-gold/50 hover:text-luxe-gold-bright transition-all duration-300 flex items-center justify-center shadow-lg active:scale-95 cursor-pointer" title="Switch Directions">
+                                    <i class="fas fa-right-left rotate-90 md:rotate-0 text-[11px] sm:text-sm"></i>
                                 </button>
                             </div>
-                            <!-- Right Block: Destination Address (free text with geocoding) -->
-                            <div id="transfer-end-wrapper" class="w-full font-medium" style="order: 3;">
-                                <label id="lbl-transfer-end" for="destination_address" class="block text-xs uppercase tracking-widest font-bold text-theme-text/90 mb-2">Drop-off Address</label>
+                            <div id="transfer-end-wrapper" class="w-full font-medium">
+                                <label id="lbl-transfer-end" for="destination_address" class="block text-[10px] sm:text-xs uppercase tracking-widest font-bold text-theme-text/90 mb-1 sm:mb-2">Drop-off Address</label>
                                 <div class="relative">
-                                    <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-luxe-gold">
-                                        <i class="fas fa-map-pin text-sm" id="icon-transfer-end"></i>
+                                    <span class="absolute inset-y-0 left-0 booking-icon pl-2 sm:pl-4 flex items-center text-luxe-gold">
+                                        <i class="fas fa-map-pin text-[9px] sm:text-sm" id="icon-transfer-end"></i>
                                     </span>
-                                    <input type="text" name="destination_address" id="destination_address" placeholder="Enter your destination address..." class="block w-full pl-11 pr-4 py-4 bg-theme-bg/80 rounded-xl border border-theme-border focus:border-luxe-gold text-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-luxe-gold font-medium" autocomplete="off">
+                                    <input type="text" name="destination_address" id="destination_address" placeholder="Enter address..." class="booking-input block w-full pl-6 sm:pl-11 pr-2 sm:pr-4 py-1.5 sm:py-3.5 bg-theme-bg/80 rounded-xl border border-theme-border focus:border-luxe-gold text-[10px] sm:text-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-luxe-gold font-medium" autocomplete="off">
                                 </div>
-                                <!-- Geocoding result info -->
-                                <p id="geocode-status" class="text-[10px] text-theme-text/95 mt-1 font-medium hidden">
+                                <p id="geocode-status" class="text-[9px] sm:text-[10px] text-theme-text/95 mt-1 font-medium hidden">
                                     <i class="fas fa-map-marker-alt text-luxe-gold mr-1"></i>
-                                    <span id="geocode-status-text">Address found  -  displaying on map</span>
+                                    <span id="geocode-status-text">Address found — displaying on map</span>
                                 </p>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Hourly fields (Hidden by Default, minimum 3 hours, maximum 12 hours) -->
-
+                    <!-- Hourly fields -->
                     <div id="div-hourly" class="hidden space-y-4">
-
                         <div>
-
-                            <label for="hours_requested" class="block text-xs uppercase tracking-widest font-bold text-theme-text/90 mb-2">Hours Requested (3 - 12 Hours)</label>
-
+                            <label for="hours_requested" class="block text-[10px] sm:text-xs uppercase tracking-widest font-bold text-theme-text/90 mb-1 sm:mb-2">Hours Requested (3 - 12 Hours)</label>
                             <div class="relative">
-
-                                <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-luxe-gold">
-
-                                    <i class="fas fa-stopwatch text-sm"></i>
-
+                                <span class="absolute inset-y-0 left-0 booking-icon pl-3 sm:pl-4 flex items-center text-luxe-gold">
+                                    <i class="fas fa-stopwatch text-[10px] sm:text-sm"></i>
                                 </span>
-
-                                <input type="number" name="hours_requested" id="hours_requested" min="3" max="12" value="3" class="block w-full pl-11 pr-4 py-4 bg-theme-bg/80 rounded-xl border border-theme-border focus:border-luxe-gold text-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-luxe-gold">
-
+                                <input type="number" name="hours_requested" id="hours_requested" min="3" max="12" value="3" class="booking-input block w-full pl-8 sm:pl-11 pr-3 sm:pr-4 py-2 sm:py-3.5 bg-theme-bg/80 rounded-xl border border-theme-border focus:border-luxe-gold text-[11px] sm:text-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-luxe-gold">
                             </div>
-
                         </div>
-
                     </div>
 
-                    <!-- Custom Pickup / Drop-off Addresses as interactive cards (shown for hourly/point-to-point) -->
-
-                    <div id="div-custom-addresses" class="hidden grid grid-cols-1 md:grid-cols-2 gap-6">
-
-                        <!-- Starting Location Card -->
-
-                        <div data-aos="fade-up" data-aos-delay="100"  class="glass-card rounded-2xl p-5 border border-theme-border hover:border-luxe-gold/50 transition-all duration-500 flex flex-col space-y-4 group">
-
+                    <!-- Custom Pickup / Drop-off Addresses -->
+                    <div id="div-custom-addresses" class="hidden grid grid-cols-2 gap-2 sm:gap-6">
+                        <div data-aos="fade-up" data-aos-delay="100" class="glass-card rounded-2xl p-3 sm:p-5 border border-theme-border hover:border-luxe-gold/50 transition-all duration-500 flex flex-col space-y-3 sm:space-y-4 group">
                             <div class="flex items-center justify-between">
-
-                                <label for="pickup_address" class="block text-xs uppercase tracking-widest font-bold text-theme-text/90">Pickup Location (Depart)</label>
-
-                                <span class="text-luxe-gold animate-pulse text-xs"><i class="fas fa-circle-dot"></i></span>
-
+                                <label for="pickup_address" class="block text-[10px] sm:text-xs uppercase tracking-widest font-bold text-theme-text/90">Pickup Location</label>
+                                <span class="text-luxe-gold animate-pulse text-[10px] sm:text-xs"><i class="fas fa-circle-dot"></i></span>
                             </div>
-
-                            
-
-                            <!-- Visual Micro Map representation -->
-
-                            <div id="map-pickup" class="relative w-full h-28 bg-theme-bg border border-theme-border rounded-xl overflow-hidden cursor-pointer group-hover:border-luxe-gold/30 transition-colors duration-500">
-
-                                <!-- SVG Grid lines simulating map streets -->
-
+                            <div id="map-pickup" class="relative w-full h-16 sm:h-28 bg-theme-bg border border-theme-border rounded-xl overflow-hidden cursor-pointer group-hover:border-luxe-gold/30 transition-colors duration-500">
                                 <svg class="absolute inset-0 w-full h-full opacity-20 stroke-gray-700" xmlns="http://www.w3.org/2000/svg">
-
                                     <defs>
-
-                                        <pattern id="grid-pickup-hero" width="20" height="20" patternUnits="userSpaceOnUse">
-
+                                        <pattern id="grid-pickup" width="20" height="20" patternUnits="userSpaceOnUse">
                                             <path d="M 20 0 L 0 0 0 20" fill="none" stroke-width="0.5"/>
-
                                         </pattern>
-
                                     </defs>
-
-                                    <rect width="100%" height="100%" fill="url(#grid-pickup-hero)" />
-
-                                    <!-- Mock Route lines -->
-
+                                    <rect width="100%" height="100%" fill="url(#grid-pickup)" />
                                     <path d="M 20 50 Q 150 20 280 80" fill="none" stroke="#C9A84C" stroke-width="2" class="opacity-40" />
-
                                 </svg>
-
-                                <!-- Glowing GPS Marker pin -->
-
                                 <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center">
-
-                                    <div class="w-8 h-8 rounded-full bg-luxe-gold/20 flex items-center justify-center animate-ping absolute"></div>
-
-                                    <div class="w-4 h-4 rounded-full bg-luxe-gold/40 flex items-center justify-center animate-pulse absolute"></div>
-
-                                    <i class="fas fa-location-dot text-luxe-gold text-lg z-10 filter drop-shadow-[0_0_8px_rgba(201,168,76,0.6)]"></i>
-
+                                    <div class="w-6 sm:w-8 h-6 sm:h-8 rounded-full bg-luxe-gold/20 flex items-center justify-center animate-ping absolute"></div>
+                                    <div class="w-3 sm:w-4 h-3 sm:h-4 rounded-full bg-luxe-gold/40 flex items-center justify-center animate-pulse absolute"></div>
+                                    <i class="fas fa-location-dot text-luxe-gold text-base sm:text-lg z-10 filter drop-shadow-[0_0_8px_rgba(201,168,76,0.6)]"></i>
                                 </div>
-
-                                <span class="absolute bottom-2 right-2 text-[8px] uppercase tracking-wider text-theme-text/95 font-bold bg-theme-bg/80 px-2 py-0.5 rounded border border-theme-border">Click to Select Plaza Hotel</span>
-
+                                <span class="absolute bottom-1 sm:bottom-2 right-1 sm:right-2 text-[7px] sm:text-[8px] uppercase tracking-wider text-theme-text/95 font-bold bg-theme-bg/80 px-1 sm:px-2 py-0.5 rounded border border-theme-border">Click to Select</span>
                             </div>
-
-                            <!-- TextInput field integrated inside the card -->
-
                             <div class="relative">
-
-                                <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-luxe-gold">
-
-                                    <i class="fas fa-search text-xs"></i>
-
+                                <span class="absolute inset-y-0 left-0 booking-icon pl-3 sm:pl-4 flex items-center text-luxe-gold">
+                                    <i class="fas fa-search text-[10px] sm:text-xs"></i>
                                 </span>
-
-                                <input type="text" name="pickup_address" id="pickup_address" placeholder="Enter starting address..." class="block w-full pl-10 pr-4 py-3.5 bg-theme-bg/90 rounded-xl border border-theme-border focus:border-luxe-gold text-xs text-gray-900 focus:outline-none focus:ring-1 focus:ring-luxe-gold font-medium transition-all duration-300">
-
+                                <input type="text" name="pickup_address" id="pickup_address" placeholder="Enter starting address..." class="booking-input block w-full pl-8 sm:pl-10 pr-3 sm:pr-4 py-2 sm:py-3.5 bg-theme-bg/90 rounded-xl border border-theme-border focus:border-luxe-gold text-[11px] sm:text-xs text-gray-900 focus:outline-none focus:ring-1 focus:ring-luxe-gold font-medium transition-all duration-300">
                             </div>
-
                         </div>
-
-                        <!-- Destination Location Card -->
-
-                        <div data-aos="fade-up" data-aos-delay="100"  id="div-dropoff-location" class="glass-card rounded-2xl p-5 border border-theme-border hover:border-luxe-gold/50 transition-all duration-500 flex flex-col space-y-4 group">
-
+                        <div data-aos="fade-up" data-aos-delay="100" id="div-dropoff-location" class="glass-card rounded-2xl p-3 sm:p-5 border border-theme-border hover:border-luxe-gold/50 transition-all duration-500 flex flex-col space-y-3 sm:space-y-4 group">
                             <div class="flex items-center justify-between">
-
-                                <label for="dropoff_address" class="block text-xs uppercase tracking-widest font-bold text-theme-text/90">Destination Location (Arrival)</label>
-
-                                <span class="text-luxe-gold animate-pulse text-xs"><i class="fas fa-location-dot"></i></span>
-
+                                <label for="dropoff_address" class="block text-[10px] sm:text-xs uppercase tracking-widest font-bold text-theme-text/90">Destination</label>
+                                <span class="text-luxe-gold animate-pulse text-[10px] sm:text-xs"><i class="fas fa-location-dot"></i></span>
                             </div>
-
-                            
-
-                            <!-- Visual Micro Map representation -->
-
-                            <div id="map-dropoff" class="relative w-full h-28 bg-theme-bg border border-theme-border rounded-xl overflow-hidden cursor-pointer group-hover:border-luxe-gold/30 transition-colors duration-500">
-
-                                <!-- SVG Grid lines simulating map streets -->
-
+                            <div id="map-dropoff" class="relative w-full h-16 sm:h-28 bg-theme-bg border border-theme-border rounded-xl overflow-hidden cursor-pointer group-hover:border-luxe-gold/30 transition-colors duration-500">
                                 <svg class="absolute inset-0 w-full h-full opacity-20 stroke-gray-700" xmlns="http://www.w3.org/2000/svg">
-
-                                    <rect width="100%" height="100%" fill="url(#grid-pickup-hero)" />
-
-                                    <!-- Mock Route lines -->
-
+                                    <rect width="100%" height="100%" fill="url(#grid-pickup)" />
                                     <path d="M 280 80 Q 150 20 20 50" fill="none" stroke="#C9A84C" stroke-width="2" class="opacity-40" />
-
                                 </svg>
-
-                                <!-- Glowing GPS Marker pin -->
-
                                 <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center">
-
-                                    <div class="w-8 h-8 rounded-full bg-luxe-gold/20 flex items-center justify-center animate-ping absolute"></div>
-
-                                    <div class="w-4 h-4 rounded-full bg-luxe-gold/40 flex items-center justify-center animate-pulse absolute"></div>
-
-                                    <i class="fas fa-location-arrow text-luxe-gold text-base z-10 filter drop-shadow-[0_0_8px_rgba(201,168,76,0.6)]"></i>
-
+                                    <div class="w-6 sm:w-8 h-6 sm:h-8 rounded-full bg-luxe-gold/20 flex items-center justify-center animate-ping absolute"></div>
+                                    <div class="w-3 sm:w-4 h-3 sm:h-4 rounded-full bg-luxe-gold/40 flex items-center justify-center animate-pulse absolute"></div>
+                                    <i class="fas fa-location-arrow text-luxe-gold text-sm sm:text-base z-10 filter drop-shadow-[0_0_8px_rgba(201,168,76,0.6)]"></i>
                                 </div>
-
-                                <span class="absolute bottom-2 right-2 text-[8px] uppercase tracking-wider text-theme-text/95 font-bold bg-theme-bg/80 px-2 py-0.5 rounded border border-theme-border">Click to Select JFK Airport</span>
-
+                                <span class="absolute bottom-1 sm:bottom-2 right-1 sm:right-2 text-[7px] sm:text-[8px] uppercase tracking-wider text-theme-text/95 font-bold bg-theme-bg/80 px-1 sm:px-2 py-0.5 rounded border border-theme-border">Click to Select</span>
                             </div>
-
-                            <!-- TextInput field integrated inside the card -->
-
                             <div class="relative">
-
-                                <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-luxe-gold">
-
-                                    <i class="fas fa-search text-xs"></i>
-
+                                <span class="absolute inset-y-0 left-0 booking-icon pl-3 sm:pl-4 flex items-center text-luxe-gold">
+                                    <i class="fas fa-search text-[10px] sm:text-xs"></i>
                                 </span>
-
-                                <input type="text" name="dropoff_address" id="dropoff_address" placeholder="Enter destination address..." class="block w-full pl-10 pr-4 py-3.5 bg-theme-bg/90 rounded-xl border border-theme-border focus:border-luxe-gold text-xs text-gray-900 focus:outline-none focus:ring-1 focus:ring-luxe-gold font-medium transition-all duration-300">
-
+                                <input type="text" name="dropoff_address" id="dropoff_address" placeholder="Enter destination address..." class="booking-input block w-full pl-8 sm:pl-10 pr-3 sm:pr-4 py-2 sm:py-3.5 bg-theme-bg/90 rounded-xl border border-theme-border focus:border-luxe-gold text-[11px] sm:text-xs text-gray-900 focus:outline-none focus:ring-1 focus:ring-luxe-gold font-medium transition-all duration-300">
                             </div>
-
                         </div>
-
                     </div>
 
-                    <!-- Intermediate Stops Section (For Hourly and Point-to-Point) -->
-
-                    <div id="div-stops-section" class="hidden space-y-4 bg-theme-bg/30 p-5 rounded-2xl border border-theme-border">
-
+                    <!-- Intermediate Stops -->
+                    <div id="div-stops-section" class="hidden space-y-4 bg-theme-bg/30 p-4 sm:p-5 rounded-2xl border border-theme-border">
                         <div class="flex items-center justify-between">
-
-                            <label for="number_of_stops" class="block text-xs uppercase tracking-widest font-bold text-theme-text/90">Intermediate Stops</label>
-
+                            <label for="number_of_stops" class="block text-[10px] sm:text-xs uppercase tracking-widest font-bold text-theme-text/90">Intermediate Stops</label>
                             <div class="flex items-center space-x-2" id="div-stops-count-wrapper">
-
-                                <span class="text-[10px] text-theme-text/95 font-semibold uppercase">Quantity:</span>
-
-                                <input type="number" name="number_of_stops" id="number_of_stops" min="0" value="0" class="w-16 bg-theme-bg border border-theme-border rounded px-2 py-1 text-xs text-gray-900 focus:border-luxe-gold outline-none">
-
-                                <span class="text-[10px] text-luxe-gold font-bold">($20/stop for Point-to-Point)</span>
-
+                                <span class="text-[9px] sm:text-[10px] text-theme-text/95 font-semibold uppercase">Quantity:</span>
+                                <input type="number" name="number_of_stops" id="number_of_stops" min="0" value="0" class="w-14 sm:w-16 bg-theme-bg border border-theme-border rounded px-1.5 sm:px-2 py-0.5 sm:py-1 text-[11px] sm:text-xs text-gray-900 focus:border-luxe-gold outline-none">
+                                <span class="text-[9px] sm:text-[10px] text-luxe-gold font-bold">($20/stop)</span>
                             </div>
-
                         </div>
-
                         <div>
-
-                            <label for="stop_addresses" class="block text-[10px] uppercase text-theme-text/95 font-bold mb-1">Stop Addresses</label>
-
-                            <textarea name="stop_addresses" id="stop_addresses" rows="2" placeholder="List address details for each stop..." class="block w-full px-4 py-3 bg-theme-bg rounded-lg border border-theme-border focus:border-luxe-gold text-xs text-gray-900 focus:outline-none focus:ring-1 focus:ring-luxe-gold font-medium"></textarea>
-
+                            <label for="stop_addresses" class="block text-[9px] sm:text-[10px] uppercase text-theme-text/95 font-bold mb-1">Stop Addresses</label>
+                            <textarea name="stop_addresses" id="stop_addresses" rows="2" placeholder="List address details for each stop..." class="block w-full px-3 sm:px-4 py-2 sm:py-3 bg-theme-bg rounded-lg border border-theme-border focus:border-luxe-gold text-[11px] sm:text-xs text-gray-900 focus:outline-none focus:ring-1 focus:ring-luxe-gold font-medium"></textarea>
                         </div>
-
                     </div>
 
-                    <!-- Date, Time, Passengers and Flight details split in 2x2 grid for extra space -->
-
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-
+                    <!-- Date, Time, Passengers, Flight - ALL in 2 cols -->
+                    <div class="field-row-2 grid grid-cols-2 gap-2 sm:gap-4">
                         <div>
-
-                            <label for="pickup_date" class="block text-xs uppercase tracking-widest font-bold text-theme-text/90 mb-2">Pickup Date</label>
-
+                            <label for="pickup_date" class="block text-[10px] sm:text-xs uppercase tracking-widest font-bold text-theme-text/90 mb-1 sm:mb-2">Pickup Date</label>
                             <div class="relative">
-
-                                <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-luxe-gold">
-
-                                    <i class="fas fa-calendar-days text-sm"></i>
-
+                                <span class="absolute inset-y-0 left-0 booking-icon pl-3 sm:pl-4 flex items-center text-luxe-gold">
+                                    <i class="fas fa-calendar-days text-[10px] sm:text-sm"></i>
                                 </span>
-
-                                <input type="date" name="pickup_date" id="pickup_date" required min="{{ today }}" value="{{ today }}" class="block w-full pl-11 pr-4 py-4 bg-theme-bg/80 rounded-xl border border-theme-border focus:border-luxe-gold text-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-luxe-gold">
-
+                                <input type="date" name="pickup_date" id="pickup_date" required min="{{ today }}" value="{{ today }}" class="booking-input block w-full pl-8 sm:pl-11 pr-2 sm:pr-4 py-2 sm:py-3.5 bg-theme-bg/80 rounded-xl border border-theme-border focus:border-luxe-gold text-[11px] sm:text-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-luxe-gold">
                             </div>
-
                         </div>
-
-                        
-
                         <div>
-
-                            <label for="pickup_time" class="block text-xs uppercase tracking-widest font-bold text-theme-text/90 mb-2">Pickup Time</label>
-
+                            <label for="pickup_time" class="block text-[10px] sm:text-xs uppercase tracking-widest font-bold text-theme-text/90 mb-1 sm:mb-2">Pickup Time</label>
                             <div class="relative">
-
-                                <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-luxe-gold">
-
-                                    <i class="fas fa-clock text-sm"></i>
-
+                                <span class="absolute inset-y-0 left-0 booking-icon pl-3 sm:pl-4 flex items-center text-luxe-gold">
+                                    <i class="fas fa-clock text-[10px] sm:text-sm"></i>
                                 </span>
-
-                                <input type="time" name="pickup_time" id="pickup_time" required value="12:00" class="block w-full pl-11 pr-4 py-4 bg-theme-bg/80 rounded-xl border border-theme-border focus:border-luxe-gold text-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-luxe-gold">
-
+                                <input type="time" name="pickup_time" id="pickup_time" required value="12:00" class="booking-input block w-full pl-8 sm:pl-11 pr-2 sm:pr-4 py-2 sm:py-3.5 bg-theme-bg/80 rounded-xl border border-theme-border focus:border-luxe-gold text-[11px] sm:text-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-luxe-gold">
                             </div>
-
                         </div>
-
                     </div>
-
-
-
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-
+                    <div class="field-row-2 grid grid-cols-2 gap-2 sm:gap-4">
                         <div>
-
-                            <label for="passenger_count" class="block text-xs uppercase tracking-widest font-bold text-theme-text/90 mb-2">Passengers</label>
-
+                            <label for="passenger_count" class="block text-[10px] sm:text-xs uppercase tracking-widest font-bold text-theme-text/90 mb-1 sm:mb-2">Passengers</label>
                             <div class="relative">
-
-                                <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-luxe-gold">
-
-                                    <i class="fas fa-users text-sm"></i>
-
+                                <span class="absolute inset-y-0 left-0 booking-icon pl-3 sm:pl-4 flex items-center text-luxe-gold">
+                                    <i class="fas fa-users text-[10px] sm:text-sm"></i>
                                 </span>
-
-                                <input type="number" name="passenger_count" id="passenger_count" required min="1" max="14" value="1" class="block w-full pl-11 pr-4 py-4 bg-theme-bg/80 rounded-xl border border-theme-border focus:border-luxe-gold text-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-luxe-gold">
-
+                                <input type="number" name="passenger_count" id="passenger_count" required min="1" max="14" value="1" class="booking-input block w-full pl-8 sm:pl-11 pr-2 sm:pr-4 py-2 sm:py-3.5 bg-theme-bg/80 rounded-xl border border-theme-border focus:border-luxe-gold text-[11px] sm:text-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-luxe-gold">
                             </div>
-
                         </div>
-
-
-
                         <div id="div-flight">
-
-                            <label for="flight_number" class="block text-xs uppercase tracking-widest font-bold text-theme-text/90 mb-2">Flight Number</label>
-
+                            <label for="flight_number" class="block text-[10px] sm:text-xs uppercase tracking-widest font-bold text-theme-text/90 mb-1 sm:mb-2">Flight Number</label>
                             <div class="relative">
-
-                                <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-luxe-gold">
-
-                                    <i class="fas fa-plane text-sm"></i>
-
+                                <span class="absolute inset-y-0 left-0 booking-icon pl-3 sm:pl-4 flex items-center text-luxe-gold">
+                                    <i class="fas fa-plane text-[10px] sm:text-sm"></i>
                                 </span>
-
-                                <input type="text" name="flight_number" id="flight_number" placeholder="e.g. AA1234" class="block w-full pl-11 pr-4 py-4 bg-theme-bg/80 rounded-xl border border-theme-border focus:border-luxe-gold text-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-luxe-gold uppercase">
-
+                                <input type="text" name="flight_number" id="flight_number" placeholder="e.g. AA1234" class="booking-input block w-full pl-8 sm:pl-11 pr-2 sm:pr-4 py-2 sm:py-3.5 bg-theme-bg/80 rounded-xl border border-theme-border focus:border-luxe-gold text-[11px] sm:text-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-luxe-gold uppercase">
                             </div>
-
                         </div>
-
                     </div>
 
-                    <!-- Round-trip Section (For Airport Transfer and Point-to-Point) -->
-
+                    <!-- Round-trip Section -->
                     <div id="div-round-trip" class="py-2 border-t border-theme-border">
-
-                        <div class="flex items-center justify-between p-4 rounded-xl bg-theme-bg/40 border border-theme-border hover:border-luxe-gold/30 transition-all duration-300 cursor-pointer select-none mb-4" id="div-round-trip-row">
-
-                            <div class="space-y-1">
-
-                                <span class="block text-xs font-bold uppercase tracking-wider text-theme-text font-sans">Aller-Retour / Round-Trip</span>
-
-                                <span class="block text-[10px] text-theme-text/90 font-medium">Planifier le trajet de retour</span>
-
+                        <div class="flex items-center justify-between p-3 sm:p-4 rounded-xl bg-theme-bg/40 border border-theme-border hover:border-luxe-gold/30 transition-all duration-300 cursor-pointer select-none" id="div-round-trip-row">
+                            <div class="space-y-0.5 sm:space-y-1">
+                                <span class="block text-[11px] sm:text-xs font-bold uppercase tracking-wider text-theme-text font-sans">Aller-Retour / Round-Trip</span>
+                                <span class="block text-[9px] sm:text-[10px] text-theme-text/90 font-medium">Planifier le trajet de retour</span>
                             </div>
-
-                            <div class="flex items-center space-x-3">
-
-                                <span id="toggle-label" class="text-[10px] font-bold uppercase tracking-wider text-theme-text/95 transition-colors duration-300">Désactivé / OFF</span>
-
+                            <div class="flex items-center space-x-2 sm:space-x-3">
+                                <span id="toggle-label" class="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-theme-text/95 transition-colors duration-300">OFF</span>
                                 <div class="relative inline-flex items-center">
-
                                     <input type="checkbox" name="round_trip" id="round_trip" class="sr-only">
-
-                                    <div class="w-14 h-7 bg-gray-300 border border-gray-400 rounded-full transition-colors duration-300 flex items-center px-1 shadow-inner" id="toggle-bg">
-
-                                        <div class="w-5 h-5 bg-white rounded-full transition-transform duration-300 shadow-md" id="toggle-dot" style="transition-property: transform; transition-duration: 300ms; transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);"></div>
-
+                                    <div class="w-12 h-6 sm:w-14 sm:h-7 bg-gray-300 border border-gray-400 rounded-full transition-colors duration-300 flex items-center px-1 shadow-inner" id="toggle-bg">
+                                        <div class="w-4 h-4 sm:w-5 sm:h-5 bg-white rounded-full transition-transform duration-300 shadow-md" id="toggle-dot" style="transition-property: transform; transition-duration: 300ms; transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);"></div>
                                     </div>
-
                                 </div>
-
                             </div>
-
                         </div>
-
-                        
-
-                        <!-- Return date/time subfields (dynamic show) -->
-
-                        <div id="div-return-fields" class="hidden grid grid-cols-1 md:grid-cols-2 gap-4 mt-4 pt-4 border-t border-theme-border">
-
+                        <div id="div-return-fields" class="hidden field-row-2 grid grid-cols-2 gap-2 sm:gap-4 mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-theme-border">
                             <div>
-
-                                <label for="return_date" class="block text-xs uppercase tracking-widest font-bold text-theme-text/90 mb-2">Return Date</label>
-
+                                <label for="return_date" class="block text-[10px] sm:text-xs uppercase tracking-widest font-bold text-theme-text/90 mb-1 sm:mb-2">Return Date</label>
                                 <div class="relative">
-
-                                    <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-luxe-gold">
-
-                                        <i class="fas fa-calendar-days text-sm"></i>
-
+                                    <span class="absolute inset-y-0 left-0 booking-icon pl-3 sm:pl-4 flex items-center text-luxe-gold">
+                                        <i class="fas fa-calendar-days text-[10px] sm:text-sm"></i>
                                     </span>
-
-                                    <input type="date" name="return_date" id="return_date" min="{{ today }}" class="block w-full pl-11 pr-4 py-4 bg-theme-bg/80 rounded-xl border border-theme-border focus:border-luxe-gold text-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-luxe-gold font-medium">
-
+                                    <input type="date" name="return_date" id="return_date" min="{{ today }}" class="booking-input block w-full pl-8 sm:pl-11 pr-2 sm:pr-4 py-2 sm:py-3.5 bg-theme-bg/80 rounded-xl border border-theme-border focus:border-luxe-gold text-[11px] sm:text-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-luxe-gold font-medium">
                                 </div>
-
                             </div>
-
                             <div>
-
-                                <label for="return_time" class="block text-xs uppercase tracking-widest font-bold text-theme-text/90 mb-2">Return Time</label>
-
+                                <label for="return_time" class="block text-[10px] sm:text-xs uppercase tracking-widest font-bold text-theme-text/90 mb-1 sm:mb-2">Return Time</label>
                                 <div class="relative">
-
-                                    <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-luxe-gold">
-
-                                        <i class="fas fa-clock text-sm"></i>
-
+                                    <span class="absolute inset-y-0 left-0 booking-icon pl-3 sm:pl-4 flex items-center text-luxe-gold">
+                                        <i class="fas fa-clock text-[10px] sm:text-sm"></i>
                                     </span>
-
-                                    <input type="time" name="return_time" id="return_time" class="block w-full pl-11 pr-4 py-4 bg-theme-bg/80 rounded-xl border border-theme-border focus:border-luxe-gold text-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-luxe-gold font-medium">
-
+                                    <input type="time" name="return_time" id="return_time" class="booking-input block w-full pl-8 sm:pl-11 pr-2 sm:pr-4 py-2 sm:py-3.5 bg-theme-bg/80 rounded-xl border border-theme-border focus:border-luxe-gold text-[11px] sm:text-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-luxe-gold font-medium">
                                 </div>
-
                             </div>
-
                         </div>
-
                     </div>
 
-                    <!-- Meeting Point Field (Visible for all service types) -->
-
-                    <div class="py-4 border-t border-theme-border space-y-2">
-
-                        <label for="meeting_point" class="block text-xs uppercase tracking-widest font-bold text-theme-text/90">Meeting Point (Lieu de rencontre)</label>
-
+                    <!-- Meeting Point -->
+                    <div class="py-2 border-t border-theme-border space-y-1 sm:space-y-2">
+                        <label for="meeting_point" class="block text-[10px] sm:text-xs uppercase tracking-widest font-bold text-theme-text/90">Meeting Point (Lieu de rencontre)</label>
                         <div class="relative">
-
-                            <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-luxe-gold">
-
-                                <i class="fas fa-handshake-simple text-sm"></i>
-
+                            <span class="absolute inset-y-0 left-0 booking-icon pl-3 sm:pl-4 flex items-center text-luxe-gold">
+                                <i class="fas fa-handshake-simple text-[10px] sm:text-sm"></i>
                             </span>
-
-                            <input type="text" name="meeting_point" id="meeting_point" placeholder="e.g. Terminal B exit gate 4, or hotel lobby entrance" class="block w-full pl-11 pr-4 py-4 bg-theme-bg/80 rounded-xl border border-theme-border focus:border-luxe-gold text-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-luxe-gold font-medium font-sans">
-
+                            <input type="text" name="meeting_point" id="meeting_point" placeholder="e.g. Terminal B exit gate 4, or hotel lobby entrance" class="booking-input block w-full pl-8 sm:pl-11 pr-3 sm:pr-4 py-2 sm:py-3.5 bg-theme-bg/80 rounded-xl border border-theme-border focus:border-luxe-gold text-[11px] sm:text-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-luxe-gold font-medium font-sans">
                         </div>
-
-                        <p class="text-[10px] text-theme-text/95 font-medium">Specify coordinates or instructions on where to meet the private chauffeur upon pickup.</p>
-
+                        <p class="text-[9px] sm:text-[10px] text-theme-text/95 font-medium">Specify coordinates or instructions on where to meet the private chauffeur upon pickup.</p>
                     </div>
 
                     <!-- Submit Button -->
-
-                    <button type="submit" id="submit-btn" disabled class="w-full gold-btn py-4.5 rounded-xl text-sm uppercase tracking-widest font-semibold mt-6 shadow-xl flex items-center justify-center space-x-3 cursor-not-allowed opacity-60">
-
+                    <button type="submit" id="submit-btn" disabled class="w-full gold-btn py-3 sm:py-4 rounded-xl text-[11px] sm:text-sm uppercase tracking-widest font-semibold mt-4 sm:mt-6 shadow-xl shadow-luxe-gold/20 flex items-center justify-center space-x-2 sm:space-x-3 cursor-not-allowed opacity-60">
                         <span>Continue to Fleet Selection</span>
-
-                        <i class="fas fa-arrow-right text-xs"></i>
-
+                        <i class="fas fa-arrow-right text-[10px] sm:text-xs"></i>
                     </button>
-
                 </form>
 
             </div>
@@ -1301,1342 +1087,4 @@
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="{% static 'core/js/booking-leaflet.js' %}"></script>
-
-<script>
-
-    document.addEventListener('DOMContentLoaded', () => {
-
-        const radTransfer = document.getElementById('rad-transfer');
-
-        const radHourly = document.getElementById('rad-hourly');
-
-        const radP2P = document.getElementById('rad-p2p');
-
-        {% if site_slug == 'dr' %}
-
-        const radRental = document.getElementById('rad-rental');
-
-        const lblRental = document.getElementById('lbl-rental');
-
-        const iconRental = document.getElementById('icon-rental');
-
-        const spanRental = document.getElementById('span-rental');
-
-        {% else %}
-
-        const radRental = null;
-
-        const lblRental = null;
-
-        const iconRental = null;
-
-        const spanRental = null;
-
-        {% endif %}
-
-        const lblTransfer = document.getElementById('lbl-transfer');
-
-        const lblHourly = document.getElementById('lbl-hourly');
-
-        const lblP2P = document.getElementById('lbl-p2p');
-
-        const iconHourly = document.getElementById('icon-hourly');
-
-        const iconP2P = document.getElementById('icon-p2p');
-
-        const spanHourly = document.getElementById('span-hourly');
-
-        const iconTransfer = document.getElementById('icon-transfer');
-
-        const spanTransfer = document.getElementById('span-transfer');
-
-        const spanP2P = document.getElementById('span-p2p');
-
-        const divAirportTransferWrapper = document.getElementById('div-airport-transfer-wrapper');
-
-        const divHourly = document.getElementById('div-hourly');
-
-        const divFlight = document.getElementById('div-flight');
-
-        const divCustomAddresses = document.getElementById('div-custom-addresses');
-
-        const divDropoffLocation = document.getElementById('div-dropoff-location');
-
-        const divStopsSection = document.getElementById('div-stops-section');
-
-        const divStopsCountWrapper = document.getElementById('div-stops-count-wrapper');
-
-        const divRoundTrip = document.getElementById('div-round-trip');
-
-        const divReturnFields = document.getElementById('div-return-fields');
-
-        const airportSelect = document.getElementById('airport_id');
-
-        const destinationAddress = document.getElementById('destination_address');
-
-        const pickupAddress = document.getElementById('pickup_address');
-
-        const dropoffAddress = document.getElementById('dropoff_address');
-
-        const roundTripCheckbox = document.getElementById('round_trip');
-
-        const returnDateInput = document.getElementById('return_date');
-
-        const returnTimeInput = document.getElementById('return_time');
-
-        const submitBtn = document.getElementById('submit-btn');
-
-        const geocodeStatus = document.getElementById('geocode-status');
-
-        const geocodeStatusText = document.getElementById('geocode-status-text');
-
-        // Form Validation logic
-
-        function checkValidation() {
-
-            let isValid = false;
-
-            if (radTransfer.checked) {
-
-                // Airport transfer: need airport + destination address
-
-                if (airportSelect.value && destinationAddress.value.trim() !== '') {
-
-                    isValid = true;
-
-                }
-
-            } else if (radHourly.checked) {
-
-                if (pickupAddress.value.trim() !== '') {
-
-                    isValid = true;
-
-                }
-
-            } else if (radP2P.checked) {
-
-                if (pickupAddress.value.trim() !== '' && dropoffAddress.value.trim() !== '') {
-
-                    isValid = true;
-
-                }
-
-            } else if (radRental && radRental.checked) {
-
-                if (pickupAddress.value.trim() !== '' && dropoffAddress.value.trim() !== '') {
-
-                    isValid = true;
-
-                }
-
-            }
-
-            
-
-            // Check round-trip coordinates (only for non-hourly services)
-
-            if (isValid && roundTripCheckbox.checked && !radHourly.checked) {
-
-                if (!returnDateInput.value || !returnTimeInput.value) {
-
-                    isValid = false;
-
-                }
-
-            }
-
-            if (isValid) {
-
-                submitBtn.disabled = false;
-
-                submitBtn.classList.remove('opacity-60', 'cursor-not-allowed');
-
-                submitBtn.classList.add('hover:scale-[1.01]', 'cursor-pointer');
-
-            } else {
-
-                submitBtn.disabled = true;
-
-                submitBtn.classList.add('opacity-60', 'cursor-not-allowed');
-
-                submitBtn.classList.remove('hover:scale-[1.01]', 'cursor-pointer');
-
-            }
-
-        }
-
-        // Service Type Visual Toggles
-
-        function updateServiceType() {
-
-            lblTransfer.className = "cursor-pointer text-center p-4 rounded-xl text-xs font-semibold uppercase tracking-wider transition-all duration-300 block select-none border border-transparent hover:bg-theme-card";
-
-            lblHourly.className = "cursor-pointer text-center p-4 rounded-xl text-xs font-semibold uppercase tracking-wider transition-all duration-300 block select-none border border-transparent hover:bg-theme-card";
-
-            lblP2P.className = "cursor-pointer text-center p-4 rounded-xl text-xs font-semibold uppercase tracking-wider transition-all duration-300 block select-none border border-transparent hover:bg-theme-card";
-
-            if (lblRental) {
-
-                lblRental.className = "cursor-pointer text-center p-4 rounded-xl text-xs font-semibold uppercase tracking-wider transition-all duration-300 block select-none border border-transparent hover:bg-theme-card";
-
-            }
-
-            
-
-            iconHourly.className = "fas fa-clock text-base text-theme-text/95 mb-2 block";
-
-            iconP2P.className = "fas fa-route text-base text-theme-text/95 mb-2 block";
-
-            if (iconRental) {
-
-                iconRental.className = "fas fa-car text-base text-theme-text/95 mb-2 block";
-
-            }
-
-            spanHourly.className = "block text-theme-text/90";
-
-            spanP2P.className = "block text-theme-text/90";
-
-            if (spanRental) {
-
-                spanRental.className = "block text-theme-text/90";
-
-            }
-
-            if (iconTransfer) {
-                iconTransfer.className = "fas fa-plane-departure text-base text-theme-text/95 mb-2 block";
-                spanTransfer.className = "block text-theme-text/90";
-            }
-
-            if (radTransfer.checked) {
-                lblTransfer.className = "cursor-pointer text-center p-4 rounded-xl text-xs font-semibold uppercase tracking-wider gold-btn block select-none";
-                
-                if (iconTransfer) {
-                    iconTransfer.className = "fas fa-plane-departure text-base text-current mb-2 block";
-                    spanTransfer.className = "block font-bold text-current";
-                }
-
-                divAirportTransferWrapper.classList.remove('hidden');
-
-                divFlight.classList.remove('hidden');
-
-                divHourly.classList.add('hidden');
-
-                divCustomAddresses.classList.add('hidden');
-
-                divStopsSection.classList.add('hidden');
-
-                divRoundTrip.classList.remove('hidden');
-
-                
-
-                airportSelect.required = true;
-
-                pickupAddress.required = false;
-
-                dropoffAddress.required = false;
-
-            } 
-
-            else if (radP2P.checked) {
-                lblP2P.className = "cursor-pointer text-center p-4 rounded-xl text-xs font-semibold uppercase tracking-wider gold-btn block select-none";
-
-                iconP2P.className = "fas fa-route text-base text-current mb-2 block";
-
-                spanP2P.className = "block font-bold text-current";
-
-                divAirportTransferWrapper.classList.add('hidden');
-
-                divFlight.classList.add('hidden');
-
-                divHourly.classList.add('hidden');
-
-                divCustomAddresses.classList.remove('hidden');
-
-                divDropoffLocation.classList.remove('hidden');
-
-                divStopsSection.classList.remove('hidden');
-
-                divStopsCountWrapper.classList.remove('hidden');
-
-                divRoundTrip.classList.remove('hidden');
-
-                airportSelect.required = false;
-
-                pickupAddress.required = true;
-
-                dropoffAddress.required = true;
-
-            }
-
-            else if (radHourly.checked) {
-                lblHourly.className = "cursor-pointer text-center p-4 rounded-xl text-xs font-semibold uppercase tracking-wider gold-btn block select-none";
-
-                iconHourly.className = "fas fa-clock text-base text-current mb-2 block";
-
-                spanHourly.className = "block font-bold text-current";
-
-                divAirportTransferWrapper.classList.add('hidden');
-
-                divFlight.classList.add('hidden');
-
-                divHourly.classList.remove('hidden');
-
-                divCustomAddresses.classList.remove('hidden');
-
-                divDropoffLocation.classList.add('hidden');
-
-                divStopsSection.classList.remove('hidden');
-
-                divStopsCountWrapper.classList.add('hidden');
-
-                // HIDE round-trip for hourly
-
-                divRoundTrip.classList.add('hidden');
-
-                roundTripCheckbox.checked = false;
-
-                airportSelect.required = false;
-
-                pickupAddress.required = true;
-
-                dropoffAddress.required = false;
-
-            }
-
-            else if (radRental && radRental.checked) {
-                lblRental.className = "cursor-pointer text-center p-4 rounded-xl text-xs font-semibold uppercase tracking-wider gold-btn block select-none";
-
-                iconRental.className = "fas fa-car text-base text-current mb-2 block";
-
-                spanRental.className = "block font-bold text-current";
-
-                divAirportTransferWrapper.classList.add('hidden');
-
-                divFlight.classList.add('hidden');
-
-                divHourly.classList.add('hidden');
-
-                divCustomAddresses.classList.remove('hidden');
-
-                divDropoffLocation.classList.remove('hidden');
-
-                divStopsSection.classList.add('hidden');
-
-                divRoundTrip.classList.remove('hidden');
-
-                airportSelect.required = false;
-
-                pickupAddress.required = true;
-
-                dropoffAddress.required = true;
-
-            }
-
-            toggleRoundTripFields();
-
-            checkValidation();
-
-            
-
-            // Refresh map layout if needed
-
-            if (bookingMap) {
-
-                setTimeout(() => {
-
-                    if (typeof bookingMap.invalidateSize === 'function') {
-
-                        bookingMap.invalidateSize();
-
-                    } else if (typeof google !== 'undefined' && google.maps && google.maps.event) {
-
-                        google.maps.event.trigger(bookingMap, 'resize');
-
-                    }
-
-                }, 200);
-
-            }
-
-        }
-
-        function toggleRoundTripFields() {
-
-            if (roundTripCheckbox.checked && !divRoundTrip.classList.contains('hidden')) {
-
-                divReturnFields.classList.remove('hidden');
-
-                returnDateInput.required = true;
-
-                returnTimeInput.required = true;
-
-            } else {
-
-                divReturnFields.classList.add('hidden');
-
-                returnDateInput.required = false;
-
-                returnTimeInput.required = false;
-
-            }
-
-            checkValidation();
-
-        }
-
-        // Attach Event Listeners to Radios
-
-        radTransfer.addEventListener('change', updateServiceType);
-
-        radHourly.addEventListener('change', updateServiceType);
-
-        radP2P.addEventListener('change', updateServiceType);
-
-        if (radRental) {
-
-            radRental.addEventListener('change', updateServiceType);
-
-        }
-
-        const toggleBg = document.getElementById('toggle-bg');
-
-        const toggleDot = document.getElementById('toggle-dot');
-
-        function syncRoundTripUI() {
-
-            if (!toggleBg || !toggleDot) return;
-
-            const toggleLabel = document.getElementById('toggle-label');
-
-            if (roundTripCheckbox.checked) {
-
-                toggleBg.classList.remove('bg-gray-300', 'border-gray-400');
-
-                toggleBg.classList.add('bg-luxe-gold', 'border-luxe-gold/50');
-
-                toggleDot.style.transform = 'translateX(28px)';
-
-                toggleDot.classList.remove('bg-white');
-
-                toggleDot.classList.add('bg-theme-bg');
-
-                if (toggleLabel) {
-
-                    toggleLabel.textContent = "Activé / ON";
-
-                    toggleLabel.classList.remove('text-theme-text/95');
-
-                    toggleLabel.classList.add('text-luxe-gold');
-
-                }
-
-            } else {
-
-                toggleBg.classList.remove('bg-luxe-gold', 'border-luxe-gold/50');
-
-                toggleBg.classList.add('bg-gray-300', 'border-gray-400');
-
-                toggleDot.style.transform = 'translateX(0px)';
-
-                toggleDot.classList.remove('bg-theme-bg');
-
-                toggleDot.classList.add('bg-white');
-
-                if (toggleLabel) {
-
-                    toggleLabel.textContent = "Désactivé / OFF";
-
-                    toggleLabel.classList.remove('text-luxe-gold');
-
-                    toggleLabel.classList.add('text-theme-text/95');
-
-                }
-
-            }
-
-        }
-
-        const roundTripRow = document.getElementById('div-round-trip-row');
-
-        if (roundTripRow) {
-
-            roundTripRow.addEventListener('click', (e) => {
-
-                if (e.target !== roundTripCheckbox) {
-
-                    roundTripCheckbox.checked = !roundTripCheckbox.checked;
-
-                    roundTripCheckbox.dispatchEvent(new Event('change'));
-
-                }
-
-            });
-
-        }
-
-        roundTripCheckbox.addEventListener('change', () => {
-
-            syncRoundTripUI();
-
-            toggleRoundTripFields();
-
-        });
-
-        // Initialize switch UI state
-
-        syncRoundTripUI();
-
-        returnDateInput.addEventListener('change', checkValidation);
-
-        returnTimeInput.addEventListener('change', checkValidation);
-
-        // Validation listeners for airport transfer
-
-        airportSelect.addEventListener('change', () => {
-
-            // Move map to airport location
-
-            if (bookingMap && pickupMarker) {
-
-                const selectedOption = airportSelect.options[airportSelect.selectedIndex];
-
-                const lat = parseFloat(selectedOption.dataset.lat);
-
-                const lng = parseFloat(selectedOption.dataset.lng);
-
-                if (!isNaN(lat) && !isNaN(lng)) {
-
-                    const loc = { lat, lng };
-
-                    pickupMarker.setPosition(loc);
-
-                    bookingMap.panTo(loc);
-
-                    bookingMap.setZoom(11);
-
-                    document.getElementById('pickup_lat').value = lat;
-
-                    document.getElementById('pickup_lng').value = lng;
-
-                    calculateRoute();
-
-                }
-
-            }
-
-        });
-
-        // Geocoding for destination address (airport transfer)
-
-        let geocodeTimeout = null;
-
-        destinationAddress.addEventListener('input', () => {
-
-            checkValidation();
-
-            clearTimeout(geocodeTimeout);
-
-            const query = destinationAddress.value.trim();
-
-            if (query.length < 5) {
-
-                geocodeStatus.classList.add('hidden');
-
-                return;
-
-            }
-
-            geocodeTimeout = setTimeout(() => {
-
-                geocodeAddress(query, 'destination');
-
-            }, 800);
-
-        });
-
-        // Other change events to trigger validation
-
-        pickupAddress.addEventListener('input', checkValidation);
-
-        dropoffAddress.addEventListener('input', checkValidation);
-
-        // ÔöÇÔöÇ Direction Switch Logic ÔöÇÔöÇ
-
-        const btnSwitchDirection = document.getElementById('btn-switch-direction');
-
-        const transferDirectionInput = document.getElementById('transfer_direction');
-
-        const lblTransferStart = document.getElementById('lbl-transfer-start');
-
-        const lblTransferEnd = document.getElementById('lbl-transfer-end');
-
-        const iconTransferStart = document.getElementById('icon-transfer-start');
-
-        const iconTransferEnd = document.getElementById('icon-transfer-end');
-
-        const startWrapper = document.getElementById('transfer-start-wrapper');
-
-        const endWrapper = document.getElementById('transfer-end-wrapper');
-
-        if (btnSwitchDirection) {
-
-            btnSwitchDirection.addEventListener('click', () => {
-
-                const currentDir = transferDirectionInput.value;
-
-                if (currentDir === 'AIRPORT_TO_DEST') {
-
-                    // Switch to: Pickup Address ÔåÆ Airport
-
-                    transferDirectionInput.value = 'DEST_TO_AIRPORT';
-
-                    lblTransferStart.textContent = "Destination Airport";
-
-                    lblTransferEnd.textContent = "Pickup Address";
-
-                    iconTransferStart.className = "fas fa-plane-arrival text-sm";
-
-                    iconTransferEnd.className = "fas fa-map-pin text-sm";
-
-                    destinationAddress.placeholder = "Enter your pickup address...";
-
-                    startWrapper.style.order = "3";
-
-                    endWrapper.style.order = "1";
-
-                } else {
-
-                    // Switch back to: Airport ÔåÆ Destination Address
-
-                    transferDirectionInput.value = 'AIRPORT_TO_DEST';
-
-                    lblTransferStart.textContent = "Origin Airport";
-
-                    lblTransferEnd.textContent = "Drop-off Address";
-
-                    iconTransferStart.className = "fas fa-plane-departure text-sm";
-
-                    iconTransferEnd.className = "fas fa-map-pin text-sm";
-
-                    destinationAddress.placeholder = "Enter your destination address...";
-
-                    startWrapper.style.order = "1";
-
-                    endWrapper.style.order = "3";
-
-                }
-
-                
-
-                // Swap coordinate inputs values
-
-                const pLat = document.getElementById('pickup_lat').value;
-
-                const pLng = document.getElementById('pickup_lng').value;
-
-                document.getElementById('pickup_lat').value = document.getElementById('dropoff_lat').value;
-
-                document.getElementById('pickup_lng').value = document.getElementById('dropoff_lng').value;
-
-                document.getElementById('dropoff_lat').value = pLat;
-
-                document.getElementById('dropoff_lng').value = pLng;
-
-                if (pickupMarker && dropoffMarker) {
-
-                    const startPos = pickupMarker.getPosition();
-
-                    const endPos = dropoffMarker.getPosition();
-
-                    pickupMarker.setPosition(endPos);
-
-                    dropoffMarker.setPosition(startPos);
-
-                    calculateRoute();
-
-                }
-
-                checkValidation();
-
-            });
-
-        }
-
-        // ÔöÇÔöÇ Initialize Google Maps Dark Map ÔöÇÔöÇ
-
-        const mapElement = document.getElementById('booking-map');
-
-        let bookingMap;
-
-        let pickupMarker;
-
-        let dropoffMarker;
-
-        let directionsService;
-
-        let directionsRenderer;
-
-        let geocoder;
-
-        const darkMapStyle = [
-
-            { elementType: "geometry", stylers: [{ color: "#1a1a1a" }] },
-
-            { elementType: "labels.text.stroke", stylers: [{ color: "#1a1a1a" }] },
-
-            { elementType: "labels.text.fill", stylers: [{ color: "#746855" }] },
-
-            { featureType: "administrative.locality", elementType: "labels.text.fill", stylers: [{ color: "#d59563" }] },
-
-            { featureType: "poi", elementType: "labels.text.fill", stylers: [{ color: "#d59563" }] },
-
-            { featureType: "poi.park", elementType: "geometry", stylers: [{ color: "#121a16" }] },
-
-            { featureType: "poi.park", elementType: "labels.text.fill", stylers: [{ color: "#6b9a76" }] },
-
-            { featureType: "road", elementType: "geometry", stylers: [{ color: "#2d2d2d" }] },
-
-            { featureType: "road", elementType: "geometry.stroke", stylers: [{ color: "#1a1a1a" }] },
-
-            { featureType: "road", elementType: "labels.text.fill", stylers: [{ color: "#9ca5b3" }] },
-
-            { featureType: "road.highway", elementType: "geometry", stylers: [{ color: "#746855" }] },
-
-            { featureType: "road.highway", elementType: "geometry.stroke", stylers: [{ color: "#1f2835" }] },
-
-            { featureType: "road.highway", elementType: "labels.text.fill", stylers: [{ color: "#f3d19c" }] },
-
-            { featureType: "transit", elementType: "geometry", stylers: [{ color: "#222222" }] },
-
-            { featureType: "transit.station", elementType: "labels.text.fill", stylers: [{ color: "#d59563" }] },
-
-            { featureType: "water", elementType: "geometry", stylers: [{ color: "#0d0d0d" }] },
-
-            { featureType: "water", elementType: "labels.text.fill", stylers: [{ color: "#515c6d" }] },
-
-            { featureType: "water", elementType: "labels.text.stroke", stylers: [{ color: "#0d0d0d" }] }
-
-        ];
-
-        if (mapElement && typeof google !== 'undefined' && google.maps) {
-
-            {% if site_slug == 'dr' %}
-
-            const mapCenter = { lat: 18.7357, lng: -69.9509 };
-
-            {% else %}
-
-            const mapCenter = { lat: 40.7128, lng: -74.0060 };
-
-            {% endif %}
-
-            bookingMap = new google.maps.Map(mapElement, {
-
-                center: mapCenter,
-
-                zoom: 11,
-
-                styles: darkMapStyle,
-
-                disableDefaultUI: false,
-
-                zoomControl: true,
-
-                mapTypeControl: false,
-
-                streetViewControl: false,
-
-                fullscreenControl: false
-
-            });
-
-            directionsService = new google.maps.DirectionsService();
-
-            directionsRenderer = new google.maps.DirectionsRenderer({
-
-                map: bookingMap,
-
-                suppressMarkers: true,
-
-                polylineOptions: {
-
-                    strokeColor: "#C9A84C",
-
-                    strokeOpacity: 0.8,
-
-                    strokeWeight: 4
-
-                }
-
-            });
-
-            geocoder = new google.maps.Geocoder();
-
-            const goldIcon = {
-
-                path: google.maps.SymbolPath.CIRCLE,
-
-                fillColor: '#C9A84C',
-
-                fillOpacity: 1,
-
-                strokeColor: '#FFFFFF',
-
-                strokeWeight: 2,
-
-                scale: 8
-
-            };
-
-            const silverIcon = {
-
-                path: google.maps.SymbolPath.CIRCLE,
-
-                fillColor: '#FFFFFF',
-
-                fillOpacity: 1,
-
-                strokeColor: '#C9A84C',
-
-                strokeWeight: 2,
-
-                scale: 8
-
-            };
-
-            pickupMarker = new google.maps.Marker({
-
-                position: mapCenter,
-
-                map: bookingMap,
-
-                draggable: true,
-
-                icon: goldIcon,
-
-                title: "Pickup Point"
-
-            });
-
-            dropoffMarker = new google.maps.Marker({
-
-                position: { lat: mapCenter.lat + 0.03, lng: mapCenter.lng + 0.03 },
-
-                map: bookingMap,
-
-                draggable: true,
-
-                icon: silverIcon,
-
-                title: "Drop-off Point"
-
-            });
-
-            // Initialize places autocomplete
-
-            const autocompleteOptions = {
-
-                fields: ["address_components", "geometry", "formatted_address"],
-
-                types: ["address"]
-
-            };
-
-            const pickupAutocomplete = new google.maps.places.Autocomplete(pickupAddress, autocompleteOptions);
-
-            const dropoffAutocomplete = new google.maps.places.Autocomplete(dropoffAddress, autocompleteOptions);
-
-            const destAutocomplete = new google.maps.places.Autocomplete(destinationAddress, autocompleteOptions);
-
-            pickupAutocomplete.bindTo("bounds", bookingMap);
-
-            dropoffAutocomplete.bindTo("bounds", bookingMap);
-
-            destAutocomplete.bindTo("bounds", bookingMap);
-
-            function onPlaceChanged(autocomplete, type) {
-
-                const place = autocomplete.getPlace();
-
-                if (!place.geometry || !place.geometry.location) {
-
-                    return;
-
-                }
-
-                const loc = place.geometry.location;
-
-                if (type === 'pickup') {
-
-                    pickupMarker.setPosition(loc);
-
-                    document.getElementById('pickup_lat').value = loc.lat();
-
-                    document.getElementById('pickup_lng').value = loc.lng();
-
-                } else {
-
-                    dropoffMarker.setPosition(loc);
-
-                    document.getElementById('dropoff_lat').value = loc.lat();
-
-                    document.getElementById('dropoff_lng').value = loc.lng();
-
-                }
-
-                calculateRoute();
-
-            }
-
-            pickupAutocomplete.addListener("place_changed", () => onPlaceChanged(pickupAutocomplete, 'pickup'));
-
-            dropoffAutocomplete.addListener("place_changed", () => onPlaceChanged(dropoffAutocomplete, 'dropoff'));
-
-            destAutocomplete.addListener("place_changed", () => onPlaceChanged(destAutocomplete, 'dropoff'));
-
-            // Geocoding function
-
-            function geocodeAddress(query, type) {
-
-                if (!geocoder) return;
-
-                geocoder.geocode({ address: query }, (results, status) => {
-
-                    if (status === "OK" && results[0]) {
-
-                        const loc = results[0].geometry.location;
-
-                        if (type === 'destination') {
-
-                            dropoffMarker.setPosition(loc);
-
-                            geocodeStatus.classList.remove('hidden');
-
-                            geocodeStatusText.textContent = results[0].formatted_address.substring(0, 80) + '...';
-
-                            document.getElementById('dropoff_lat').value = loc.lat();
-
-                            document.getElementById('dropoff_lng').value = loc.lng();
-
-                        } else if (type === 'pickup') {
-
-                            pickupMarker.setPosition(loc);
-
-                            document.getElementById('pickup_lat').value = loc.lat();
-
-                            document.getElementById('pickup_lng').value = loc.lng();
-
-                        } else if (type === 'dropoff') {
-
-                            dropoffMarker.setPosition(loc);
-
-                            document.getElementById('dropoff_lat').value = loc.lat();
-
-                            document.getElementById('dropoff_lng').value = loc.lng();
-
-                        }
-
-                        
-
-                        calculateRoute();
-
-                        
-
-                        const bounds = new google.maps.LatLngBounds();
-
-                        bounds.extend(pickupMarker.getPosition());
-
-                        bounds.extend(dropoffMarker.getPosition());
-
-                        bookingMap.fitBounds(bounds, 40);
-
-                    } else {
-
-                        if (type === 'destination') {
-
-                            geocodeStatus.classList.remove('hidden');
-
-                            geocodeStatusText.textContent = 'Address not found  -  please refine';
-
-                        }
-
-                    }
-
-                });
-
-            }
-
-            function reverseGeocode(latLng, inputElement) {
-
-                if (!geocoder) return;
-
-                geocoder.geocode({ location: latLng }, (results, status) => {
-
-                    if (status === "OK" && results[0]) {
-
-                        inputElement.value = results[0].formatted_address;
-
-                        inputElement.dispatchEvent(new Event('input'));
-
-                        checkValidation();
-
-                        calculateRoute();
-
-                    }
-
-                });
-
-            }
-
-            function calculateRoute() {
-
-                const start = pickupMarker.getPosition();
-
-                const end = dropoffMarker.getPosition();
-
-                if (!start || !end) return;
-
-                const request = {
-
-                    origin: start,
-
-                    destination: end,
-
-                    travelMode: google.maps.TravelMode.DRIVING
-
-                };
-
-                directionsService.route(request, (result, status) => {
-
-                    if (status === "OK") {
-
-                        directionsRenderer.setDirections(result);
-
-                        
-
-                        const route = result.routes[0];
-
-                        let totalDistanceMeters = 0;
-
-                        for (let i = 0; i < route.legs.length; i++) {
-
-                            totalDistanceMeters += route.legs[i].distance.value;
-
-                        }
-
-                        const distanceKm = totalDistanceMeters / 1000.0;
-
-                        
-
-                        document.getElementById('distance_km').value = distanceKm.toFixed(2);
-
-                        
-
-                        if (geocodeStatus && geocodeStatusText) {
-
-                            geocodeStatus.classList.remove('hidden');
-
-                            geocodeStatusText.textContent = `Route distance: ${distanceKm.toFixed(1)} km`;
-
-                        }
-
-                    } else {
-
-                        // Fallback using Haversine
-
-                        const d_km = haversineDistance(start.lat(), start.lng(), end.lat(), end.lng());
-
-                        document.getElementById('distance_km').value = d_km.toFixed(2);
-
-                        
-
-                        if (geocodeStatus && geocodeStatusText) {
-
-                            geocodeStatus.classList.remove('hidden');
-
-                            geocodeStatusText.textContent = `Direct line: ${d_km.toFixed(1)} km (route unavailable)`;
-
-                        }
-
-                    }
-
-                });
-
-            }
-
-            function haversineDistance(lat1, lon1, lat2, lon2) {
-
-                const R = 6371; // Earth radius in km
-
-                const dLat = (lat2 - lat1) * Math.PI / 180;
-
-                const dLon = (lon2 - lon1) * Math.PI / 180;
-
-                const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-
-                          Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-
-                          Math.sin(dLon / 2) * Math.sin(dLon / 2);
-
-                const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-
-                return R * c;
-
-            }
-
-            // Dragend events for markers
-
-            pickupMarker.addListener("dragend", () => {
-
-                const pos = pickupMarker.getPosition();
-
-                document.getElementById('pickup_lat').value = pos.lat();
-
-                document.getElementById('pickup_lng').value = pos.lng();
-
-                reverseGeocode(pos, pickupAddress);
-
-            });
-
-            dropoffMarker.addListener("dragend", () => {
-
-                const pos = dropoffMarker.getPosition();
-
-                document.getElementById('dropoff_lat').value = pos.lat();
-
-                document.getElementById('dropoff_lng').value = pos.lng();
-
-                if (radTransfer.checked) {
-
-                    reverseGeocode(pos, destinationAddress);
-
-                } else {
-
-                    reverseGeocode(pos, dropoffAddress);
-
-                }
-
-            });
-
-            // Map click listener
-
-            let activeInput = 'pickup';
-
-            pickupAddress.addEventListener('focus', () => activeInput = 'pickup');
-
-            dropoffAddress.addEventListener('focus', () => activeInput = 'dropoff');
-
-            destinationAddress.addEventListener('focus', () => activeInput = 'destination');
-
-            bookingMap.addListener("click", (e) => {
-
-                const loc = e.latLng;
-
-                if (radTransfer.checked) {
-
-                    dropoffMarker.setPosition(loc);
-
-                    document.getElementById('dropoff_lat').value = loc.lat();
-
-                    document.getElementById('dropoff_lng').value = loc.lng();
-
-                    reverseGeocode(loc, destinationAddress);
-
-                } else {
-
-                    if (activeInput === 'pickup') {
-
-                        pickupMarker.setPosition(loc);
-
-                        document.getElementById('pickup_lat').value = loc.lat();
-
-                        document.getElementById('pickup_lng').value = loc.lng();
-
-                        reverseGeocode(loc, pickupAddress);
-
-                        activeInput = 'dropoff';
-
-                    } else {
-
-                        dropoffMarker.setPosition(loc);
-
-                        document.getElementById('dropoff_lat').value = loc.lat();
-
-                        document.getElementById('dropoff_lng').value = loc.lng();
-
-                        reverseGeocode(loc, dropoffAddress);
-
-                        activeInput = 'pickup';
-
-                    }
-
-                }
-
-                calculateRoute();
-
-            });
-
-            let pickupGeoTimeout = null;
-
-            let dropoffGeoTimeout = null;
-
-            pickupAddress.addEventListener('input', () => {
-
-                clearTimeout(pickupGeoTimeout);
-
-                const query = pickupAddress.value.trim();
-
-                if (query.length >= 5) {
-
-                    pickupGeoTimeout = setTimeout(() => geocodeAddress(query, 'pickup'), 800);
-
-                }
-
-            });
-
-            dropoffAddress.addEventListener('input', () => {
-
-                clearTimeout(dropoffGeoTimeout);
-
-                const query = dropoffAddress.value.trim();
-
-                if (query.length >= 5) {
-
-                    dropoffGeoTimeout = setTimeout(() => geocodeAddress(query, 'dropoff'), 800);
-
-                }
-
-            });
-
-        }
-
-        // URL Search Params pre-selection
-
-        const urlParams = new URLSearchParams(window.location.search);
-
-        const serviceTypeParam = urlParams.get('service_type');
-
-        if (serviceTypeParam === 'luxury_rental' && radRental) {
-
-            radRental.checked = true;
-
-        } else if (serviceTypeParam === 'point_to_point') {
-
-            radP2P.checked = true;
-
-        } else if (serviceTypeParam === 'hourly') {
-
-            radHourly.checked = true;
-
-        } else if (serviceTypeParam === 'airport_transfer') {
-
-            radTransfer.checked = true;
-
-        }
-
-        // Initial setup
-
-        updateServiceType();
-
-        // 3D Parallax & Mouse Interactivity for Hero Image
-
-        const parallaxImg = document.getElementById('hero-parallax-img');
-
-        const heroSection = document.getElementById('hero-section');
-
-        if (parallaxImg && heroSection) {
-
-            let targetX = 0, targetY = 0, targetRotX = 0, targetRotY = 0;
-
-            let currentX = 0, currentY = 0, currentRotX = 0, currentRotY = 0;
-
-            
-
-            let time = 0;
-
-            let mouseX = 0, mouseY = 0;
-
-            let mouseActive = false;
-
-            heroSection.addEventListener('mousemove', (e) => {
-
-                const rect = heroSection.getBoundingClientRect();
-
-                mouseX = ((e.clientX - rect.left) / rect.width) * 2 - 1;
-
-                mouseY = ((e.clientY - rect.top) / rect.height) * 2 - 1;
-
-                mouseActive = true;
-
-            }, { passive: true });
-
-            heroSection.addEventListener('mouseleave', () => {
-
-                mouseActive = false;
-
-            }, { passive: true });
-
-            function animate() {
-
-                time += 1;
-
-                const ambX = Math.sin(time * 0.008) * 15;
-
-                const ambY = Math.cos(time * 0.006) * 10;
-
-                const ambRotX = Math.sin(time * 0.005) * 0.8;
-
-                const ambRotY = Math.cos(time * 0.005) * 0.8;
-
-                if (mouseActive) {
-
-                    targetX = mouseX * -25 + ambX * 0.3;
-
-                    targetY = mouseY * -25 + ambY * 0.3;
-
-                    targetRotX = mouseY * 4.5 + ambRotX * 0.3;
-
-                    targetRotY = mouseX * -4.5 + ambRotY * 0.3;
-
-                } else {
-
-                    targetX = ambX;
-
-                    targetY = ambY;
-
-                    targetRotX = ambRotX;
-
-                    targetRotY = ambRotY;
-
-                }
-
-                const scrollOffset = window.pageYOffset * 0.3;
-
-                const finalTargetY = targetY + scrollOffset;
-
-                currentX += (targetX - currentX) * 0.08;
-
-                currentY += (finalTargetY - currentY) * 0.08;
-
-                currentRotX += (targetRotX - currentRotX) * 0.08;
-
-                currentRotY += (targetRotY - currentRotY) * 0.08;
-
-                parallaxImg.style.transform = `translate3d(${currentX}px, ${currentY}px, 0) rotateX(${currentRotX}deg) rotateY(${currentRotY}deg) scale(1.15)`;
-
-                requestAnimationFrame(animate);
-
-            }
-
-            requestAnimationFrame(animate);
-
-        }
-
-    });
-
-</script>
-
 {% endblock %}
-
