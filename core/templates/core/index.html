@@ -1098,6 +1098,7 @@
         const iconTransferEnd = document.getElementById('icon-transfer-end');
         const startWrapper = document.getElementById('transfer-start-wrapper');
         const endWrapper = document.getElementById('transfer-end-wrapper');
+        const airportSelect = document.getElementById('airport_id');
         const destinationAddress = document.getElementById('destination_address');
 
         if (btnSwitchDirection) {
@@ -1106,24 +1107,30 @@
                 if (currentDir === 'AIRPORT_TO_DEST') {
                     // Switch to: Pickup Address → Airport
                     transferDirectionInput.value = 'DEST_TO_AIRPORT';
+                    // Swap labels and icons
                     lblTransferStart.textContent = "Destination Airport";
                     lblTransferEnd.textContent = "Pickup Address";
                     iconTransferStart.className = "fas fa-plane-arrival text-[9px] sm:text-sm";
                     iconTransferEnd.className = "fas fa-map-pin text-[9px] sm:text-sm";
                     destinationAddress.placeholder = "Enter your pickup address...";
-                    startWrapper.style.order = "3";
-                    endWrapper.style.order = "1";
                 } else {
                     // Switch back to: Airport → Destination Address
                     transferDirectionInput.value = 'AIRPORT_TO_DEST';
+                    // Swap labels and icons back
                     lblTransferStart.textContent = "Origin Airport";
                     lblTransferEnd.textContent = "Drop-off Address";
                     iconTransferStart.className = "fas fa-plane-departure text-[9px] sm:text-sm";
                     iconTransferEnd.className = "fas fa-map-pin text-[9px] sm:text-sm";
                     destinationAddress.placeholder = "Enter your destination address...";
-                    startWrapper.style.order = "1";
-                    endWrapper.style.order = "3";
                 }
+                // Swap the actual field content between the two wrappers
+                const startContent = startWrapper.innerHTML;
+                const endContent = endWrapper.innerHTML;
+                startWrapper.innerHTML = endContent;
+                endWrapper.innerHTML = startContent;
+                // Re-select elements after swapping
+                const newAirportSelect = document.getElementById('airport_id');
+                const newDestinationAddress = document.getElementById('destination_address');
                 // Swap coordinate inputs values
                 const pLat = document.getElementById('pickup_lat').value;
                 const pLng = document.getElementById('pickup_lng').value;
