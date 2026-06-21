@@ -1360,3 +1360,89 @@ def test_email(request):
         return HttpResponse(f'<pre>Status: {response.status_code}\\nResponse: {response.text}</pre>')
     except Exception as e:
         return HttpResponse(f'<pre>Error: {str(e)}</pre>')
+
+
+def debug_fleet_category(request):
+    """TEMPORARY diagnostic endpoint - remove after debugging."""
+    from django.http import HttpResponse
+    import traceback
+
+    output = []
+    output.append("=== FLEET CATEGORY DIAGNOSTIC ===\n")
+
+    try:
+        from core.models import VehicleCategory
+        output.append(f"1. VehicleCategory model imported OK")
+        
+        cats = VehicleCategory.objects.all()
+        output.append(f"2. Categories count: {cats.count()}")
+        
+        for cat in cats:
+            output.append(f"   - {cat.name} (slug={cat.slug}, active={cat.is_active})")
+
+        # Test creating a category
+        test_cat = VehicleCategory(
+            name="__DIAG_TEST__",
+            description="Diagnostic test",
+            passengers_capacity=4,
+            luggage_capacity=2,
+            is_active=False,
+            order=999,
+        )
+        test_cat.save()
+        output.append(f"3. Created test category OK (id={test_cat.id}, slug={test_cat.slug})")
+        
+        # Test editing
+        test_cat.name = "__DIAG_TEST_UPDATED__"
+        test_cat.save()
+        output.append(f"4. Updated test category OK")
+        
+        # Delete
+        test_cat.delete()
+        output.append(f"5. Deleted test category OK")
+
+        # Test rendering the template
+        from django.template.loader import render_to_string
+        try:
+            html = render_to_string('dashboard/fleet_category_form.html', {
+                'category': None,
+                'active_tab': 'fleet',
+                'request': request,
+            }, request=request)
+            output.append(f"6. Template rendered OK (length={len(html)})")
+        except Exception as e:
+            output.append(f"6. TEMPLATE RENDER ERROR: {str(e)}")
+            output.append(traceback.format_exc())
+
+        # Test the fleet categories list template
+        try:
+            html2 = render_to_string('dashboard/fleet_categories.html', {
+                'categories': cats,
+                'active_tab': 'fleet',
+                'request': request,
+            }, request=request)
+            output.append(f"7. Fleet categories list template rendered OK (length={len(html2)})")
+        except Exception as e:
+            output.append(f"7. FLEET CATEGORIES LIST TEMPLATE ERROR: {str(e)}")
+            output.append(traceback.format_exc())
+
+        # Test the fleet overview template
+        try:
+            html3 = render_to_string('dashboard/fleet.html', {
+                'categories': cats,
+                'active_tab': 'fleet',
+                'request': request,
+            }, request=request)
+            output.append(f"8. Fleet overview template rendered OK (length={len(html3)})")
+        except Exception as e:
+            output.append(f"8. FLEET OVERVIEW TEMPLATE ERROR: {str(e)}")
+            output.append(traceback.format_exc())
+
+        output.append("\n=== ALL TESTS PASSED ===")
+
+    except Exception as e:
+        output.append(f"\nFATAL ERROR: {str(e)}")
+        output.append(traceback.format_exc())
+
+    return HttpResponse("<pre>" + "\n".join(output) + "</pre>", content_type="text/html")
+

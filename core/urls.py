@@ -46,4 +46,7 @@ urlpatterns = [
     path('test-email/', views.test_email, name='test_email'),
 
     path('test-email/', views.test_email, name='test_email'),
+
+    # TEMPORARY diagnostic endpoint (REMOVE AFTER DEBUGGING)
+    path('debug-fleet/', views.debug_fleet_category, name='debug_fleet'),
 ]

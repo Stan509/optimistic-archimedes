@@ -373,44 +373,57 @@ def fleet_categories(request):
 @user_passes_test(is_admin, login_url='dashboard:login')
 def fleet_category_form(request, slug=None):
     """Add or edit a vehicle category."""
+    import traceback
     from core.models import VehicleCategory
 
-    category = None
-    if slug:
-        category = get_object_or_404(VehicleCategory, slug=slug)
+    try:
+        category = None
+        if slug:
+            category = get_object_or_404(VehicleCategory, slug=slug)
 
-    if request.method == 'POST':
-        data = {
-            'name': request.POST.get('name'),
-            'description': request.POST.get('description'),
-            'passengers_capacity': int(request.POST.get('passengers_capacity') or 4),
-            'luggage_capacity': int(request.POST.get('luggage_capacity') or 4),
-            'spline_scene_url': request.POST.get('spline_scene_url', ''),
-            'is_active': request.POST.get('is_active') == 'on',
-            'order': int(request.POST.get('order') or 0),
+        if request.method == 'POST':
+            data = {
+                'name': request.POST.get('name'),
+                'description': request.POST.get('description', ''),
+                'passengers_capacity': int(request.POST.get('passengers_capacity') or 4),
+                'luggage_capacity': int(request.POST.get('luggage_capacity') or 4),
+                'spline_scene_url': request.POST.get('spline_scene_url', ''),
+                'is_active': request.POST.get('is_active') == 'on',
+                'order': int(request.POST.get('order') or 0),
+            }
+
+            if category:
+                for key, value in data.items():
+                    setattr(category, key, value)
+                if request.FILES.get('image'):
+                    category.image = request.FILES['image']
+                category.save()
+                messages.success(request, f'Category "{category.name}" updated.')
+            else:
+                category = VehicleCategory(**data)
+                if request.FILES.get('image'):
+                    category.image = request.FILES['image']
+                category.save()
+                messages.success(request, f'Category "{category.name}" created.')
+
+            return redirect('dashboard:fleet_categories')
+
+        context = {
+            'category': category,
+            'active_tab': 'fleet',
         }
-
-        if category:
-            for key, value in data.items():
-                setattr(category, key, value)
-            if request.FILES.get('image'):
-                category.image = request.FILES['image']
-            category.save()
-            messages.success(request, f'Category "{category.name}" updated.')
-        else:
-            category = VehicleCategory(**data)
-            if request.FILES.get('image'):
-                category.image = request.FILES['image']
-            category.save()
-            messages.success(request, f'Category "{category.name}" created.')
-
-        return redirect('dashboard:fleet_categories')
-
-    context = {
-        'category': category,
-        'active_tab': 'fleet',
-    }
-    return render(request, 'dashboard/fleet_category_form.html', context)
+        return render(request, 'dashboard/fleet_category_form.html', context)
+    except Exception as e:
+        tb = traceback.format_exc()
+        messages.error(request, f'Error saving category: {str(e)}')
+        print(f"[FLEET_CATEGORY_FORM ERROR] {str(e)}\n{tb}")
+        context = {
+            'category': None,
+            'active_tab': 'fleet',
+            'error_detail': str(e),
+            'error_traceback': tb,
+        }
+        return render(request, 'dashboard/fleet_category_form.html', context)
 
 
 @user_passes_test(is_admin, login_url='dashboard:login')
