@@ -152,7 +152,17 @@ DO_SPACES_ENDPOINT = os.environ.get(
     f'https://{DO_SPACES_REGION}.digitaloceanspaces.com'
 )
 
-if DO_SPACES_KEY and DO_SPACES_SECRET:
+# Only use Spaces if ALL required vars are explicitly set
+# DO_SPACES_BUCKET must be explicitly set in environment (not just the fallback default)
+# This prevents NoSuchBucket errors when DO keys exist (e.g. from App Platform) but no bucket was created
+_use_spaces = bool(
+    DO_SPACES_KEY
+    and DO_SPACES_SECRET
+    and os.environ.get('DO_SPACES_BUCKET')  # Must be explicitly set
+    and os.environ.get('USE_SPACES', '').lower() in ('true', '1', 'yes')  # Explicit opt-in
+)
+
+if _use_spaces:
     # Production: DigitalOcean Spaces (S3)
     STORAGES = {
         "default": {
@@ -178,7 +188,7 @@ if DO_SPACES_KEY and DO_SPACES_SECRET:
     )
     MEDIA_URL = f'{DO_SPACES_CDN}/media/'
 else:
-    # Development: Local filesystem
+    # Development / fallback: Local filesystem
     STORAGES = {
         "default": {
             "BACKEND": "django.core.files.storage.FileSystemStorage",
