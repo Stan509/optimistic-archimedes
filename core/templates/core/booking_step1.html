@@ -31,7 +31,7 @@
 </style>
 {% endblock %}
 {% block content %}
-<section data-aos="fade-up" id="hero-section" class="relative min-h-[85vh] flex items-center justify-center overflow-hidden py-16">
+<section data-aos="fade-up" id="hero-section" class="relative min-h-[100dvh] flex items-center justify-center overflow-hidden pt-40 pb-16 md:py-24">
     <!-- Video / Static Image Background -->
     <div class="absolute inset-0 z-0 overflow-hidden hero-perspective">
         <div class="absolute inset-0 bg-black/60 z-10"></div>
@@ -41,7 +41,7 @@
             <img src="{% static 'core/images/dr-hero.jpg' %}?v=3" alt="Dominican Republic VIP Transfers" id="hero-parallax-img" class="w-full h-full md:h-[130%] object-cover md:object-cover object-center absolute top-0 md:-top-[15%] left-0 will-change-transform">
         {% endif %}
     </div>
-    <div class="max-w-3xl w-full mx-auto px-4 sm:px-6 relative z-20">
+    <div class="max-w-3xl w-full mx-auto px-8 sm:px-12 md:px-6 relative z-20">
         
         <!-- Premium Multi-step Progress Indicator -->
         <div class="mb-12">
@@ -78,18 +78,18 @@
                 <!-- Service Type selector -->
                 <div>
                     <label class="block text-xs uppercase tracking-widest font-bold text-theme-text/90 mb-3">Service Type</label>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3 bg-theme-bg p-1.5 rounded-2xl border border-theme-border">
-                        <label class="cursor-pointer text-center p-4 rounded-xl text-xs font-semibold uppercase tracking-wider transition-all duration-300 block select-none border border-transparent" id="lbl-transfer">
+                    <div class="grid grid-cols-3 gap-1 md:gap-3 bg-theme-bg p-1 rounded-2xl border border-theme-border">
+                        <label class="cursor-pointer text-center p-2 sm:p-4 rounded-xl text-[10px] sm:text-xs font-semibold uppercase tracking-wider transition-all duration-300 block select-none border border-transparent" id="lbl-transfer">
                             <input type="radio" name="service_type" value="airport_transfer" checked class="sr-only" id="rad-transfer">
                             <i class="fas fa-plane-departure text-base text-luxe-gold mb-2 block"></i>
                             <span class="block">Airport Transfer</span>
                         </label>
-                        <label class="cursor-pointer text-center p-4 rounded-xl text-xs font-semibold uppercase tracking-wider transition-all duration-300 block select-none border border-transparent" id="lbl-p2p">
+                        <label class="cursor-pointer text-center p-2 sm:p-4 rounded-xl text-[10px] sm:text-xs font-semibold uppercase tracking-wider transition-all duration-300 block select-none border border-transparent" id="lbl-p2p">
                             <input type="radio" name="service_type" value="point_to_point" class="sr-only" id="rad-p2p">
                             <i class="fas fa-route text-base text-theme-text/95 mb-2 block" id="icon-p2p"></i>
                             <span class="block text-theme-text/90" id="span-p2p">Point to Point</span>
                         </label>
-                        <label class="cursor-pointer text-center p-4 rounded-xl text-xs font-semibold uppercase tracking-wider transition-all duration-300 block select-none border border-transparent" id="lbl-hourly">
+                        <label class="cursor-pointer text-center p-2 sm:p-4 rounded-xl text-[10px] sm:text-xs font-semibold uppercase tracking-wider transition-all duration-300 block select-none border border-transparent" id="lbl-hourly">
                             <input type="radio" name="service_type" value="hourly" class="sr-only" id="rad-hourly">
                             <i class="fas fa-clock text-base text-theme-text/95 mb-2 block" id="icon-hourly"></i>
                             <span class="block text-theme-text/90" id="span-hourly">Hourly Chauffeur</span>
@@ -97,7 +97,7 @@
                     </div>
                 </div>
                 <!-- Interactive Dark Map -->
-                <div class="relative w-full h-[600px] bg-theme-bg border border-theme-border rounded-2xl overflow-hidden shadow-inner group mb-2" style="height: 600px;">
+                <div class="relative w-full aspect-square max-h-[350px] md:max-h-[450px] bg-theme-bg border border-theme-border rounded-2xl overflow-hidden shadow-inner group mb-2" >
                     <div id="booking-map" class="w-full h-full z-0"></div>
                     <div class="absolute top-4 left-4 z-[1000] bg-theme-bg/90 px-3 py-1.5 rounded-lg border border-theme-border backdrop-blur-md">
                         <span class="text-[9px] uppercase font-bold tracking-widest text-luxe-gold flex items-center gap-1.5">
@@ -110,7 +110,7 @@
                 <input type="hidden" name="transfer_direction" id="transfer_direction" value="AIRPORT_TO_DEST">
                 <!-- Airport Transfer wrapper (airport + address with Toggle switch) -->
                 <div id="div-airport-transfer-wrapper" class="space-y-4">
-                    <div class="flex flex-col md:flex-row items-center gap-4 relative">
+                    <div class="grid grid-cols-2 gap-4 relative">
                         <!-- Left Block: Airport Select -->
                         <div id="transfer-start-wrapper" class="w-full font-medium">
                             <label id="lbl-transfer-start" for="airport_id" class="block text-xs uppercase tracking-widest font-bold text-theme-text/90 mb-2">Origin Airport</label>
@@ -251,7 +251,7 @@
                     </div>
                 </div>
 <!-- Date, Time, Passengers and Flight details split in 2x2 grid for extra space -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label for="pickup_date" class="block text-xs uppercase tracking-widest font-bold text-theme-text/90 mb-2">Pickup Date</label>
                         <div class="relative">
@@ -272,7 +272,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                <div class="grid grid-cols-2 gap-4 mt-4">
                     <div>
                         <label for="passenger_count" class="block text-xs uppercase tracking-widest font-bold text-theme-text/90 mb-2">Passengers</label>
                         <div class="relative">
