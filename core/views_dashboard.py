@@ -383,11 +383,11 @@ def fleet_category_form(request, slug=None):
         data = {
             'name': request.POST.get('name'),
             'description': request.POST.get('description'),
-            'passengers_capacity': int(request.POST.get('passengers_capacity', 4)),
-            'luggage_capacity': int(request.POST.get('luggage_capacity', 4)),
+            'passengers_capacity': int(request.POST.get('passengers_capacity') or 4),
+            'luggage_capacity': int(request.POST.get('luggage_capacity') or 4),
             'spline_scene_url': request.POST.get('spline_scene_url', ''),
             'is_active': request.POST.get('is_active') == 'on',
-            'order': int(request.POST.get('order', 0)),
+            'order': int(request.POST.get('order') or 0),
         }
 
         if category:
@@ -588,15 +588,9 @@ def pricing_form(request, pk=None):
             'service_type': request.POST.get('service_type', 'hourly'),
             'base_price': float(request.POST.get('base_price', 0)),
             'minimum_price': float(request.POST.get('minimum_price', 0)),
-            'km_threshold': int(request.POST.get('km_threshold', 25)),
+            'km_threshold': int(request.POST.get('km_threshold') or 25),
             'is_active': request.POST.get('is_active') == 'on',
         }
-
-        
-        if vehicle_id:
-            data['vehicle_id'] = int(vehicle_id)
-        else:
-            data['vehicle_id'] = None
 
         price_per_km = request.POST.get('price_per_km')
         if price_per_km:
@@ -676,7 +670,7 @@ def airport_pricing_form(request, pk=None):
         airport_id = int(request.POST.get('airport'))
         category_id = int(request.POST.get('vehicle_category'))
         base_price = float(request.POST.get('base_price', 0))
-        base_km = int(request.POST.get('base_km', 25))
+        base_km = int(request.POST.get('base_km') or 25)
         price_per_km = float(request.POST.get('price_per_km', 0))
         is_active = request.POST.get('is_active') == 'on'
 
@@ -858,7 +852,7 @@ def dashboard_reports(request):
     from core.models import ProfitReport, Booking, Site
 
     site_filter = request.GET.get('site', '')
-    year = int(request.GET.get('year', date.today().year))
+    year = int(request.GET.get('year') or date.today().year)
 
     reports = ProfitReport.objects.filter(year=year)
     if site_filter:
@@ -895,8 +889,8 @@ def generate_report(request):
     from core.models import ProfitReport, Booking, Site
 
     if request.method == 'POST':
-        month = int(request.POST.get('month', date.today().month))
-        year = int(request.POST.get('year', date.today().year))
+        month = int(request.POST.get('month') or date.today().month)
+        year = int(request.POST.get('year') or date.today().year)
 
         for site in Site.objects.filter(is_active=True):
             bookings = Booking.objects.filter(
@@ -1009,7 +1003,7 @@ def email_settings(request):
         settings_obj.email_provider = request.POST.get('email_provider', 'SMTP')
         settings_obj.email_host = request.POST.get('email_host', '')
         try:
-            settings_obj.email_port = int(request.POST.get('email_port', 587))
+            settings_obj.email_port = int(request.POST.get('email_port') or 587)
         except ValueError:
             settings_obj.email_port = 587
         settings_obj.email_username = request.POST.get('email_username', '')
