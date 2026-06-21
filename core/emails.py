@@ -380,7 +380,7 @@ def send_booking_email(booking, email_type):
             host = settings_obj.email_host or os.getenv('EMAIL_HOST', 'mail.privateemail.com')
             port = settings_obj.email_port or int(os.getenv('EMAIL_PORT', 587))
             user = settings_obj.email_username or os.getenv('EMAIL_HOST_USER', 'info@aeroluxselect.com')
-            pwd = settings_obj.email_password or os.getenv('EMAIL_HOST_PASSWORD', '')
+            pwd = settings_obj.email_password or os.getenv('EMAIL_HOST_PASSWORD', 'Dee@aerolux2026')
             tls = settings_obj.email_use_tls if settings_obj.email_host else True
             
             backend = EmailBackend(
