@@ -11,6 +11,8 @@ Management command to populate the database with:
 - Sample CMS content
 """
 
+import os
+from django.conf import settings
 from django.core.management.base import BaseCommand
 from django.utils.text import slugify
 
@@ -20,7 +22,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         from core.models import (
-            Site, Airport, Destination, VehicleCategory, Vehicle,
+            Site, Airport, Destination, VehicleCategory,
             PremiumAddOn, PricingRule, AirportCategoryPrice, SiteContent, SiteSettings, Testimonial,
             WhatsAppTemplate
         )
@@ -416,254 +418,10 @@ class Command(BaseCommand):
             }
         )
 
-        # Vehicles
-        # 1. Executive SUV
-        escalade, _ = Vehicle.objects.update_or_create(
-            name='Cadillac Escalade',
-            defaults={
-                'category': exec_suv,
-                'model_year': 2024,
-                'price_multiplier': 1.0,
-                'features': {
-                    'leather_seats': True,
-                    'wifi': True,
-                    'water_bottles': True,
-                    'phone_charger': True,
-                    'climate_control': True,
-                    'tinted_windows': True,
-                },
-                'is_active': True,
-            }
-        )
-        escalade.sites.set([nyc, dr])
-
-        suburban, _ = Vehicle.objects.update_or_create(
-            name='Chevrolet Suburban',
-            defaults={
-                'category': exec_suv,
-                'model_year': 2024,
-                'price_multiplier': 0.95,
-                'features': {
-                    'leather_seats': True,
-                    'wifi': True,
-                    'water_bottles': True,
-                    'phone_charger': True,
-                    'climate_control': True,
-                },
-                'is_active': True,
-            }
-        )
-        suburban.sites.set([nyc, dr])
-
-        yukon, _ = Vehicle.objects.update_or_create(
-            name='GMC Yukon Denali',
-            defaults={
-                'category': exec_suv,
-                'model_year': 2024,
-                'price_multiplier': 0.95,
-                'features': {
-                    'leather_seats': True,
-                    'wifi': True,
-                    'water_bottles': True,
-                    'climate_control': True,
-                },
-                'is_active': True,
-            }
-        )
-        yukon.sites.set([nyc, dr])
-
-        # 2. Business Sedan
-        xts, _ = Vehicle.objects.update_or_create(
-            name='Cadillac XTS',
-            defaults={
-                'category': business_sedan,
-                'model_year': 2023,
-                'price_multiplier': 0.85,
-                'features': {
-                    'leather_seats': True,
-                    'water_bottles': True,
-                    'phone_charger': True,
-                },
-                'is_active': True,
-            }
-        )
-        xts.sites.set([nyc, dr])
-
-        chrysler, _ = Vehicle.objects.update_or_create(
-            name='Chrysler 300',
-            defaults={
-                'category': business_sedan,
-                'model_year': 2023,
-                'price_multiplier': 0.80,
-                'features': {
-                    'leather_seats': True,
-                    'water_bottles': True,
-                },
-                'is_active': True,
-            }
-        )
-        chrysler.sites.set([nyc, dr])
-
-        # 3. Luxury Sedan
-        s_class, _ = Vehicle.objects.update_or_create(
-            name='Mercedes-Benz S-Class',
-            defaults={
-                'category': luxury_sedan,
-                'model_year': 2024,
-                'price_multiplier': 1.20,
-                'features': {
-                    'leather_seats': True,
-                    'wifi': True,
-                    'water_bottles': True,
-                    'phone_charger': True,
-                    'climate_control': True,
-                    'rear_entertainment': True,
-                },
-                'is_active': True,
-            }
-        )
-        s_class.sites.set([nyc, dr])
-
-        bmw_7, _ = Vehicle.objects.update_or_create(
-            name='BMW 7 Series',
-            defaults={
-                'category': luxury_sedan,
-                'model_year': 2024,
-                'price_multiplier': 1.15,
-                'features': {
-                    'leather_seats': True,
-                    'wifi': True,
-                    'water_bottles': True,
-                    'phone_charger': True,
-                    'climate_control': True,
-                },
-                'is_active': True,
-            }
-        )
-        bmw_7.sites.set([nyc, dr])
-
-        # 4. Minivan
-        sienna, _ = Vehicle.objects.update_or_create(
-            name='Toyota Sienna',
-            defaults={
-                'category': minivan,
-                'model_year': 2023,
-                'price_multiplier': 0.85,
-                'features': {
-                    'water_bottles': True,
-                    'phone_charger': True,
-                    'climate_control': True,
-                },
-                'is_active': True,
-            }
-        )
-        sienna.sites.set([nyc, dr])
-
-        traverse, _ = Vehicle.objects.update_or_create(
-            name='Chevrolet Traverse',
-            defaults={
-                'category': minivan,
-                'model_year': 2023,
-                'price_multiplier': 0.85,
-                'features': {
-                    'water_bottles': True,
-                    'phone_charger': True,
-                },
-                'is_active': True,
-            }
-        )
-        traverse.sites.set([nyc, dr])
-
-        # 5. Sprinter Van
-        sprinter_vehicle, _ = Vehicle.objects.update_or_create(
-            name='Mercedes-Benz Sprinter',
-            defaults={
-                'category': sprinter,
-                'model_year': 2024,
-                'price_multiplier': 1.40,
-                'features': {
-                    'wifi': True,
-                    'water_bottles': True,
-                    'phone_charger': True,
-                    'climate_control': True,
-                    'luggage_partition': True,
-                    'high_roof': True,
-                },
-                'is_active': True,
-            }
-        )
-        sprinter_vehicle.sites.set([nyc, dr])
-
-        transit, _ = Vehicle.objects.update_or_create(
-            name='Ford Transit',
-            defaults={
-                'category': sprinter,
-                'model_year': 2023,
-                'price_multiplier': 1.25,
-                'features': {
-                    'water_bottles': True,
-                    'phone_charger': True,
-                    'climate_control': True,
-                },
-                'is_active': True,
-            }
-        )
-        transit.sites.set([nyc, dr])
-
-        # 6. Limousine
-        mkt_limo, _ = Vehicle.objects.update_or_create(
-            name='Lincoln MKT Stretch Limo',
-            defaults={
-                'category': limo,
-                'model_year': 2022,
-                'price_multiplier': 1.50,
-                'features': {
-                    'leather_seats': True,
-                    'water_bottles': True,
-                    'phone_charger': True,
-                    'bar_filled': True,
-                    'mood_lighting': True,
-                },
-                'is_active': True,
-            }
-        )
-        mkt_limo.sites.set([nyc, dr])
-
         self.stdout.write('  Linking vehicle images...')
 
         # ── Link images to vehicles ──
-        # Map vehicle names to their image files in media/vehicles/
-        import os
-        from django.conf import settings
-
-        vehicle_images = {
-            'Cadillac Escalade': 'vehicles/escalade.jpg',
-            'Chevrolet Suburban': 'vehicles/db5b0cd41b1ec2043d931d2eda123d47.jpg',
-            'GMC Yukon Denali': 'vehicles/2023-gmc-yukon-trims-denali-xl.jpg',
-            'Cadillac XTS': 'vehicles/2016-cadillac-xts-4-door-sedan-fwd-angular-front-exterior-view_100571416_m.jpg',
-            'Chrysler 300': 'vehicles/7a62cc3a555fa543de597c474608489d.jpg',
-            'Mercedes-Benz S-Class': 'vehicles/000000008395616.jpg',
-            'BMW 7 Series': 'vehicles/P90491611_highRes_the-bmw-740i-in-sout.jpg',
-            'Toyota Sienna': 'vehicles/Toyota_Sienna_2025_1.jpg',
-            'Chevrolet Traverse': 'vehicles/13370820.jpg',
-            'Mercedes-Benz Sprinter': 'vehicles/Mercedes-Sprinter-Hire.jpg',
-            'Ford Transit': 'vehicles/eyJidWNrZXQiOiJkYXRhay1jZG4teHkiLCJrZXkiOiJjb25maWd1cmF0b3ItaW1ncy9jYXJzL2ttNzd_V6phpfo.jpg',
-            'Lincoln MKT Stretch Limo': 'vehicles/MKT-1.jpg',
-        }
-
-        for vehicle_name, image_path in vehicle_images.items():
-            try:
-                vehicle = Vehicle.objects.get(name=vehicle_name)
-                full_path = os.path.join(settings.MEDIA_ROOT, image_path)
-                if os.path.exists(full_path):
-                    vehicle.image = image_path
-                    vehicle.save(update_fields=['image'])
-                    self.stdout.write(f'    {vehicle_name} -> {image_path}')
-                else:
-                    self.stdout.write(self.style.WARNING(f'    {vehicle_name} — image not found: {image_path}'))
-            except Vehicle.DoesNotExist:
-                pass
-
+        
         # Link category images
         category_images = {
             'sprinter-van': 'vehicles/categories/van.jpg',
@@ -851,8 +609,7 @@ class Command(BaseCommand):
                     site=s,
                     vehicle_category=category,
                     service_type='hourly',
-                    vehicle=None,
-                    defaults={
+                                        defaults={
                         'base_price': hr_rate,
                         'minimum_price': hr_rate,
                         'is_active': True,
@@ -866,8 +623,7 @@ class Command(BaseCommand):
                     site=s,
                     vehicle_category=category,
                     service_type='point_to_point',
-                    vehicle=None,
-                    defaults={
+                                        defaults={
                         'base_price': p2p_base,
                         'price_per_km': p2p_per_km,
                         'km_threshold': 25,
@@ -1067,7 +823,6 @@ class Command(BaseCommand):
         self.stdout.write(f'  Airports: {Airport.objects.count()}')
         self.stdout.write(f'  Destinations: {Destination.objects.count()}')
         self.stdout.write(f'  Vehicle Categories: {VehicleCategory.objects.count()}')
-        self.stdout.write(f'  Vehicles: {Vehicle.objects.count()}')
         self.stdout.write(f'  Add-ons: {PremiumAddOn.objects.count()}')
         self.stdout.write(f'  Pricing Rules: {PricingRule.objects.count()}')
         self.stdout.write(f'  Airport Category Prices: {AirportCategoryPrice.objects.count()}')
