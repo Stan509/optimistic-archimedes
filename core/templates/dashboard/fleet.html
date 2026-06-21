@@ -1,22 +1,22 @@
 {% extends 'dashboard/base.html' %}
 
 {% block title %}Fleet Hub  -  AeroLux Select{% endblock %}
-{% block dashboard_header %}Fleet Chauffeur Database{% endblock %}
+{% block dashboard_header %}Fleet Management{% endblock %}
 
 {% block content %}
 <!-- Top Header Actions Bar -->
 <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-luxury-card border border-luxury-border p-6 rounded-2xl">
     <div>
         <h2 class="text-xl font-bold font-serif tracking-wide gold-text-gradient">Premium Fleet Hub</h2>
-        <p class="text-xs text-luxury-muted mt-1">Configure luxury vehicle categories, capacities, pricing multipliers, and specific models in your network.</p>
+        <p class="text-xs text-luxury-muted mt-1">Configure luxury vehicle categories, capacities, and pricing multipliers.</p>
     </div>
     
     <div class="flex flex-wrap items-center gap-3">
         <a href="{% url 'dashboard:fleet_categories' %}" class="text-xs font-semibold text-luxury-muted hover:text-white transition-colors bg-luxury-black border border-luxury-border px-4 py-2.5 rounded-xl hover:bg-luxury-card">
             <i class="fa-solid fa-list-check mr-1.5"></i>Manage Categories
         </a>
-        <a href="{% url 'dashboard:fleet_vehicles' %}" class="gold-gradient text-luxury-black text-xs font-semibold px-5 py-2.5 rounded-xl hover:opacity-95 transition-all shadow-lg shadow-gold-500/10">
-            <i class="fa-solid fa-car mr-1.5"></i>Manage Vehicles
+        <a href="{% url 'dashboard:add_category' %}" class="gold-gradient text-luxury-black text-xs font-semibold px-5 py-2.5 rounded-xl hover:opacity-95 transition-all shadow-lg shadow-gold-500/10">
+            <i class="fa-solid fa-plus mr-1.5"></i>Add New Category
         </a>
     </div>
 </div>
@@ -28,18 +28,18 @@
             <i class="fa-solid fa-layer-group"></i>
         </div>
         <div>
-            <span class="block text-[10px] uppercase tracking-wider text-luxury-muted">Categories active</span>
+            <span class="block text-[10px] uppercase tracking-wider text-luxury-muted">Categories</span>
             <span class="block text-2xl font-serif font-bold text-white mt-0.5">{{ categories.count }}</span>
         </div>
     </div>
     
     <div class="bg-luxury-card border border-luxury-border p-5 rounded-xl flex items-center space-x-4">
-        <div class="w-12 h-12 rounded-xl bg-gold-500/10 border border-gold-500/20 flex items-center justify-center text-gold-400 text-lg">
-            <i class="fa-solid fa-car-side"></i>
+        <div class="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 text-lg">
+            <i class="fa-solid fa-check-circle"></i>
         </div>
         <div>
-            <span class="block text-[10px] uppercase tracking-wider text-luxury-muted">Vehicles registered</span>
-            <span class="block text-2xl font-serif font-bold text-white mt-0.5">{{ vehicles.count }}</span>
+            <span class="block text-[10px] uppercase tracking-wider text-luxury-muted">Active Categories</span>
+            <span class="block text-2xl font-serif font-bold text-emerald-400 mt-0.5">{{ categories.count }}</span>
         </div>
     </div>
 
@@ -54,106 +54,52 @@
     </div>
 </div>
 
-<!-- Fleet Categories & Vehicle summary grids -->
-<div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-    
-    <!-- Column 1: Fleet Categories overview -->
-    <div class="bg-luxury-card border border-luxury-border p-6 rounded-2xl space-y-6">
-        <div class="flex justify-between items-center border-b border-luxury-border pb-4">
-            <div>
-                <h3 class="font-serif font-semibold text-base text-white">Vehicle Class Categories</h3>
-                <span class="text-[11px] text-luxury-muted block mt-0.5">Defines pax capacity, base pricing mapping, and features</span>
-            </div>
-            <a href="{% url 'dashboard:add_category' %}" class="text-xs text-gold-400 hover:underline">
-                <i class="fa-solid fa-plus mr-1"></i>Add Class
-            </a>
+<!-- Fleet Categories Grid -->
+<div class="bg-luxury-card border border-luxury-border p-6 rounded-2xl space-y-6">
+    <div class="flex justify-between items-center border-b border-luxury-border pb-4">
+        <div>
+            <h3 class="font-serif font-semibold text-base text-white">Vehicle Class Categories</h3>
+            <span class="text-[11px] text-luxury-muted block mt-0.5">Defines passenger capacity, base pricing mapping, and features</span>
         </div>
-
-        <div class="space-y-4">
-            {% for cat in categories %}
-            <div class="p-4 rounded-xl bg-luxury-black/40 border border-luxury-border flex flex-col sm:flex-row justify-between sm:items-center gap-4 hover:border-gold-500/20 transition-all">
-                <div class="flex items-center space-x-3.5">
-                    {% if cat.image %}
-                    <img src="{{ cat.image.url }}" alt="{{ cat.name }}" class="w-16 h-12 object-cover rounded-lg border border-luxury-border">
-                    {% else %}
-                    <div class="w-16 h-12 rounded-lg bg-luxury-card border border-luxury-border flex items-center justify-center text-luxury-muted text-xs">
-                        <i class="fa-solid fa-car text-lg"></i>
-                    </div>
-                    {% endif %}
-                    <div>
-                        <h4 class="font-semibold text-sm text-white">{{ cat.name }}</h4>
-                        <span class="block text-xs text-luxury-muted mt-0.5">
-                            Capacity: <strong class="text-white">{{ cat.passengers_capacity }} Pax</strong> &bull; <strong class="text-white">{{ cat.luggage_capacity }} Bags</strong>
-                        </span>
-                    </div>
-                </div>
-                
-                <div class="flex items-center justify-between sm:justify-end gap-3.5">
-                    <span class="inline-block text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded border 
-                        {% if cat.is_active %}bg-emerald-500/10 border-emerald-500/20 text-emerald-400{% else %}bg-rose-500/10 border-rose-500/20 text-rose-400{% endif %}">
-                        {% if cat.is_active %}Active{% else %}Inactive{% endif %}
-                    </span>
-                    <a href="{% url 'dashboard:edit_category' cat.slug %}" class="text-xs text-gold-400 hover:text-white transition-colors bg-luxury-card border border-luxury-border px-3 py-1.5 rounded-lg">
-                        <i class="fa-solid fa-pen-to-square"></i>
-                    </a>
-                </div>
-            </div>
-            {% empty %}
-            <div class="text-center py-10 text-xs text-luxury-muted italic">
-                No luxury categories created yet.
-            </div>
-            {% endfor %}
-        </div>
+        <a href="{% url 'dashboard:add_category' %}" class="text-xs text-gold-400 hover:underline">
+            <i class="fa-solid fa-plus mr-1"></i>Add Class
+        </a>
     </div>
 
-    <!-- Column 2: Specific vehicles inventory -->
-    <div class="bg-luxury-card border border-luxury-border p-6 rounded-2xl space-y-6">
-        <div class="flex justify-between items-center border-b border-luxury-border pb-4">
-            <div>
-                <h3 class="font-serif font-semibold text-base text-white">Chauffeur Chassis Inventory</h3>
-                <span class="text-[11px] text-luxury-muted block mt-0.5">Individual cars mapped under specific categories</span>
-            </div>
-            <a href="{% url 'dashboard:add_vehicle' %}" class="text-xs text-gold-400 hover:underline">
-                <i class="fa-solid fa-plus mr-1"></i>Add Vehicle
-            </a>
-        </div>
-
-        <div class="space-y-4">
-            {% for v in vehicles %}
-            <div class="p-4 rounded-xl bg-luxury-black/40 border border-luxury-border flex flex-col sm:flex-row justify-between sm:items-center gap-4 hover:border-gold-500/20 transition-all">
-                <div class="flex items-center space-x-3.5">
-                    {% if v.image %}
-                    <img src="{{ v.image.url }}" alt="{{ v.name }}" class="w-16 h-12 object-cover rounded-lg border border-luxury-border">
-                    {% else %}
-                    <div class="w-16 h-12 rounded-lg bg-luxury-card border border-luxury-border flex items-center justify-center text-luxury-muted text-xs">
-                        <i class="fa-solid fa-car text-lg"></i>
-                    </div>
-                    {% endif %}
-                    <div>
-                        <h4 class="font-semibold text-sm text-white">{{ v.name }} {% if v.model_year %}({{ v.model_year }}){% endif %}</h4>
-                        <span class="block text-xs text-luxury-muted mt-0.5">
-                            Category: <strong class="text-white">{{ v.category.name }}</strong> &bull; Multiplier: <strong class="text-gold-400">x{{ v.price_multiplier }}</strong>
-                        </span>
-                    </div>
+    <div class="space-y-4">
+        {% for cat in categories %}
+        <div class="p-4 rounded-xl bg-luxury-black/40 border border-luxury-border flex flex-col sm:flex-row justify-between sm:items-center gap-4 hover:border-gold-500/20 transition-all">
+            <div class="flex items-center space-x-3.5">
+                {% if cat.image %}
+                <img src="{{ cat.image.url }}" alt="{{ cat.name }}" class="w-16 h-12 object-cover rounded-lg border border-luxury-border">
+                {% else %}
+                <div class="w-16 h-12 rounded-lg bg-luxury-card border border-luxury-border flex items-center justify-center text-luxury-muted text-xs">
+                    <i class="fa-solid fa-car text-lg"></i>
                 </div>
-                
-                <div class="flex items-center justify-between sm:justify-end gap-3.5">
-                    <span class="inline-block text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded border 
-                        {% if v.is_active %}bg-emerald-500/10 border-emerald-500/20 text-emerald-400{% else %}bg-rose-500/10 border-rose-500/20 text-rose-400{% endif %}">
-                        {% if v.is_active %}Active{% else %}Inactive{% endif %}
+                {% endif %}
+                <div>
+                    <h4 class="font-semibold text-sm text-white">{{ cat.name }}</h4>
+                    <span class="block text-xs text-luxury-muted mt-0.5">
+                        Capacity: <strong class="text-white">{{ cat.passengers_capacity }} Pax</strong> &bull; <strong class="text-white">{{ cat.luggage_capacity }} Bags</strong>
                     </span>
-                    <a href="{% url 'dashboard:edit_vehicle' v.pk %}" class="text-xs text-gold-400 hover:text-white transition-colors bg-luxury-card border border-luxury-border px-3 py-1.5 rounded-lg">
-                        <i class="fa-solid fa-pen-to-square"></i>
-                    </a>
                 </div>
             </div>
-            {% empty %}
-            <div class="text-center py-10 text-xs text-luxury-muted italic">
-                No vehicles registered. Add a vehicle chassis to start dispatching.
+            
+            <div class="flex items-center justify-between sm:justify-end gap-3.5">
+                <span class="inline-block text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded border 
+                    {% if cat.is_active %}bg-emerald-500/10 border-emerald-500/20 text-emerald-400{% else %}bg-rose-500/10 border-rose-500/20 text-rose-400{% endif %}">
+                    {% if cat.is_active %}Active{% else %}Inactive{% endif %}
+                </span>
+                <a href="{% url 'dashboard:edit_category' cat.slug %}" class="text-xs text-gold-400 hover:text-white transition-colors bg-luxury-card border border-luxury-border px-3 py-1.5 rounded-lg">
+                    <i class="fa-solid fa-pen-to-square"></i>
+                </a>
             </div>
-            {% endfor %}
         </div>
+        {% empty %}
+        <div class="text-center py-10 text-xs text-luxury-muted italic">
+            No luxury categories created yet.
+        </div>
+        {% endfor %}
     </div>
-
 </div>
 {% endblock %}
