@@ -264,10 +264,10 @@
 
                     <!-- Direction State Tracker -->
                     <input type="hidden" name="transfer_direction" id="transfer_direction" value="AIRPORT_TO_DEST">
-                    <!-- Airport Transfer wrapper (airport + switch + address on same row) -->
+                    <!-- Airport Transfer wrapper (airport + address with Toggle switch) -->
                     <div id="div-airport-transfer-wrapper" class="space-y-4">
-                        <div class="airport-row-3">
-                            <!-- Left: Origin Airport -->
+                        <div class="flex flex-col md:flex-row items-center gap-4 relative">
+                            <!-- Left Block: Airport Select (default: Origin Airport) -->
                             <div id="transfer-start-wrapper" class="w-full font-medium" style="order: 1;">
                                 <label id="lbl-transfer-start" for="airport_id" class="block text-xs uppercase tracking-widest font-bold text-theme-text/90 mb-2">Origin Airport</label>
                                 <div class="relative">
@@ -288,12 +288,12 @@
                                 </div>
                             </div>
                             <!-- Inversion Toggle Button -->
-                            <div class="flex justify-center items-end pb-1" style="order: 2;">
+                            <div class="flex justify-center items-center md:pt-6" style="order: 2;">
                                 <button type="button" id="btn-switch-direction" class="w-10 h-10 rounded-full bg-theme-bg border border-theme-border hover:border-luxe-gold/50 hover:text-luxe-gold-bright transition-all duration-300 flex items-center justify-center shadow-lg active:scale-95 cursor-pointer" title="Switch Directions">
                                     <i class="fas fa-right-left rotate-90 md:rotate-0 text-sm text-luxe-gold"></i>
                                 </button>
                             </div>
-                            <!-- Right Block: Destination Address -->
+                            <!-- Right Block: Destination Address (free text with geocoding) -->
                             <div id="transfer-end-wrapper" class="w-full font-medium" style="order: 3;">
                                 <label id="lbl-transfer-end" for="destination_address" class="block text-xs uppercase tracking-widest font-bold text-theme-text/90 mb-2">Drop-off Address</label>
                                 <div class="relative">
@@ -302,6 +302,7 @@
                                     </span>
                                     <input type="text" name="destination_address" id="destination_address" placeholder="Enter your destination address..." class="block w-full pl-11 pr-4 py-4 bg-theme-bg/80 rounded-xl border border-theme-border focus:border-luxe-gold text-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-luxe-gold font-medium" autocomplete="off">
                                 </div>
+                                <!-- Geocoding result info -->
                                 <p id="geocode-status" class="text-[10px] text-theme-text/95 mt-1 font-medium hidden">
                                     <i class="fas fa-map-marker-alt text-luxe-gold mr-1"></i>
                                     <span id="geocode-status-text">Address found  -  displaying on map</span>
