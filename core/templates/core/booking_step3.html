@@ -321,12 +321,12 @@
             checkboxes.forEach(checkbox => {
                 if (checkbox.checked) {
                     addonsTotal += parseFloat(checkbox.getAttribute('data-price')) || 0;
-                    
-                    // Sum return addon if it is checked
-                    const returnCb = document.querySelector(`.addon-return-checkbox[value="${checkbox.value}"]`);
-                    if (returnCb && returnCb.checked) {
-                        addonsTotal += parseFloat(returnCb.getAttribute('data-price')) || 0;
-                    }
+                }
+            });
+
+            returnCheckboxes.forEach(returnCb => {
+                if (returnCb.checked) {
+                    addonsTotal += parseFloat(returnCb.getAttribute('data-price')) || 0;
                 }
             });
 
@@ -339,30 +339,12 @@
 
         // Attach change listeners to all main checkboxes
         checkboxes.forEach(checkbox => {
-            checkbox.addEventListener('change', () => {
-                if (!checkbox.checked) {
-                    // Uncheck return checkbox if main is unchecked
-                    const returnCb = document.querySelector(`.addon-return-checkbox[value="${checkbox.value}"]`);
-                    if (returnCb) {
-                        returnCb.checked = false;
-                    }
-                }
-                calculateLiveTotal();
-            });
+            checkbox.addEventListener('change', calculateLiveTotal);
         });
 
         // Attach change listeners to all return checkboxes
         returnCheckboxes.forEach(returnCb => {
-            returnCb.addEventListener('change', () => {
-                if (returnCb.checked) {
-                    // Automatically check main checkbox if return is checked
-                    const mainCb = document.querySelector(`.addon-checkbox[value="${returnCb.value}"]`);
-                    if (mainCb && !mainCb.checked) {
-                        mainCb.checked = true;
-                    }
-                }
-                calculateLiveTotal();
-            });
+            returnCb.addEventListener('change', calculateLiveTotal);
         });
 
         // Initialize total once on load
