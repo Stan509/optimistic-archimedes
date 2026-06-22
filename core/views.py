@@ -749,10 +749,17 @@ def booking_payment(request):
                 # For return leg: pickup_address = dropoff of outbound (the destination/hotel)
                 # This is already set correctly above: return_pickup_address = booking_outbound.dropoff_address
                 # Also set pickup_location_name for clarity in the return booking
+                # For return leg: pickup_address = dropoff of outbound (the destination/hotel)
                 if booking_outbound.destination:
                     booking_return.pickup_address = booking_outbound.destination.name + (f' - {booking_outbound.destination.address}' if booking_outbound.destination.address else '')
                 elif booking_outbound.dropoff_address:
                     booking_return.pickup_address = booking_outbound.dropoff_address
+
+                # For return leg: dropoff_address = pickup of outbound (the airport)
+                if booking_outbound.airport:
+                    booking_return.dropoff_address = booking_outbound.airport.name + (f' ({booking_outbound.airport.code})' if booking_outbound.airport.code else '')
+                elif booking_outbound.pickup_address:
+                    booking_return.dropoff_address = booking_outbound.pickup_address
 
                 # Set return addons total (return leg only has addon_return_ids)
                 return_addons_total = Decimal('0.00')

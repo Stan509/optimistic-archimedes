@@ -650,13 +650,7 @@ ${bold}Flight Number:${bold} ${booking.flightNumber}
 ${bold}Outbound Pickup:${bold} ${booking.pickupDate}
 ${bold}Outbound Meeting Point:${bold} ${booking.pickupLocation}`;
 
-    {% if booking.round_trip %}
-    details += `\n${bold}Return Pickup:${bold} ${booking.returnDate}
-${bold}Return Meeting Point:${bold} ${booking.returnLocation}`;
-    {% endif %}
-
-    details += `\n${bold}Vehicle:${bold} ${booking.vehicle}
-${bold}VIP Add-ons:${bold} ${booking.addons}`;
+    // Removed Return details, vehicle, and VIP Add-ons from copy string as requested by user.
 
     return details;
 }

@@ -92,41 +92,70 @@
                         </div>
 
                         <!-- VIP Add-ons block -->
-                        <div class="space-y-4">
-                            <h3 class="text-xs uppercase tracking-widest font-bold text-theme-text border-b border-theme-border pb-2">Premium Add-Ons & Enhancements</h3>
-                            <p class="text-[11px] text-theme-text/95 font-medium leading-relaxed">
-                                Select from our customizable premium services to maximize convenience. Added fees are calculated live in the itinerary summary.
-                            </p>
-                            
-                            <div class="space-y-3">
-                                {% for addon in addons %}
-                                <label class="flex items-start p-4 rounded-xl border border-theme-border hover:border-luxe-gold/20 bg-theme-bg/30 cursor-pointer select-none transition-all duration-200 group">
-                                    <div class="flex items-center h-5 mt-0.5">
-                                        <input type="checkbox" name="addons" value="{{ addon.id }}" data-price="{{ addon.price }}" class="addon-checkbox h-4.5 w-4.5 rounded border-theme-border text-luxe-gold focus:ring-luxe-gold bg-theme-bg cursor-pointer">
-                                    </div>
-                                    <div class="ml-4 flex-grow">
-                                        <div class="flex items-center justify-between">
-                                            <div>
-                                                <h4 class="text-xs font-bold uppercase tracking-wider text-theme-text group-hover:text-luxe-gold transition-colors flex items-center space-x-2">
-                                                    <i class="{% if addon.icon %}{{ addon.icon }}{% else %}fas fa-star{% endif %} text-luxe-gold text-[10px]"></i>
-                                                    <span>{{ addon.name }}</span>
-                                                </h4>
-                                                <p class="text-[11px] text-theme-text/95 font-medium mt-0.5">{{ addon.description }}</p>
+                        <div class="space-y-6">
+                            <!-- Outbound Add-Ons -->
+                            <div>
+                                <h3 class="text-xs uppercase tracking-widest font-bold text-theme-text border-b border-theme-border pb-2">Outbound Add-Ons (Aller)</h3>
+                                <p class="text-[11px] text-theme-text/95 font-medium leading-relaxed mt-2 mb-4">
+                                    Select premium enhancements for your outbound trip.
+                                </p>
+                                <div class="space-y-3">
+                                    {% for addon in addons %}
+                                    <label class="flex items-start p-4 rounded-xl border border-theme-border hover:border-luxe-gold/20 bg-theme-bg/30 cursor-pointer select-none transition-all duration-200 group">
+                                        <div class="flex items-center h-5 mt-0.5">
+                                            <input type="checkbox" name="addons" value="{{ addon.id }}" data-price="{{ addon.price }}" class="addon-checkbox h-4.5 w-4.5 rounded border-theme-border text-luxe-gold focus:ring-luxe-gold bg-theme-bg cursor-pointer">
+                                        </div>
+                                        <div class="ml-4 flex-grow">
+                                            <div class="flex items-center justify-between">
+                                                <div>
+                                                    <h4 class="text-xs font-bold uppercase tracking-wider text-theme-text group-hover:text-luxe-gold transition-colors flex items-center space-x-2">
+                                                        <i class="{% if addon.icon %}{{ addon.icon }}{% else %}fas fa-star{% endif %} text-luxe-gold text-[10px]"></i>
+                                                        <span>{{ addon.name }}</span>
+                                                    </h4>
+                                                    <p class="text-[11px] text-theme-text/95 font-medium mt-0.5">{{ addon.description }}</p>
+                                                </div>
+                                                <span class="text-xs font-bold text-luxe-gold whitespace-nowrap ml-4">+{{ addon.price|currency }}</span>
                                             </div>
-                                            <span class="text-xs font-bold text-luxe-gold whitespace-nowrap ml-4">+{{ addon.price|currency }}</span>
                                         </div>
-                                        {% if booking_data.round_trip %}
-                                        <div class="mt-2.5 pt-2 border-t border-theme-border/40 flex items-center space-x-2 text-[10px] text-theme-text/90">
-                                            <input type="checkbox" name="addons_return" value="{{ addon.id }}" data-price="{{ addon.price }}" class="addon-return-checkbox h-3.5 w-3.5 rounded border-theme-border text-luxe-gold focus:ring-luxe-gold bg-theme-bg cursor-pointer">
-                                            <span>Apply also to return leg (+{{ addon.price|currency }})</span>
-                                        </div>
-                                        {% endif %}
-                                    </div>
-                                </label>
-                                {% empty %}
-                                <p class="text-xs text-theme-text/95 italic">No add-ons available for dynamic reservation.</p>
-                                {% endfor %}
+                                    </label>
+                                    {% empty %}
+                                    <p class="text-xs text-theme-text/95 italic">No add-ons available for dynamic reservation.</p>
+                                    {% endfor %}
+                                </div>
                             </div>
+
+                            {% if booking_data.round_trip %}
+                            <!-- Return Add-Ons -->
+                            <div>
+                                <h3 class="text-xs uppercase tracking-widest font-bold text-theme-text border-b border-theme-border pb-2">Return Add-Ons (Retour)</h3>
+                                <p class="text-[11px] text-theme-text/95 font-medium leading-relaxed mt-2 mb-4">
+                                    Select premium enhancements specifically for your return trip.
+                                </p>
+                                <div class="space-y-3">
+                                    {% for addon in addons %}
+                                    <label class="flex items-start p-4 rounded-xl border border-theme-border hover:border-luxe-gold/20 bg-theme-bg/30 cursor-pointer select-none transition-all duration-200 group">
+                                        <div class="flex items-center h-5 mt-0.5">
+                                            <input type="checkbox" name="addons_return" value="{{ addon.id }}" data-price="{{ addon.price }}" class="addon-return-checkbox h-4.5 w-4.5 rounded border-theme-border text-luxe-gold focus:ring-luxe-gold bg-theme-bg cursor-pointer">
+                                        </div>
+                                        <div class="ml-4 flex-grow">
+                                            <div class="flex items-center justify-between">
+                                                <div>
+                                                    <h4 class="text-xs font-bold uppercase tracking-wider text-theme-text group-hover:text-luxe-gold transition-colors flex items-center space-x-2">
+                                                        <i class="{% if addon.icon %}{{ addon.icon }}{% else %}fas fa-star{% endif %} text-luxe-gold text-[10px]"></i>
+                                                        <span>{{ addon.name }}</span>
+                                                    </h4>
+                                                    <p class="text-[11px] text-theme-text/95 font-medium mt-0.5">{{ addon.description }}</p>
+                                                </div>
+                                                <span class="text-xs font-bold text-luxe-gold whitespace-nowrap ml-4">+{{ addon.price|currency }}</span>
+                                            </div>
+                                        </div>
+                                    </label>
+                                    {% empty %}
+                                    <p class="text-xs text-theme-text/95 italic">No add-ons available.</p>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            {% endif %}
                         </div>
 
                         {% if booking_data.round_trip %}
