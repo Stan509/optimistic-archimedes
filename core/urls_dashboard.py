@@ -70,6 +70,13 @@ urlpatterns = [
     path('settings/email/', views.email_settings, name='email_settings'),
     path('settings/email/templates/', views.email_template_editor, name='email_template_editor'),
 
+    # Contact Messages
+    path('contacts/', views.contact_messages, name='contact_messages'),
+    path('contacts/<int:message_id>/reply/', views.contact_reply, name='contact_reply'),
+
+    # Delete booking
+    path('bookings/<int:booking_id>/delete/', views.delete_booking, name='delete_booking'),
+
     # Admin User Management
     path('admins/', views.admin_users_list, name='admin_users'),
     path('admins/add/', views.admin_user_form, name='add_admin'),

@@ -165,6 +165,8 @@ def create_or_update_app(spaces_key=None, spaces_secret=None):
         {"key": "DJANGO_DEBUG", "value": "False"},
         {"key": "DJANGO_ALLOWED_HOSTS", "value": ".ondigitalocean.app,aeroluxselect.com,www.aeroluxselect.com,aeroluxeselect-nyc.com,aeroluxeselect-dr.com,www.aeroluxeselect-nyc.com,www.aeroluxeselect-dr.com,localhost"},
         {"key": "CSRF_TRUSTED_ORIGINS", "value": "https://aeroluxselect.com,https://www.aeroluxselect.com,https://aeroluxeselect-nyc.com,https://aeroluxeselect-dr.com,https://www.aeroluxeselect-nyc.com,https://www.aeroluxeselect-dr.com"},
+        {"key": "DATABASE_URL", "value": "${db.DATABASE_URL}"},
+        {"key": "USE_SPACES", "value": "True"},
     ]
 
     if spaces_key and spaces_secret:

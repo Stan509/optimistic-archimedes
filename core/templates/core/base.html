@@ -227,6 +227,31 @@
             filter: invert(72%) sepia(21%) saturate(1476%) hue-rotate(5deg) brightness(91%) contrast(85%);
             cursor: pointer;
         }
+        /* Dark mode: make all form input/select/textarea text black (booking form only) */
+        .dark .booking-input,
+        .dark .booking-select,
+        .dark input[type="text"]:not(.sr-only),
+        .dark input[type="number"]:not(.sr-only),
+        .dark input[type="date"]:not(.sr-only),
+        .dark input[type="time"]:not(.sr-only),
+        .dark select:not(.sr-only),
+        .dark textarea {
+            color: #111827 !important;
+            -webkit-text-fill-color: #111827 !important;
+        }
+        .dark .booking-input::placeholder,
+        .dark .booking-select::placeholder,
+        .dark input::placeholder,
+        .dark select::placeholder,
+        .dark textarea::placeholder {
+            color: #6B7280 !important;
+            -webkit-text-fill-color: #6B7280 !important;
+            opacity: 1 !important;
+        }
+        .dark input[type="date"]::-webkit-calendar-picker-indicator,
+        .dark input[type="time"]::-webkit-calendar-picker-indicator {
+            filter: invert(40%) sepia(0%) saturate(0%) brightness(40%) contrast(100%);
+        }
     </style>
     
     <!-- Immediate Theme Initialization Script (Avoids FOUC) -->

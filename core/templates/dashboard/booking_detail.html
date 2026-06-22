@@ -95,20 +95,18 @@
                     </span>
                 </div>
                 <div>
-                    <span class="block text-xs text-luxury-muted uppercase tracking-wider">Linked Booking</span>
-                    {% if booking.linked_booking %}
-                    <a href="{% url 'dashboard:booking_detail' booking.linked_booking.id %}" class="block font-semibold text-gold-400 hover:underline text-base mt-1">
-                        <i class="fa-solid fa-link mr-1"></i>Outbound: {{ booking.linked_booking.booking_reference }}
-                    </a>
-                    {% elif booking.return_bookings.all %}
-                    <span class="block font-semibold text-gold-400 text-base mt-1">
-                        <i class="fa-solid fa-link mr-1"></i>Return Leg:
-                        {% for return_b in booking.return_bookings.all %}
-                        <a href="{% url 'dashboard:booking_detail' return_b.id %}" class="hover:underline font-mono">{{ return_b.booking_reference }}</a>{% if not forloop.last %}, {% endif %}
-                        {% endfor %}
+                    <span class="block text-xs text-luxury-muted uppercase tracking-wider">Trip Leg</span>
+                    {% if booking.transfer_direction == 'AIRPORT_TO_DEST' %}
+                    <span class="block font-semibold text-sky-400 text-base mt-1">
+                        <i class="fa-solid fa-arrow-right mr-1"></i>Outbound Leg (Aller)
                     </span>
                     {% else %}
-                    <span class="block text-xs text-luxury-muted italic mt-1">None (Single leg)</span>
+                    <span class="block font-semibold text-amber-400 text-base mt-1">
+                        <i class="fa-solid fa-arrow-left mr-1"></i>Return Leg (Retour)
+                    </span>
+                    {% endif %}
+                    {% if booking.round_trip %}
+                    <span class="block text-[10px] text-luxury-muted mt-0.5">Round-trip booking — This leg is independent</span>
                     {% endif %}
                 </div>
             </div>
@@ -556,9 +554,12 @@
                 </a>
             </div>
             
-            <div class="pt-2 border-t border-luxury-border text-center">
+            <div class="pt-2 border-t border-luxury-border text-center space-y-2">
                 <a href="javascript:window.print();" class="inline-block text-[11px] font-semibold text-luxury-muted hover:text-white transition-colors bg-luxury-black border border-luxury-border px-3 py-1.5 rounded-lg w-full">
                     <i class="fa-solid fa-print mr-1.5"></i>Print Chauffeur Dispatch Sheet
+                </a>
+                <a href="{% url 'dashboard:delete_booking' booking.id %}" class="inline-block text-[11px] font-semibold text-rose-400 hover:text-rose-300 transition-colors bg-rose-500/10 border border-rose-500/30 px-3 py-1.5 rounded-lg w-full hover:bg-rose-500/20" onclick="return confirm('Are you sure you want to permanently delete booking {{ booking.booking_reference }}? This action cannot be undone.')">
+                    <i class="fa-solid fa-trash-can mr-1.5"></i>Delete Booking
                 </a>
             </div>
         </div>

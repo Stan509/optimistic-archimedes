@@ -700,7 +700,7 @@ def booking_payment(request):
                 if addon_ids:
                     booking_outbound.addons.set(addon_ids)
                     
-                # 2. Create Return Booking (Retour)
+                # 2. Create Return Booking (Retour) — fully independent
                 # Reverse addresses for return leg
                 return_pickup_address = booking_outbound.dropoff_address
                 return_dropoff_address = booking_outbound.pickup_address
@@ -727,6 +727,7 @@ def booking_payment(request):
                     customer_notes=booking_data.get('customer_notes', ''),
                     booking_source='DIRECT',
                     round_trip=True,
+                    # Return booking stores its own pickup info (the outbound destination)
                     return_date=booking_data.get('pickup_date') or None,
                     return_time=booking_data.get('pickup_time') or None,
                     number_of_stops=0,
@@ -735,7 +736,7 @@ def booking_payment(request):
                     base_price=base_price,
                     pay_separately=booking_data.get('pay_separately', False),
                     payment_method=payment_method,
-                    linked_booking=booking_outbound,
+                    # No linked_booking — each leg is fully independent
                 )
 
                 if airport_id:
@@ -744,6 +745,14 @@ def booking_payment(request):
                     booking_return.destination_id = int(dest_id)
                 if cat_id:
                     booking_return.vehicle_category_id = int(cat_id)
+                
+                # For return leg: pickup_address = dropoff of outbound (the destination/hotel)
+                # This is already set correctly above: return_pickup_address = booking_outbound.dropoff_address
+                # Also set pickup_location_name for clarity in the return booking
+                if booking_outbound.destination:
+                    booking_return.pickup_address = booking_outbound.destination.name + (f' - {booking_outbound.destination.address}' if booking_outbound.destination.address else '')
+                elif booking_outbound.dropoff_address:
+                    booking_return.pickup_address = booking_outbound.dropoff_address
 
                 # Set return addons total (return leg only has addon_return_ids)
                 return_addons_total = Decimal('0.00')
@@ -759,9 +768,7 @@ def booking_payment(request):
                 if addon_return_ids:
                     booking_return.addons.set(addon_return_ids)
                 
-                # Link outbound to return
-                booking_outbound.linked_booking = booking_return
-                booking_outbound.save(update_fields=['round_trip', 'linked_booking'])
+                # No linked_booking — each leg is fully independent
                 
                 # Force reload to get updated fields and calculate totals with addons
                 booking_outbound = Booking.objects.get(pk=booking_outbound.pk)
@@ -1028,7 +1035,7 @@ def booking_success(request, reference):
 # =========================================================================
 
 def contact(request):
-    """Contact page."""
+    """Contact page with form submission saved to DB."""
     site, slug = _get_site_or_404(request)
 
     try:
@@ -1036,6 +1043,28 @@ def contact(request):
         site_settings = SiteSettings.get_settings(site)
     except Exception:
         site_settings = None
+
+    if request.method == 'POST':
+        name = request.POST.get('name', '').strip()
+        email = request.POST.get('email', '').strip()
+        subject = request.POST.get('subject', '').strip()
+        message = request.POST.get('message', '').strip()
+        
+        if name and email and subject and message:
+            try:
+                from core.models import ContactMessage
+                ContactMessage.objects.create(
+                    site=site,
+                    name=name,
+                    email=email,
+                    subject=subject,
+                    message=message,
+                )
+                messages.success(request, 'Your message has been sent successfully! We will respond shortly.')
+            except Exception as e:
+                messages.error(request, f'An error occurred while sending your message. Please try again.')
+        else:
+            messages.error(request, 'Please fill in all required fields.')
 
     context = {
         'site_settings': site_settings,

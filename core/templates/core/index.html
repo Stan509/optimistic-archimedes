@@ -77,6 +77,15 @@
         gap: 0.5rem;
         align-items: end;
     }
+    #transfer-start-wrapper {
+        order: 1;
+    }
+    #btn-switch-direction-wrapper {
+        order: 2;
+    }
+    #transfer-end-wrapper {
+        order: 3;
+    }
     @media (max-width: 640px) {
         .airport-row-3 {
             grid-template-columns: 1fr auto 1fr;
@@ -267,7 +276,7 @@
                     <!-- Airport Transfer wrapper (airport + switch + address on same row) -->
                     <div id="div-airport-transfer-wrapper" class="space-y-4">
                         <div class="airport-row-3">
-                            <div id="transfer-start-wrapper" class="w-full font-medium">
+                            <div id="transfer-start-wrapper" class="w-full font-medium" style="order: 1;">
                                 <label id="lbl-transfer-start" for="airport_id" class="block text-[10px] sm:text-xs uppercase tracking-widest font-bold text-theme-text/90 mb-1 sm:mb-2">Origin Airport</label>
                                 <div class="relative">
                                     <span class="absolute inset-y-0 left-0 booking-icon pl-2 sm:pl-4 flex items-center text-luxe-gold">
@@ -286,12 +295,12 @@
                                     </span>
                                 </div>
                             </div>
-                            <div class="flex justify-center items-end pb-1 sm:pb-0">
-                                <button type="button" id="btn-switch-direction" class="btn-switch-mobile w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-theme-bg border border-theme-border text-theme-text hover:border-luxe-gold/50 hover:text-luxe-gold transition-all duration-300 flex items-center justify-center shadow-lg active:scale-95 cursor-pointer" title="Switch Directions">
-                                    <i class="fas fa-right-left rotate-90 md:rotate-0 text-[11px] sm:text-sm"></i>
+                            <div id="btn-switch-direction-wrapper" class="flex justify-center items-center pb-1 sm:pb-0 px-1 sm:px-2" style="order: 2;">
+                                <button type="button" id="btn-switch-direction" class="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-luxe-gold/20 border border-luxe-gold text-luxe-gold hover:bg-luxe-gold hover:text-white transition-all duration-300 flex items-center justify-center shadow-lg active:scale-95 cursor-pointer" title="Switch Directions">
+                                    <i class="fas fa-right-left rotate-90 md:rotate-0 text-sm"></i>
                                 </button>
                             </div>
-                            <div id="transfer-end-wrapper" class="w-full font-medium">
+                            <div id="transfer-end-wrapper" class="w-full font-medium" style="order: 3;">
                                 <label id="lbl-transfer-end" for="destination_address" class="block text-[10px] sm:text-xs uppercase tracking-widest font-bold text-theme-text/90 mb-1 sm:mb-2">Drop-off Address</label>
                                 <div class="relative">
                                     <span class="absolute inset-y-0 left-0 booking-icon pl-2 sm:pl-4 flex items-center text-luxe-gold">
@@ -914,130 +923,44 @@
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-
             {% for test in testimonials %}
-
-            <div data-aos="fade-up" data-aos-delay="100"  class="glass-card rounded-2xl p-8 hover:border-luxe-gold/30 transition-all duration-300 relative">
-
-                <span class="absolute top-6 right-8 text-6xl text-luxe-gold/10 font-serif">"</span>
-
-                <div class="mb-4">
-
-                    {{ test.rating|star_rating }}
-
+            <div data-aos="fade-up" data-aos-delay="100" class="glass-card rounded-2xl p-8 hover:border-luxe-gold/30 transition-all duration-300 relative flex flex-col justify-between">
+                <div>
+                    <span class="absolute top-6 right-8 text-6xl text-luxe-gold/10 font-serif">"</span>
+                    <div class="mb-4">
+                        {{ test.rating|star_rating }}
+                    </div>
+                    <p class="text-sm leading-relaxed text-theme-text/95 mb-6 font-medium italic">
+                        "{{ test.comment }}"
+                    </p>
                 </div>
-
-                <p class="text-sm leading-relaxed text-theme-text/95 mb-6 font-medium italic">
-
-                    "{{ test.content }}"
-
-                </p>
-
-                <div class="flex items-center space-x-3 pt-4 border-t border-theme-border">
-
+                <div class="flex items-center space-x-3 pt-4 border-t border-theme-border mt-auto">
                     {% if test.image %}
-
-                    <img src="{{ test.image.url }}" alt="{{ test.author }}" class="w-10 h-10 rounded-full object-cover">
-
+                    <img src="{{ test.image.url }}" alt="{{ test.customer_name }}" class="w-10 h-10 rounded-full object-cover">
                     {% else %}
-
                     <div class="w-10 h-10 rounded-full bg-luxe-gold/20 flex items-center justify-center text-luxe-gold font-bold text-xs">
-
-                        {{ test.author|slice:":2"|upper }}
-
+                        {{ test.customer_name|slice:":2"|upper }}
                     </div>
-
                     {% endif %}
-
                     <div>
-
-                        <h4 class="text-xs font-bold uppercase tracking-wider text-theme-text">{{ test.author }}</h4>
-
-                        <p class="text-[10px] text-theme-text/95 font-medium">{{ test.company|default:"Verified Client" }}</p>
-
+                        <h4 class="text-xs font-bold uppercase tracking-wider text-theme-text">{{ test.customer_name }}</h4>
+                        <p class="text-[10px] text-theme-text/95 font-medium">{{ test.get_service_type_display }}</p>
                     </div>
-
                 </div>
-
             </div>
-
-
-                </div>
-
-            </div>
-
-            <div data-aos="fade-up" data-aos-delay="100"  class="glass-card rounded-2xl p-8 transition-all duration-300 relative">
-
-                <span class="absolute top-6 right-8 text-6xl text-luxe-gold/10 font-serif">"</span>
-
-                <div class="mb-4">
-
-                    <span class="text-luxe-gold">&#9733;&#9733;&#9733;&#9733;&#9733;</span>
-
-                </div>
-
-                <p class="text-sm leading-relaxed text-theme-text/95 mb-6 font-medium italic">
-
-                    "Our family trip to the Dominican Republic began the moment we stepped into our Aerolux VIP transfer. Fast-track customs, cold champagne waiting, and a seamless ride to Punta Cana. We will never travel any other way."
-
-                </p>
-
-                <div class="flex items-center space-x-3 pt-4 border-t border-theme-border">
-
-                    <div class="w-10 h-10 rounded-full bg-luxe-gold/20 flex items-center justify-center text-luxe-gold font-bold text-xs">
-
-                        ER
-
-                    </div>
-
-                    <div>
-
-                        <h4 class="text-xs font-bold uppercase tracking-wider text-theme-text">Elena Rostova</h4>
-
-                        <p class="text-[10px] text-theme-text/95 font-medium">Luxury Lifestyle Influencer</p>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-            <div data-aos="fade-up" data-aos-delay="100"  class="glass-card rounded-2xl p-8 transition-all duration-300 relative">
-
-                <span class="absolute top-6 right-8 text-6xl text-luxe-gold/10 font-serif">"</span>
-
-                <div class="mb-4">
-
-                    <span class="text-luxe-gold">&#9733;&#9733;&#9733;&#9733;&#9733;</span>
-
-                </div>
-
-                <p class="text-sm leading-relaxed text-theme-text/95 mb-6 font-medium italic">
-
-                    "I rely on Aerolux for all my corporate hourly bookings in NYC. The discretion, punctuality, and seamless booking platform make them an indispensable asset for my executive team's logistical needs."
-
-                </p>
-
-                <div class="flex items-center space-x-3 pt-4 border-t border-theme-border">
-
-                    <div class="w-10 h-10 rounded-full bg-luxe-gold/20 flex items-center justify-center text-luxe-gold font-bold text-xs">
-
-                        MC
-
-                    </div>
-
-                    <div>
             {% empty %}
             <!-- Fallback Static Testimonials if Database is empty -->
-            <div data-aos="fade-up" data-aos-delay="100"  class="glass-card rounded-2xl p-8 transition-all duration-300 relative">
-                <span class="absolute top-6 right-8 text-6xl text-luxe-gold/10 font-serif">"</span>
-                <div class="mb-4">
-                    <span class="text-luxe-gold">&#9733;&#9733;&#9733;&#9733;&#9733;</span>
+            <div data-aos="fade-up" data-aos-delay="100" class="glass-card rounded-2xl p-8 hover:border-luxe-gold/30 transition-all duration-300 relative flex flex-col justify-between">
+                <div>
+                    <span class="absolute top-6 right-8 text-6xl text-luxe-gold/10 font-serif">"</span>
+                    <div class="mb-4">
+                        <span class="text-luxe-gold">&#9733;&#9733;&#9733;&#9733;&#9733;</span>
+                    </div>
+                    <p class="text-sm leading-relaxed text-theme-text/95 mb-6 font-medium italic">
+                        "The attention to detail is unmatched. From the pristine condition of the Cadillac Escalade to the chauffeur's immaculate professionalism, AeroLux truly defines luxury travel. It felt less like a transfer and more like a five-star concierge experience."
+                    </p>
                 </div>
-                <p class="text-sm leading-relaxed text-theme-text/95 mb-6 font-medium italic">
-                    "The attention to detail is unmatched. From the pristine condition of the Cadillac Escalade to the chauffeur's immaculate professionalism, AeroLux truly defines luxury travel. It felt less like a transfer and more like a five-star concierge experience."
-                </p>
-                <div class="flex items-center space-x-3 pt-4 border-t border-theme-border">
+                <div class="flex items-center space-x-3 pt-4 border-t border-theme-border mt-auto">
                     <div class="w-10 h-10 rounded-full bg-luxe-gold/20 flex items-center justify-center text-luxe-gold font-bold text-xs">MC</div>
                     <div>
                         <h4 class="text-xs font-bold uppercase tracking-wider text-theme-text">Marcus C.</h4>
@@ -1046,15 +969,17 @@
                 </div>
             </div>
 
-            <div data-aos="fade-up" data-aos-delay="200"  class="glass-card rounded-2xl p-8 transition-all duration-300 relative">
-                <span class="absolute top-6 right-8 text-6xl text-luxe-gold/10 font-serif">"</span>
-                <div class="mb-4">
-                    <span class="text-luxe-gold">&#9733;&#9733;&#9733;&#9733;&#9733;</span>
+            <div data-aos="fade-up" data-aos-delay="200" class="glass-card rounded-2xl p-8 hover:border-luxe-gold/30 transition-all duration-300 relative flex flex-col justify-between">
+                <div>
+                    <span class="absolute top-6 right-8 text-6xl text-luxe-gold/10 font-serif">"</span>
+                    <div class="mb-4">
+                        <span class="text-luxe-gold">&#9733;&#9733;&#9733;&#9733;&#9733;</span>
+                    </div>
+                    <p class="text-sm leading-relaxed text-theme-text/95 mb-6 font-medium italic">
+                        "I travel frequently to New York for business and AeroLux Select is the only car service I trust. Their promptness and the sheer elegance of their fleet provide a seamless transition from the airport directly to my corporate meetings."
+                    </p>
                 </div>
-                <p class="text-sm leading-relaxed text-theme-text/95 mb-6 font-medium italic">
-                    "I travel frequently to New York for business and AeroLux Select is the only car service I trust. Their promptness and the sheer elegance of their fleet provide a seamless transition from the airport directly to my corporate meetings."
-                </p>
-                <div class="flex items-center space-x-3 pt-4 border-t border-theme-border">
+                <div class="flex items-center space-x-3 pt-4 border-t border-theme-border mt-auto">
                     <div class="w-10 h-10 rounded-full bg-luxe-gold/20 flex items-center justify-center text-luxe-gold font-bold text-xs">AR</div>
                     <div>
                         <h4 class="text-xs font-bold uppercase tracking-wider text-theme-text">Amanda R.</h4>
@@ -1063,15 +988,17 @@
                 </div>
             </div>
 
-            <div data-aos="fade-up" data-aos-delay="300"  class="glass-card rounded-2xl p-8 transition-all duration-300 relative">
-                <span class="absolute top-6 right-8 text-6xl text-luxe-gold/10 font-serif">"</span>
-                <div class="mb-4">
-                    <span class="text-luxe-gold">&#9733;&#9733;&#9733;&#9733;&#9733;</span>
+            <div data-aos="fade-up" data-aos-delay="300" class="glass-card rounded-2xl p-8 hover:border-luxe-gold/30 transition-all duration-300 relative flex flex-col justify-between">
+                <div>
+                    <span class="absolute top-6 right-8 text-6xl text-luxe-gold/10 font-serif">"</span>
+                    <div class="mb-4">
+                        <span class="text-luxe-gold">&#9733;&#9733;&#9733;&#9733;&#9733;</span>
+                    </div>
+                    <p class="text-sm leading-relaxed text-theme-text/95 mb-6 font-medium italic">
+                        "Exceptional service! We booked an hourly chauffeur for a private event. The driver was incredibly polite, knowledgeable about the city routes, and made our entire evening remarkably stress-free. Highly recommended."
+                    </p>
                 </div>
-                <p class="text-sm leading-relaxed text-theme-text/95 mb-6 font-medium italic">
-                    "Exceptional service! We booked an hourly chauffeur for a private event. The driver was incredibly polite, knowledgeable about the city routes, and made our entire evening remarkably stress-free. Highly recommended."
-                </p>
-                <div class="flex items-center space-x-3 pt-4 border-t border-theme-border">
+                <div class="flex items-center space-x-3 pt-4 border-t border-theme-border mt-auto">
                     <div class="w-10 h-10 rounded-full bg-luxe-gold/20 flex items-center justify-center text-luxe-gold font-bold text-xs">JP</div>
                     <div>
                         <h4 class="text-xs font-bold uppercase tracking-wider text-theme-text">James P.</h4>
@@ -1080,6 +1007,7 @@
                 </div>
             </div>
             {% endfor %}
+        </div>
 
         </div>
 

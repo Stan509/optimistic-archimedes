@@ -991,18 +991,8 @@ class Booking(models.Model):
             self.booking_reference = self.generate_reference()
         super().save(*args, **kwargs)
 
-        # Enforce status synchronization for linked booking legs (recursion-safe)
-        if not getattr(self, '_saving_sync', False):
-            if self.linked_booking and self.linked_booking.status != self.status:
-                linked = self.linked_booking
-                linked._saving_sync = True
-                linked.status = self.status
-                linked.save()
-            for return_b in self.return_bookings.all():
-                if return_b.status != self.status:
-                    return_b._saving_sync = True
-                    return_b.status = self.status
-                    return_b.save()
+        # No status synchronization — round-trip legs are now fully independent
+        # Each booking can be managed and status-changed independently
 
     # ── Business logic ──
 
@@ -1606,6 +1596,34 @@ class EmailTemplate(models.Model):
 
     def __str__(self):
         return f"{self.get_email_type_display()} ({self.site.slug.upper()})"
+
+
+class ContactMessage(models.Model):
+    """
+    Customer contact form submission stored in the database.
+    """
+    site = models.ForeignKey(
+        Site,
+        on_delete=models.CASCADE,
+        related_name='contact_messages',
+        blank=True,
+        null=True,
+    )
+    name = models.CharField(max_length=200)
+    email = models.EmailField()
+    subject = models.CharField(max_length=300)
+    message = models.TextField()
+    is_read = models.BooleanField(default=False, help_text='Whether this message has been read by staff.')
+    replied = models.BooleanField(default=False, help_text='Whether a reply has been sent.')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'Contact Message'
+        verbose_name_plural = 'Contact Messages'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f'{self.name} — {self.subject} ({self.created_at.date()})'
 
 
 class WhatsAppTemplate(models.Model):

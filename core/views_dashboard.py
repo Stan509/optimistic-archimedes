@@ -1039,6 +1039,72 @@ def email_settings(request):
 
 
 # =========================================================================
+# CONTACT MESSAGES
+# =========================================================================
+
+@user_passes_test(is_admin, login_url='dashboard:login')
+def contact_messages(request):
+    """View contact form submissions."""
+    from core.models import ContactMessage
+    
+    messages_list = ContactMessage.objects.all().select_related('site')
+    
+    # Mark all as read
+    unread = messages_list.filter(is_read=False)
+    unread.update(is_read=True)
+    
+    context = {
+        'messages_list': messages_list,
+        'active_tab': 'contact_messages',
+    }
+    return render(request, 'dashboard/contact_messages.html', context)
+
+
+@user_passes_test(is_admin, login_url='dashboard:login')
+def contact_reply(request, message_id):
+    """Send an auto-reply email to a contact message."""
+    from core.models import ContactMessage, SiteSettings
+    from django.core.mail import send_mail
+    
+    msg = get_object_or_404(ContactMessage, id=message_id)
+    
+    if request.method == 'POST':
+        reply_body = request.POST.get('reply_body', '').strip()
+        if reply_body:
+            try:
+                site_settings = SiteSettings.get_settings(msg.site) if msg.site else None
+                from_email = site_settings.email_from if site_settings else 'no-reply@aeroluxeselect.com'
+                
+                send_mail(
+                    subject=f'Re: {msg.subject}',
+                    message=reply_body,
+                    from_email=from_email,
+                    recipient_list=[msg.email],
+                    fail_silently=False,
+                )
+                msg.replied = True
+                msg.save()
+                messages.success(request, f'Reply sent to {msg.email}.')
+            except Exception as e:
+                messages.error(request, f'Failed to send email: {str(e)}')
+        else:
+            messages.error(request, 'Please enter a reply message.')
+    
+    return redirect('dashboard:contact_messages')
+
+
+@user_passes_test(is_admin, login_url='dashboard:login')
+def delete_booking(request, booking_id):
+    """Delete a booking from the database."""
+    from core.models import Booking
+    booking = get_object_or_404(Booking, id=booking_id)
+    ref = booking.booking_reference
+    booking.delete()
+    messages.success(request, f'Booking {ref} has been permanently deleted.')
+    return redirect('dashboard:bookings')
+
+
+# =========================================================================
 # ADMIN USER MANAGEMENT
 # =========================================================================
 

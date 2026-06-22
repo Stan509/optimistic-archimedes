@@ -1,0 +1,195 @@
+{% extends 'dashboard/base.html' %}
+
+{% block title %}Contact Messages — AeroLux Select{% endblock %}
+{% block dashboard_header %}Customer Contact Messages{% endblock %}
+
+{% block content %}
+<div class="bg-luxury-card border border-luxury-border rounded-2xl overflow-hidden shadow-xl">
+    <div class="overflow-x-auto">
+        <table class="w-full text-left text-sm whitespace-nowrap">
+            <thead>
+                <tr class="bg-luxury-black/30 text-luxury-muted text-xs uppercase tracking-wider border-b border-luxury-border">
+                    <th class="py-4 px-6">Date</th>
+                    <th class="py-4 px-6">Name</th>
+                    <th class="py-4 px-6">Email</th>
+                    <th class="py-4 px-6">Subject</th>
+                    <th class="py-4 px-6">Message</th>
+                    <th class="py-4 px-6 text-center">Status</th>
+                    <th class="py-4 px-6 text-right">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-luxury-border">
+                {% for msg in messages_list %}
+                <tr class="hover:bg-luxury-black/20 transition-colors {% if not msg.is_read %}bg-gold-500/5{% endif %}">
+                    <td class="py-4 px-6">
+                        <span class="block text-xs text-white font-mono">{{ msg.created_at|date:"Y-m-d" }}</span>
+                        <span class="block text-[10px] text-luxury-muted">{{ msg.created_at|date:"H:i" }}</span>
+                    </td>
+                    <td class="py-4 px-6">
+                        <span class="font-semibold text-white">{{ msg.name }}</span>
+                        {% if msg.site %}
+                        <span class="block text-[10px] text-luxury-muted">{{ msg.site.slug|upper }}</span>
+                        {% endif %}
+                    </td>
+                    <td class="py-4 px-6">
+                        <a href="mailto:{{ msg.email }}" class="text-xs text-gold-400 hover:underline font-mono">{{ msg.email }}</a>
+                    </td>
+                    <td class="py-4 px-6">
+                        <span class="block text-xs font-semibold text-white truncate max-w-[200px]">{{ msg.subject }}</span>
+                    </td>
+                    <td class="py-4 px-6">
+                        <span class="block text-xs text-luxury-muted truncate max-w-[250px]">{{ msg.message|truncatechars:80 }}</span>
+                    </td>
+                    <td class="py-4 px-6 text-center">
+                        {% if msg.replied %}
+                        <span class="inline-block text-[10px] uppercase font-bold tracking-wider px-2.5 py-1 rounded-full border bg-emerald-500/10 border-emerald-500/20 text-emerald-400">
+                            <i class="fa-solid fa-check mr-1"></i>Replied
+                        </span>
+                        {% else %}
+                        <span class="inline-block text-[10px] uppercase font-bold tracking-wider px-2.5 py-1 rounded-full border bg-amber-500/10 border-amber-500/20 text-amber-400">
+                            <i class="fa-solid fa-clock mr-1"></i>Pending
+                        </span>
+                        {% endif %}
+                    </td>
+                    <td class="py-4 px-6 text-right space-x-1.5">
+                        <button onclick="showMessage({{ msg.id }})" class="inline-block text-xs font-semibold text-gold-400 hover:text-white transition-colors bg-luxury-card border border-luxury-border px-3 py-1.5 rounded-lg hover:border-gold-400/40">
+                            <i class="fa-solid fa-eye mr-1"></i>View
+                        </button>
+                        {% if not msg.replied %}
+                        <button onclick="showReply({{ msg.id }})" class="inline-block text-xs font-semibold text-emerald-400 hover:text-white transition-colors bg-emerald-500/10 border border-emerald-500/25 px-3 py-1.5 rounded-lg hover:bg-emerald-500/20">
+                            <i class="fa-solid fa-reply mr-1"></i>Reply
+                        </button>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" class="text-center py-20 text-luxury-muted text-sm bg-luxury-card">
+                        <div class="max-w-md mx-auto">
+                            <i class="fa-solid fa-envelope-open text-4xl text-luxury-border mb-3 block"></i>
+                            <h4 class="text-white font-serif font-bold text-base">No Messages</h4>
+                            <p class="text-xs text-luxury-muted mt-1">There are no contact form submissions.</p>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- View Message Modal -->
+{% for msg in messages_list %}
+<div id="message-modal-{{ msg.id }}" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+    <div class="bg-luxury-card border border-luxury-border rounded-2xl w-full max-w-2xl max-h-[80vh] overflow-y-auto p-6">
+        <div class="flex items-center justify-between border-b border-luxury-border pb-3 mb-4">
+            <h3 class="font-serif font-semibold text-base text-white">Message from {{ msg.name }}</h3>
+            <button onclick="closeModal('message-modal-{{ msg.id }}')" class="text-luxury-muted hover:text-white transition-colors">
+                <i class="fa-solid fa-xmark text-xl"></i>
+            </button>
+        </div>
+        <div class="space-y-4 text-sm">
+            <div class="grid grid-cols-2 gap-4 bg-luxury-black/30 p-3 rounded-xl border border-luxury-border">
+                <div>
+                    <span class="block text-[10px] uppercase text-luxury-muted font-bold">Name</span>
+                    <span class="text-white">{{ msg.name }}</span>
+                </div>
+                <div>
+                    <span class="block text-[10px] uppercase text-luxury-muted font-bold">Email</span>
+                    <a href="mailto:{{ msg.email }}" class="text-gold-400 hover:underline">{{ msg.email }}</a>
+                </div>
+                <div>
+                    <span class="block text-[10px] uppercase text-luxury-muted font-bold">Subject</span>
+                    <span class="text-white">{{ msg.subject }}</span>
+                </div>
+                <div>
+                    <span class="block text-[10px] uppercase text-luxury-muted font-bold">Date</span>
+                    <span class="text-white">{{ msg.created_at }}</span>
+                </div>
+            </div>
+            <div>
+                <span class="block text-[10px] uppercase text-luxury-muted font-bold mb-1">Full Message</span>
+                <div class="bg-luxury-black/30 border border-luxury-border p-4 rounded-xl text-white text-sm whitespace-pre-wrap">{{ msg.message }}</div>
+            </div>
+        </div>
+        <div class="mt-6 flex justify-end space-x-3">
+            {% if not msg.replied %}
+            <button onclick="closeModal('message-modal-{{ msg.id }}'); showReply({{ msg.id }})" class="text-xs font-semibold px-4 py-2 rounded-lg bg-emerald-500/10 border border-emerald-500/25 text-emerald-400 hover:bg-emerald-500/20 transition-all">
+                <i class="fa-solid fa-reply mr-1.5"></i>Reply
+            </button>
+            {% endif %}
+            <button onclick="closeModal('message-modal-{{ msg.id }}')" class="text-xs font-semibold px-4 py-2 rounded-lg bg-luxury-black border border-luxury-border text-luxury-muted hover:text-white transition-all">
+                Close
+            </button>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+<!-- Reply Modal -->
+{% for msg in messages_list %}
+<div id="reply-modal-{{ msg.id }}" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+    <div class="bg-luxury-card border border-luxury-border rounded-2xl w-full max-w-2xl p-6">
+        <div class="flex items-center justify-between border-b border-luxury-border pb-3 mb-4">
+            <h3 class="font-serif font-semibold text-base text-white">Reply to {{ msg.name }}</h3>
+            <button onclick="closeModal('reply-modal-{{ msg.id }}')" class="text-luxury-muted hover:text-white transition-colors">
+                <i class="fa-solid fa-xmark text-xl"></i>
+            </button>
+        </div>
+        
+        <div class="bg-luxury-black/30 border border-luxury-border p-3 rounded-xl mb-4">
+            <p class="text-xs text-luxury-muted">Original message: <span class="text-white">{{ msg.subject }} — "{{ msg.message|truncatechars:100 }}"</span></p>
+        </div>
+        
+        <form method="POST" action="{% url 'dashboard:contact_reply' msg.id %}">
+            {% csrf_token %}
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs text-luxury-muted font-semibold uppercase tracking-wider mb-1.5">To: {{ msg.email }}</label>
+                </div>
+                <div>
+                    <label class="block text-xs text-luxury-muted font-semibold uppercase tracking-wider mb-1.5">Your Reply</label>
+                    <textarea name="reply_body" rows="8" required class="w-full bg-luxury-black border border-luxury-border rounded-xl p-4 text-sm text-white placeholder-luxury-muted focus:border-gold-500/50 outline-none transition-all resize-none" placeholder="Write your reply here...">{{ reply_template|default:"Dear {{ msg.name }},
+
+Thank you for contacting AeroLux Select. We have received your message and will respond to your inquiry as soon as possible.
+
+Our team typically replies within 24 hours. For urgent matters, please contact us via WhatsApp.
+
+Best regards,
+The AeroLux Select Team" }}
+                    </textarea>
+                </div>
+                <div class="flex justify-end space-x-3 pt-2">
+                    <button type="button" onclick="closeModal('reply-modal-{{ msg.id }}')" class="text-xs font-semibold px-4 py-2 rounded-lg bg-luxury-black border border-luxury-border text-luxury-muted hover:text-white transition-all">
+                        Cancel
+                    </button>
+                    <button type="submit" class="text-xs font-semibold px-5 py-2 rounded-lg gold-gradient text-luxury-black hover:opacity-90 transition-all">
+                        <i class="fa-solid fa-paper-plane mr-1.5"></i>Send Reply
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endfor %}
+
+<script>
+function showMessage(id) {
+    document.getElementById('message-modal-' + id).classList.remove('hidden');
+}
+function showReply(id) {
+    document.getElementById('reply-modal-' + id).classList.remove('hidden');
+}
+function closeModal(id) {
+    document.getElementById(id).classList.add('hidden');
+}
+// Close modals on Escape key
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        document.querySelectorAll('[id^="message-modal-"], [id^="reply-modal-"]').forEach(el => {
+            el.classList.add('hidden');
+        });
+    }
+});
+</script>
+{% endblock %}

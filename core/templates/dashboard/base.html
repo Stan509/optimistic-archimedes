@@ -180,6 +180,11 @@
                     </div>
                 </div>
 
+                <a href="{% url 'dashboard:contact_messages' %}" class="flex items-center space-x-3.5 px-4 py-3 rounded-lg text-luxury-muted hover:text-white hover:bg-luxury-card transition-all {% if active_tab == 'contact_messages' %}sidebar-active{% endif %}">
+                    <i class="fa-solid fa-message w-5 text-center text-lg"></i>
+                    <span class="font-medium text-sm">Contact Messages</span>
+                </a>
+
                 <a href="{% url 'dashboard:addons' %}" class="flex items-center space-x-3.5 px-4 py-3 rounded-lg text-luxury-muted hover:text-white hover:bg-luxury-card transition-all {% if active_tab == 'addons' %}sidebar-active{% endif %}">
                     <i class="fa-solid fa-crown w-5 text-center text-lg"></i>
                     <span class="font-medium text-sm">VIP Add-Ons</span>

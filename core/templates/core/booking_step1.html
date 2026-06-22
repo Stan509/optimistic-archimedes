@@ -39,6 +39,15 @@
         gap: 0.5rem;
         align-items: end;
     }
+    #transfer-start-wrapper {
+        order: 1;
+    }
+    #btn-switch-direction-wrapper {
+        order: 2;
+    }
+    #transfer-end-wrapper {
+        order: 3;
+    }
     @media (max-width: 640px) {
         .airport-row-3 {
             grid-template-columns: 1fr auto 1fr;
@@ -151,7 +160,7 @@
                 <div id="div-airport-transfer-wrapper" class="space-y-4">
                     <div class="airport-row-3">
                         <!-- Left: Origin Airport -->
-                        <div id="transfer-start-wrapper" class="w-full font-medium">
+                        <div id="transfer-start-wrapper" class="w-full font-medium" style="order: 1;">
                             <label id="lbl-transfer-start" for="airport_id" class="block text-[10px] sm:text-xs uppercase tracking-widest font-bold text-theme-text/90 mb-1 sm:mb-2">Origin Airport</label>
                             <div class="relative">
                                 <span class="absolute inset-y-0 left-0 booking-icon pl-2 sm:pl-4 flex items-center text-luxe-gold">
@@ -171,13 +180,13 @@
                             </div>
                         </div>
                         <!-- Middle: Switch Direction Button (same height as fields) -->
-                        <div class="flex justify-center items-end pb-1 sm:pb-0">
-                            <button type="button" id="btn-switch-direction" class="btn-switch-mobile w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-theme-bg border border-theme-border text-luxe-gold hover:border-luxe-gold/50 hover:text-luxe-gold-bright transition-all duration-300 flex items-center justify-center shadow-lg active:scale-95 cursor-pointer" title="Switch Directions">
-                                <i class="fas fa-right-left rotate-90 md:rotate-0 text-[11px] sm:text-sm"></i>
+                        <div id="btn-switch-direction-wrapper" class="flex justify-center items-center pb-1 sm:pb-0 px-1 sm:px-2" style="order: 2;">
+                            <button type="button" id="btn-switch-direction" class="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-luxe-gold/20 border border-luxe-gold text-luxe-gold hover:bg-luxe-gold hover:text-white transition-all duration-300 flex items-center justify-center shadow-lg active:scale-95 cursor-pointer" title="Switch Directions">
+                                <i class="fas fa-right-left rotate-90 md:rotate-0 text-sm"></i>
                             </button>
                         </div>
                         <!-- Right: Drop-off Address -->
-                        <div id="transfer-end-wrapper" class="w-full font-medium">
+                        <div id="transfer-end-wrapper" class="w-full font-medium" style="order: 3;">
                             <label id="lbl-transfer-end" for="destination_address" class="block text-[10px] sm:text-xs uppercase tracking-widest font-bold text-theme-text/90 mb-1 sm:mb-2">Drop-off Address</label>
                             <div class="relative">
                                 <span class="absolute inset-y-0 left-0 booking-icon pl-2 sm:pl-4 flex items-center text-luxe-gold">

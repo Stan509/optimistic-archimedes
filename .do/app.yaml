@@ -28,6 +28,8 @@ spec:
         - key: DATABASE_URL
           scope: RUN_TIME
           value: "${db.DATABASE_URL}"
+        - key: USE_SPACES
+          value: "True"
         - key: DO_SPACES_KEY
           value: "${DO_SPACES_KEY}"
           type: SECRET
