@@ -149,14 +149,14 @@
                 </div>
                 <div>
                     <label class="block text-xs text-luxury-muted font-semibold uppercase tracking-wider mb-1.5">Your Reply</label>
-                    <textarea name="reply_body" rows="8" required class="w-full bg-luxury-black border border-luxury-border rounded-xl p-4 text-sm text-white placeholder-luxury-muted focus:border-gold-500/50 outline-none transition-all resize-none" placeholder="Write your reply here...">{{ reply_template|default:"Dear {{ msg.name }},
+                    <textarea name="reply_body" rows="8" required class="w-full bg-luxury-black border border-luxury-border rounded-xl p-4 text-sm text-white placeholder-luxury-muted focus:border-gold-500/50 outline-none transition-all resize-none" placeholder="Write your reply here...">{% if reply_template %}{{ reply_template }}{% else %}Dear {{ msg.name }},
 
 Thank you for contacting AeroLux Select. We have received your message and will respond to your inquiry as soon as possible.
 
 Our team typically replies within 24 hours. For urgent matters, please contact us via WhatsApp.
 
 Best regards,
-The AeroLux Select Team" }}
+The AeroLux Select Team{% endif %}
                     </textarea>
                 </div>
                 <div class="flex justify-end space-x-3 pt-2">

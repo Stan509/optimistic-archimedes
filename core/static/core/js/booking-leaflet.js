@@ -216,34 +216,55 @@
     // Nominatim address search + autocomplete
     // ──────────────────────────────────────────────
 
-    function normalizePrediction(p) {
-        if (p.place_id) {
-            return {
-                label: p.display_name,
-                main: p.name || p.display_name,
-                secondary: p.display_name,
-                lat: Number(p.lat),
-                lng: Number(p.lon),
-            };
-        }
-        return {
-            label: p.display_name,
-            main: p.name || p.display_name,
-            secondary: p.display_name,
-            lat: Number(p.lat),
-            lng: Number(p.lon),
-        };
-    }
-
     function searchNominatim(query) {
-        const u = new URL('https://nominatim.openstreetmap.org/search');
-        u.searchParams.set('format', 'jsonv2');
-        u.searchParams.set('addressdetails', '1');
-        u.searchParams.set('limit', '6');
+        // Upgrade: Using Photon API (Komoot) which provides significantly better POI, Hotel, and Villa search than base Nominatim
+        const u = new URL('https://photon.komoot.io/api/');
         u.searchParams.set('q', query);
-        return fetch(u.toString(), { headers: { 'Accept-Language': 'en' } })
-            .then(r => r.ok ? r.json() : [])
-            .then(r => r.map(normalizePrediction))
+        u.searchParams.set('limit', '6');
+        
+        // Restrict to specific country based on site slug
+        if (window.AEROLUX_SITE_SLUG === 'dr') {
+            // Dominican Republic bbox
+            u.searchParams.set('bbox', '-72.01,17.40,-68.32,19.93');
+        } else {
+            // USA contiguous bbox (approximate)
+            u.searchParams.set('bbox', '-125.00,24.39,-66.93,49.38');
+        }
+        
+        return fetch(u.toString())
+            .then(r => r.ok ? r.json() : { features: [] })
+            .then(r => r.features.map(f => {
+                const p = f.properties;
+                const coords = f.geometry.coordinates; // [lon, lat]
+                
+                // Construct a detailed display name similar to Google Places
+                const parts = [];
+                if (p.name) parts.push(p.name);
+                
+                let streetAddr = '';
+                if (p.housenumber && p.street) streetAddr = p.housenumber + ' ' + p.street;
+                else if (p.street) streetAddr = p.street;
+                
+                if (streetAddr && p.name !== streetAddr) parts.push(streetAddr);
+                
+                if (p.city) parts.push(p.city);
+                else if (p.town) parts.push(p.town);
+                else if (p.village) parts.push(p.village);
+                
+                if (p.state) parts.push(p.state);
+                if (p.country) parts.push(p.country);
+                
+                const displayName = parts.join(', ');
+                const mainName = p.name || streetAddr || displayName;
+                
+                return {
+                    label: displayName,
+                    main: mainName,
+                    secondary: displayName,
+                    lat: Number(coords[1]),
+                    lng: Number(coords[0]),
+                };
+            }))
             .catch(() => []);
     }
 
@@ -374,7 +395,7 @@
         state.map = L.map(mapEl, { center: center, zoom: 11, zoomControl: true, attributionControl: true });
 
         // Dark tile layer (CartoDB – free, no key)
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             maxZoom: 19,
             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>',
         }).addTo(state.map);

@@ -18,7 +18,7 @@
 
     #booking-map {
 
-        background: #0A0A0A !important;
+        background: #ffffff !important;
 
         font-family: 'Outfit', sans-serif;
 
@@ -26,9 +26,9 @@
 
     #booking-map .leaflet-control-attribution {
 
-        background: rgba(10, 10, 10, 0.75);
+        background: rgba(255, 255, 255, 0.75);
 
-        color: #9ca3af;
+        color: #4b5563;
 
     }
 
@@ -296,7 +296,7 @@
                                 </div>
                             </div>
                             <div id="btn-switch-direction-wrapper" class="flex justify-center items-center pb-1 sm:pb-0 px-1 sm:px-2" style="order: 2;">
-                                <button type="button" id="btn-switch-direction" class="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-luxe-gold/20 border border-luxe-gold text-luxe-gold hover:bg-luxe-gold hover:text-white transition-all duration-300 flex items-center justify-center shadow-lg active:scale-95 cursor-pointer" title="Switch Directions">
+                                <button type="button" id="btn-switch-direction" class="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-luxe-gold border-2 border-white text-white hover:bg-luxe-gold-bright transition-all duration-300 flex items-center justify-center shadow-lg active:scale-95 cursor-pointer" title="Switch Directions">
                                     <i class="fas fa-right-left rotate-90 md:rotate-0 text-sm"></i>
                                 </button>
                             </div>
@@ -1020,7 +1020,8 @@
 {% block extra_js %}
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="{% static 'core/js/booking-leaflet.js' %}"></script>
+<script>window.AEROLUX_SITE_SLUG = "{{ current_site.slug|default:'nyc' }}";</script>
+<script src="{% static 'core/js/booking-leaflet.js' %}?v=4"></script>
 <script>
       document.addEventListener('DOMContentLoaded', () => {
         const radTransfer = document.getElementById('rad-transfer');
